@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>めぐみ事務所 ツール一覧</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --ink:#1f2933; --sub:#5b6b7b;
+    --line:#d7dee6; --accent:#2c6e9b; --accent2:#305496;
+    --font: "Yu Gothic UI","Meiryo","Hiragino Kaku Gothic ProN",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.7}
+  header{background:var(--accent2);color:#fff;padding:22px 20px}
+  header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.02em}
+  header p{margin:6px 0 0;font-size:13px;color:#dbe6f2}
+  main{max-width:760px;margin:0 auto;padding:24px 20px 60px}
+  .list{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;
+    display:flex;justify-content:space-between;align-items:center;gap:16px;text-decoration:none;color:inherit;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .15s,border-color .15s}
+  .card:hover{border-color:var(--accent);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+  .card h2{margin:0 0 4px;font-size:15px;color:var(--accent2)}
+  .card p{margin:0;font-size:12.5px;color:var(--sub)}
+  .card .go{flex:0 0 auto;font-size:12px;font-weight:700;color:#fff;background:var(--accent);
+    border-radius:20px;padding:6px 14px;white-space:nowrap}
+  .note{margin-top:28px;font-size:11.5px;color:var(--sub);background:#fff7d6;border:1px solid #ecd98a;
+    border-radius:8px;padding:10px 12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>めぐみ事務所　ツール一覧</h1>
+  <p>事務所内で使う各種作成ツールのポータルです。下のカードから使いたいツールを開いてください。</p>
+</header>
+<main>
+  <div class="list">
+    <a class="card" href="roudou-tsuchisho/">
+      <div>
+        <h2>労働条件通知書・雇用契約書 作成ツール</h2>
+        <p>入力内容から労働条件通知書／雇用契約書／変更通知書を自動作成。印刷・PDF・Word・Excel出力、複数人の一括作成に対応。</p>
+      </div>
+      <span class="go">開く →</span>
+    </a>
+    <!-- 新しいツールを追加する場合は、この上に <a class="card" href="フォルダ名/"> ... </a> を1件追加してください -->
+  </div>
+  <div class="note">
+    ※ これらは下書き作成を支援するツールです。明示事項の要否・文言・条番号は最新の法令（e-Gov／厚労省）と所属社労士の確認を要します。入力内容はブラウザ内で処理され、外部サーバーには送信されません。
+  </div>
+</main>
+</body>
+</html>

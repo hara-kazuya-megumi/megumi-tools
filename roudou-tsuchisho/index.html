@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>労働条件通知書・雇用契約書 作成ツール</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --ink:#1f2933; --sub:#5b6b7b;
+    --line:#d7dee6; --accent:#2c6e9b; --accent2:#305496; --warn:#c0392b;
+    --field:#fbfcfe; --chip:#eef3f8;
+    --font: "Yu Gothic UI","Meiryo","Hiragino Kaku Gothic ProN",sans-serif;
+    --mincho: "MS PMincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+  header.appbar{position:sticky;top:0;z-index:20;background:var(--accent2);color:#fff;
+    display:flex;align-items:center;gap:14px;padding:10px 16px;box-shadow:0 2px 6px rgba(0,0,0,.15);flex-wrap:wrap}
+  header.appbar h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.02em}
+  header.appbar .spacer{flex:1}
+  .btn{border:0;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;
+    background:#fff;color:var(--accent2)}
+  .btn:hover{filter:brightness(.96)}
+  .btn.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5)}
+  .btn.print{background:#ffd35c;color:#4a3600}
+  .wrap{display:grid;grid-template-columns:minmax(360px,440px) 1fr;gap:0;align-items:start}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  /* ---- form ---- */
+  .form{padding:14px 16px 60px;max-height:calc(100vh - 56px);overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+  @media(max-width:900px){.form{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+  fieldset{border:1px solid var(--line);border-radius:10px;margin:0 0 14px;padding:10px 12px 12px;background:var(--panel)}
+  legend{font-weight:700;color:var(--accent);padding:0 6px;font-size:13px}
+  .row{display:flex;flex-direction:column;gap:3px;margin:7px 0}
+  .row.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  label{font-size:12px;color:var(--ink);font-weight:700}
+  input[type=text],input[type=date],select,textarea{
+    width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--field);
+    font-family:var(--font);font-size:13px;color:var(--ink)}
+  textarea{resize:vertical;min-height:44px}
+  input:focus,select:focus,textarea:focus{outline:2px solid #bcd6ea;border-color:var(--accent)}
+  .hint{font-size:11px;color:var(--sub);margin-top:2px}
+  .empty-field{background:#fff7d6 !important;box-shadow:inset 0 0 0 1px #ecd98a}
+  .empty-legend{background:#fff7d6;border:1px solid #ecd98a;border-radius:6px;padding:6px 9px;font-size:12px;color:#7a5b00;margin-bottom:12px}
+  .help-note{background:#e9f6ea;border:1px solid #c4e2c6;color:#245a2b;border-radius:6px;padding:6px 9px;font-size:11.5px;line-height:1.65;margin-top:5px}
+  .help-note b{color:#1b6b2e}
+  .help-guide{background:#e9f6ea;border:1px solid #c4e2c6;color:#245a2b;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.7;margin-bottom:12px}
+  .help-guide b{color:#1b6b2e}
+  body.help-off .help-note,body.help-off .help-guide{display:none}
+  /* タブ・賃金試算 */
+  .tabbar{display:flex;gap:4px;background:#e7edf3;padding:6px 12px 0;border-bottom:1px solid var(--line)}
+  .tab{border:1px solid var(--line);border-bottom:none;background:#f0f3f6;padding:8px 20px;border-radius:9px 9px 0 0;cursor:pointer;font-weight:700;color:var(--sub);font-size:14px}
+  .tab.active{background:var(--panel);color:var(--accent2)}
+  .calc-wrap{padding:18px 16px 60px;max-width:780px;margin:0 auto}
+  .calc-result{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px;line-height:1.9}
+  .calc-result .big{font-size:22px;font-weight:800;color:var(--accent2);margin-left:6px}
+  .calc-result table{width:100%;border-collapse:collapse;margin-top:10px}
+  .calc-result td{padding:5px 6px;border-bottom:1px solid #eef1f4}
+  .calc-result td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .cnum{width:100%}
+  .hidden{display:none !important}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg label{display:inline-flex;align-items:center;gap:5px;background:var(--chip);border:1px solid var(--line);
+    border-radius:20px;padding:5px 11px;cursor:pointer;font-size:12px;color:var(--ink);font-weight:600}
+  .seg input{accent-color:var(--accent)}
+  .note-law{font-size:11px;color:var(--warn);background:#fdf3f2;border:1px solid #f3d3cf;border-radius:6px;padding:6px 8px;margin-top:6px}
+  .break-row{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+  .break-row input{flex:1}
+  .time-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap}
+  .time-row .t-label{flex:1 1 100%}.time-row .t-start,.time-row .t-end{flex:1}
+  .wt-times{margin:4px 0 8px}
+  #inAllowList{background:#eaf1fb;border:1px solid #cfe0f5;border-radius:7px;padding:7px 8px}
+  #outAllowList{background:#fdf1e6;border:1px solid #f2dcc2;border-radius:7px;padding:7px 8px}
+  .allow-row{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center}
+  .allow-row .a-name{flex:1 1 100%}
+  .allow-row .a-unit{flex:0 0 92px}
+  .allow-row .a-amt{flex:1 1 auto}
+  .total-box{background:#eef6ef;border:1px solid #bcd8bf;border-radius:6px;padding:7px 9px;font-weight:700;color:#245a2b}
+  .other-row{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+  .other-row .o-name{flex:1}.other-row .o-val{flex:1.7}
+  .mini{border:1px solid var(--line);background:#fff;border-radius:6px;width:32px;cursor:pointer;color:var(--warn);font-weight:700}
+  .btn-add{border:1px dashed var(--accent);background:var(--chip);color:var(--accent);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700}
+  /* ---- preview ---- */
+  .preview{padding:22px;overflow:auto;max-height:calc(100vh - 56px)}
+  @media(max-width:900px){.preview{max-height:none}}
+  .sheet{background:#fff;color:#000;font-family:var(--mincho);width:210mm;min-height:297mm;margin:0 auto 20px;
+    padding:16mm 15mm;box-shadow:0 3px 14px rgba(0,0,0,.18);font-size:10.5pt;line-height:1.5}
+  .sheet .form-kind{text-align:right;font-size:9.5pt;margin-bottom:2px}
+  .sheet .title{text-align:center;font-size:17pt;font-weight:700;letter-spacing:.06em;margin-bottom:10px}
+  .sheet .issue{text-align:right;font-size:10.5pt}
+  .sheet .addr{font-size:12pt;margin:2px 0 6px}
+  .sheet .office{text-align:right;font-size:10.5pt;line-height:1.5}
+  .sheet .lead{margin:10px 0}
+  .sheet table.doc{width:100%;border-collapse:collapse;table-layout:fixed}
+  .sheet table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt}
+  .sheet table.doc td.k{width:18%;background:#f6f6f6;font-weight:700;text-align:center;white-space:normal}
+  .sheet .lines div{margin:1px 0}
+  .sheet .note{font-size:8.5pt;color:#333;margin-top:1px}
+  .sheet .after{margin-top:10px;font-size:10pt}
+  .sheet .sign{margin-top:14px;font-size:10.5pt;line-height:2.0}
+  .sheet .chg-meta{font-size:10pt;margin:4px 0}
+  .sheet .mark{color:#b00;font-weight:700}
+  .pagebreak{height:0}
+  .empty-hint{color:#999;text-align:center;padding:40px}
+  .page-note{background:#fff6e5;border:1px solid #f0d9a0;color:#7a5b00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
+  /* scale toggle for screen */
+  .preview.fit .sheet{transform:scale(var(--scale,1));transform-origin:top center}
+  /* ---- 名簿バー・一括作成 ---- */
+  /* 明るい面ではゴースト白文字が見えないので上書き */
+  #rosterBar .btn.ghost,#modeBatch .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  #rosterBar .btn.ghost:hover,#modeBatch .btn.ghost:hover{background:#eef2f7}
+  #rosterBar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#eef4ff;border:1px solid #cfe0f5;border-radius:8px;padding:8px 12px;margin:10px 16px 0}
+  #rosterBar .btn{white-space:nowrap;flex:0 0 auto;min-width:max-content}
+  #modeBatch .brow .btn{white-space:nowrap;flex:0 0 auto;min-width:max-content}
+  #rosterBar .rb-label{font-weight:700;color:var(--ink);font-size:13px}
+  #rosterBar .rb-status{font-size:12px;color:#2a6b34;font-weight:600}
+  .btn.mini{font-size:12px;padding:6px 11px}
+  #modeBatch .batch-wrap{max-width:1040px;margin:16px auto;padding:0 16px}
+  #modeBatch .batch-guide{background:#e9f6ea;border:1px solid #c4e2c6;color:#245a2b;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.7;margin-bottom:14px}
+  table.roster{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel)}
+  table.roster th,table.roster td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+  table.roster th{background:#f2f6fb;font-size:12px}
+  table.roster td.num{text-align:center;width:34px;color:var(--sub)}
+  table.roster td.ops{white-space:nowrap;width:1%}
+  table.roster tr.editing{background:#fffbe6}
+  .roster-empty{color:#888;padding:24px;text-align:center;border:1px dashed var(--line);border-radius:8px}
+  .rowbtn{font-size:11px;padding:3px 7px;margin:0 1px;border:1px solid var(--line);border-radius:6px;background:#f7f9fc;cursor:pointer}
+  .rowbtn:hover{background:#eef2f7}
+  .rowbtn.del{color:#b00;border-color:#e6b8b8;background:#fdf2f2}
+  .batch-sec{margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+  .batch-sec h3{margin:0 0 4px;font-size:14px}
+  .batch-sec .hint{margin-bottom:8px}
+  .batch-sec .brow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  /* ---- print ---- */
+  @media print{
+    header.appbar,.form,.toolbar,#rosterBar,#modeBatch,#modeCalc{display:none !important}
+    body{background:#fff}
+    .wrap{display:block}
+    .preview{padding:0;overflow:visible;max-height:none}
+    .page-note{display:none !important}
+    .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 12mm;
+      page-break-after:always;font-size:10pt}
+    .sheet:last-child{page-break-after:auto}
+    @page{size:A4 portrait;margin:0}
+  }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <h1>労働条件通知書・雇用契約書 作成ツール</h1>
+  <span class="spacer"></span>
+  <span id="createActions" style="display:flex;gap:14px;flex-wrap:wrap">
+    <button class="btn print" onclick="doPrint()">🖨 印刷 / PDF</button>
+    <button class="btn" onclick="exportWord()">📄 Word</button>
+    <button class="btn" onclick="exportExcel()">📊 Excel</button>
+    <button class="btn ghost" onclick="saveData()">💾 保存</button>
+    <button class="btn ghost" onclick="document.getElementById('loadFile').click()">📂 読込</button>
+    <input type="file" id="loadFile" accept=".json,application/json" style="display:none" onchange="loadData(this)">
+    <button class="btn ghost" id="helpBtn" onclick="toggleHelp()">❓ ヘルプON</button>
+    <button class="btn ghost" onclick="resetForm()">クリア</button>
+    <button class="btn ghost" onclick="loadSample()">記入例</button>
+  </span>
+</header>
+
+<div class="tabbar">
+  <button id="tabCreate" class="tab active" onclick="switchMode('create')">作成</button>
+  <button id="tabBatch" class="tab" onclick="switchMode('batch')">一括作成</button>
+  <button id="tabCalc" class="tab" onclick="switchMode('calc')">賃金試算</button>
+</div>
+
+<div id="rosterBar">
+  <span class="rb-label">👥 名簿 <b id="rosterCount">0</b> 人</span>
+  <button class="btn mini" id="rosterCommitBtn" onclick="rosterCommit()" title="今フォームに入力している内容を、1名分として名簿に登録します">➕ 名簿に追加</button>
+  <button class="btn mini ghost" onclick="rosterAddNext()" title="今の内容を名簿に追加し、氏名・賃金額・手当（支給項目）だけをクリアします。会社情報・労働時間・休日などの条件は残るので、続けて次の方を素早く入力できます">➡ 追加して次の人へ</button>
+  <button class="btn mini ghost" onclick="switchMode('batch')" title="名簿の一覧・並べ替え・一括出力の画面へ移動します">👥 一括作成タブ</button>
+  <span id="rosterStatus" class="rb-status"></span>
+</div>
+
+<div id="modeCreate">
+<div class="wrap">
+  <!-- ============ FORM ============ -->
+  <form class="form" id="form" oninput="render()" onchange="render()">
+
+    <div class="empty-legend">※ <b>薄い黄色</b>の欄は未入力です（入力すると色が消えます）。表示中の欄のみ対象です。</div>
+
+    <div class="help-guide">
+      <b>🔰 使い方</b><br>
+      ① 上から順に入力します。まず「書類の種類」→「雇用区分」を選ぶと、<b>その人に必要な入力欄だけが自動で表示</b>されます（不要な欄は自動で隠れます）。<br>
+      ② 各欄の下の<b>緑のヒント</b>が「ここを選ぶと何の欄が出るか／どう入力するか」を説明します。慣れたら右上の<b>「❓ ヘルプ」</b>で非表示にできます。<br>
+      ③ 入力し終えたら右上の「印刷/PDF・Word・Excel」で出力。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。
+    </div>
+
+    <fieldset>
+      <legend>表示設定</legend>
+      <div class="row"><label>日付の表示形式（全書類共通）</label>
+        <div class="seg">
+          <label><input type="radio" name="dateMode" value="wareki" checked> 和暦（例：令和8年7月1日）</label>
+          <label><input type="radio" name="dateMode" value="seireki"> 西暦（例：2026年7月1日）</label>
+        </div>
+        <div class="hint">日付欄はカレンダーから選択できます。ここで選んだ形式で全書類の日付が表示されます。</div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>書類の種類</legend>
+      <div class="row"><label>書類種別</label>
+        <div class="seg" id="docTypeSeg">
+          <label><input type="radio" name="docType" value="NOTICE" checked> 労働条件通知書</label>
+          <label><input type="radio" name="docType" value="CONTRACT"> 雇用契約書</label>
+          <label><input type="radio" name="docType" value="CHG"> 労働条件変更通知書</label>
+        </div>
+        <div class="help-note">作成する書類を選びます。<b>労働条件通知書</b>＝会社が労働者へ交付する通知（署名欄なし）。<b>雇用契約書</b>＝会社と労働者の双方が署名・押印する契約書（末尾に双方の署名欄が出ます）。<b>労働条件変更通知書</b>＝変更点を通知する書類で、選ぶと下に「変更日・変更理由・変更根拠」の入力欄が現れ、末尾は変更同意の署名欄になります。</div>
+      </div>
+      <div id="grpChg" class="hidden">
+        <div class="row"><label>変更日</label><input type="date" name="change_date"></div>
+        <div class="row"><label>変更理由</label><input type="text" name="change_reason" placeholder="配置転換のため 等"></div>
+        <div class="row"><label>変更根拠</label><input type="text" name="change_basis" placeholder="就業規則改定・本人合意 等"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>基本情報</legend>
+      <div class="row two">
+        <div><label>交付日</label><input type="date" name="issue_date"></div>
+        <div><label>社員氏名</label><input type="text" name="employee_name" placeholder="田中　太郎"></div>
+      </div>
+      <div class="row"><label>事業場所在地</label><input type="text" name="office_addr" placeholder="仙台市宮城野区…"></div>
+      <div class="row two">
+        <div><label>事業場名称</label><input type="text" name="office_name" placeholder="株式会社○○"></div>
+        <div><label id="lblEmployer">使用者職氏名</label><input type="text" name="employer" placeholder="代表取締役　○○"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>雇用区分（まず選ぶ）</legend>
+      <div class="row"><label>雇用形態</label>
+        <div class="seg">
+          <label><input type="radio" name="emp_category" value="一般" checked> 一般</label>
+          <label><input type="radio" name="emp_category" value="短時間"> 短時間（パート）</label>
+          <label><input type="radio" name="emp_category" value="派遣"> 派遣</label>
+          <label><input type="radio" name="emp_category" value="建設"> 建設</label>
+          <label><input type="radio" name="emp_category" value="林業"> 林業</label>
+        </div>
+        <div class="help-note">この選択で様式が切り替わります。<b>派遣</b>→「その他」に派遣元/派遣先欄、<b>建設</b>→帰郷旅費欄＋使用者欄が「事業主の氏名又は名称」、<b>短時間</b>→賃金の昇給・賞与・退職金の有無明示が付きます。</div>
+      </div>
+      <div class="row"><label>期間区分</label>
+        <div class="seg">
+          <label><input type="radio" name="period_type" value="無期" checked> 無期</label>
+          <label><input type="radio" name="period_type" value="有期"> 有期</label>
+          <label><input type="radio" name="period_type" value="日雇"> 日雇</label>
+        </div>
+        <div class="help-note"><b>無期</b>→入社日だけ入力。<b>有期</b>→契約始期・終期／更新の有無／無期転換の欄が出ます（更新「あり得る」で判断基準・上限、無期転換「有」で2ページ目に別紙が自動作成）。<b>日雇</b>→就労日欄が出て、休日・休暇・退職の欄は消えます。</div>
+      </div>
+      <div class="row"><label>表示用の雇用区分（書面の右上に表示・任意）</label>
+        <input type="text" name="display_category" placeholder="例）（短時間労働者用；常用、有期雇用型）">
+        <div class="hint">厚労省様式のような「（○○労働者用；…）」の区分を、書面の右上（タイトルの上）に印字します。空欄なら表示しません。</div>
+      </div>
+      <div class="note-law hidden" id="warnCombo">短時間・林業に「日雇」の様式はありません。期間区分を見直してください。</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>契約期間</legend>
+      <div class="row" id="grpMuki">
+        <label>入社日（無期）</label>
+        <input type="date" name="muki_start">
+        <div class="hint">入社日を選ぶと「○○から期間の定めなし」と表示されます（未入力なら「期間の定めなし」）。</div>
+      </div>
+      <div id="grpYuki" class="hidden">
+        <div class="row two">
+          <div><label>契約始期</label><input type="date" name="contract_start"></div>
+          <div><label>契約終期</label><input type="date" name="contract_end"></div>
+        </div>
+        <div class="row"><label>更新の有無</label>
+          <select name="renewal">
+            <option value="">（選択）</option>
+            <option value="自動的に更新する">自動的に更新する</option>
+            <option value="更新する場合があり得る">更新する場合があり得る</option>
+            <option value="契約の更新はしない">契約の更新はしない</option>
+          </select>
+          <div class="help-note">「自動的に更新する」または「更新する場合があり得る」を選ぶと、下に<b>更新の判断基準・更新上限</b>の欄が出ます（2024年4月改正で更新上限＝通算契約期間や更新回数の上限の明示が必要）。「契約の更新はしない」なら不要です。</div>
+        </div>
+        <div class="row" id="grpRenew">
+          <label>更新の判断基準</label>
+          <input type="text" name="renewal_criteria" placeholder="業務量、勤務成績、能力、経営状況 等">
+          <label style="margin-top:6px">更新上限</label>
+          <input type="text" name="renewal_cap" placeholder="通算5年まで／更新3回まで 等">
+        </div>
+        <div class="row"><label>無期転換申込権（通算5年超見込み）</label>
+          <div class="seg">
+            <label><input type="radio" name="muki_flag" value="無" checked> 無</label>
+            <label><input type="radio" name="muki_flag" value="有"> 有（別紙を添付）</label>
+          </div>
+          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。</div>
+        </div>
+      </div>
+      <div id="grpHiyatoi" class="hidden">
+        <div class="row"><label>就労日</label><input type="text" name="work_days" placeholder="令和8年7月の各営業日 等"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>就業の場所・業務</legend>
+      <div class="help-note">「雇入れ直後」＝入社してすぐの場所・業務。「変更の範囲」＝将来の配置転換等で変わりうる範囲（2024年4月改正で明示が必要）。当面変わらなければ「変更なし」や雇入れ直後と同じ内容を記載します。</div>
+      <div class="row"><label>就業の場所（雇入れ直後）</label><input type="text" name="workplace_now" placeholder="本社（仙台市…）"></div>
+      <div class="row"><label>就業の場所（変更の範囲）</label><input type="text" name="workplace_scope" placeholder="会社が指定する場所"></div>
+      <div class="row"><label>業務の内容（雇入れ直後）</label><textarea name="job_now" placeholder="総務事務職：給与計算、書類作成 等"></textarea></div>
+      <div class="row"><label>業務の内容（変更の範囲）</label><input type="text" name="job_scope" placeholder="会社が指定する業務"></div>
+    </fieldset>
+
+    <fieldset id="fsShiyo">
+      <legend>試用期間</legend>
+      <div class="row"><div class="seg">
+        <label><input type="radio" name="probation_flag" value="無" checked> 無</label>
+        <label><input type="radio" name="probation_flag" value="有"> 有</label>
+      </div>
+      <div class="help-note">試用期間が「有」のときだけ内容欄が出ます。期間（例：入社から6か月）や本採用の条件、就業規則の条番号などを記載します。</div>
+      </div>
+      <div class="row hidden" id="grpShiyo"><label>試用期間の内容</label>
+        <input type="text" name="probation_text" placeholder="令和8年7月1日から6か月（就業規則第9条）"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>労働時間</legend>
+      <div class="row"><label>労働時間制度</label>
+        <select name="worktime_system">
+          <option value="通常">通常（固定時間制）</option>
+          <option value="1か月単位変形">1か月単位の変形労働時間制</option>
+          <option value="1年単位変形">1年単位の変形労働時間制</option>
+          <option value="1週間単位変形">1週間単位の非定型的変形</option>
+          <option value="フレックスタイム">フレックスタイム制</option>
+          <option value="事業場外みなし">事業場外みなし労働</option>
+          <option value="専門業務型裁量">専門業務型裁量労働</option>
+          <option value="企画業務型裁量">企画業務型裁量労働</option>
+          <option value="交替制">交替制</option>
+          <option value="シフト制">シフト制</option>
+        </select>
+        <div class="help-note">選んだ制度で入力欄が変わります。<b>通常/交替/シフト/変形</b>→始業・終業（複数追加可）、<b>変形</b>→起算日や対象期間、<b>フレックス</b>→清算期間・標準労働時間、<b>みなし/裁量</b>→みなし労働時間。始業終業・休憩は時計から選べます。</div>
+      </div>
+      <div class="wt wt-1m hidden"><div class="row"><label>変形の起算日</label><input type="text" name="henkei_start" placeholder="毎月1日"></div></div>
+      <div class="wt wt-1y hidden">
+        <div class="row two">
+          <div><label>対象期間</label><input type="text" name="target_period" placeholder="R8.4.1〜R9.3.31"></div>
+          <div><label>特定期間</label><input type="text" name="specific_period" placeholder="12月"></div>
+        </div>
+        <div class="row two">
+          <div><label>年間労働日数</label><input type="text" name="annual_days" placeholder="280"></div>
+          <div><label>連続労働日数</label><input type="text" name="consecutive_days" placeholder="6"></div>
+        </div>
+      </div>
+      <div class="wt wt-flex hidden">
+        <div class="row two">
+          <div><label>清算期間</label><input type="text" name="settle_period" placeholder="1か月"></div>
+          <div><label>清算期間の総労働時間</label><input type="text" name="settle_total" placeholder="各月の所定労働時間"></div>
+        </div>
+        <div class="row"><label>標準となる1日の労働時間</label><input type="text" name="std_daily" placeholder="8時間"></div>
+        <div class="row two">
+          <div><label>コアタイム（任意）</label><input type="text" name="core_time" placeholder="10:00〜15:00"></div>
+          <div><label>フレキシブルタイム（任意）</label><input type="text" name="flex_time" placeholder="7:00〜20:00"></div>
+        </div>
+      </div>
+      <div class="wt wt-minashi hidden"><div class="row"><label>みなし労働時間</label><input type="text" name="deemed_hours" placeholder="1日8時間"></div></div>
+      <div class="wt wt-sairyo hidden">
+        <div class="row"><label>対象業務</label><input type="text" name="target_work" placeholder="システムの分析・設計 等"></div>
+        <div class="row two">
+          <div><label>みなし労働時間</label><input type="text" name="deemed_hours2" placeholder="1日8時間"></div>
+          <div><label>本人同意</label>
+            <select name="consent_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select>
+          </div>
+        </div>
+        <div class="row"><label>健康・福祉確保措置</label><input type="text" name="health_measure" placeholder="健康診断の実施 等"></div>
+      </div>
+      <div class="wt-times">
+        <label>始業・終業（複数可。曜日・区分・シフトごとに追加できます）</label>
+        <div id="timeList">
+          <div class="time-row">
+            <input type="text" class="t-label" placeholder="区分/曜日/シフト（例:月〜金・早番）">
+            <input type="time" class="t-start">〜<input type="time" class="t-end">
+            <button type="button" class="mini" onclick="delTime(this)" title="削除">×</button>
+          </div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addTime()">＋ 始業・終業を追加</button></div>
+        <div class="help-note">始業・終業は<b>時計から選択</b>します。曜日や勤務区分（早番・遅番等）で時間帯が異なる場合は「＋ 始業・終業を追加」で行を増やし、左の欄に区分名（例：月〜金／土／早番）を入れます。1つだけなら区分名は空でOKです。</div>
+      </div>
+      <div class="row"><label>始業・終業に関する備考</label>
+        <textarea name="worktime_note" placeholder="例）土曜日は隔週出勤／夜勤は翌日まで／曜日により所定労働時間が異なる 等"></textarea></div>
+      <div class="row"><label>休憩時間</label>
+        <div class="seg">
+          <label><input type="radio" name="break_mode" value="time" checked> 時刻で指定（複数可）</label>
+          <label><input type="radio" name="break_mode" value="total"> 合計時間のみ</label>
+        </div>
+        <div class="help-note"><b>時刻で指定</b>＝休憩を「開始〜終了」で入力（複数可）。自動で合計時間を集計し「（合計○）」と表示します。<b>合計時間のみ</b>＝細かい時刻を入れず「60分」「1時間」など合計だけを記載します。</div>
+      </div>
+      <div class="row" id="breakTimeMode">
+        <div id="breakList">
+          <div class="break-row"><input type="time" class="b-start">〜<input type="time" class="b-end"><button type="button" class="mini" onclick="delBreak(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addBreak()">＋ 休憩を追加</button></div>
+        <div class="hint" id="breakTotalDisp"></div>
+      </div>
+      <div class="row hidden" id="breakTotalMode"><label>休憩時間の合計</label>
+        <input type="text" name="break_total" placeholder="例：60分／1時間"></div>
+      <div class="row"><label>所定時間外労働</label>
+        <select name="overtime"><option value="有">有</option><option value="無">無</option></select></div>
+      <div class="note-law wt-note hidden" id="wtNote"></div>
+    </fieldset>
+
+    <fieldset id="fsHolyday">
+      <legend>休日・休暇</legend>
+      <div class="row"><label id="lblHoliday">休日</label><input type="text" name="holiday" placeholder="毎週土曜日、日曜日、祝日、年末年始"></div>
+      <div class="row"><label>年次有給休暇</label><input type="text" name="paid_leave" placeholder="労働基準法の定めによる"></div>
+      <div class="row"><label>その他の休暇</label><input type="text" name="other_leave" placeholder="特別休暇（慶弔等）"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>賃金</legend>
+      <div class="row"><label>基本賃金の種類</label>
+        <select name="wage_type">
+          <option value="月給">月給</option><option value="日給">日給</option>
+          <option value="時給">時給</option><option value="出来高">出来高（歩合）</option>
+          <option value="年俸">年俸</option>
+        </select>
+        <div class="help-note">選択で基本給の入力欄が変わります。<b>出来高</b>は保障給（労基法27条）が必須。<b>月給</b>のときだけ「総支給額」が自動計算され、固定残業の自動計算も使えます。金額欄は<b>半角数字</b>のみ（全角は自動変換）。</div>
+      </div>
+      <div class="row"><label>基本給の項目名（会社の呼称に合わせて変更可）</label>
+        <input type="text" name="base_wage_name" value="基本給" placeholder="例：基本給／基礎給"></div>
+      <div class="wg wg-month"><div class="row"><label>月額（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="monthly_wage" placeholder="200000"></div></div>
+      <div class="wg wg-day hidden"><div class="row"><label>日額（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="daily_wage" placeholder="10000"></div></div>
+      <div class="wg wg-hour hidden"><div class="row"><label>時間額（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="hourly_wage" placeholder="1200"></div></div>
+      <div class="wg wg-deki hidden"><div class="row two">
+        <div><label>基本単価（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="unit_price" placeholder="500"></div>
+        <div><label>保障給（円）★必須</label><input type="text" class="num" inputmode="numeric" name="guaranteed_wage" placeholder="180000"></div>
+      </div><div class="note-law">出来高払には保障給が必要です（労基法27条）。</div></div>
+      <div class="wg wg-year hidden"><div class="row"><label>年額（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="annual_wage" placeholder="3600000"></div></div>
+      <div class="help-note">手当は「＋追加」で何件でも入れられます。<b>基準内</b>＝残業の割増単価に算入する手当（役職・資格等）、<b>基準外</b>＝算入しない手当（通勤・住宅等）。単位で「日額・1回」等も選べ、月給のときは<b>月額のものだけ総支給額に合算</b>します。</div>
+      <div class="row"><label>基準内賃金の手当（割増賃金の単価に算入）</label>
+        <div id="inAllowList">
+          <div class="allow-row"><input type="text" class="a-name" placeholder="手当名（例:役職手当）">
+            <select class="a-unit"><option value="month">月額</option><option value="day">日額</option><option value="hour">時間額</option><option value="count">回数(1回)</option><option value="other">その他</option></select>
+            <input type="text" class="a-amt" placeholder="金額(円) 例:10000"><button type="button" class="mini" onclick="delAllow(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addAllow('in')">＋ 基準内手当を追加</button></div>
+      </div>
+      <div class="row"><label>基準外賃金の手当（割増賃金の単価に算入しない）</label>
+        <div id="outAllowList">
+          <div class="allow-row"><input type="text" class="a-name" placeholder="手当名（例:通勤手当）">
+            <select class="a-unit"><option value="month">月額</option><option value="day">日額</option><option value="hour">時間額</option><option value="count">回数(1回)</option><option value="other">その他</option></select>
+            <input type="text" class="a-amt" placeholder="金額(円) 例:5890"><button type="button" class="mini" onclick="delAllow(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addAllow('out')">＋ 基準外手当を追加</button></div>
+        <div class="hint">単位：月額＝総支給額に合算／日額・時間額・回数・その他＝「1日○円」等で記載し合算対象外。通勤・家族・住宅手当等は割増賃金の算定基礎から除外（労基法37条5項・労基則21条）。</div>
+      </div>
+      <div class="row"><label style="display:block"><input type="checkbox" name="show_breakdown" checked> 賃金の内訳（基準内・基準外の区分／割増算定基礎の注記）を通知書に表示する</label>
+        <div class="help-note"><b>チェックあり（既定）</b>＝各手当に「（基準内）／（基準外）」の区分を付け、「割増賃金の算定基礎＝基準内賃金○○円」の注記を通知書に載せます。<b>チェックを外す</b>と、これらの区分表記と算定基礎の注記を省き、手当名と金額だけを表示します。内訳（どこまでが割増の基礎か）を相手に見せたくないクライアント向けの切り替えです。</div>
+      </div>
+      <div class="row wg wg-month" id="totalRow"><label>総支給額（自動計算・月給のみ）</label>
+        <input type="text" id="totalDisp" readonly class="total-box"></div>
+      <div class="row"><label>固定残業の方式</label>
+        <select name="ot_style"><option value="split" selected>区分別（固定残業＋固定深夜）</option><option value="unified">一体型（固定時間外勤務手当・内訳明示）</option></select>
+        <div class="help-note">「一体型」は時間外・法定休日・深夜を1本の手当にまとめ、内訳（時間数・金額）を明示します。希望額を6:3:1などで自動按分できます（割増率は下の「割増賃金率」を使用）。</div>
+      </div>
+      <div class="row wg wg-month"><label>月の所定労働時間（固定残業の算定用・半角数字）</label>
+        <input type="text" class="num" inputmode="numeric" name="monthly_scheduled_hours" placeholder="例：160"></div>
+      <div class="row wg wg-month"><label>自動計算の端数処理（切り上げ単位）</label>
+        <select name="round_unit"><option value="0">切り上げなし（円未満四捨五入）</option><option value="10">十の位で切り上げ</option><option value="100">百の位で切り上げ</option><option value="1000" selected>千の位で切り上げ</option></select></div>
+      <div id="otSplit">
+        <div class="help-note">「固定残業手当」「固定深夜手当」を別々に設定します。金額を直接入力するか、<b>月給の場合は「月給から自動計算」にチェック</b>すると、基準内賃金÷所定労働時間×割増率×時間数で自動算出します（端数は上の切り上げ単位で処理）。固定残業が月60時間を超える設定では、超過分の追加割増を別項目で表示できます。</div>
+        <div class="row"><label>固定残業（みなし残業手当・手当名は自由）</label>
+          <input type="text" name="fixed_ot_name" value="固定残業手当" placeholder="手当名（例：固定残業手当／営業手当）">
+          <div class="allow-row" style="margin-top:5px">
+            <input type="text" class="num" inputmode="numeric" name="fixed_ot_hours" placeholder="時間数（例：20）">
+            <input type="text" class="num" inputmode="numeric" name="fixed_ot_amount" placeholder="金額(円)">
+          </div>
+          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_ot_auto"> 月給から自動計算（基準内賃金÷所定労働時間×時間外割増率×時間数。割増率は上の「時間外 法定超」の％＝125%等をそのまま使用）</label>
+          <label style="margin-top:2px;display:block"><input type="checkbox" name="fixed_ot60_show" checked> 固定残業が月60時間を超える場合、超過分（時間数−60）の追加割増を「（月60時間超）」項目として表示・計算する（不要ならチェックを外す）</label>
+        </div>
+        <div class="row"><label>固定深夜（みなし深夜手当・手当名は自由）</label>
+          <input type="text" name="fixed_night_name" value="固定深夜手当" placeholder="手当名（例：固定深夜手当）">
+          <div class="allow-row" style="margin-top:5px">
+            <input type="text" class="num" inputmode="numeric" name="fixed_night_hours" placeholder="時間数（例：30）">
+            <input type="text" class="num" inputmode="numeric" name="fixed_night_amount" placeholder="金額(円)">
+          </div>
+          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_night_auto"> 月給から自動計算（基準内賃金÷所定労働時間×深夜割増率×時間数。割増率は上の「深夜」を使用）</label>
+        </div>
+      </div>
+      <div id="otUnified" class="hidden">
+        <div class="row"><label>手当名</label><input type="text" name="uni_name" value="固定時間外勤務手当"></div>
+        <div class="row"><label>入力方式</label>
+          <div class="seg">
+            <label><input type="radio" name="uni_mode" value="ratio" checked> 希望額から按分（6:3:1）</label>
+            <label><input type="radio" name="uni_mode" value="hours"> 時間から算定</label>
+          </div>
+        </div>
+        <div id="uniRatio">
+          <div class="row"><label>希望する固定時間外勤務手当（円）</label><input type="text" class="num" inputmode="numeric" name="uni_target" value="75000"></div>
+          <div class="row three">
+            <div><label>時間外の比</label><input type="text" class="num" inputmode="numeric" name="uni_r_ot" value="60"></div>
+            <div><label>法定休日の比</label><input type="text" class="num" inputmode="numeric" name="uni_r_hol" value="30"></div>
+            <div><label>深夜の比</label><input type="text" class="num" inputmode="numeric" name="uni_r_night" value="10"></div>
+          </div>
+        </div>
+        <div id="uniHours" class="hidden">
+          <div class="row three">
+            <div><label>時間外(h)</label><input type="text" class="num" inputmode="numeric" name="uni_h_ot" value="30"></div>
+            <div><label>法定休日(h)</label><input type="text" class="num" inputmode="numeric" name="uni_h_hol" value="4"></div>
+            <div><label>深夜(h)</label><input type="text" class="num" inputmode="numeric" name="uni_h_night" value="5"></div>
+          </div>
+        </div>
+        <label style="display:block;margin-top:4px"><input type="checkbox" name="uni_note_clause" checked> 就業規則準拠の注記（差額精算・減額しない・日割り）を付ける</label>
+        <div class="help-note"><b>チェックあり（既定）</b>＝一体型の固定手当のあとに「実際の割増賃金が本手当額を超える月は差額を追加支給」「本手当があることを理由に割増賃金を減額しない」「月途中の入退社は日割り計算」の注記文を自動で付けます（就業規則の固定残業規定に沿った、後々のトラブル防止用の文言）。不要ならチェックを外すと注記なしになります。</div>
+        <div class="help-note">割増率は下の「割増賃金率」の 時間外(125%)・法定休日(135%)・深夜(25%) を使用。按分方式は金額を<b>1円単位で配分し合計が希望額に一致</b>します（切り上げなし）。時間は「○時間分（相当）」で表示します。</div>
+      </div>
+      <div class="row"><label>割増賃金率（％）</label>
+        <div class="help-note">各割増率を％で入力します（初期値は法定：時間外125％・月60時間超は追加25％・法定休日135％・深夜は追加25％）。ここの値は通知書に記載され、<b>固定残業の自動計算にも使われます</b>。「所定超（法定内）」は所定労働時間を超えるが法定8時間内の分で、法律上は割増不要のため通常100％です。</div>
+      </div>
+      <div class="row three">
+        <div><label>時間外 法定超</label><input type="text" class="num" inputmode="numeric" name="ot_60under" value="125"></div>
+        <div><label>時間外 月60h超（追加）</label><input type="text" class="num" inputmode="numeric" name="ot_60over" value="25"></div>
+        <div><label>時間外 所定超（法定内）</label><input type="text" class="num" inputmode="numeric" name="ot_shotei" value="100"></div>
+      </div>
+      <div class="row three">
+        <div><label>休日 法定休日</label><input type="text" class="num" inputmode="numeric" name="hol_legal" value="135"></div>
+        <div><label>休日 法定外休日</label><input type="text" class="num" inputmode="numeric" name="hol_nonlegal" value="125"></div>
+        <div><label>深夜（追加分）</label><input type="text" class="num" inputmode="numeric" name="night_pct" value="25"></div>
+      </div>
+      <div class="row two">
+        <div><label>賃金締切日</label><input type="text" name="wage_closing" placeholder="毎月末日"></div>
+        <div><label>賃金支払日</label><input type="text" name="wage_payday" placeholder="翌月10日"></div>
+      </div>
+      <div class="row three">
+        <div><label>昇給</label>
+          <select name="raise_flag"><option value="有">有</option><option value="無">無</option></select></div>
+        <div><label>賞与</label>
+          <select name="bonus_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
+        <div><label id="lblRetireAllow">退職金</label>
+          <select name="retire_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
+      </div>
+      <div class="help-note">昇給・賞与・退職金は「有／無」を選び、「有」のときは下の<b>内容（備考）</b>欄に時期・金額・条件などを記載します（記載すると通知書に反映）。昇給は必ず記載します。賞与・退職金は「無」でも短時間・有期の方は有無明示が必要です。</div>
+      <div class="row"><label>昇給の内容（備考）</label><input type="text" name="raise_note" placeholder="例：毎年4月、会社業績による（有のとき記載）"></div>
+      <div class="row"><label>賞与の内容（備考）</label><input type="text" name="bonus_note" placeholder="例：年2回（7月・12月）、業績連動（有のとき記載）"></div>
+      <div class="row"><label>退職金の内容（備考）</label><input type="text" name="retire_note" placeholder="例：勤続3年以上、就業規則第40条による（有のとき記載）"></div>
+      <div class="hint" id="hintShort"></div>
+    </fieldset>
+
+    <fieldset id="fsRetire">
+      <legend>退職に関する事項</legend>
+      <div class="row two">
+        <div><label>定年</label><input type="text" name="mandatory_age" placeholder="満60歳"></div>
+        <div><label>継続雇用</label><input type="text" name="reemployment" placeholder="満65歳まで"></div>
+      </div>
+      <div class="row"><label>自己都合退職の手続</label><input type="text" name="self_retire" placeholder="退職30日以上前に届け出ること"></div>
+      <div class="row"><label>解雇の事由（1項目ずつ追加）</label>
+        <div id="dismissalList">
+          <div class="other-row"><input type="text" class="d-item" placeholder="例：身体又は精神の障害により業務に耐えられないとき"><button type="button" class="mini" onclick="delDismissal(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addDismissal()">＋ 解雇事由を追加</button></div>
+        <div class="help-note">解雇の事由を<b>1項目ずつ「＋ 解雇事由を追加」で追加</b>します（「×」で削除）。下のチェックが<b>ON＝入力した全事由を箇条書き</b>で記載、<b>OFF＝先頭1件＋「等（詳細は就業規則による）」</b>と簡潔に記載します。用紙を1枚に収めたいときはOFFが便利です。</div>
+      </div>
+      <div class="row"><label><input type="checkbox" name="dismissal_full"> 解雇事由を全て列挙する（オフのときは先頭1件＋「等（詳細は就業規則による）」）</label></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>その他</legend>
+      <div class="row two">
+        <div><label>厚生年金</label><select name="kounen"><option value="有">有</option><option value="無">無</option></select></div>
+        <div><label>健康保険</label><select name="kenpo"><option value="有">有</option><option value="無">無</option></select></div>
+      </div>
+      <div class="row two">
+        <div><label>雇用保険</label><select name="emp_ins"><option value="有">有</option><option value="無">無</option></select></div>
+        <div><label>労災保険</label><select name="rousai"><option value="有">有</option><option value="無">無</option></select></div>
+      </div>
+      <div class="row two">
+        <div><label>健康保険の保険者名（任意）</label><input type="text" name="kenpo_name" placeholder="○○健康保険組合／協会けんぽ 等"></div>
+        <div><label>企業年金等（有無）</label><select name="kigyou_nenkin"><option value="無">無</option><option value="有">有</option></select></div>
+      </div>
+      <div class="row"><label>企業年金等の制度名（任意）</label><input type="text" name="kigyou_nenkin_name" placeholder="企業型確定拠出年金／確定給付企業年金／厚生年金基金 等"></div>
+      <div class="row"><label>社会保険の未加入の理由（厚年・健保が「無」の場合）</label><input type="text" name="shakai_riyuu" placeholder="例：所定労働時間が短く加入要件を満たさないため未加入（国民健康保険・国民年金に加入）"></div>
+      <div class="help-note">厚生年金・健康保険・雇用保険・労災保険はそれぞれ「有／無」を選びます。健康保険が組合健保等なら「保険者名」を任意入力。企業年金等（企業型確定拠出年金・確定給付企業年金・厚生年金基金など）に加入していれば「有」にして制度名を記載します。短時間などで社会保険に入れない方は、厚年・健保を「無」にしたうえで<b>「未加入の理由」</b>を記載してください（この欄は厚年・健保が「無」のときに通知書へ反映されます）。</div>
+      <div class="row"><label>労働者区分（R8.10改正・待遇の相違の説明窓口用）</label>
+        <div class="seg">
+          <label><input type="radio" name="worker_kind" value="normal" checked> 通常の労働者（正社員等）</label>
+          <label><input type="radio" name="worker_kind" value="other"> それ以外（短時間・有期・派遣等）</label>
+        </div>
+        <div class="help-note"><b>それ以外</b>を選ぶと、待遇の相違の説明窓口・相談窓口（部署名・担当者・連絡先）の入力欄が出ます。①の窓口はチェックで表示/非表示、②雇用管理改善の相談窓口は常に表示されます。</div>
+      </div>
+      <div id="grpSetsumei" class="hidden">
+        <label style="display:block;font-weight:600;margin:4px 0"><input type="checkbox" name="show_setsumei" checked> ①「待遇の相違の説明を求める窓口」を書面に明示する（R8.10改正／現時点は任意。②雇用管理改善の相談窓口は常に表示）</label>
+        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。R8.10改正で新設された項目で、現時点では書面明示は任意のため、記載しない運用なら<b>チェックを外す</b>と①欄が通知書から消えます。②の雇用管理改善の相談窓口はチェックに関係なく常に表示されます。</div>
+        <div class="row"><label>① 待遇の相違（内容・理由）等の説明を求める窓口</label></div>
+        <div class="row three">
+          <div><label>部署名</label><input type="text" name="setsumei_dept" placeholder="総務部"></div>
+          <div><label>担当者職氏名</label><input type="text" name="setsumei_person" placeholder="部長 ○○"></div>
+          <div><label>連絡先</label><input type="text" name="setsumei_contact" placeholder="内線100"></div>
+        </div>
+        <div class="row"><label>② 雇用管理の改善等に関する事項に係る相談窓口</label></div>
+        <div class="row three">
+          <div><label>部署名</label><input type="text" name="consult_dept" placeholder="総務部"></div>
+          <div><label>担当者職氏名</label><input type="text" name="consult_person" placeholder="課長 ○○"></div>
+          <div><label>連絡先</label><input type="text" name="consult_contact" placeholder="内線101"></div>
+        </div>
+      </div>
+      <div class="ex ex-haken hidden">
+        <div class="row two">
+          <div><label>派遣元事業主</label><input type="text" name="haken_moto" placeholder="株式会社○○スタッフ"></div>
+          <div><label>派遣先</label><input type="text" name="haken_saki" placeholder="株式会社△△商事"></div>
+        </div>
+      </div>
+      <div class="ex ex-kensetsu hidden">
+        <div class="row"><label>帰郷旅費（建設）</label>
+          <input type="text" name="kikyo" placeholder="明示条件と事実が相違する場合、解除し14日以内に帰郷するときは旅費を支給"></div>
+        <div class="note-law">帰郷旅費は労基法15条2項・3項が根拠です。</div>
+      </div>
+      <div class="row"><label>就業規則を確認できる場所</label><input type="text" name="rules_place" placeholder="社内に設置"></div>
+      <div class="row"><label>その他の記載事項（自由に追加）</label>
+        <div id="otherList">
+          <div class="other-row"><input type="text" class="o-name" placeholder="項目名（例:貸与品）"><input type="text" class="o-val" placeholder="内容（例:業務用チェーンソーを貸与）"><button type="button" class="mini" onclick="delOther(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addOther()">＋ 記載事項を追加</button></div>
+        <div class="help-note">上の欄にない任意の記載を自由に追加できます（例：貸与品＝業務用PCを貸与／車両＝借上げ車両の経費精算 など）。「＋ 記載事項を追加」で何件でも増やせ、「×」で削除。項目名は空でも内容だけで記載できます。</div>
+      </div>
+      <div class="row"><label>備考</label><input type="text" name="remarks" placeholder=""></div>
+    </fieldset>
+
+    <p class="hint" style="color:var(--warn)">
+      ※ 出力は下書きです。明示事項の要否・文言・条番号は最新の法令（e-Gov／厚労省）と所属社労士の確認を要します。</p>
+  </form>
+
+  <!-- ============ PREVIEW ============ -->
+  <div class="preview" id="preview"></div>
+</div>
+</div><!-- /modeCreate -->
+
+<!-- ============ 一括作成（複数人まとめて） ============ -->
+<div id="modeBatch" class="hidden">
+  <div class="batch-wrap">
+    <div class="batch-guide">
+      <b>👥 複数人をまとめて作成する</b><br>
+      ① 「作成」タブで一人目を作り込む → 名簿バーの<b>「➕ この内容を名簿に追加」</b>で登録。<br>
+      ② <b>「➡ 追加して次の人へ」</b>を押すと、氏名・手当（金額・支給項目）だけをクリアし、他の条件（会社情報・労働時間・休日・賃金体系など）は残したまま次の方の入力に移れます。<br>
+      ③ 下の名簿で各人を<b>編集・複製・並べ替え・削除</b>できます。<b>「💾 名簿を保存」</b>でまとめてダウンロード、<b>「📂 名簿を読込」</b>で後日続きから作業できます。<br>
+      ④ 全員そろったら下の<b>一括出力</b>で、まとめて1ファイル（PDF/Word/Excel）または一人ずつ個別ファイルに出力します。
+    </div>
+
+    <div class="batch-sec">
+      <div class="brow" style="margin-bottom:10px">
+        <button class="btn ghost" onclick="saveRoster()">💾 名簿を保存（JSON）</button>
+        <button class="btn ghost" onclick="document.getElementById('rosterFile').click()">📂 名簿を読込</button>
+        <input type="file" id="rosterFile" accept=".json,application/json" style="display:none" onchange="loadRoster(this)">
+        <button class="btn ghost" onclick="rosterClearAll()">🗑 名簿を全消去</button>
+      </div>
+      <div id="rosterListWrap"></div>
+    </div>
+
+    <div class="batch-sec">
+      <h3>一括出力 ― まとめて1ファイル</h3>
+      <div class="hint">全員を1つのファイルに連結します（1人＝改ページ。Excelは1人＝1シート）。印刷／保存が1回で済みます。</div>
+      <div class="brow">
+        <button class="btn print" onclick="bulkPrint()">🖨 全員 印刷 / PDF</button>
+        <button class="btn" onclick="bulkWordCombined()">📄 まとめて Word</button>
+        <button class="btn" onclick="bulkExcelCombined()">📊 まとめて Excel</button>
+      </div>
+    </div>
+
+    <div class="batch-sec">
+      <h3>一括出力 ― 一人ずつ個別ファイル</h3>
+      <div class="hint">氏名ごとに別ファイルを連続ダウンロードします。※ブラウザが複数ダウンロードの許可を求める場合は「許可」を選んでください。</div>
+      <div class="brow">
+        <button class="btn" onclick="bulkExportEach('doc')">📄 個別 Word（連続DL）</button>
+        <button class="btn" onclick="bulkExportEach('xls')">📊 個別 Excel（連続DL）</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modeBatch -->
+
+<!-- ============ 賃金試算（通知書には反映しない独立モード） ============ -->
+<div id="modeCalc" class="hidden">
+  <div class="calc-wrap">
+    <form id="calcForm" oninput="calcRender()" onchange="calcRender()">
+      <fieldset>
+        <legend>試算の種類</legend>
+        <div class="seg">
+          <label><input type="radio" name="calc_mode" value="forward" checked> 順算（時間→総額）</label>
+          <label><input type="radio" name="calc_mode" value="reverse"> 逆算（総額→固定残業）</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>共通設定</legend>
+        <div class="row two">
+          <div><label>月の所定労働時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_sched" value="160"></div>
+          <div><label>端数の切り上げ単位</label>
+            <select name="calc_round"><option value="0">切り上げなし</option><option value="10">十の位</option><option value="100">百の位</option><option value="1000" selected>千の位</option></select></div>
+        </div>
+        <div class="row two">
+          <div><label>時間外割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_rate" value="125"></div>
+          <div><label>深夜割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_rate" value="25"></div>
+        </div>
+        <div class="row"><label>時間外 月60時間超の追加率(%)（固定残業が60時間超のとき使用）</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot60_rate" value="25"></div>
+        <div class="row two">
+          <div><label>基準内手当 合計(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_in" value="0"></div>
+          <div><label>基準外手当 合計(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_out" value="0"></div>
+        </div>
+      </fieldset>
+      <fieldset id="calcFwd">
+        <legend>順算の入力</legend>
+        <div class="row two">
+          <div><label>基本給(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_base" value="200000"></div>
+          <div><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours" value="20"></div>
+        </div>
+        <div class="row"><label>固定深夜時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours" value="0"></div>
+      </fieldset>
+      <fieldset id="calcRev" class="hidden">
+        <legend>逆算の入力</legend>
+        <div class="row"><label>目標の総支給額(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_target" value="300000"></div>
+        <div class="row"><label>求めたい値</label>
+          <div class="seg">
+            <label><input type="radio" name="calc_solve" value="base" checked> 固定残業・深夜時間を指定 → 基準内賃金/基本給を逆算（総額固定・切上げ）</label>
+            <label><input type="radio" name="calc_solve" value="hours"> 基本給を指定 → 固定残業時間を逆算</label>
+          </div>
+        </div>
+        <div class="row" id="calcRevHours"><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours2" value="20"></div>
+        <div class="row" id="calcRevNight"><label>深夜勤務時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours2" value="0"></div>
+        <div class="row hidden" id="calcRevBase"><label>基本給(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_base2" value="200000"></div>
+      </fieldset>
+      <p class="hint" style="color:var(--warn)">※ このタブは試算専用です。通知書・出力には反映されません。金額は「基準内賃金＝基本給＋基準内手当」を基礎に算定します。</p>
+    </form>
+    <div id="calcResult" class="calc-result"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const form = $('#form');
+const esc = s => String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const has = v => v!=null && String(v).trim()!=='';
+const val = n => { const el=form.elements[n]; return el ? String(el.value||'').trim() : ''; };
+const radio = n => { const el=form.elements[n]; return el ? (el.value||'') : ''; };
+
+// ===== 日付整形（全書類共通で 和暦／西暦 を切替）=====
+function dateMode(){ return radio('dateMode')||'wareki'; }
+const ERAS=[['令和',2019,5,1],['平成',1989,1,8],['昭和',1926,12,25]];
+function fmtDate(v){
+  if(!has(v)) return '';
+  const m=String(v).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);   // input[type=date]=ISO
+  if(!m) return String(v);                                     // 非ISO(旧テキスト)はそのまま
+  const y=+m[1], mo=+m[2], d=+m[3];
+  if(dateMode()==='seireki') return `${y}年${mo}月${d}日`;
+  const key=y*10000+mo*100+d;
+  for(const [nm,ey,em,ed] of ERAS){ if(key>=ey*10000+em*100+ed){ const yr=y-ey+1; return `${nm}${yr===1?'元':yr}年${mo}月${d}日`; } }
+  return `${y}年${mo}月${d}日`;
+}
+
+// 労働時間制度の根拠法（P7相当）
+const WT_LAW = {
+  "1か月単位変形":"労基法32条の2（労使協定は届出）",
+  "1年単位変形":"労基法32条の4（労使協定届出必須／3か月超は年280日・連続6日）",
+  "1週間単位変形":"労基法32条の5（30人未満の特定業種・届出・1日10時間上限）",
+  "フレックスタイム":"労基法32条の3（清算期間1か月超は届出・上限3か月）",
+  "事業場外みなし":"労基法38条の2（法定超は労使協定届出）",
+  "専門業務型裁量":"労基法38条の3（労使協定届出／本人同意必須）",
+  "企画業務型裁量":"労基法38条の4（労使委員会決議届出・定期報告）",
+  "交替制":""
+};
+const WAGE_LAW = { "時給":"最賃法（時間額換算で最低賃金以上か要確認）", "出来高":"労基法27条（保障給が必須）" };
+// 労働時間制度の正式名（通知書本文に明示する）
+const WT_NAME = {
+  "通常":"通常の労働時間制（固定時間制）","1か月単位変形":"1か月単位の変形労働時間制",
+  "1年単位変形":"1年単位の変形労働時間制","1週間単位変形":"1週間単位の非定型的変形労働時間制",
+  "フレックスタイム":"フレックスタイム制","事業場外みなし":"事業場外みなし労働時間制",
+  "専門業務型裁量":"専門業務型裁量労働制","企画業務型裁量":"企画業務型裁量労働制","交替制":"交替制","シフト制":"シフト制"
+};
+// 始業・終業（時間帯）の明示が必要で、複数追加できる制度
+const TIME_SYSTEMS=['通常','1か月単位変形','1年単位変形','1週間単位変形','交替制','シフト制'];
+
+// ===== 金額ユーティリティ =====
+function toHalf(s){ return String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); }
+function normalizeNum(inp){ if(!inp) return; const v=toHalf(inp.value).replace(/[^\d]/g,''); if(v!==inp.value) inp.value=v; }
+function normalizeAllNumeric(){
+  document.querySelectorAll('input.num').forEach(normalizeNum);           // 賃金の金額欄
+  document.querySelectorAll('.allow-row').forEach(r=>{                    // 手当（月/日/時/回は数字のみ、その他は自由）
+    const u=r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month';
+    if(u!=='other') normalizeNum(r.querySelector('.a-amt'));
+  });
+}
+function parseYen(x){ const s=String(x==null?'':x).replace(/[,，円\s]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s):null; }
+function numStr(x){ const s=String(x==null?'':x).replace(/[,，]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s).toLocaleString('ja-JP')+'円':(x==null?'':String(x)); }
+
+// ===== 手当（基準内／基準外を複数入力）=====
+const ALLOW_UNIT_OPTS='<option value="month">月額</option><option value="day">日額</option><option value="hour">時間額</option><option value="count">回数(1回)</option><option value="other">その他</option>';
+const ALLOW_UNIT_PRE={month:'',day:'1日 ',hour:'1時間 ',count:'1回 ',other:''};
+function allowListEl(kind){ return document.getElementById(kind==='in'?'inAllowList':'outAllowList'); }
+function _allowRowHTML(){ return '<input type="text" class="a-name" placeholder="手当名">'+
+  '<select class="a-unit">'+ALLOW_UNIT_OPTS+'</select>'+
+  '<input type="text" class="a-amt" placeholder="金額/内容"><button type="button" class="mini" onclick="delAllow(this)" title="削除">×</button>'; }
+function getAllows(kind){
+  return [...allowListEl(kind).querySelectorAll('.allow-row')].map(r=>({
+    name:r.querySelector('.a-name').value.trim(),
+    unit:(r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month'),
+    amount:r.querySelector('.a-amt').value.trim()
+  })).filter(a=>a.name||a.amount);
+}
+function addAllow(kind,item){
+  const row=document.createElement('div'); row.className='allow-row'; row.innerHTML=_allowRowHTML();
+  allowListEl(kind).appendChild(row);
+  if(item){ row.querySelector('.a-name').value=item.name||''; if(item.unit)row.querySelector('.a-unit').value=item.unit; row.querySelector('.a-amt').value=item.amount||''; }
+  render();
+}
+function delAllow(btn){
+  const row=btn.closest('.allow-row'), list=row.parentElement;
+  if(list.querySelectorAll('.allow-row').length<=1){ row.querySelectorAll('input').forEach(i=>i.value=''); row.querySelector('.a-unit').value='month'; }
+  else { row.remove(); }
+  render();
+}
+function setAllows(kind,arr){
+  const list=allowListEl(kind); list.innerHTML='';
+  (arr&&arr.length?arr:[{}]).forEach(it=>{
+    const row=document.createElement('div'); row.className='allow-row'; row.innerHTML=_allowRowHTML();
+    row.querySelector('.a-name').value=it.name||''; row.querySelector('.a-unit').value=it.unit||'month'; row.querySelector('.a-amt').value=it.amount||''; list.appendChild(row);
+  });
+}
+// ===== その他の記載事項（自由に増減）=====
+function _otherRowHTML(){ return '<input type="text" class="o-name" placeholder="項目名">'+
+  '<input type="text" class="o-val" placeholder="内容"><button type="button" class="mini" onclick="delOther(this)" title="削除">×</button>'; }
+function getOthers(){
+  return [...document.querySelectorAll('#otherList .other-row')].map(r=>({
+    name:r.querySelector('.o-name').value.trim(), val:r.querySelector('.o-val').value.trim()
+  })).filter(x=>x.name||x.val);
+}
+function addOther(item){
+  const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_otherRowHTML();
+  document.getElementById('otherList').appendChild(row);
+  if(item){ row.querySelector('.o-name').value=item.name||''; row.querySelector('.o-val').value=item.val||''; }
+  render();
+}
+function delOther(btn){
+  const row=btn.closest('.other-row'), list=row.parentElement;
+  if(list.querySelectorAll('.other-row').length<=1){ row.querySelectorAll('input').forEach(i=>i.value=''); }
+  else { row.remove(); }
+  render();
+}
+function setOthers(arr){
+  const list=document.getElementById('otherList'); list.innerHTML='';
+  (arr&&arr.length?arr:[{}]).forEach(it=>{
+    const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_otherRowHTML();
+    row.querySelector('.o-name').value=it.name||''; row.querySelector('.o-val').value=it.val||''; list.appendChild(row);
+  });
+}
+
+// ===== 解雇の事由（1項目ずつ追加）=====
+function _dismissalRowHTML(){ return '<input type="text" class="d-item" placeholder="解雇事由"><button type="button" class="mini" onclick="delDismissal(this)" title="削除">×</button>'; }
+function getDismissals(){ return [...document.querySelectorAll('#dismissalList .d-item')].map(x=>x.value.trim()).filter(Boolean); }
+function addDismissal(v){
+  const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_dismissalRowHTML();
+  document.getElementById('dismissalList').appendChild(row);
+  if(v) row.querySelector('.d-item').value=v; render();
+}
+function delDismissal(btn){
+  const list=document.getElementById('dismissalList');
+  if(list.querySelectorAll('.other-row').length<=1){ btn.closest('.other-row').querySelector('input').value=''; }
+  else { btn.closest('.other-row').remove(); }
+  render();
+}
+function setDismissals(arr){
+  const list=document.getElementById('dismissalList'); list.innerHTML='';
+  (arr&&arr.length?arr:['']).forEach(v=>{
+    const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_dismissalRowHTML();
+    row.querySelector('.d-item').value=v||''; list.appendChild(row);
+  });
+}
+
+// 手当1件の表示（単位に応じた表記）。cat=基準内/基準外
+function fmtAllow(a,cat){
+  const label = cat ? `${a.name||'手当'}（${cat}）` : (a.name||'手当');
+  if((a.unit||'month')==='other') return `${label}　${a.amount}`;
+  return `${label}　${ALLOW_UNIT_PRE[a.unit||'month']}${numStr(a.amount)}`;
+}
+function numH(x){ return Number(toHalf(String(x==null?'':x)).replace(/[^\d.]/g,''))||0; }
+// 一体型（固定時間外勤務手当）：時間外125%・法定休日135%・深夜0.25を1本にまとめ内訳明示
+function computeUnified(inBase, sched, unit, roundUp){
+  const per = sched>0? inBase/sched : 0;
+  const otR=(numH(val('ot_60under'))||125)/100, holR=(numH(val('hol_legal'))||135)/100, nightR=(numH(val('night_pct'))||25)/100;
+  const mode=(form.elements['uni_mode']&&form.elements['uni_mode'].value)||'ratio';
+  let ot={amt:0,h:0}, hol={amt:0,h:0}, ni={amt:0,h:0}, total=0;
+  if(mode==='ratio'){
+    const T=numH(val('uni_target'));
+    const r1=numH(val('uni_r_ot')), r2=numH(val('uni_r_hol')), r3=numH(val('uni_r_night')); const rs=(r1+r2+r3)||1;
+    ot.amt=Math.round(T*r1/rs); hol.amt=Math.round(T*r2/rs); ni.amt=T-ot.amt-hol.amt;   // 1円単位・合計=T（切上げなし）
+    ot.h = (per>0&&otR>0)? ot.amt/(per*otR):0;
+    hol.h= (per>0&&holR>0)? hol.amt/(per*holR):0;
+    ni.h = (per>0&&nightR>0)? ni.amt/(per*nightR):0;
+    total=T;
+  } else {
+    ot.h=numH(val('uni_h_ot')); hol.h=numH(val('uni_h_hol')); ni.h=numH(val('uni_h_night'));
+    ot.amt = ot.h>0? roundUp(per*otR*ot.h):0;
+    hol.amt= hol.h>0? roundUp(per*holR*hol.h):0;
+    ni.amt = ni.h>0? roundUp(per*nightR*ni.h):0;
+    total=ot.amt+hol.amt+ni.amt;
+  }
+  return {mode, per, otR, holR, nightR, ot, hol, ni, total,
+    name: val('uni_name')||'固定時間外勤務手当',
+    note: !!(form.elements['uni_note_clause']&&form.elements['uni_note_clause'].checked)};
+}
+function wageTotals(){
+  const base=parseYen(val('monthly_wage'))||0;
+  const sumMonth=arr=>arr.filter(a=>(a.unit||'month')==='month').reduce((s,a)=>s+(parseYen(a.amount)||0),0);
+  const inSum=sumMonth(getAllows('in')), outSum=sumMonth(getAllows('out'));
+  const inBase=base+inSum;
+  const hasVar=[...getAllows('in'),...getAllows('out')].some(a=>(a.unit||'month')!=='month' && has(a.amount));
+  // 固定残業・固定深夜
+  const isMonth=val('wage_type')==='月給';
+  const sched=numH(val('monthly_scheduled_hours'));
+  const unit=parseInt(val('round_unit')||'0',10);
+  const roundUp=v=> unit>0 ? Math.ceil(v/unit)*unit : Math.round(v);
+  const ck=n=>form.elements[n] && form.elements[n].checked;
+  const otMult= (numH(val('ot_60under'))||125)/100;   // 時間外(法定超60h以内)の割増率＝総率(125%→1.25)
+  const nightMult= (numH(val('night_pct'))||25)/100;  // 深夜割増率＝追加分(25%→0.25)
+  const otMult60over= (numH(val('ot_60over'))||25)/100;  // 月60時間超の追加割増率(25%→0.25)
+  const otHours=numH(val('fixed_ot_hours'));
+  const otAuto= ck('fixed_ot_auto') && isMonth && sched>0 && otHours>0;
+  const otAmt= otAuto ? roundUp(inBase/sched*otMult*otHours) : (parseYen(val('fixed_ot_amount'))||0);
+  // 固定残業が月60時間を超える場合の追加割増（超過分×追加率）
+  const ot60Hours= Math.max(0, otHours-60);
+  const ot60Auto= otAuto && ot60Hours>0;
+  const ot60Amt= ot60Auto ? roundUp(inBase/sched*otMult60over*ot60Hours) : 0;
+  const ot60Include= ck('fixed_ot60_show') && ot60Amt>0;
+  const nightHours=numH(val('fixed_night_hours'));
+  const nightAuto= ck('fixed_night_auto') && isMonth && sched>0 && nightHours>0;
+  const nightAmt= nightAuto ? roundUp(inBase/sched*nightMult*nightHours) : (parseYen(val('fixed_night_amount'))||0);
+  // 一体型（固定時間外勤務手当）
+  const otStyle=val('ot_style')||'split';
+  if(otStyle==='unified'){
+    const uni=computeUnified(inBase, sched, unit, roundUp);
+    const total=base+inSum+outSum+uni.total;
+    return {base, inSum, outSum, inBase, total, hasVar, otStyle,
+      uni, otAmt:0, ot60Amt:0, ot60Include:false, nightAmt:0,
+      otHours:0, otAuto:false, nightHours:0, nightAuto:false, rounded:unit>0};
+  }
+  const total=base+inSum+outSum+otAmt+(ot60Include?ot60Amt:0)+nightAmt;
+  return {base, inSum, outSum, inBase, total, hasVar, otStyle,
+    otHours, otAmt, otAuto, ot60Hours, ot60Amt, ot60Include,
+    nightHours, nightAmt, nightAuto, rounded:unit>0};
+}
+
+// ===== 休憩時間（複数可・時刻ピッカー 開始〜終了）=====
+function _breakRowHTML(){ return '<input type="time" class="b-start">〜<input type="time" class="b-end"><button type="button" class="mini" onclick="delBreak(this)" title="削除">×</button>'; }
+function getBreaks(){
+  return [...document.querySelectorAll('#breakList .break-row')].map(r=>{
+    const s=r.querySelector('.b-start').value.trim(), e=r.querySelector('.b-end').value.trim();
+    return (s&&e)?`${s}〜${e}`:(s||e);
+  }).filter(Boolean);
+}
+function addBreak(item){
+  const row=document.createElement('div'); row.className='break-row'; row.innerHTML=_breakRowHTML();
+  document.getElementById('breakList').appendChild(row);
+  if(item){ row.querySelector('.b-start').value=item.start||''; row.querySelector('.b-end').value=item.end||''; }
+  render();
+}
+function delBreak(btn){
+  const list=document.getElementById('breakList');
+  if(list.querySelectorAll('.break-row').length<=1){ btn.closest('.break-row').querySelectorAll('input').forEach(i=>i.value=''); }
+  else { btn.closest('.break-row').remove(); }
+  render();
+}
+function setBreaks(arr){
+  const list=document.getElementById('breakList'); list.innerHTML='';
+  (arr&&arr.length?arr:[{}]).forEach(it=>{
+    const row=document.createElement('div'); row.className='break-row'; row.innerHTML=_breakRowHTML();
+    row.querySelector('.b-start').value=it.start||''; row.querySelector('.b-end').value=it.end||''; list.appendChild(row);
+  });
+}
+
+// ===== 始業・終業（複数可。通常の固定時間制でも曜日・区分別に入力できる）=====
+function _timeRowHTML(){
+  return '<input type="text" class="t-label" placeholder="区分/曜日/シフト（例:月〜金・早番）">'+
+         '<input type="time" class="t-start">〜<input type="time" class="t-end">'+
+         '<button type="button" class="mini" onclick="delTime(this)" title="削除">×</button>';
+}
+function getTimes(){
+  return [...document.querySelectorAll('#timeList .time-row')].map(r=>({
+    label:r.querySelector('.t-label').value.trim(),
+    start:r.querySelector('.t-start').value.trim(),
+    end:r.querySelector('.t-end').value.trim()
+  })).filter(t=>t.start||t.end);
+}
+function addTime(t){
+  const row=document.createElement('div'); row.className='time-row'; row.innerHTML=_timeRowHTML();
+  document.getElementById('timeList').appendChild(row);
+  if(t){ row.querySelector('.t-label').value=t.label||''; row.querySelector('.t-start').value=t.start||''; row.querySelector('.t-end').value=t.end||''; }
+  render();
+}
+function delTime(btn){
+  const list=document.getElementById('timeList');
+  if(list.querySelectorAll('.time-row').length<=1){ btn.closest('.time-row').querySelectorAll('input').forEach(i=>i.value=''); }
+  else { btn.closest('.time-row').remove(); }
+  render();
+}
+function setTimes(arr){
+  const list=document.getElementById('timeList'); list.innerHTML='';
+  (arr&&arr.length?arr:[{}]).forEach(t=>{
+    const row=document.createElement('div'); row.className='time-row'; row.innerHTML=_timeRowHTML();
+    row.querySelector('.t-label').value=t.label||''; row.querySelector('.t-start').value=t.start||''; row.querySelector('.t-end').value=t.end||'';
+    list.appendChild(row);
+  });
+}
+
+// 表示切替
+function updateVisibility(){
+  const cat = radio('emp_category'), per = radio('period_type'), wt = val('worktime_system'), wg = val('wage_type');
+  const doc = radio('docType');
+  // 書類種別
+  $('#grpChg').classList.toggle('hidden', doc!=='CHG');
+  // 期間区分
+  $('#grpMuki').classList.toggle('hidden', per!=='無期');
+  $('#grpYuki').classList.toggle('hidden', per!=='有期');
+  $('#grpHiyatoi').classList.toggle('hidden', per!=='日雇');
+  const isHiyatoi = per==='日雇';
+  $('#fsHolyday').classList.toggle('hidden', isHiyatoi);
+  $('#fsRetire').classList.toggle('hidden', isHiyatoi);
+  $('#fsShiyo').classList.toggle('hidden', isHiyatoi);
+  // 更新詳細
+  const rn = val('renewal');
+  $('#grpRenew').classList.toggle('hidden', !(rn==='自動的に更新する'||rn==='更新する場合があり得る'));
+  // 試用期間
+  $('#grpShiyo').classList.toggle('hidden', radio('probation_flag')!=='有');
+  // 労働時間制度
+  document.querySelectorAll('.wt').forEach(e=>e.classList.add('hidden'));
+  const paramMap={"1か月単位変形":".wt-1m","1年単位変形":".wt-1y","フレックスタイム":".wt-flex",
+    "事業場外みなし":".wt-minashi","専門業務型裁量":".wt-sairyo","企画業務型裁量":".wt-sairyo"};
+  if(paramMap[wt]) show(paramMap[wt]);
+  // 始業終業リストは明示が必要な制度で表示
+  document.querySelector('.wt-times').classList.toggle('hidden', !TIME_SYSTEMS.includes(wt));
+  // 休憩の入力モード（時刻指定／合計のみ）
+  const bm=radio('break_mode')||'time';
+  $('#breakTimeMode').classList.toggle('hidden', bm!=='time');
+  $('#breakTotalMode').classList.toggle('hidden', bm!=='total');
+  // 賃金体系
+  document.querySelectorAll('.wg').forEach(e=>e.classList.add('hidden'));
+  show({"月給":".wg-month","日給":".wg-day","時給":".wg-hour","出来高":".wg-deki","年俸":".wg-year"}[wg]||".wg-month");
+  // 固定残業の方式（区分別／一体型）
+  const otStyle=val('ot_style')||'split';
+  $('#otSplit').classList.toggle('hidden', otStyle!=='split');
+  $('#otUnified').classList.toggle('hidden', otStyle!=='unified');
+  if(otStyle==='unified'){ const um=radio('uni_mode');
+    $('#uniRatio').classList.toggle('hidden', um!=='ratio');
+    $('#uniHours').classList.toggle('hidden', um!=='hours'); }
+  // その他（固有）
+  const isShort = cat==='短時間';
+  $('#grpSetsumei').classList.toggle('hidden', radio('worker_kind')!=='other');
+  $('.ex-haken').classList.toggle('hidden', cat!=='派遣');
+  $('.ex-kensetsu').classList.toggle('hidden', cat!=='建設');
+  // ラベル切替
+  $('#lblEmployer').textContent = (cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名';
+  $('#lblHoliday').textContent = (cat==='短時間'||cat==='派遣')?'休日及び勤務日':'休日';
+  $('#lblRetireAllow').textContent = '退職金';
+  $('#hintShort').textContent = isShort?'短時間・有期は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条）。空欄なら「無」と印字します。':'';
+  // 無効な組合せ
+  const bad = (per==='日雇' && (cat==='短時間'||cat==='林業'));
+  $('#warnCombo').classList.toggle('hidden', !bad);
+  // 労働時間の根拠法
+  const note = WT_LAW[wt]||'';
+  $('#wtNote').textContent = note?('※ '+note):'';
+  $('#wtNote').classList.toggle('hidden', !note);
+  return {cat,per,wt,wg,doc,bad,isShort,isHiyatoi};
+}
+function show(sel){ if(sel) document.querySelectorAll(sel).forEach(e=>e.classList.remove('hidden')); }
+
+// deemed hours：裁量用は別name → 統合
+function deemedHours(){ return val('deemed_hours2')||val('deemed_hours'); }
+
+// ===== ドキュメント組立（CLIの可変式に対応）=====
+function buildBlocks(st){
+  const B=[]; const push=(k,lines)=>{ lines=lines.filter(has); if(lines.length) B.push({k,lines}); };
+  const cat=st.cat, per=st.per, wt=st.wt, wg=st.wg;
+
+  // 契約期間
+  let term=[];
+  if(per==='無期'){ const s=val('muki_start'); term.push(has(s)?`${fmtDate(s)}から期間の定めなし`:'期間の定めなし'); }
+  else if(per==='有期'){
+    if(has(val('contract_start'))||has(val('contract_end'))) term.push(`${fmtDate(val('contract_start'))}から${fmtDate(val('contract_end'))}まで`);
+    if(has(val('renewal'))) term.push('更新の有無　'+val('renewal'));
+    if(has(val('renewal_criteria'))) term.push('更新の判断基準　'+val('renewal_criteria').replace(/,/g,'、'));
+    if(has(val('renewal_cap'))) term.push('更新上限　'+val('renewal_cap'));
+    if(radio('muki_flag')==='有'){
+      term.push('無期転換申込機会　本契約期間中に、会社に対して期間の定めのない労働契約（無期労働契約）の締結を申し込むことができる');
+      term.push('無期転換後の労働条件　別紙のとおり');
+    }
+  } else { if(has(val('work_days'))) term.push('就労日　'+val('work_days')); }
+  push('契約期間', term);
+
+  // 就業の場所
+  push('就業の場所', [val('workplace_now'), has(val('workplace_scope'))?('（変更の範囲）'+val('workplace_scope')):'']);
+  // 業務
+  push('従事すべき業務の内容', [val('job_now'), has(val('job_scope'))?('（変更の範囲）'+val('job_scope')):'']);
+  // 試用期間
+  if(!st.isHiyatoi && radio('probation_flag')==='有' && has(val('probation_text'))) push('試用期間',[val('probation_text')]);
+
+  // 労働時間
+  let t=[];
+  if(WT_NAME[wt]) t.push('労働時間制度　'+WT_NAME[wt]);
+  if(wt==='1か月単位変形'){
+    if(has(val('henkei_start'))) t.push('変形期間の起算日　'+val('henkei_start'));
+  } else if(wt==='1年単位変形'){
+    if(has(val('target_period'))) t.push('対象期間　'+val('target_period'));
+    if(has(val('specific_period'))) t.push('特定期間　'+val('specific_period'));
+    if(has(val('annual_days'))) t.push('年間労働日数　'+val('annual_days')+'日');
+    if(has(val('consecutive_days'))) t.push('連続労働日数　'+val('consecutive_days')+'日');
+  } else if(wt==='フレックスタイム'){
+    t.push('始業及び終業の時刻は労働者の決定に委ねる');
+    if(has(val('settle_period'))) t.push('清算期間　'+val('settle_period'));
+    if(has(val('settle_total'))) t.push('清算期間の総労働時間　'+val('settle_total'));
+    if(has(val('std_daily'))) t.push('標準となる1日の労働時間　'+val('std_daily'));
+    if(has(val('core_time'))) t.push('コアタイム　'+val('core_time'));
+    if(has(val('flex_time'))) t.push('フレキシブルタイム　'+val('flex_time'));
+  } else if(wt==='事業場外みなし'){
+    if(has(deemedHours())) t.push('みなし労働時間　'+deemedHours());
+  } else if(wt==='専門業務型裁量'||wt==='企画業務型裁量'){
+    if(has(val('target_work'))) t.push('対象業務　'+val('target_work'));
+    if(has(deemedHours())) t.push('みなし労働時間　'+deemedHours());
+    if(has(val('consent_flag'))) t.push('本人同意　'+val('consent_flag'));
+    if(has(val('health_measure'))) t.push('健康・福祉確保措置　'+val('health_measure'));
+  }
+  if(TIME_SYSTEMS.includes(wt)){
+    getTimes().forEach(x=>{ const core=`始業 ${x.start}　終業 ${x.end}`; t.push(x.label?`${x.label}　${core}`:core); });
+  }
+  if(has(val('worktime_note'))) t.push('（備考）'+val('worktime_note'));
+  const bmode=(form.elements['break_mode']&&form.elements['break_mode'].value)||'time';
+  if(bmode==='total'){
+    if(has(val('break_total'))) t.push('休憩時間　'+val('break_total'));
+  } else {
+    const breaks=getBreaks();
+    if(breaks.length){ const tot=breakTotalMinutes(); t.push('休憩時間　'+breaks.join('、')+(tot>0?`（合計${fmtDur(tot)}）`:'')); }
+  }
+  t.push('所定時間外労働　'+(val('overtime')||'無'));
+  const wtLaw=WT_LAW[wt]; if(wtLaw) t.push('__NOTE__※ '+wtLaw);
+  push('始業・終業の時刻等', t);
+
+  if(!st.isHiyatoi){
+    if(has(val('holiday'))) push($('#lblHoliday').textContent,[val('holiday')]);
+    let v=[]; if(has(val('paid_leave'))) v.push('年次有給休暇　'+val('paid_leave'));
+    if(has(val('other_leave'))) v.push('その他の休暇　'+val('other_leave')); push('休暇',v);
+  }
+
+  // 賃金
+  let w=[]; let n=0;
+  const baseName=val('base_wage_name')||'基本給';
+  const baseMap={'月給':['monthly_wage',`${baseName}（月給）`],'日給':['daily_wage',`${baseName}（日給）`],'時給':['hourly_wage',`${baseName}（時給）`],'年俸':['annual_wage','年俸']};
+  if(wg==='出来高'){ if(has(val('unit_price'))){n++;w.push(`${n}　基本単価（出来高）　${numStr(val('unit_price'))}`);} if(has(val('guaranteed_wage'))){n++;w.push(`${n}　保障給　${numStr(val('guaranteed_wage'))}`);} }
+  else { const b=baseMap[wg]; if(b&&has(val(b[0]))){n++;w.push(`${n}　${b[1]}　${numStr(val(b[0]))}`);} }
+  const inA=getAllows('in'), outA=getAllows('out');
+  const showBk = !form.elements['show_breakdown'] || form.elements['show_breakdown'].checked;
+  inA.forEach(a=>{n++;w.push(`${n}　${fmtAllow(a, showBk?'基準内':'')}`);});
+  outA.forEach(a=>{n++;w.push(`${n}　${fmtAllow(a, showBk?'基準外':'')}`);});
+  const tt=wageTotals();
+  if(tt.otStyle==='unified'){
+    // 一体型：固定時間外勤務手当（内訳明示）
+    const u=tt.uni;
+    if(u.total>0){
+      const hl=h=> u.mode==='ratio'? `${(Math.round(h*10)/10)}時間分（相当）` : `${h}時間分`;
+      n++; w.push(`${n}　${u.name}　${numStr(u.total)}`);
+      w.push(`__NOTE__本手当は時間外・休日・深夜労働に対する割増賃金（労基法37条）として一体で支給し、次を算定の基礎とする。`);
+      w.push(`　　・時間外労働 ${hl(u.ot.h)}（割増率${u.otR.toFixed(2)}）　${numStr(u.ot.amt)}`);
+      w.push(`　　・法定休日労働 ${hl(u.hol.h)}（割増率${u.holR.toFixed(2)}）　${numStr(u.hol.amt)}`);
+      w.push(`　　・深夜労働 ${hl(u.ni.h)}（割増率${u.nightR.toFixed(2)}。時間外・休日と重複する場合は加算）　${numStr(u.ni.amt)}`);
+      if(u.note){
+        w.push(`__NOTE__実際の割増賃金の合計額が本手当額を超える場合は、その差額を当該賃金計算期間の賃金支払日に追加して支給する。`);
+        w.push(`__NOTE__欠勤・遅刻・早退・年次有給休暇その他の休暇の取得を理由とする減額は行わない。月途中の入社・退職・休職等の場合は基本給と同一の方法により日割りして支給する。`);
+      }
+    }
+  } else {
+  // 固定残業（みなし残業手当）
+  if(tt.otAmt>0){
+    const hrs = tt.otHours>0 ? `時間外${tt.otHours}時間分${tt.otAuto&&tt.rounded?'（相当）':''}` : '';
+    n++; w.push(`${n}　${val('fixed_ot_name')||'固定残業手当'}　${numStr(tt.otAmt)}${hrs?`（${hrs}を含む。これを超える時間外労働は別途割増賃金を支給する）`:''}`);
+  }
+  // 固定残業が月60時間超の追加割増分
+  if(tt.ot60Include){
+    n++; w.push(`${n}　${val('fixed_ot_name')||'固定残業手当'}（月60時間超）　${numStr(tt.ot60Amt)}（時間外 月60時間超 ${tt.ot60Hours}時間分${tt.rounded?'（相当）':''}の追加割増を含む。これを超える時間外労働は別途割増賃金を支給する）`);
+  }
+  // 固定深夜（みなし深夜手当）
+  if(tt.nightAmt>0){
+    const hrs = tt.nightHours>0 ? `深夜${tt.nightHours}時間分${tt.nightAuto&&tt.rounded?'（相当）':''}` : '';
+    n++; w.push(`${n}　${val('fixed_night_name')||'固定深夜手当'}　${numStr(tt.nightAmt)}${hrs?`（${hrs}を含む。これを超える深夜労働は別途割増賃金を支給する）`:''}`);
+  }
+  }
+  if(wg==='月給'){ if(tt.total){ n++;w.push(`${n}　総支給額（月額固定分）　${tt.total.toLocaleString('ja-JP')}円`); if(showBk) w.push(`__NOTE__※ 割増賃金の算定基礎（基準内賃金）＝${baseName}＋基準内手当＝${tt.inBase.toLocaleString('ja-JP')}円（基準外手当・固定残業手当は算入しない）`); if(tt.hasVar) w.push(`__NOTE__※ 日額・時間額・回数等の変動手当は上記総支給額に含みません`); } }
+  const pc=(nm,def)=>{ const v=val(nm); return has(v)?v:def; };
+  n++; w.push(`${n}　割増賃金率`);
+  w.push(`　　イ 所定時間外　法定超 ${pc('ot_60under','125')}％／月60時間超（追加）${pc('ot_60over','25')}％／所定超（法定内）${pc('ot_shotei','100')}％`);
+  w.push(`　　ロ 休日　法定休日 ${pc('hol_legal','135')}％／法定外休日 ${pc('hol_nonlegal','125')}％`);
+  w.push(`　　ハ 深夜　（上記に追加して）${pc('night_pct','25')}％`);
+  if(has(val('wage_closing'))||has(val('wage_payday'))){n++;w.push(`${n}　賃金締切日 ${val('wage_closing')}　賃金支払日 ${val('wage_payday')}`);}
+  const short=st.isShort;
+  // 昇給（絶対的明示・常に記載）
+  { const f=val('raise_flag')||'無'; const note=(f==='有'&&has(val('raise_note')))?`（${val('raise_note')}）`:''; n++; w.push(`${n}　昇給　${f}${note}`); }
+  // 賞与（定めがあれば記載／短時間・有期は有無明示）
+  { const f=val('bonus_flag');
+    if(f==='有'){ n++; w.push(`${n}　賞与　有${has(val('bonus_note'))?`（${val('bonus_note')}）`:''}`); }
+    else if(f==='無'||short){ n++; w.push(`${n}　賞与　無`); } }
+  // 退職手当（定めがあれば記載／短時間・有期は有無明示）
+  { const f=val('retire_flag');
+    if(f==='有'){ n++; w.push(`${n}　退職金　有${has(val('retire_note'))?`（${val('retire_note')}）`:''}`); }
+    else if(f==='無'||short){ n++; w.push(`${n}　退職金　無`); } }
+  const wgLaw=WAGE_LAW[wg]; if(wgLaw) w.push('__NOTE__※ '+wgLaw);
+  push('賃金', w);
+
+  // 退職
+  if(!st.isHiyatoi){
+    let r=[]; let m=0;
+    if(has(val('mandatory_age'))){m++;r.push(`${m}　定年制　${val('mandatory_age')}`);}
+    if(has(val('reemployment'))){m++;r.push(`${m}　継続雇用制度　${val('reemployment')}`);}
+    if(has(val('self_retire'))){m++;r.push(`${m}　自己都合退職の手続　${val('self_retire')}`);}
+    const items=getDismissals();
+    if(items.length){
+      m++;r.push(`${m}　解雇の事由及び手続`);
+      if(form.elements['dismissal_full'].checked){ items.forEach(x=>r.push('　　・'+x)); }
+      else { r.push('　　・'+items[0]+' 等（詳細は就業規則による）'); }
+    }
+    push('退職に関する事項', r);
+  }
+
+  // その他
+  let o=[];
+  const kounen=val('kounen')||'有', kenpo=val('kenpo')||'有';
+  let si=`・社会保険の加入　厚生年金（${kounen}）　健康保険（${kenpo}${has(val('kenpo_name'))?'：'+val('kenpo_name'):''}）`;
+  if(has(val('shakai_riyuu')) && (kounen==='無'||kenpo==='無')) si+=`　※${val('shakai_riyuu')}`;
+  o.push(si);
+  if(val('kigyou_nenkin')==='有') o.push('・企業年金等　有'+(has(val('kigyou_nenkin_name'))?`（${val('kigyou_nenkin_name')}）`:''));
+  o.push(`・雇用保険の適用　${val('emp_ins')||'無'}　労災保険　${val('rousai')||'有'}`);
+  if(radio('worker_kind')==='other'){
+    // 待遇の相違の説明窓口：チェックした時のみ表示
+    if(form.elements['show_setsumei'] && form.elements['show_setsumei'].checked){
+      o.push('・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる相談窓口。');
+      o.push(`　　部署名 ${val('setsumei_dept')}　担当者職氏名 ${val('setsumei_person')}（連絡先 ${val('setsumei_contact')}）`);
+    }
+    // 雇用管理の改善等に関する相談窓口：常に表示
+    o.push('・雇用管理の改善等に関する事項に係る相談窓口');
+    o.push(`　　部署名 ${val('consult_dept')}　担当者職氏名 ${val('consult_person')}（連絡先 ${val('consult_contact')}）`);
+  }
+  if(cat==='派遣'){ if(has(val('haken_moto')))o.push('・派遣元事業主　'+val('haken_moto')); if(has(val('haken_saki')))o.push('・派遣先　'+val('haken_saki'));
+    if(has(val('haken_moto'))||has(val('haken_saki')))o.push('・就業条件の詳細は別途交付する就業条件明示書による'); }
+  if(cat==='建設' && has(val('kikyo'))) o.push('・帰郷旅費　'+val('kikyo'));
+  if(has(val('rules_place'))) o.push('・就業規則を確認できる場所　'+val('rules_place'));
+  getOthers().forEach(x=>{ const t=x.name?`${x.name}　${x.val}`:x.val; if(t.trim()) o.push('・'+t); });
+  if(has(val('remarks'))) o.push('・'+val('remarks'));
+  push('その他', o);
+
+  return B;
+}
+
+function officeLines(cat){
+  const L=[]; if(has(val('office_addr')))L.push('事業場所在地　'+val('office_addr'));
+  if(has(val('office_name')))L.push('事業場名称　'+val('office_name'));
+  const el=(cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名';
+  if(has(val('employer')))L.push(el+'　'+val('employer'));
+  return L;
+}
+
+function signatureLines(mode){
+  if(mode==='chg') return ['上記の労働条件の変更に同意します。','令和　　年　　月　　日','（労働者）　氏名　　　　　　　　　　　㊞'];
+  if(mode==='contract') return ['上記のとおり労働契約（雇用契約）を締結し、本書2通を作成して使用者・労働者が各1通を保有する。',
+    '令和　　年　　月　　日','（使用者）　所在地・名称　　　　　　　　　　　','　　　　　　氏名　　　　　　　　　　　　　　㊞',
+    '（労働者）　住所　　　　　　　　　　　　　　　','　　　　　　氏名　　　　　　　　　　　　　　㊞'];
+  return [];
+}
+function sheetHTML(title, lead, blocks, opts={}){
+  const cat=radio('emp_category');
+  let h='';
+  const kind=val('display_category');
+  if(has(kind) && !opts.leave) h+=`<div class="form-kind">${esc(kind)}</div>`;
+  h+=`<div class="title">${esc(title)}</div>`;
+  h+=`<div class="issue">${esc(fmtDate(val('issue_date')))}</div>`;
+  h+=`<div class="addr">${esc(val('employee_name'))}　殿</div>`;
+  h+=`<div class="office">${officeLines(cat).map(esc).join('<br>')}</div>`;
+  if(opts.chgMeta && opts.chgMeta.length) h+=`<div class="chg-meta">${opts.chgMeta.map(esc).join('<br>')}</div>`;
+  h+=`<div class="lead">${esc(lead)}</div>`;
+  h+=`<table class="doc"><tbody>`;
+  blocks.forEach(b=>{
+    const lines=b.lines.map(l=>{
+      if(String(l).startsWith('__NOTE__')) return `<div class="note">${esc(l.slice(8))}</div>`;
+      return `<div>${esc(l)}</div>`;
+    }).join('');
+    const mark = opts.changed && opts.changed.has(b.k) ? '<span class="mark">★</span>' : '';
+    h+=`<tr><td class="k">${mark}${esc(b.k)}</td><td class="lines">${lines}</td></tr>`;
+  });
+  h+=`</tbody></table>`;
+  if(opts.leave) return h;
+  h+=`<div class="after">以上のほかは、当社就業規則による。</div>`;
+  const s=signatureLines(opts.sign);   // 'notice'は署名欄なし
+  if(s.length){ h+=`<div class="sign">${s.map(esc).join('<br>')}</div>`; }
+  return h;
+}
+
+function docMeta(doc){
+  if(doc==='CHG') return {title:'労働条件変更通知書', lead:'下記のとおり労働条件を変更します。', sign:'chg', chg:true, base:'労働条件変更通知書'};
+  if(doc==='CONTRACT') return {title:'雇用契約書', lead:'次の労働条件により、雇用契約を締結します。', sign:'contract', chg:false, base:'雇用契約書'};
+  return {title:'労働条件通知書', lead:'以下のとおり労働条件を通知します。', sign:'notice', chg:false, base:'労働条件通知書'};
+}
+
+// A4何枚に収まるかを概算し、2枚以上なら印刷/PDFの各ページ左上に「全Nページ中nページ目」を表示
+function estimatePages(){
+  const sheets=[...document.querySelectorAll('#preview .sheet')];
+  const PRINT_PAGE_MM = 297 - 24;   // A4高さ − 印刷時の上下padding(12mm×2)
+  const FONT_ADJ = 10/10.5;         // 印刷本文10pt / 画面10.5pt の補正
+  let total=0;
+  sheets.forEach(s=>{
+    const cs=getComputedStyle(s);
+    const padTop=parseFloat(cs.paddingTop)||0, padBot=parseFloat(cs.paddingBottom)||0;
+    const mmPerPx = 210/(s.offsetWidth||794);
+    const contentMm = Math.max(0, s.scrollHeight - padTop - padBot) * mmPerPx * FONT_ADJ;
+    total += Math.max(1, Math.ceil(contentMm/PRINT_PAGE_MM - 0.02));
+  });
+  return total||1;
+}
+function updatePageIndicator(){
+  const pages = estimatePages();
+  const multi = pages>=2;
+  // 印刷/PDF用：各ページ左上に「全Nページ中nページ目」
+  let st=document.getElementById('mpHeader');
+  if(multi){
+    if(!st){ st=document.createElement('style'); st.id='mpHeader'; document.head.appendChild(st); }
+    st.textContent=`@media print{
+      @page{ margin-top:12mm; }
+      @page{ @top-left{ content:"全" counter(pages) "ページ中 " counter(page) "ページ目"; font-family:'ＭＳ Ｐ明朝',serif; font-size:9pt; } }
+      .sheet{ padding-top:3mm !important; }
+    }`;
+  } else if(st){ st.remove(); }
+  // 画面用の案内バナー（印刷には出さない）
+  const pv=document.getElementById('preview');
+  let b=document.getElementById('pageNote');
+  if(multi){
+    if(!b){ b=document.createElement('div'); b.id='pageNote'; b.className='page-note'; pv.insertBefore(b, pv.firstChild); }
+    b.textContent=`※ この内容は約${pages}ページになります。印刷／PDFでは各ページ左上に「全${pages}ページ中○ページ目」が表示されます。1ページに収めたい場合は項目・文言を減らしてください。`;
+  } else if(b){ b.remove(); }
+}
+
+// 表示中で未入力の欄に薄い黄色を付ける（読取専用・無効・任意の追加リストは除外）
+function markEmpty(){
+  const skip=/\b(a-name|a-amt|o-name|o-val)\b/;
+  form.querySelectorAll('input[type=text],input[type=date],textarea,select').forEach(el=>{
+    if(el.readOnly||el.disabled||skip.test(el.className)){ el.classList.remove('empty-field'); return; }
+    const visible = el.offsetParent!==null;
+    el.classList.toggle('empty-field', visible && String(el.value||'').trim()==='');
+  });
+}
+
+let LAST_SHEETS=[];
+function render(){
+  normalizeAllNumeric();
+  const st=updateVisibility();
+  const dm=docMeta(st.doc);
+  const chgMeta = dm.chg?[
+    has(val('change_date'))?'変更日　'+fmtDate(val('change_date')):'',
+    has(val('change_reason'))?'変更理由　'+val('change_reason'):'',
+    has(val('change_basis'))?'変更根拠　'+val('change_basis'):''
+  ].filter(has):[];
+  const blocks=buildBlocks(st);
+  const sheets=[];
+  sheets.push(sheetHTML(dm.title, dm.lead, blocks, {sign:dm.sign, chgMeta}));
+  // 無期転換別紙
+  if(st.per==='有期' && radio('muki_flag')==='有'){
+    const bb = blocks.filter(b=>!['契約期間'].includes(b.k));
+    bb.unshift({k:'契約期間', lines:['期間の定めなし（無期労働契約に転換後）']});
+    const lead2='本契約期間中に会社に対して期間の定めのない労働契約（無期労働契約）の締結の申込みをしたときに成立する無期労働契約の労働条件は、次のとおりです。';
+    sheets.push(sheetHTML('労働条件通知書（別紙）　無期転換後の労働条件', lead2, bb, {sign:false, leave:true}));
+  }
+  const tt=wageTotals();
+  const otInp=form.elements['fixed_ot_amount']; if(otInp){ otInp.disabled=tt.otAuto; if(tt.otAuto) otInp.value=tt.otAmt; }
+  const ngInp=form.elements['fixed_night_amount']; if(ngInp){ ngInp.disabled=tt.nightAuto; if(tt.nightAuto) ngInp.value=tt.nightAmt; }
+  const td=$('#totalDisp');
+  if(td){ td.value=`${tt.total.toLocaleString('ja-JP')}円　（うち基準内賃金 ${tt.inBase.toLocaleString('ja-JP')}円／基準外 ${tt.outSum.toLocaleString('ja-JP')}円）`; }
+  LAST_SHEETS=sheets;
+  const pv=$('#preview');
+  if(!has(val('employee_name')) && !has(val('office_name'))){
+    pv.innerHTML=`<div class="empty-hint">左のフォームに入力すると、ここに A4 プレビューが表示されます。</div>`+
+      sheets.map(s=>`<div class="sheet">${s}</div>`).join('');
+  } else {
+    pv.innerHTML=sheets.map(s=>`<div class="sheet">${s}</div>`).join('');
+  }
+  const bd=document.getElementById('breakTotalDisp'); if(bd){ const t=breakTotalMinutes(); bd.textContent = t>0? `合計休憩時間 ${fmtDur(t)}` : ''; }
+  updatePageIndicator();
+  markEmpty();
+}
+
+function doPrint(){ render(); window.print(); }
+
+function download(filename, content, mime){
+  const blob=new Blob(['﻿'+content],{type:mime});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function fname(ext){ const nm=(val('employee_name')||'無題').replace(/[\\\/:*?"<>|]/g,''); const base=docMeta(radio('docType')).base; return `${base}_${nm}.${ext}`; }
+
+// ===== 入力データの保存／読込（続きから作業用）=====
+function getBreaksRaw(){
+  return [...document.querySelectorAll('#breakList .break-row')].map(r=>({
+    start:r.querySelector('.b-start').value, end:r.querySelector('.b-end').value
+  })).filter(b=>b.start||b.end);
+}
+function parseHM(v){ const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/); return m? (+m[1])*60+(+m[2]) : null; }
+function fmtDur(mins){ if(!mins||mins<=0) return ''; const h=Math.floor(mins/60), mm=mins%60; return (h?`${h}時間`:'')+(mm?`${mm}分`:''); }
+function breakTotalMinutes(){
+  let m=0; getBreaksRaw().forEach(b=>{ const s=parseHM(b.start), e=parseHM(b.end); if(s!=null&&e!=null){ let d=e-s; if(d<0)d+=1440; m+=d; } }); return m;
+}
+function serializeState(){
+  const s={_v:1, fields:{}, radios:{}, checks:{}};
+  [...form.elements].forEach(el=>{
+    const n=el.name; if(!n) return;
+    if(el.type==='radio'){ if(el.checked) s.radios[n]=el.value; return; }
+    if(el.type==='checkbox'){ s.checks[n]=el.checked; return; }
+    if(el.readOnly) return;
+    s.fields[n]=el.value;
+  });
+  s.allowIn=getAllows('in'); s.allowOut=getAllows('out');
+  s.times=getTimes(); s.breaks=getBreaksRaw(); s.others=getOthers();
+  return s;
+}
+function restoreState(s){
+  if(!s||typeof s!=='object') throw new Error('データ形式が不正です');
+  Object.entries(s.radios||{}).forEach(([n,v])=>{ const g=form.elements[n]; if(!g)return; const list=g.length?[...g]:[g]; list.forEach(r=>{ if(r.type==='radio') r.checked=(r.value===v); }); });
+  Object.entries(s.checks||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type==='checkbox') el.checked=!!v; });
+  Object.entries(s.fields||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type!=='radio'&&el.type!=='checkbox'&&!el.readOnly) el.value=v; });
+  setAllows('in', s.allowIn||[{}]); setAllows('out', s.allowOut||[{}]);
+  setTimes(s.times||[{}]); setBreaks(s.breaks||[{}]); setOthers(s.others||[{}]);
+  render();
+}
+function saveData(){
+  const s=serializeState();
+  const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`労働条件_入力データ_${(val('employee_name')||'無題').replace(/[\\\/:*?"<>|]/g,'')}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function loadData(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const txt=String(r.result).replace(/^﻿/,''); restoreState(JSON.parse(txt)); alert('入力データを読み込みました。続きから作業できます。'); }
+    catch(e){ alert('読み込みに失敗しました：'+e.message); } input.value=''; };
+  r.readAsText(f,'utf-8');
+}
+
+// ===== ヘルプ表示の切替（新任スタッフ向け説明）=====
+function toggleHelp(){
+  const off=document.body.classList.toggle('help-off');
+  const b=document.getElementById('helpBtn'); if(b) b.textContent = off?'❓ ヘルプOFF':'❓ ヘルプON';
+}
+
+// ===== タブ切替・賃金試算（通知書に反映しない独立機能）=====
+function switchMode(m){
+  document.getElementById('modeCreate').classList.toggle('hidden', m!=='create');
+  document.getElementById('modeBatch').classList.toggle('hidden', m!=='batch');
+  document.getElementById('modeCalc').classList.toggle('hidden', m!=='calc');
+  document.getElementById('createActions').style.display = (m==='create')?'flex':'none';
+  const rb=document.getElementById('rosterBar'); if(rb) rb.style.display = (m==='create')?'flex':'none';
+  document.getElementById('tabCreate').classList.toggle('active', m==='create');
+  document.getElementById('tabBatch').classList.toggle('active', m==='batch');
+  document.getElementById('tabCalc').classList.toggle('active', m==='calc');
+  if(m==='calc') calcRender();
+  if(m==='batch') renderRoster();
+}
+
+/* ===================== 名簿（複数人一括作成） ===================== */
+let ROSTER=[];          // [{id, state}]
+let ROSTER_SEQ=0;
+let EDIT_ID=null;       // 編集中の名簿ID（null＝新規追加モード）
+
+function sf(s,n){ return (s&&s.fields&&s.fields[n]!=null)?s.fields[n]:''; }
+function sr(s,n){ return (s&&s.radios&&s.radios[n]!=null)?s.radios[n]:''; }
+
+function rosterStatus(msg){
+  const el=document.getElementById('rosterStatus'); if(el) el.textContent=msg||'';
+}
+function updateRosterBar(){
+  const c=document.getElementById('rosterCount'); if(c) c.textContent=ROSTER.length;
+  const btn=document.getElementById('rosterCommitBtn');
+  if(btn){
+    if(EDIT_ID!=null){ const e=ROSTER.find(x=>x.id===EDIT_ID); const nm=e?(sf(e.state,'employee_name')||'（無題）'):''; btn.textContent='✔ 編集中「'+nm+'」を上書き保存'; }
+    else btn.textContent='➕ この内容を名簿に追加';
+  }
+}
+function rosterCommit(){
+  const st=serializeState();
+  if(EDIT_ID!=null){
+    const e=ROSTER.find(x=>x.id===EDIT_ID);
+    if(e){ e.state=st; rosterStatus('「'+(sf(st,'employee_name')||'無題')+'」を上書き保存しました。'); }
+    EDIT_ID=null;
+  } else {
+    ROSTER.push({id:++ROSTER_SEQ, state:st});
+    rosterStatus('名簿に追加しました（現在 '+ROSTER.length+' 人）。');
+  }
+  renderRoster(); updateRosterBar();
+}
+function rosterAddNext(){
+  ROSTER.push({id:++ROSTER_SEQ, state:serializeState()});
+  EDIT_ID=null;
+  // 次の人用に「氏名」「賃金額」「手当（支給項目）」だけをクリア（他条件は維持）
+  ['employee_name','monthly_wage','daily_wage','hourly_wage','annual_wage',
+   'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount']
+    .forEach(n=>{ const el=form.elements[n]; if(el){ el.disabled=false; el.value=''; } });
+  setAllows('in',[{}]); setAllows('out',[{}]);
+  render(); renderRoster(); updateRosterBar();
+  rosterStatus('名簿に追加し、氏名・手当をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
+  const nm=form.elements['employee_name']; if(nm){ try{nm.focus();nm.scrollIntoView({block:'center'});}catch(e){} }
+}
+function rosterEdit(id){
+  const e=ROSTER.find(x=>x.id===id); if(!e) return;
+  restoreState(e.state); EDIT_ID=id; switchMode('create'); updateRosterBar();
+  rosterStatus('「'+(sf(e.state,'employee_name')||'無題')+'」を読み込みました。編集後「上書き保存」を押してください。');
+  window.scrollTo(0,0);
+}
+function rosterDup(id){
+  const i=ROSTER.findIndex(x=>x.id===id); if(i<0) return;
+  const clone=JSON.parse(JSON.stringify(ROSTER[i].state));
+  ROSTER.splice(i+1,0,{id:++ROSTER_SEQ, state:clone});
+  renderRoster(); updateRosterBar(); rosterStatus('複製しました。');
+}
+function rosterDel(id){
+  const e=ROSTER.find(x=>x.id===id); if(!e) return;
+  if(!confirm('「'+(sf(e.state,'employee_name')||'無題')+'」を名簿から削除します。よろしいですか？')) return;
+  ROSTER=ROSTER.filter(x=>x.id!==id);
+  if(EDIT_ID===id) EDIT_ID=null;
+  renderRoster(); updateRosterBar();
+}
+function rosterMove(id,dir){
+  const i=ROSTER.findIndex(x=>x.id===id); if(i<0) return;
+  const j=i+dir; if(j<0||j>=ROSTER.length) return;
+  const t=ROSTER[i]; ROSTER[i]=ROSTER[j]; ROSTER[j]=t;
+  renderRoster();
+}
+function rosterClearAll(){
+  if(!ROSTER.length){ alert('名簿は空です。'); return; }
+  if(!confirm('名簿の全 '+ROSTER.length+' 人を消去します。よろしいですか？（保存済みJSONは残ります）')) return;
+  ROSTER=[]; EDIT_ID=null; renderRoster(); updateRosterBar(); rosterStatus('名簿を全消去しました。');
+}
+function wageSummary(s){
+  const wt=sf(s,'wage_type')||'—';
+  const map={'月給':'monthly_wage','日給':'daily_wage','時給':'hourly_wage','年俸':'annual_wage'};
+  const amt=numH(sf(s,map[wt]||'monthly_wage'));
+  const nIn=(s.allowIn||[]).filter(a=>a&&(a.name||a.amount)).length;
+  const nOut=(s.allowOut||[]).filter(a=>a&&(a.name||a.amount)).length;
+  return `${wt}${amt?(' '+amt.toLocaleString('ja-JP')+'円'):''}／手当 内${nIn}・外${nOut}`;
+}
+function renderRoster(){
+  const wrap=document.getElementById('rosterListWrap'); if(!wrap) return;
+  if(!ROSTER.length){
+    wrap.innerHTML='<div class="roster-empty">名簿は空です。「作成」タブで入力し、名簿バーの「➕ この内容を名簿に追加」で登録してください。</div>';
+    return;
+  }
+  let rows='';
+  ROSTER.forEach((e,i)=>{
+    const s=e.state;
+    const nm=esc(sf(s,'employee_name')||'（氏名未入力）');
+    const doc=esc(docMeta(sr(s,'docType')).base);
+    const cat=esc(sr(s,'emp_category')||'—');
+    const wage=esc(wageSummary(s));
+    const editing = e.id===EDIT_ID ? ' class="editing"' : '';
+    rows+=`<tr${editing}>
+      <td class="num">${i+1}</td>
+      <td><b>${nm}</b></td>
+      <td>${doc}</td>
+      <td>${cat}</td>
+      <td>${wage}</td>
+      <td class="ops">
+        <button class="rowbtn" onclick="rosterEdit(${e.id})">編集</button>
+        <button class="rowbtn" onclick="rosterDup(${e.id})">複製</button>
+        <button class="rowbtn" onclick="rosterMove(${e.id},-1)" title="上へ">↑</button>
+        <button class="rowbtn" onclick="rosterMove(${e.id},1)" title="下へ">↓</button>
+        <button class="rowbtn del" onclick="rosterDel(${e.id})">削除</button>
+      </td></tr>`;
+  });
+  wrap.innerHTML=`<table class="roster"><thead><tr>
+    <th class="num">#</th><th>氏名</th><th>書類種別</th><th>雇用形態</th><th>賃金の概要</th><th class="ops">操作</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+function saveRoster(){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  const data={_v:1, type:'roster', savedAt:'', people:ROSTER.map(e=>({name:sf(e.state,'employee_name')||'', state:e.state}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`労働条件_名簿_${ROSTER.length}名.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function loadRoster(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(String(r.result).replace(/^﻿/,''));
+      let people=[];
+      if(obj && obj.type==='roster' && Array.isArray(obj.people)) people=obj.people.map(p=>p.state||p);
+      else if(Array.isArray(obj)) people=obj;
+      else if(obj && obj.fields) people=[obj];   // 単票の入力データも1名として取り込む
+      else throw new Error('名簿データが見つかりません');
+      if(!people.length) throw new Error('人数が0件です');
+      let append=true;
+      if(ROSTER.length) append=confirm('現在の名簿（'+ROSTER.length+'人）に追加読み込みしますか？\n「キャンセル」を選ぶと、現在の名簿を置き換えます。');
+      if(!append){ ROSTER=[]; }
+      people.forEach(st=>{ ROSTER.push({id:++ROSTER_SEQ, state:st}); });
+      EDIT_ID=null; renderRoster(); updateRosterBar();
+      rosterStatus(people.length+'人を読み込みました（現在 '+ROSTER.length+' 人）。');
+      alert(people.length+'人を読み込みました。');
+    }catch(e){ alert('読み込みに失敗しました：'+e.message); }
+    input.value='';
+  };
+  r.readAsText(f,'utf-8');
+}
+
+/* ===== 一括出力 ===== */
+function _withRoster(perPerson, done){
+  if(!ROSTER.length){ alert('名簿が空です。まず「作成」タブで入力し名簿に追加してください。'); return false; }
+  const backup=serializeState();
+  ROSTER.forEach((e,i)=>{ restoreState(e.state); perPerson(e,i); });
+  restoreState(backup);   // 作業中の内容を復元
+  if(done) done();
+  return true;
+}
+function bulkPrint(){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  const backup=serializeState();
+  const all=[];
+  ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>all.push(s)); });
+  switchMode('create');   // プレビュー領域を表示状態にして印刷対象にする
+  const pv=document.getElementById('preview');
+  pv.innerHTML=all.map(s=>`<div class="sheet">${s}</div>`).join('');
+  updatePageIndicator();
+  window.print();
+  setTimeout(()=>{ restoreState(backup); switchMode('batch'); }, 300);
+}
+function bulkWordCombined(){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  const backup=serializeState();
+  const parts=[];
+  ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>parts.push(s)); });
+  restoreState(backup);
+  const css=`body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
+    .form-kind{text-align:right;font-size:9.5pt}
+    .title{text-align:center;font-size:16pt;font-weight:bold}
+    .issue{text-align:right}.office{text-align:right}.addr{font-size:12pt}.lead{margin:8px 0}
+    table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
+    table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
+    td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
+    .note{font-size:8.5pt}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
+    p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
+    @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;mso-header:h1}
+    div.WordSection1{page:WordSection1;}`;
+  const body=parts.map((s,i)=>`<div style="${i?'page-break-before:always;':''}">${s}</div>`).join('');
+  const headerDiv=`<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>`;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>労働条件通知書_一括</title>
+    <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+    <style>${css}</style></head><body><div class="WordSection1">${body}${headerDiv}</div></body></html>`;
+  download(`労働条件通知書_一括_${ROSTER.length}名.doc`, html, 'application/msword');
+}
+function bulkExcelCombined(){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  const backup=serializeState();
+  const tables=[], sheets=[], used={};
+  ROSTER.forEach((e,i)=>{
+    restoreState(e.state);
+    tables.push(excelTableForCurrent());
+    sheets.push(excelWorksheetOptionsXml(excelSheetName(val('employee_name'), i, used), false));
+  });
+  restoreState(backup);
+  const body=tables.map((t,i)=>(i?`<br style="page-break-before:always"/>`:'')+t).join('');
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8">
+  <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>${sheets.join('')}</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+  <body>${body}</body></html>`;
+  download(`労働条件通知書_一括_${ROSTER.length}名.xls`, html, 'application/vnd.ms-excel');
+}
+function bulkExportEach(kind){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  const backup=serializeState();
+  let i=0;
+  (function next(){
+    if(i>=ROSTER.length){ restoreState(backup); rosterStatus('個別ファイル '+ROSTER.length+'件を出力しました。'); return; }
+    restoreState(ROSTER[i].state);
+    if(kind==='doc') exportWord(); else exportExcel();
+    i++; setTimeout(next, 500);
+  })();
+}
+function calcRender(){
+  const cf=document.getElementById('calcForm');
+  const cget=n=>{ const el=cf.elements[n]; return el?el.value:''; };
+  const cnum=n=>numH(cget(n));
+  const mode=cget('calc_mode');
+  document.getElementById('calcFwd').classList.toggle('hidden', mode!=='forward');
+  document.getElementById('calcRev').classList.toggle('hidden', mode!=='reverse');
+  const sched=cnum('calc_sched')||160;
+  const unit=parseInt(cget('calc_round')||'0',10);
+  const roundUp=x=> unit>0?Math.ceil(x/unit)*unit:Math.round(x);
+  const otRate=(cnum('calc_ot_rate')||125)/100;      // 時間外は総率(125→1.25)
+  const ot60Rate=(cnum('calc_ot60_rate')||25)/100;   // 月60時間超の追加分(25→0.25)
+  const nightRate=(cnum('calc_night_rate')||25)/100; // 深夜は追加分(25→0.25)
+  const inA=cnum('calc_in'), outA=cnum('calc_out');
+  const yen=x=>Math.round(x).toLocaleString('ja-JP')+'円';
+  let html='';
+  if(mode==='forward'){
+    const base=cnum('calc_base'), otH=cnum('calc_ot_hours'), nH=cnum('calc_night_hours');
+    const inBase=base+inA;
+    const otAmt=otH>0?roundUp(inBase/sched*otRate*otH):0;
+    const ot60H=Math.max(0, otH-60);
+    const ot60Amt=ot60H>0?roundUp(inBase/sched*ot60Rate*ot60H):0;
+    const nightAmt=nH>0?roundUp(inBase/sched*nightRate*nH):0;
+    const total=base+inA+outA+otAmt+ot60Amt+nightAmt;
+    html=`<div>総支給額<span class="big">${yen(total)}</span></div><table>
+      <tr><td>基本給</td><td class="r">${yen(base)}</td></tr>
+      <tr><td>基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
+      <tr><td>基準外手当 合計</td><td class="r">${yen(outA)}</td></tr>
+      <tr><td>固定残業手当（${otH}時間分）</td><td class="r">${yen(otAmt)}</td></tr>
+      ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分の追加）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
+      ${nH>0?`<tr><td>固定深夜手当（${nH}時間分）</td><td class="r">${yen(nightAmt)}</td></tr>`:''}
+      <tr><td>参考：基準内賃金（割増算定基礎）</td><td class="r">${yen(inBase)}</td></tr>
+      </table><div class="hint">固定残業額＝基準内賃金÷所定労働時間×割増率×時間数（切り上げ：${unit?unit+'円単位':'なし'}）${ot60H>0?'。月60時間超の分は追加率で別途計上。':''}</div>`;
+  } else {
+    const target=cnum('calc_target'), solve=cget('calc_solve');
+    document.getElementById('calcRevHours').classList.toggle('hidden', solve!=='base');
+    document.getElementById('calcRevNight').classList.toggle('hidden', solve!=='base');
+    document.getElementById('calcRevBase').classList.toggle('hidden', solve!=='hours');
+    if(solve==='base'){
+      // Excel方式：総額固定。換算時間で単価を求め、固定残業/60超/深夜を切上げ、基準内賃金が端数を吸収
+      const otH=cnum('calc_ot_hours2'), nH=cnum('calc_night_hours2');
+      const ot60H=Math.max(0, otH-60);
+      const B8=target-outA;                                          // 基準内賃金+固定残業(+60超)+深夜 の合計
+      const G=sched + otRate*otH + ot60Rate*ot60H + nightRate*nH;    // 換算時間
+      const hourly = G>0? B8/G : 0;
+      const otAmt = otH>0? roundUp(hourly*otRate*otH):0;
+      const ot60Amt = ot60H>0? roundUp(hourly*ot60Rate*ot60H):0;
+      const nightAmt = nH>0? roundUp(hourly*nightRate*nH):0;
+      const inBaseTotal = B8 - otAmt - ot60Amt - nightAmt;           // 基準内賃金合計（端数吸収）
+      const base = inBaseTotal - inA;                                // 基本給 = 基準内賃金 − 基準内手当
+      const warn = base<0 ? '<div class="hint" style="color:#c00">※ 基準内手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
+      html=`<div>基準内賃金 合計<span class="big">${yen(inBaseTotal)}</span></div><table>
+        <tr><td>基準内賃金 合計</td><td class="r">${yen(inBaseTotal)}</td></tr>
+        <tr><td>　うち基本給（＝基準内賃金−基準内手当）</td><td class="r">${yen(base)}</td></tr>
+        <tr><td>　うち基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
+        <tr><td>固定残業手当（${otH}時間分・切上げ）</td><td class="r">${yen(otAmt)}</td></tr>
+        ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分・切上げ）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
+        ${nH>0?`<tr><td>深夜勤務手当（${nH}時間分・切上げ）</td><td class="r">${yen(nightAmt)}</td></tr>`:''}
+        <tr><td>基準外賃金 合計</td><td class="r">${yen(outA)}</td></tr>
+        <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${yen(target)}</b></td></tr>
+        <tr><td>参考：1時間あたり単価（基準内賃金÷所定）</td><td class="r">${G>0?yen(inBaseTotal/sched):'—'}</td></tr>
+        </table>${warn}<div class="hint">換算時間＝所定${sched}h＋固定残業${otH}h×${(otRate).toFixed(2)}${ot60H>0?`＋60時間超${ot60H}h×${ot60Rate.toFixed(2)}`:''}${nH>0?`＋深夜${nH}h×${nightRate.toFixed(2)}`:''}。固定残業・深夜は切上げ（${unit?unit+'円単位':'なし'}）＝実残業がその時間内なら不足せず違反になりません。端数は基準内賃金が吸収し、総額は目標どおりです。</div>`;
+    } else {
+      const base=cnum('calc_base2'), inBase=base+inA;
+      const rem=target-base-inA-outA;             // 固定残業に充てられる額
+      const per=inBase>0?inBase/sched:0;          // 通常1時間あたり
+      const cost60=per*otRate*60;                 // 60時間分（総率）の固定残業額
+      let hours=0, otAmt=0, ot60Amt=0;
+      if(rem>0 && per>0){
+        if(rem<=cost60){ hours=rem/(per*otRate); otAmt=rem; }
+        else { const extra=rem-cost60; const exH=ot60Rate>0?extra/(per*ot60Rate):0; hours=60+exH; otAmt=cost60; ot60Amt=extra; }
+      }
+      html=`<div>逆算した固定残業<span class="big">${hours>0?hours.toFixed(1)+'時間分':'0時間'}</span></div><table>
+        <tr><td>基本給（指定）</td><td class="r">${yen(base)}</td></tr>
+        <tr><td>基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
+        <tr><td>基準外手当 合計</td><td class="r">${yen(outA)}</td></tr>
+        <tr><td>固定残業手当（60時間まで${ot60Amt>0?'／60時間分':''}）</td><td class="r">${yen(Math.max(0,otAmt))}</td></tr>
+        ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${(hours-60).toFixed(1)}時間分の追加）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
+        <tr><td><b>総支給額</b></td><td class="r"><b>${yen(target)}</b></td></tr>
+        </table><div class="hint">${rem<=0?'※ 基本給＋手当が総額以上のため、固定残業は0時間です。':`固定残業に充てられる額 ${yen(rem)} は約 ${hours.toFixed(1)} 時間分に相当します${hours>60?'（うち60時間超は追加率で換算）':''}。`}</div>`;
+    }
+  }
+  document.getElementById('calcResult').innerHTML=html;
+}
+
+function exportWord(){
+  render();
+  const multi = estimatePages()>=2;   // 2ページ以上のときだけヘッダーにページ番号
+  const headerRef = multi ? 'mso-header:h1;' : '';
+  const css=`body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
+    .form-kind{text-align:right;font-size:9.5pt}
+    .title{text-align:center;font-size:16pt;font-weight:bold}
+    .issue{text-align:right}.office{text-align:right}.addr{font-size:12pt}.lead{margin:8px 0}
+    table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
+    table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
+    td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
+    .note{font-size:8.5pt}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
+    p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
+    @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;${headerRef}}
+    div.WordSection1{page:WordSection1;}`;
+  const body=LAST_SHEETS.map((s,i)=>`<div style="${i? 'page-break-before:always;':''}">${s}</div>`).join('');
+  const headerDiv = multi ? `<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>` : '';
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>労働条件通知書</title>
+    <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+    <style>${css}</style></head><body><div class="WordSection1">${body}${headerDiv}</div></body></html>`;
+  download(fname('doc'), html, 'application/msword');
+}
+
+// 現在のフォーム状態から Excel 用の1名分テーブルHTMLを返す（単票・一括で共用）
+function excelTableForCurrent(){
+  const cat=radio('emp_category');
+  const st=updateVisibility(); const dm=docMeta(st.doc);
+  const blocks=buildBlocks(st);
+  const chgMeta=dm.chg?[
+    has(val('change_date'))?'変更日　'+fmtDate(val('change_date')):'',
+    has(val('change_reason'))?'変更理由　'+val('change_reason'):'',
+    has(val('change_basis'))?'変更根拠　'+val('change_basis'):''
+  ].filter(has):[];
+  const F="'ＭＳ Ｐ明朝',serif";
+  const BR='<br style="mso-data-placement:same-cell">';
+  const cell=(txt,o)=>{ o=o||{};
+    let s=`padding:3px 6px;font-family:${F};mso-number-format:'\\@';white-space:normal;`;
+    s+=`vertical-align:${o.vt?'top':'middle'};text-align:${o.align||'left'};`;
+    s+=(o.border===false)?'border:none;':'border:0.7pt solid #000;';
+    if(o.bold) s+='font-weight:bold;';
+    if(o.shade) s+='background:#f2f2f2;';
+    s+=`font-size:${o.size||'10.5pt'};`;
+    return `<td colspan="${o.span||1}" style="${s}">${txt}</td>`;
+  };
+  const rows=[];
+  if(has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:2,align:'right',border:false,size:'9.5pt'})}</tr>`);
+  rows.push(`<tr style="height:34px">${cell(esc(dm.title),{span:2,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
+  rows.push(`<tr>${cell(esc(fmtDate(val('issue_date'))),{span:2,align:'right',border:false})}</tr>`);
+  rows.push(`<tr>${cell(esc(val('employee_name'))+'　殿',{span:2,border:false,size:'12pt'})}</tr>`);
+  officeLines(cat).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,align:'right',border:false})}</tr>`));
+  chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
+  rows.push(`<tr>${cell(esc(dm.lead),{span:2,border:false})}</tr>`);
+  blocks.forEach(b=>{
+    const content=b.lines.map(l=>esc(String(l).startsWith('__NOTE__')?l.slice(8):l)).join(BR);
+    rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true})}</tr>`);
+  });
+  rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:2,border:false})}</tr>`);
+  signatureLines(dm.sign).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
+  return `<table style="border-collapse:collapse;table-layout:fixed;width:720px">`+
+    `<colgroup><col width="105"><col width="615"></colgroup>${rows.join('')}</table>`;
+}
+function excelWorksheetOptionsXml(name, multi){
+  const headerXml = multi ? `<x:Header x:Margin="0.3" x:Data="&amp;L全&amp;Nページ中&amp;Pページ目"/>` : `<x:Header x:Margin="0.3"/>`;
+  const nm = name!=null ? `<x:Name>${esc(name)}</x:Name>` : `<x:Name>労働条件通知書</x:Name>`;
+  return `<x:ExcelWorksheet>${nm}<x:WorksheetOptions><x:DoNotDisplayGridlines/><x:Print>${headerXml}<x:ValidPrinterInfo/><x:PaperSizeIndex>9</x:PaperSizeIndex><x:Layout x:Orientation="Portrait"/></x:Print></x:WorksheetOptions></x:ExcelWorksheet>`;
+}
+function excelSheetName(base, idx, used){
+  let nm=String(base||('無題'+(idx+1))).replace(/[\[\]\:\*\?\/\\]/g,'').trim().slice(0,28) || ('無題'+(idx+1));
+  if(used[nm]!=null){ used[nm]++; nm=(nm.slice(0,25)+'_'+used[nm]); } else used[nm]=0;
+  return nm;
+}
+function exportExcel(){
+  render();
+  const table=excelTableForCurrent();
+  const multi = estimatePages()>=2;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8">
+  <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>${excelWorksheetOptionsXml(null, multi)}</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+  <body>${table}</body></html>`;
+  download(fname('xls'), html, 'application/vnd.ms-excel');
+}
+function resetForm(){ if(confirm('入力内容をクリアします。よろしいですか？')){ form.reset(); render(); } }
+
+function loadSample(){
+  const set=(n,v)=>{ const el=form.elements[n]; if(!el)return; if(el.type==='radio'){[...form.elements[n]].forEach(r=>r.checked=(r.value===v));} else el.value=v; };
+  set('docType','NOTICE'); set('issue_date','2026-07-01'); set('employee_name','田中　太郎');
+  set('office_addr','仙台市宮城野区榴岡３－'); set('office_name','株式会社　○○○○'); set('employer','代表取締役　○○○○');
+  set('emp_category','一般'); set('period_type','無期'); set('muki_start','2026-07-01');
+  set('display_category','（一般労働者用；常用、期間の定めなし型）');
+  set('workplace_now','仙台市宮城野区榴岡３－（本社）'); set('workplace_scope','会社が指定する場所');
+  set('job_now','総務事務職：給与計算、書類作成、電子申請、電話応対'); set('job_scope','会社が指定する業務');
+  set('probation_flag','有'); set('probation_text','令和8年7月1日から6か月（就業規則第9条）');
+  set('worktime_system','通常');
+  setTimes([{label:'月〜金',start:'09:00',end:'18:00'},{label:'土',start:'09:00',end:'13:00'}]);
+  set('worktime_note','土曜日は隔週出勤（月2回）。');
+  setBreaks([{start:'12:00',end:'13:00'},{start:'15:00',end:'15:15'}]); set('overtime','有');
+  set('holiday','毎週土曜日、日曜日、祝日、年末年始'); set('paid_leave','労働基準法の定めによる');
+  set('wage_type','月給'); set('monthly_wage','200000');
+  setAllows('in',[{name:'役職手当',unit:'month',amount:'10000'},{name:'資格手当',unit:'month',amount:'5000'}]);
+  setAllows('out',[{name:'通勤手当',unit:'month',amount:'5890'},{name:'住宅手当',unit:'month',amount:'15000'},{name:'出張日当',unit:'day',amount:'2000'}]);
+  set('monthly_scheduled_hours','160'); set('round_unit','1000');
+  set('fixed_ot_name','固定残業手当'); set('fixed_ot_hours','20'); if(form.elements['fixed_ot_auto'])form.elements['fixed_ot_auto'].checked=true;
+  set('fixed_night_name','固定深夜手当'); set('fixed_night_hours',''); if(form.elements['fixed_night_auto'])form.elements['fixed_night_auto'].checked=false;
+  set('ot_60under','125'); set('ot_60over','25'); set('ot_shotei','100'); set('hol_legal','135'); set('hol_nonlegal','125'); set('night_pct','25');
+  set('wage_closing','毎月末日'); set('wage_payday','翌月10日');
+  set('raise_flag','有'); set('raise_note','毎年8月、会社業績による');
+  set('bonus_flag','有'); set('bonus_note','年2回（7月・12月）');
+  set('retire_flag','有'); set('retire_note','勤続3年以上、就業規則第40条による');
+  set('mandatory_age','満60歳'); set('reemployment','満65歳まで'); set('self_retire','退職30日以上前に届け出ること');
+  setDismissals(['身体又は精神の障害により業務に耐えられないとき','勤務状況が著しく不良のとき','服務規律違反を繰り返したとき','経営上やむを得ない事由があるとき']);
+  set('kounen','有'); set('kenpo','有'); set('kenpo_name',''); set('emp_ins','有'); set('rousai','有');
+  set('kigyou_nenkin','無'); set('kigyou_nenkin_name',''); set('shakai_riyuu',''); set('rules_place','社内に設置');
+  setOthers([{name:'',val:''}]);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
