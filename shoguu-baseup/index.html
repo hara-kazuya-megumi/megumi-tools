@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>処遇改善加算・ベースアップ評価料 試算＆チェックツール</title>
+<style>
+  :root{
+    --ground:#F3F5F8; --surface:#FFFFFF; --ink:#1B2430; --muted:#5A6A7A;
+    --border:#DBE2EA; --accent:#2A5278; --accent-soft:#EDF2F7; --accent-deep:#1E3C58;
+    --care:#1E6E62; --care-soft:#E8F2F0;
+    --ok:#1E7B4F; --ok-soft:#E9F4EE; --warn:#9A6508; --warn-soft:#FBF3E2; --risk:#B3362B; --risk-soft:#F9ECEA;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--ground); color:var(--ink);
+    font-family:"Yu Gothic UI","Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
+    font-size:14.5px; line-height:1.75; margin:0;}
+  .wrap{max-width:1100px; margin:0 auto; padding:0 20px 64px;}
+
+  header.app{background:var(--accent-deep); color:#F2F6FA; padding:22px 0 18px;}
+  header.app .wrap{padding-bottom:0;}
+  .app-eyebrow{font-size:11.5px; letter-spacing:.18em; color:#9FB6CB; text-transform:uppercase;}
+  h1{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+     font-size:25px; font-weight:600; margin:4px 0 6px; letter-spacing:.03em; text-wrap:balance;}
+  .app-sub{font-size:12.5px; color:#C6D5E2; display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center;}
+  .badge-date{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    border-radius:999px; padding:1px 12px; font-size:12px;}
+
+  nav.tabs{background:var(--accent-deep); position:sticky; top:0; z-index:20;
+    border-bottom:3px solid var(--accent);}
+  nav.tabs .wrap{display:flex; gap:2px; padding-top:6px; padding-bottom:0; overflow-x:auto;}
+  nav.tabs button{appearance:none; border:none; background:transparent; color:#B9CBDA;
+    font:inherit; font-size:13.5px; padding:9px 15px 8px; cursor:pointer; white-space:nowrap;
+    border-radius:8px 8px 0 0; border-bottom:3px solid transparent; margin-bottom:-3px;}
+  nav.tabs button:hover{color:#fff;}
+  nav.tabs button:focus-visible{outline:2px solid #fff; outline-offset:-2px;}
+  nav.tabs button.on{background:var(--ground); color:var(--accent-deep); font-weight:700;
+    border-bottom-color:var(--ground);}
+
+  main{padding-top:26px;}
+  section.tabpane{display:none;}
+  section.tabpane.on{display:block;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:20px 24px; margin-bottom:20px;}
+  .card h2{font-size:17px; margin:0 0 4px; letter-spacing:.02em;}
+  .card h3{font-size:14.5px; margin:20px 0 8px; color:var(--accent-deep);}
+  .lede{color:var(--muted); font-size:13px; margin:0 0 14px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px 24px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px 24px;}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  label.fld{display:block; font-size:12.5px; font-weight:700; color:var(--accent-deep); margin-bottom:12px;}
+  label.fld .hint{font-weight:400; color:var(--muted);}
+  select,input[type=number],input[type=text]{display:block; width:100%; margin-top:4px;
+    font:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--border);
+    border-radius:6px; background:#fff; color:var(--ink);}
+  select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  input[type=number]{font-variant-numeric:tabular-nums; text-align:right;}
+
+  .seg{display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-top:4px;}
+  .seg button{appearance:none; border:none; background:#fff; font:inherit; font-size:13px;
+    padding:6px 14px; cursor:pointer; color:var(--muted); border-right:1px solid var(--border);}
+  .seg button:last-child{border-right:none;}
+  .seg button.on{background:var(--accent); color:#fff; font-weight:700;}
+
+  table{border-collapse:collapse; width:100%; font-size:13px;}
+  .tblwrap{overflow-x:auto; border:1px solid var(--border); border-radius:8px; margin:8px 0 4px;}
+  th,td{border-bottom:1px solid var(--border); padding:6px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--accent-soft); color:var(--accent-deep); font-size:12px; white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  td.num,th.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .tbl-care th{background:var(--care-soft); color:var(--care);}
+
+  .chip{display:inline-block; border-radius:999px; padding:1px 11px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .chip.care{background:var(--care-soft); color:var(--care);}
+  .chip.med{background:var(--accent-soft); color:var(--accent);}
+  .chip.ok{background:var(--ok-soft); color:var(--ok);}
+  .chip.warn{background:var(--warn-soft); color:var(--warn);}
+  .chip.risk{background:var(--risk-soft); color:var(--risk);}
+
+  .note{background:var(--warn-soft); border-left:4px solid var(--warn); border-radius:0 6px 6px 0;
+    padding:9px 14px; font-size:12.5px; margin:10px 0;}
+  .note.risk{background:var(--risk-soft); border-left-color:var(--risk);}
+  .note.ok{background:var(--ok-soft); border-left-color:var(--ok);}
+  .note.plain{background:var(--accent-soft); border-left-color:var(--accent);}
+
+  .result{background:var(--accent-soft); border:1px solid #CBD9E6; border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .result .row{display:flex; justify-content:space-between; gap:16px; padding:4px 0; border-bottom:1px dashed #C2D0DD; flex-wrap:wrap;}
+  .result .row:last-child{border-bottom:none;}
+  .result .row .k{color:var(--muted); font-size:13px;}
+  .result .row .v{font-variant-numeric:tabular-nums; font-weight:700; font-size:15px; text-align:right;}
+  .result .row .v small{font-weight:400; color:var(--muted);}
+  .result .row.total{border-top:2px solid var(--accent); margin-top:4px;}
+  .result .row.total .v{font-size:19px; color:var(--accent-deep);}
+
+  .verdict{font-size:16px; font-weight:700; padding:10px 16px; border-radius:8px; margin-top:12px;}
+  .verdict.ok{background:var(--ok-soft); color:var(--ok);}
+  .verdict.risk{background:var(--risk-soft); color:var(--risk);}
+
+  ul.tight{margin:6px 0; padding-left:22px;}
+  ul.tight li{margin:3px 0;}
+  .src{font-size:12px; color:var(--muted);}
+  .src a{color:var(--accent);}
+  .kv{display:grid; grid-template-columns:9em 1fr; gap:4px 14px; font-size:13.5px; margin:8px 0;}
+  .kv dt{color:var(--muted); font-weight:700; font-size:12.5px;}
+  .kv dd{margin:0;}
+  @media(max-width:600px){.kv{grid-template-columns:1fr;} .kv dt{margin-top:6px;}}
+
+  .checkline{display:flex; align-items:flex-start; gap:9px; padding:10px 4px; border-bottom:1px solid var(--border);}
+  .checkline:last-child{border-bottom:none;}
+  .checkline input{width:18px; height:18px; margin-top:3px; accent-color:var(--accent); flex-shrink:0;}
+  .checkline .t{flex:1; min-width:0;}
+  .checkline .t b{font-size:14px;}
+  .checkline .t .d{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .checkline .need{display:inline-block; margin-left:8px; font-size:11px; font-weight:700; color:var(--accent-deep);
+    background:var(--accent-soft); border-radius:999px; padding:1px 10px; vertical-align:middle; white-space:nowrap;}
+  .checkline details{margin-top:6px;}
+  .checkline summary{cursor:pointer; font-size:12px; color:var(--accent); font-weight:700; list-style:none;
+    display:inline-flex; align-items:center; gap:5px; width:fit-content;}
+  .checkline summary::-webkit-details-marker{display:none;}
+  .checkline summary::before{content:"▶"; font-size:9px; transition:transform .15s;}
+  .checkline details[open] summary::before{transform:rotate(90deg);}
+  .checkline .more-body{margin:8px 0 2px; padding:11px 14px; background:var(--ground);
+    border:1px solid var(--border); border-radius:8px; font-size:12.5px; line-height:1.8;}
+  .checkline .more-body p{margin:0 0 8px;}
+  .checkline .more-body p:last-child{margin-bottom:0;}
+  .checkline .more-body .q{color:var(--accent-deep); font-weight:700;}
+  .checkline .more-body .ex{display:block; color:var(--muted); background:#fff; border-left:3px solid var(--accent);
+    padding:5px 10px; border-radius:0 5px 5px 0;}
+
+  .explain{background:var(--care-soft); border:1px solid #BFE0D9; border-left:4px solid var(--care);
+    border-radius:0 8px 8px 0; padding:13px 17px; margin:2px 0 14px;}
+  .explain-h{font-weight:700; color:var(--care); font-size:14.5px; margin-bottom:7px;}
+  .explain-intro{font-size:12.5px; color:var(--ink); margin:0 0 10px; padding-bottom:9px; border-bottom:1px dashed #A9D3C9;}
+  .explain-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px;}
+  .explain-level{font-size:12.5px; margin-bottom:8px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; color:var(--muted);}
+  .explain-level b{color:var(--ink);}
+  .explain-level .dots{display:inline-flex; gap:5px;}
+  .explain-level .dot{width:15px; height:15px; border-radius:50%; background:#fff; border:1.5px solid var(--care);}
+  .explain-level .dot.on{background:var(--care);}
+  .explain-body{font-size:13.5px; margin:5px 0 0; line-height:1.75;}
+  .chip.plain{background:var(--accent-soft); color:var(--accent-deep);}
+
+  /* ① 制度解説・手順・リンク */
+  .h-explain{background:var(--accent-soft); border-radius:8px; padding:13px 17px; margin:14px 0 6px;
+    font-size:13px; line-height:1.85;}
+  .h-explain b{color:var(--accent-deep);}
+  .h-sub{font-size:12.5px; font-weight:700; color:var(--accent-deep); margin:16px 0 6px; letter-spacing:.02em;}
+  .h-steps{counter-reset:st; list-style:none; padding:0; margin:6px 0;}
+  .h-steps li{position:relative; padding:7px 8px 7px 38px; border-bottom:1px solid var(--border); font-size:13px; line-height:1.7;}
+  .h-steps li:last-child{border-bottom:none;}
+  .h-steps li::before{counter-increment:st; content:counter(st); position:absolute; left:4px; top:7px;
+    width:24px; height:24px; background:var(--accent); color:#fff; border-radius:50%;
+    font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+  .h-links{display:flex; flex-direction:column; gap:7px; margin:6px 0;}
+  .h-links a{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--accent);
+    text-decoration:none; padding:8px 13px; background:#fff; border:1px solid var(--border); border-radius:7px;}
+  .h-links a:hover{border-color:var(--accent); background:var(--accent-soft);}
+  .h-links a:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  .h-links a::before{content:"🔗"; font-size:12px;}
+  .h-links a .req{color:var(--warn); font-weight:700;}
+
+  /* ⑦ 資料依頼書 */
+  .shorui-doc{background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:28px 32px; margin-top:18px; font-size:13px; line-height:1.9; color:#1a1a1a;}
+  .shorui-doc .to{font-size:15px; font-weight:700; margin:0 0 2px;}
+  .shorui-doc .date{text-align:right; color:var(--muted); font-size:12.5px; margin:0 0 8px;}
+  .shorui-doc .doc-title{text-align:center; font-size:17px; font-weight:700; margin:16px 0; letter-spacing:.04em;}
+  .shorui-doc .from{text-align:right; margin-top:22px; white-space:pre-line;}
+  .mat-group{margin:10px 0 4px;}
+  .mat-cat{font-weight:700; color:var(--accent-deep); border-left:4px solid var(--accent);
+    padding-left:9px; margin:16px 0 6px; font-size:13.5px;}
+  .mat-item{padding:6px 0 6px 26px; position:relative; border-bottom:1px dashed var(--border);}
+  .mat-item:last-child{border-bottom:none;}
+  .mat-item::before{content:"☐"; position:absolute; left:2px; top:5px; color:var(--accent); font-size:15px;}
+  .mat-item .why{display:block; font-size:11.5px; color:var(--muted); margin-top:1px;}
+  .fill-tbl{border-collapse:collapse; width:100%; margin:8px 0 4px; font-size:12.5px;}
+  .fill-tbl th,.fill-tbl td{border:1px solid #b7c2cd; padding:6px 9px; text-align:left; vertical-align:top;}
+  .fill-tbl th{background:var(--accent-soft); color:var(--accent-deep); font-weight:700; white-space:nowrap;}
+  .fill-tbl td.blank{background:#FCFDFE; min-width:6em;}
+  .fill-note{font-size:11.5px; color:var(--muted); margin:4px 0 0;}
+
+  /* ⑨ 実務Q&A */
+  .qa-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px;}
+  .qa-search{flex:1; min-width:200px;}
+  .qa-search input{margin-top:0;}
+  .qa-filters{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+  .qa-filters button{appearance:none; border:1px solid var(--border); background:#fff; color:var(--muted);
+    font:inherit; font-size:12px; padding:5px 12px; border-radius:999px; cursor:pointer; white-space:nowrap;}
+  .qa-filters button:hover{border-color:var(--accent);}
+  .qa-filters button.on{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;}
+  .qa-filters button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  .qa-count{font-size:12px; color:var(--muted); margin:4px 0 10px;}
+  .qa-item{border:1px solid var(--border); border-radius:8px; margin-bottom:8px; overflow:hidden; background:#fff;}
+  .qa-item summary{list-style:none; cursor:pointer; padding:12px 15px; display:flex; gap:10px; align-items:flex-start;}
+  .qa-item summary::-webkit-details-marker{display:none;}
+  .qa-item summary::before{content:"Q"; flex-shrink:0; width:22px; height:22px; border-radius:50%;
+    background:var(--accent); color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+  .qa-item[open] summary{border-bottom:1px solid var(--border); background:var(--accent-soft);}
+  .qa-item summary .qtext{flex:1; font-weight:700; font-size:13.5px; line-height:1.6;}
+  .qa-item summary .qmeta{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;}
+  .qa-ans{padding:13px 15px 15px 47px; font-size:13px; line-height:1.85;}
+  .qa-ans .src{margin-top:9px; padding-top:8px; border-top:1px dashed var(--border); font-size:11.5px;}
+  .qa-ans .src a{word-break:break-all;}
+  .qa-badge{display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px; padding:1px 9px; white-space:nowrap;}
+  .qa-badge.med{background:var(--accent-soft); color:var(--accent);}
+  .qa-badge.care{background:var(--care-soft); color:var(--care);}
+  .qa-badge.pri{background:var(--ok-soft); color:var(--ok);}
+  .qa-badge.sec{background:var(--warn-soft); color:var(--warn);}
+  .qa-badge.theme{background:var(--ground); color:var(--muted); border:1px solid var(--border);}
+  .qa-empty{text-align:center; color:var(--muted); padding:30px; font-size:13px;}
+  mark{background:#FFF1A8; color:inherit; padding:0 1px; border-radius:2px;}
+
+  /* ⑧ 実績報告サポート */
+  .jis-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; margin-bottom:6px;}
+  .jis-toolbar .fld{margin-bottom:0; min-width:11em;}
+  .ledgerwrap{overflow-x:auto; margin:8px 0;}
+  .ledgerwrap table{border-collapse:collapse; width:100%; font-size:12.5px;}
+  .ledgerwrap th,.ledgerwrap td{border:1px solid var(--border); padding:4px 6px;}
+  .ledgerwrap th{background:var(--accent-soft); color:var(--accent-deep); white-space:nowrap; font-size:11.5px;}
+  .ledgerwrap td input,.ledgerwrap td select{width:100%; margin:0; padding:4px 6px; font-size:12.5px;
+    border:1px solid transparent; border-radius:4px; background:transparent;}
+  .ledgerwrap td input:focus-visible,.ledgerwrap td select:focus-visible{border-color:var(--accent); background:#fff;}
+  .ledgerwrap td input[type=number]{text-align:right; font-variant-numeric:tabular-nums;}
+  .ledgerwrap tr:hover td{background:var(--accent-soft);}
+  .ledgerwrap td.sum{background:var(--accent-soft); font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
+  .pasteBox{display:flex; flex-direction:column; gap:6px; margin:6px 0 14px;}
+  .pasteBox textarea{width:100%; min-height:64px; font:inherit; font-size:12.5px; font-family:ui-monospace,Consolas,monospace;
+    padding:8px 10px; border:1px solid var(--border); border-radius:6px; resize:vertical;}
+  .lamp{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; padding:8px 14px;
+    border-radius:8px; margin:6px 0;}
+  .lamp::before{content:""; width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .lamp.g{background:var(--ok-soft); color:var(--ok);} .lamp.g::before{background:var(--ok);}
+  .lamp.r{background:var(--risk-soft); color:var(--risk);} .lamp.r::before{background:var(--risk);}
+  .lamp.n{background:var(--ground); color:var(--muted);} .lamp.n::before{background:#B7C2CD;}
+  .jis-sect{margin-top:20px; padding-top:16px; border-top:1px solid var(--border);}
+  .jis-sect:first-of-type{margin-top:6px; padding-top:0; border-top:none;}
+  .print-tbl-title{font-weight:700; color:var(--accent-deep); margin:14px 0 4px; font-size:13px;}
+
+  .btn{appearance:none; font:inherit; font-size:13px; font-weight:700; padding:7px 18px;
+    border-radius:7px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer;}
+  .btn.ghost{background:#fff; color:var(--accent);}
+  .btn.danger{border-color:var(--risk); background:#fff; color:var(--risk);}
+  .btn:disabled{opacity:.45; cursor:default;}
+
+  footer.app{margin-top:36px; border-top:1px solid var(--border); padding-top:16px; font-size:12px; color:var(--muted);}
+  @media(prefers-reduced-motion:no-preference){
+    section.tabpane.on{animation:fade .18s ease;}
+    @keyframes fade{from{opacity:.4;}to{opacity:1;}}
+  }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="wrap">
+    <div class="app-eyebrow">SHAROUSHI OFFICE TOOL</div>
+    <h1>処遇改善加算・ベースアップ評価料 試算＆チェックツール</h1>
+    <div class="app-sub">
+      <span class="badge-date">料率・点数データ確認日：2026-07-03（令和8年6月改定反映）</span>
+      <span>概算・確認用ツール — 正式な区分決定・届出は公式様式で行うこと</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="機能タブ">
+  <div class="wrap">
+    <button class="on" data-tab="hantei">① 制度判定</button>
+    <button data-tab="kasan">② 処遇改善加算 試算</button>
+    <button data-tab="bup">③ ベースアップ評価料 試算</button>
+    <button data-tab="check">④ 要件チェック</button>
+    <button data-tab="sched">⑤ 年間スケジュール</button>
+    <button data-tab="data">⑥ 料率データ・出典</button>
+    <button data-tab="shorui">⑦ 資料依頼書</button>
+    <button data-tab="jisseki">⑧ 実績報告サポート</button>
+    <button data-tab="qa">⑨ 実務Q&amp;A</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ================= ① 制度判定 ================= -->
+<section class="tabpane on" id="pane-hantei">
+  <div class="card">
+    <h2>顧問先の事業種別から対象制度を判定</h2>
+    <p class="lede">事業種別を選ぶと、対象となる制度・提出先・主な様式・業際上の整理・事務所の関与ポイントを表示します。</p>
+    <label class="fld" style="max-width:520px;">事業種別
+      <select id="hanteiSel">
+        <option value="kaigo">介護保険サービス事業所（訪問介護・通所介護・施設 等）</option>
+        <option value="kaigoNew">訪問看護・訪問リハ・居宅介護支援（介護保険／令和8年6月新規対象）</option>
+        <option value="shougai">障害福祉サービス事業所（就労支援・生活介護・GH・児童系 等）</option>
+        <option value="iryo">保険医療機関（医科・歯科の診療所／病院）</option>
+        <option value="hkSt">訪問看護ステーション（医療保険＋介護保険）</option>
+        <option value="yakkyoku">保険薬局</option>
+      </select>
+    </label>
+    <div id="hanteiOut"></div>
+  </div>
+  <div class="card">
+    <h2>両制度のちがい（早見表）</h2>
+    <div class="tblwrap"><table>
+      <tr><th style="width:9em;"></th><th><span class="chip care">介護・障害福祉</span> 処遇改善加算</th><th><span class="chip med">医療</span> ベースアップ評価料</th></tr>
+      <tr><td><b>財源</b></td><td>介護報酬・障害福祉サービス等報酬への加算（％上乗せ）</td><td>診療報酬の点数（初診・再診・入院等に加点）</td></tr>
+      <tr><td><b>提出先</b></td><td>指定権者（都道府県・市町村等）</td><td>地方厚生（支）局</td></tr>
+      <tr><td><b>計画書</b></td><td>処遇改善計画書の提出が必要（令和8年度は4/15）</td><td>賃金改善計画書は不要（届出様式95〜98のみ）</td></tr>
+      <tr><td><b>実績報告</b></td><td>実績報告書（最終支払月の翌々月末＝通常7/31）</td><td>毎年8月に実績報告書＋当年度中間報告書（様式100）</td></tr>
+      <tr><td><b>賃金改善の縛り</b></td><td>加算額以上の賃金改善（月額賃金改善要件＝Ⅳ相当の1/2以上を基本給等で）</td><td>収入全額を基本給等の引上げ（ベア）＋連動賞与・法定福利費増に充当</td></tr>
+      <tr><td><b>未達時</b></td><td>返還（実績報告未提出は全額返還）</td><td>施設基準不適合（実績報告未提出で翌年度算定不可）</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ================= ② 処遇改善加算 試算 ================= -->
+<section class="tabpane" id="pane-kasan">
+  <div class="card">
+    <h2><span class="chip care">介護・障害福祉</span> 処遇改善加算 試算（令和8年6月改定・6区分対応）</h2>
+    <p class="lede">「処遇改善加算等を除く加減算後の月間報酬額」に加算率を乗じた概算です。実際は単位数ベースで端数処理・地域単価の影響があるため、±数％の誤差が出ます。</p>
+    <div class="grid3">
+      <label class="fld">制度
+        <span class="seg" id="segSeido">
+          <button class="on" data-v="kaigo">介護保険</button><button data-v="shougai">障害福祉</button>
+        </span>
+      </label>
+      <label class="fld">サービス種別
+        <select id="svcSel"></select>
+      </label>
+      <label class="fld">加算区分
+        <select id="kubunSel"></select>
+      </label>
+    </div>
+    <div class="grid3">
+      <label class="fld">適用時期
+        <span class="seg" id="segPeriod">
+          <button class="on" data-v="r6">令和8年6月以降（新率）</button><button data-v="r45">令和8年4〜5月（旧率）</button>
+        </span>
+      </label>
+      <label class="fld">月間報酬額（円） <span class="hint">処遇改善加算等を除く・加減算後</span>
+        <input type="number" id="hoshuIn" value="3000000" min="0" step="10000">
+      </label>
+    </div>
+    <div id="kubunDesc"></div>
+    <div id="kasanOut"></div>
+    <div class="note">加算額には<b>法定福利費等の事業主負担増加分を含めて</b>賃金改善額を設定できます。月額賃金改善要件（加算Ⅳ相当額の1/2以上を基本給又は決まって毎月支払う手当で改善）の充足を先に確認してください。</div>
+  </div>
+</section>
+
+<!-- ================= ③ ベースアップ評価料 試算 ================= -->
+<section class="tabpane" id="pane-bup">
+  <div class="card">
+    <h2><span class="chip med">医療</span> ベースアップ評価料 試算（令和8年6月改定・告示69号／74号）</h2>
+    <p class="lede">点数×算定回数で評価料収入を概算し、賃上げ目標水準（令和8・9年度 各＋3.2％、看護補助者・事務職員は各＋5.7％）と比較します。<b>正式な区分決定は厚労省の届出様式Excel（自動計算）で行ってください</b>（区分対応表〔別表3〜5〕は本ツール未収載）。</p>
+    <div class="grid3">
+      <label class="fld">医療機関種別
+        <select id="medType">
+          <option value="ika">医科（外来・在宅）</option>
+          <option value="shika">歯科（外来・在宅）</option>
+          <option value="nyuin">入院ベースアップ評価料（病院等）</option>
+          <option value="hk">訪問看護ステーション（医療保険）</option>
+        </select>
+      </label>
+      <label class="fld">適用期間
+        <span class="seg" id="segMedPeriod">
+          <button class="on" data-v="r8">令和8年6月〜令和9年5月</button><button data-v="r9">令和9年6月以降</button>
+        </span>
+      </label>
+      <label class="fld">継続賃上げ機関（注5加算点数）
+        <span class="seg" id="segKeizoku">
+          <button class="on" data-v="no">通常</button><button data-v="yes">継続賃上げ機関</button>
+        </span>
+      </label>
+    </div>
+    <div class="note plain" style="margin-top:0;">「継続賃上げ機関」＝ ①令和8年3月31日時点で外来・在宅ベースアップ評価料(Ⅰ)届出済み、又は ②基本給等を令和6年3月比で規定率以上ベアした機関（様式98で証明）。</div>
+    <div id="medInputs" class="grid3"></div>
+    <div class="grid2">
+      <label class="fld">対象職員の月額賃金総額（円）<span class="hint">医師・歯科医師・看護補助者・事務職員を除く</span>
+        <input type="number" id="wageMain" value="5000000" min="0" step="100000">
+      </label>
+      <label class="fld">看護補助者・事務職員の月額賃金総額（円）
+        <input type="number" id="wageJimu" value="1000000" min="0" step="100000">
+      </label>
+    </div>
+    <div id="bupOut"></div>
+    <div class="note">対象職員は令和8年6月から「<b>勤務する職員全体（40歳以上の医師・歯科医師と業務委託者を除く）</b>」に拡大（非常勤含む常勤換算、役員除く）。評価料収入は<b>全額</b>を対象職員の基本給等の引上げと、それに連動する賞与・時間外手当・法定福利費等の増加分に充当する必要があります。6月〜翌年5月の収入を当該年4月〜翌年3月の賃金改善に充当可。</div>
+  </div>
+</section>
+
+<!-- ================= ④ 要件チェック ================= -->
+<section class="tabpane" id="pane-check">
+  <div class="card">
+    <h2><span class="chip care">介護・障害福祉</span> 取得可能区分の判定（令和8年6月以降）</h2>
+    <p class="lede">満たしている要件にチェックを入れると、取得できる最上位の区分を自動判定します。制度は「② 処遇改善加算 試算」タブの選択（介護／障害）と連動します。<b>用語がわからないときは各項目の「くわしく」を開いてください</b>（意味・やること・具体例が読めます）。各項目の右のタグは「その要件がどの区分で必要か」を示します。</p>
+    <div id="reqList"></div>
+    <div id="reqVerdict"></div>
+    <div class="note ok">令和8年度は<b>配慮措置</b>として、特例要件を満たす事業所はキャリアパス要件Ⅰ〜Ⅳ・職場環境等要件を「誓約」（令和9年3月末までに対応）で申請時点充足扱いにできます。<b>誓約未達成の場合は返還</b>となるため、受任時は達成計画まで確認してください。</div>
+  </div>
+  <div class="card">
+    <h2><span class="chip med">医療</span> ベースアップ評価料 コンプライアンス確認</h2>
+    <div id="medCheckList"></div>
+    <div id="medCheckOut"></div>
+  </div>
+  <div class="card">
+    <h2>返還・不適合につながる落とし穴</h2>
+    <ul class="tight">
+      <li><span class="chip risk">介護・障害</span> <b>実績報告書の提出遅延・未提出 → 加算全額返還</b>。期限（最終支払月の翌々月末）は事務所の期限管理台帳に必ず登録。</li>
+      <li><span class="chip risk">介護・障害</span> 賃金改善実施期間内に支払っていない（一時金の支給日が期間外）→ 改善額に算入不可。</li>
+      <li><span class="chip risk">介護・障害</span> 月額賃金改善要件（Ⅳ相当×1/2）を一時金で満たそうとする → 基本給・毎月の手当での改善が必要。</li>
+      <li><span class="chip risk">介護・障害</span> Ⅰロ・Ⅱロの特例要件やキャリアパス要件の「誓約」を令和9年3月末までに達成できない → 返還。</li>
+      <li><span class="chip risk">医療</span> 令和8年5月中の再届出漏れ → 6月以降の新点数を算定できない（既届出機関も全機関再届出）。</li>
+      <li><span class="chip risk">医療</span> 毎年8月の実績報告書＋中間報告書（様式100）の未提出 → 翌年度施設基準不適合。根拠書類は年度終了後3年間保管。</li>
+      <li><span class="chip risk">医療</span> 対象職員数・算定回数に1割以上の変動 → 区分変動があれば月内に変更届出（翌月から新区分）。放置は過大算定のリスク。</li>
+      <li><span class="chip warn">共通</span> 賞与や退職金への充当は原則不可（ベア中心の設計が必要。介護・障害はベースアップ等要件、医療は基本給等への充当義務）。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= ⑤ スケジュール ================= -->
+<section class="tabpane" id="pane-sched">
+  <div class="card">
+    <h2><span class="chip care">介護</span> 令和8年度の期限（老発0313第6号）</h2>
+    <div class="tblwrap"><table class="tbl-care">
+      <tr><th style="width:12em;">期限</th><th>手続</th><th>備考</th></tr>
+      <tr><td class="num"><b>令和8年4月1日</b></td><td>体制届出（4月から算定・区分変更）</td><td>指定権者判断で4月15日まで可</td></tr>
+      <tr><td class="num"><b>令和8年4月15日</b></td><td>処遇改善計画書</td><td>4・5月分（旧4区分）＋6月以降分（新6区分）を一体提出。原則は初回算定月の前々月末日</td></tr>
+      <tr><td class="num"><b>令和8年5月15日／6月1日</b></td><td>新規対象サービス（訪看・訪リハ・居宅介護支援等）の体制届出</td><td>居宅系5/15・施設系6/1（6月15日まで可）</td></tr>
+      <tr><td class="num"><b>令和8年6月15日</b></td><td>新規対象サービスのみの事業所の処遇改善計画書</td><td>6月から算定する場合</td></tr>
+      <tr><td class="num">前々月末日</td><td>年度途中の区分変更（計画書変更届）</td><td>変更算定月の前々月末まで</td></tr>
+      <tr><td class="num"><b>令和9年7月31日</b></td><td>実績報告書</td><td>最終の加算支払月の翌々月末日。<b>未提出は全額返還</b></td></tr>
+    </table></div>
+    <p class="src">障害福祉も6区分化は令和8年6月施行。障害福祉側の計画書・実績報告の提出期限は事務処理手順通知（厚労省障害保健福祉部・こども家庭庁連名）で<b>要確認</b>（介護と同様の運用が見込まれる）。</p>
+  </div>
+  <div class="card">
+    <h2><span class="chip med">医療</span> ベースアップ評価料の期限（保医発0305第8号ほか）</h2>
+    <div class="tblwrap"><table>
+      <tr><th style="width:12em;">期限</th><th>手続</th><th>備考</th></tr>
+      <tr><td class="num"><b>令和8年5月中</b></td><td>新様式での届出（様式95〜98）</td><td><b>既届出機関を含む全医療機関が対象</b>。6月1日から新点数を算定するための期限（経過済み：未了先は至急、算定開始日は所轄厚生局に確認）</td></tr>
+      <tr><td class="num">毎年6月1日時点</td><td>評価区分の見直し届出</td><td>令和8・9年度は毎年6月1日時点で算定できるよう届出（点数構造の段階変更のため）</td></tr>
+      <tr><td class="num"><b>毎年8月</b></td><td>前年度分「賃金改善実績報告書」＋当年度分「中間報告書」（様式100）</td><td>地方厚生（支）局へ。未提出は翌年度施設基準不適合。根拠書類は3年間保管</td></tr>
+      <tr><td class="num">変動発生の月内</td><td>変更届出</td><td>対象職員数・算定回数の1割以上変動で区分が変わる場合。翌月から新区分</td></tr>
+      <tr><td class="num">令和9年6月1日</td><td>第2段階の点数へ移行（(Ⅰ)は2倍点数、(Ⅱ)区分13〜24・入院区分251〜500が解禁）</td><td>再度の届出（区分見直し）に注意</td></tr>
+    </table></div>
+  </div>
+  <div class="card">
+    <h2>事務所の年間ルーティン（推奨）</h2>
+    <div class="tblwrap"><table>
+      <tr><th>月</th><th><span class="chip care">介護・障害</span></th><th><span class="chip med">医療</span></th></tr>
+      <tr><td class="num">2〜3月</td><td>次年度の区分アップ検討・キャリアパス整備・計画書ドラフト</td><td>賃金改善状況の確認・次年度届出の要否確認</td></tr>
+      <tr><td class="num">4月</td><td><b>4/15 計画書提出</b>・体制届出</td><td>給与改定（ベア）の実施確認</td></tr>
+      <tr><td class="num">5月</td><td>新規対象サービスの届出フォロー</td><td><b>届出（6月算定分）</b>・様式Excelで区分計算</td></tr>
+      <tr><td class="num">6月</td><td>新率・新区分での算定開始の確認</td><td>新点数算定開始の確認</td></tr>
+      <tr><td class="num">7月</td><td><b>7/31 実績報告書提出</b>（前年度分）</td><td>実績報告の準備（賃金台帳整理）</td></tr>
+      <tr><td class="num">8月</td><td>実績報告の指摘対応</td><td><b>実績報告書＋中間報告書提出</b></td></tr>
+      <tr><td class="num">10〜12月</td><td>賃金改善の進捗確認（誓約事項の達成状況）</td><td>職員数・回数変動（1割）の確認</td></tr>
+      <tr><td class="num">1月</td><td>賃上げ不足の是正（一時金等の設計）</td><td>同左＋次年度体系の検討</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ================= ⑥ データ・出典 ================= -->
+<section class="tabpane" id="pane-data">
+  <div class="card">
+    <h2>料率データの管理</h2>
+    <p class="lede">加算率は画面上で修正して保存できます（このブラウザに保存されます）。改定・訂正があった場合は一次資料で確認のうえ更新し、確認日をメモしてください。</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <button class="btn ghost" id="btnEdit">料率を編集</button>
+      <button class="btn" id="btnSave" disabled>保存</button>
+      <button class="btn danger" id="btnReset">既定値（2026-07-03確認）に戻す</button>
+      <span id="ovBadge"></span>
+    </div>
+    <h3><span class="chip care">介護</span> 介護職員等処遇改善加算率（令和8年6月以降・単位：％）</h3>
+    <div class="tblwrap" id="tblKaigo6"></div>
+    <h3><span class="chip care">介護</span> 令和8年4〜5月（旧4区分・単位：％）</h3>
+    <div class="tblwrap" id="tblKaigo45"></div>
+    <h3><span class="chip care">介護</span> 新規対象サービス（令和8年6月以降・単一区分）</h3>
+    <div class="tblwrap" id="tblKaigoNew"></div>
+    <p class="src">短期入所療養介護（老健）は老健と同率、同（病院等・医療院）は介護医療院と同率。総合事業は第一号訪問事業＝訪問介護と同率・第一号通所事業＝通所介護と同率。<b>福祉用具貸与・特定福祉用具販売・居宅療養管理指導は対象外（0％）のまま。</b></p>
+    <h3><span class="chip care">障害福祉</span> 福祉・介護職員等処遇改善加算率（令和8年6月以降・主要サービス抜粋・単位：％）</h3>
+    <div class="tblwrap" id="tblShougai"></div>
+    <div class="tblwrap" id="tblShougaiNew"></div>
+    <p class="src">障害福祉の全サービスの率は改定告示を参照。令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載・要確認）。</p>
+    <h3><span class="chip med">医療</span> ベースアップ評価料 主要点数（告示69号・74号）</h3>
+    <div class="tblwrap" id="tblMed"></div>
+    <p class="src">外来・在宅(Ⅱ)の通常点数：イ＝8点×区分番号・ロ＝1点×区分番号（令和8年度は区分1〜12、令和9年6月以降1〜24）。入院：点数＝区分番号（令和8年度は区分1〜250、令和9年6月以降1〜500）。訪問看護(Ⅱ)：30円×区分番号（令和8年度は区分1〜18）。継続賃上げ機関は別表点数（(Ⅱ)分はツール内蔵、訪看(Ⅱ)継続分は未収載）。医療の点数は告示事項のため画面編集の対象外です。</p>
+  </div>
+  <div class="card">
+    <h2>出典（一次資料・取得日 2026-07-03）</h2>
+    <ul class="tight src">
+      <li>【介護】令和8年厚生労働省告示第87号（改定告示）／老発0313第6号「介護職員等処遇改善加算に関する基本的考え方並びに事務処理手順及び様式例の提示について（令和8年度分）」＋別紙1（加算率・要件表）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html" target="_blank" rel="noopener">厚労省 令和8年度介護報酬改定ページ</a></li>
+      <li>【障害福祉】「令和8年度障害福祉サービス等報酬改定における改定事項について」（令和8年2月18日 報酬改定検討チーム・厚労省／こども家庭庁）</li>
+      <li>【医療】令和8年厚生労働省告示第69号（診療報酬）・第74号（訪問看護療養費）／保医発0305第8号（特掲診療料の施設基準等）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html" target="_blank" rel="noopener">厚労省 ベースアップ評価料ページ</a>（疑義解釈その1〜9・届出様式Excel）</li>
+      <li>詳細メモ：knowledge/_updates/2026-07-03_処遇改善加算_令和8年6月改定.md（事務所ナレッジベース）</li>
+    </ul>
+    <h3>未確認事項（実装済みデータの限界）</h3>
+    <ul class="tight src">
+      <li>医療：別表3（賃金改善算定基礎額の係数）・別表4（【B】→(Ⅱ)区分）・別表5（【C】→入院区分）の対応表 → 区分決定は届出様式Excelで。</li>
+      <li>障害福祉：改定告示の番号・計画書／実績報告書の提出期限 → 事務処理手順通知で確認要。</li>
+      <li>介護：通所リハ・看護小規模多機能の令和8年4〜5月旧率、端数処理の細部（Q&amp;A第1版）。</li>
+      <li>調剤ベースアップ評価料の点数（未調査）。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= ⑦ 資料依頼書 ================= -->
+<section class="tabpane" id="pane-shorui">
+  <div class="card">
+    <h2>クライアントへの資料依頼書をつくる</h2>
+    <p class="lede">②③の試算をする前に、顧問先から集める必要がある情報の「依頼書」を作成します。制度を選び、宛名などを入力して<b>「Wordで保存」</b>を押すと、そのまま送れる依頼書ファイル（提出物チェックリスト＋顧問先が数値を書き込む記入式シート付き）がダウンロードできます。</p>
+    <div class="grid2">
+      <label class="fld">対象制度
+        <select id="shoruiSeido">
+          <option value="shoguu">処遇改善加算（介護・障害福祉）— ②の試算用</option>
+          <option value="baseup">ベースアップ評価料（医療）— ③の試算用</option>
+        </select>
+      </label>
+      <label class="fld">提出希望日 <span class="hint">任意</span>
+        <input type="text" id="shoruiDate" placeholder="例：令和8年8月15日まで">
+      </label>
+    </div>
+    <div class="grid2">
+      <label class="fld">宛名（顧問先の事業所名）
+        <input type="text" id="shoruiTo" placeholder="例：社会福祉法人○○　○○事業所">
+      </label>
+      <label class="fld">差出人（事務所名・担当者・連絡先）
+        <input type="text" id="shoruiFrom" placeholder="例：○○社会保険労務士事務所　担当：○○（TEL 000-0000-0000）">
+      </label>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px;">
+      <button class="btn" id="btnShoruiDoc">Wordで保存（.doc）</button>
+      <button class="btn ghost" id="btnShoruiPreview">画面プレビューを更新</button>
+    </div>
+    <p class="fill-note">※ Word保存は、ブラウザのダウンロード機能で Word 互換の .doc ファイルを保存します。開いた後は事務所のレターヘッド追加など自由に編集できます。</p>
+  </div>
+  <div id="shoruiOut"></div>
+</section>
+
+<!-- ================= ⑧ 実績報告サポート ================= -->
+<section class="tabpane" id="pane-jisseki">
+  <div class="card">
+    <h2>実績報告の集計サポート</h2>
+    <p class="lede">顧問先ごとに毎月の賃金改善額・評価料収入・職員データを入力すると、実績報告書（様式）の欄に対応した数字を自動集計し、加算額や収入に対して充足しているかを判定します。<b>このツールは1枚のHTMLでサーバーを持たないため、入力データはこのブラウザに自動保存されるほか、「ファイルに保存」でjsonファイルとして共有ドライブに置き、他のスタッフはそれを「ファイルを読み込み」で開いて引き継げます。</b></p>
+    <div class="jis-toolbar">
+      <label class="fld">顧問先を選択
+        <select id="jisClientSel"></select>
+      </label>
+      <button class="btn ghost" id="jisBtnNew">新規に顧問先を追加</button>
+      <button class="btn danger" id="jisBtnDel">この顧問先を削除</button>
+      <button class="btn" id="jisBtnSaveFile">ファイルに保存（.json）</button>
+      <button class="btn ghost" id="jisBtnLoadFile">ファイルを読み込み</button>
+      <input type="file" id="jisFileInput" accept="application/json" style="display:none;">
+    </div>
+    <div class="grid3">
+      <label class="fld">顧問先名
+        <input type="text" id="jisName" placeholder="例：社会福祉法人○○　○○事業所">
+      </label>
+      <label class="fld">対象制度
+        <select id="jisSeido">
+          <option value="kaigo">処遇改善加算（介護・障害福祉）</option>
+          <option value="iryo">ベースアップ評価料（医療）</option>
+        </select>
+      </label>
+      <label class="fld">対象年度
+        <input type="text" id="jisNendo" placeholder="例：令和8年度">
+      </label>
+    </div>
+    <p class="fill-note">※ 入力するたびにこのブラウザへ自動保存されます。他のスタッフと共有する場合は必ず「ファイルに保存」してください。</p>
+  </div>
+
+  <!-- ▼▼ 介護・障害福祉モード ▼▼ -->
+  <div id="jisKaigoCard">
+    <div class="card">
+      <h2><span class="chip care">介護・障害福祉</span> ①令和8年度の加算額（月別）</h2>
+      <p class="lede">国民健康保険団体連合会から送付される「処遇改善加算等総額のお知らせ」の金額を月ごとに入力してください。開始月は年度開始月（通常4月）です。</p>
+      <label class="fld" style="max-width:16em;">集計の開始月
+        <input type="text" id="jisKaigoStart" placeholder="2026-04" value="2026-04">
+      </label>
+      <div class="ledgerwrap" id="jisKasan12"></div>
+      <div class="pasteBox">
+        <span class="fill-note">Excelで12か月分の金額を横一列にコピーした場合はここに貼り付けて反映できます（タブまたは改行区切り・開始月から順に12個）。</span>
+        <textarea id="jisKasanPaste" placeholder="例：1200000&#9;1200000&#9;1250000 …（12個）"></textarea>
+        <button class="btn ghost" id="jisKasanPasteBtn" style="align-self:flex-start;">この内容を12か月へ反映</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="chip care">介護・障害福祉</span> ②賃金改善台帳（職員別・月別の積み上げ）</h2>
+      <p class="lede">各職員の「基本給の改善額」「毎月の手当の改善額」「一時金（賞与等）」を、支給した年月ごとに1行で入力します。給与ソフトの出力をExcelでコピーして貼り付けられます（列順：職員名／年月／区分／金額。区分は「基本給」「手当」「一時金」のいずれかで入力）。</p>
+      <div class="pasteBox">
+        <textarea id="jisChinginPaste" placeholder="例：山田太郎&#9;2026-04&#9;基本給&#9;5000&#10;山田太郎&#9;2026-04&#9;一時金&#9;30000"></textarea>
+        <button class="btn ghost" id="jisChinginPasteBtn" style="align-self:flex-start;">この内容を台帳へ追加</button>
+      </div>
+      <div class="ledgerwrap" id="jisChinginLedger"></div>
+      <button class="btn ghost" id="jisChinginAddRow" style="margin-top:6px;">＋ 1行追加</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="chip care">介護・障害福祉</span> ③要件判定に使う数値</h2>
+      <div class="grid3">
+        <label class="fld">処遇改善加算Ⅳ相当額（月額・円）<span class="hint">②タブの試算結果を入力</span>
+          <input type="number" id="jisKasan4" value="0" min="0" step="1000">
+        </label>
+        <label class="fld">改善後の賃金が年額440万円(障害460万円)以上となる者の数
+          <input type="number" id="jisNinzu440" value="0" min="0" step="1">
+        </label>
+      </div>
+      <h3 style="margin-top:4px;">法定福利費等の事業主負担増加分（簡便計算・Q&amp;A方式）</h3>
+      <p class="fill-note">「前年度の法定福利費等の事業主負担分総額 ÷ 前年度の賃金総額」を率として、当年度の賃金改善額に乗じて増加分を概算します。</p>
+      <div class="grid2">
+        <label class="fld">前年度の法定福利費等（事業主負担分）総額（円）
+          <input type="number" id="jisFukuriPrevBenefit" value="0" min="0" step="10000">
+        </label>
+        <label class="fld">前年度の賃金総額（円）
+          <input type="number" id="jisFukuriPrevWage" value="0" min="0" step="10000">
+        </label>
+      </div>
+      <h3>賃金水準を下げていないことの確認（任意）</h3>
+      <div class="grid3">
+        <label class="fld">令和7年度の賃金の総額（円）
+          <input type="number" id="jisZenChingin" value="0" min="0" step="10000">
+        </label>
+        <label class="fld">令和7年度の処遇改善加算の総額（円）
+          <input type="number" id="jisZenKasan" value="0" min="0" step="10000">
+        </label>
+        <label class="fld">令和8年度の賃金の総額（円）
+          <input type="number" id="jisKonChingin" value="0" min="0" step="10000">
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>判定結果（介護・障害福祉）</h2>
+      <div id="jisKaigoJudge"></div>
+    </div>
+
+    <div class="card">
+      <h2>様式への転記表（印刷・目視確認用）</h2>
+      <div class="tblwrap" id="jisKaigoTenki"></div>
+      <p class="fill-note">項目名は令和8年度 別紙様式3-1・3-2（老発0313第6号）に準拠。最終的な記入・提出は必ず厚労省配布の様式Excelで行ってください。</p>
+    </div>
+  </div>
+
+  <!-- ▼▼ 医療モード ▼▼ -->
+  <div id="jisIryoCard">
+    <div class="card">
+      <h2><span class="chip med">医療</span> ①職員マスタ（常勤換算の自動計算）</h2>
+      <p class="lede">対象職員を職種グループごとに登録します。常勤は自動的に1.0、非常勤は「週の所定労働時間 ÷ 医療機関が定める常勤の所定労働時間」（上限1.0・小数第2位四捨五入）で常勤換算数を自動計算します。</p>
+      <label class="fld" style="max-width:18em;">当院の常勤職員の所定労働時間（週・時間）
+        <input type="number" id="jisCommonHours" value="40" min="1" step="0.5">
+      </label>
+      <div class="pasteBox">
+        <span class="fill-note">列順：氏名／職種グループ（看護職員等・40歳未満医師等・事務職員・看護補助者・薬剤師・歯科衛生士・その他）／雇用形態（常勤・非常勤）／週所定労働時間（非常勤のみ）</span>
+        <textarea id="jisStaffPaste" placeholder="例：鈴木花子&#9;看護職員等&#9;常勤&#9;40&#10;佐藤次郎&#9;事務職員&#9;非常勤&#9;20"></textarea>
+        <button class="btn ghost" id="jisStaffPasteBtn" style="align-self:flex-start;">この内容を職員マスタへ追加</button>
+      </div>
+      <div class="ledgerwrap" id="jisStaffLedger"></div>
+      <button class="btn ghost" id="jisStaffAddRow" style="margin-top:6px;">＋ 1行追加</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="chip med">医療</span> ②開始月スナップショット（職種グループ別）</h2>
+      <p class="lede">賃金改善実施期間の開始月における「改善後の基本給等総額（1か月分）」と、比較基準となる給与体系を当てはめた場合の総額を、職種グループごとに入力します。差額がベースアップ実績額（1か月分）です。</p>
+      <label class="fld" style="max-width:18em;">比較基準の時点
+        <select id="jisKijun">
+          <option value="r8_3">令和8年3月時点の給与体系</option>
+          <option value="r8_5">令和8年5月時点の給与体系（既届出機関）</option>
+        </select>
+      </label>
+      <div class="tblwrap" id="jisSnapshotTbl"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="chip med">医療</span> ③評価料収入の実績（月別）</h2>
+      <p class="lede">レセプトから確定した評価料の算定額（継続的な賃上げ加算の点数分は除いた本体点数）を月ごとに入力します。</p>
+      <label class="fld" style="max-width:16em;">集計の開始月
+        <input type="text" id="jisIryoStart" placeholder="2026-06" value="2026-06">
+      </label>
+      <div class="ledgerwrap" id="jisIncome12"></div>
+      <div class="pasteBox">
+        <span class="fill-note">Excelで12か月分の金額を横一列にコピーした場合はここに貼り付け（タブまたは改行区切り・開始月から順に12個）。</span>
+        <textarea id="jisIncomePaste" placeholder="例：1700000&#9;1700000&#9;1750000 …（12個）"></textarea>
+        <button class="btn ghost" id="jisIncomePasteBtn" style="align-self:flex-start;">この内容を12か月へ反映</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="chip med">医療</span> ④ベアに伴う賞与・時間外・法定福利費等の増加分（年間・職種グループ別）</h2>
+      <p class="lede">(13)のベア実績額とは別に、ベアに連動して増えた賞与・時間外手当・法定福利費（事業者負担分）の年間の増加額を職種グループごとに入力します。</p>
+      <div class="tblwrap" id="jisBonusTbl"></div>
+    </div>
+
+    <div class="card">
+      <h2>判定結果（医療）</h2>
+      <div id="jisIryoJudge"></div>
+    </div>
+
+    <div class="card">
+      <h2>様式100への転記表（印刷・目視確認用）</h2>
+      <div class="tblwrap" id="jisIryoTenki"></div>
+      <p class="fill-note">項目番号は令和8年度改定版 様式100（賃金改善実績報告書・中間報告書）に準拠。収入とベア実績額の突合はここでの概算であり、正式な判定は様式100本体（自動計算）で行ってください。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ⑨ 実務Q&A ================= -->
+<section class="tabpane" id="pane-qa">
+  <div class="card">
+    <h2>実務Q&amp;A（令和8年度改定・厚労省 疑義解釈／Q&amp;Aベース）</h2>
+    <p class="lede">運用で迷いやすいケース（6月前後の2段階改定、計画と実績のズレ、不足分の賞与調整、集計方法など）を、厚労省の疑義解釈・Q&amp;Aから整理しました。質問をクリックすると回答と出典が開きます。<b>キーワード検索</b>と<b>制度・テーマの絞り込み</b>ができます。</p>
+    <div class="qa-toolbar">
+      <div class="qa-search"><input type="text" id="qaSearch" placeholder="キーワードで検索（例：賞与、繰越、40歳、法定福利費、区分変更…）"></div>
+    </div>
+    <div class="qa-filters" id="qaSeidoFilter"></div>
+    <div class="qa-filters" id="qaThemeFilter"></div>
+    <div class="qa-count" id="qaCount"></div>
+    <div id="qaList"></div>
+    <p class="fill-note" style="margin-top:14px;">凡例：<span class="qa-badge pri">一次確認</span> 厚労省の疑義解釈・通知の原文で確認済み ／ <span class="qa-badge sec">二次・要確認</span> 公式Q&amp;Aの所在は確認済みだが本文は二次情報経由（問番号・細部は原文突合が必要）。最終判断は必ず出典の原文と所属社労士の確認を要します。</p>
+  </div>
+</section>
+
+<footer class="app wrap">
+  本ツールの計算はすべて概算であり、告示・通知の原文および公式届出様式（自動計算Excel）による確認を前提とします。法令の解釈・適用は事案により異なるため、<b>具体的事案への適用は所属社労士の確認を要します</b>。業際の整理（社労士・行政書士の業務範囲）は事務所内の暫定整理であり、各士業会の見解を確認してください。
+</footer>
+</main>
+
+<script>
+"use strict";
+/* ==================== データ（既定値：2026-07-03 一次資料確認） ==================== */
+const DEFAULT_DATA = {
+  kaigo: {
+    kubun: ["Ⅰイ","Ⅰロ","Ⅱイ","Ⅱロ","Ⅲ","Ⅳ"],
+    oldKubun: ["Ⅰ","Ⅱ","Ⅲ","Ⅳ"],
+    services: [
+      {name:"訪問介護", r6:[27.0,28.7,24.9,26.6,20.7,17.0], r45:[24.5,22.4,18.2,14.5]},
+      {name:"夜間対応型訪問介護", r6:[26.7,27.8,24.6,25.7,20.4,16.7], r45:[24.5,22.4,18.2,14.5]},
+      {name:"定期巡回・随時対応型訪問介護看護", r6:[26.7,27.8,24.6,25.7,20.4,16.7], r45:[24.5,22.4,18.2,14.5]},
+      {name:"（介護予防）訪問入浴介護", r6:[12.2,13.3,11.6,12.7,10.1,8.5], r45:[10.0,9.4,7.9,6.3]},
+      {name:"通所介護", r6:[11.1,12.0,10.9,11.8,9.9,8.3], r45:[9.2,9.0,8.0,6.4]},
+      {name:"地域密着型通所介護", r6:[11.7,12.7,11.5,12.5,10.5,8.9], r45:[9.2,9.0,8.0,6.4]},
+      {name:"（介護予防）認知症対応型通所介護", r6:[21.6,23.6,20.9,22.9,18.5,15.7], r45:[18.1,17.4,15.0,12.2]},
+      {name:"通所リハビリテーション", r6:[10.3,11.1,10.0,10.8,8.3,7.0], r45:null},
+      {name:"（介護予防）小規模多機能型居宅介護", r6:[17.1,18.6,16.8,18.3,15.6,12.8], r45:[14.9,14.6,13.4,10.6]},
+      {name:"看護小規模多機能型居宅介護", r6:[16.8,17.7,16.5,17.4,15.3,12.5], r45:null},
+      {name:"（介護予防）短期入所生活介護", r6:[16.3,17.6,15.9,17.2,13.6,11.3], r45:[14.0,13.6,11.3,9.0]},
+      {name:"（介護予防）特定施設入居者生活介護（地域密着型含む）", r6:[14.8,15.9,14.2,15.3,13.0,10.8], r45:[12.8,12.2,11.0,8.8]},
+      {name:"（介護予防）認知症対応型共同生活介護", r6:[21.0,22.8,20.2,22.0,17.9,14.9], r45:[18.6,17.8,15.5,12.5]},
+      {name:"介護老人福祉施設（地域密着型含む）", r6:[16.3,17.6,15.9,17.2,13.6,11.3], r45:[14.0,13.6,11.3,9.0]},
+      {name:"介護老人保健施設", r6:[9.0,9.7,8.6,9.3,6.9,5.9], r45:[7.5,7.1,5.4,4.4]},
+      {name:"介護医療院", r6:[6.2,6.6,5.8,6.2,4.7,4.0], r45:[5.1,4.7,3.6,2.9]}
+    ],
+    single: [
+      {name:"（介護予防）訪問看護", rate:1.8},
+      {name:"（介護予防）訪問リハビリテーション", rate:1.5},
+      {name:"居宅介護支援・介護予防支援", rate:2.1}
+    ]
+  },
+  shougai: {
+    kubun: ["Ⅰイ","Ⅰロ","Ⅱイ","Ⅱロ","Ⅲ","Ⅳ"],
+    services: [
+      {name:"居宅介護", r6:[44.6,45.6,43.1,44.1,37.6,30.2]},
+      {name:"重度訪問介護", r6:[37.2,38.2,35.7,36.7,30.2,24.8]},
+      {name:"生活介護", r6:[9.3,9.7,9.2,9.6,7.9,6.7]},
+      {name:"就労継続支援A型", r6:[10.8,11.2,10.6,11.0,9.1,7.5]},
+      {name:"就労継続支援B型", r6:[10.5,10.9,10.3,10.7,8.8,7.4]},
+      {name:"児童発達支援", r6:[15.2,15.8,14.9,15.5,13.9,11.7]},
+      {name:"放課後等デイサービス", r6:[15.5,16.1,15.2,15.8,14.2,11.9]},
+      {name:"共同生活援助（介護サービス包括型・日中サービス支援型）", r6:[16.3,16.9,16.0,16.6,14.4,12.1]},
+      {name:"共同生活援助（外部サービス利用型）", r6:[22.7,23.3,22.4,23.0,20.8,16.8]}
+    ],
+    single: [
+      {name:"計画相談支援", rate:5.1},
+      {name:"地域相談支援（地域移行・地域定着）", rate:5.1},
+      {name:"障害児相談支援", rate:5.1}
+    ]
+  },
+  med: {
+    cols: ["令和8年度 通常","令和8年度 継続賃上げ","令和9年6月〜 通常","令和9年6月〜 継続賃上げ"],
+    ika1: {"初診時":[17,23,34,40], "再診時等":[4,6,8,10], "訪問診療時イ（同一建物以外）":[79,107,158,186], "訪問診療時ロ（同一建物）":[19,26,38,45]},
+    shika1: {"初診時":[21,31,42,52], "再診時等":[4,6,8,10], "歯科訪問診療時イ（同一建物以外）":[66,107,132,173], "歯科訪問診療時ロ（同一建物）":[11,21,22,32]},
+    ii: {
+      maxR8:12, maxR9:24,
+      keizokuR8: [[16,2],[24,3],[40,5],[56,7],[64,8],[80,10],[96,12],[104,13],[120,15],[136,17],[144,18],[160,20]],
+      keizokuR9: [[16,2],[24,3],[32,4],[48,6],[56,7],[64,8],[80,10],[88,11],[96,12],[112,14],[120,15],[128,16],[144,18],[152,19],[160,20],[176,22],[184,23],[192,24],[208,26],[216,27],[224,28],[240,30],[248,31],[256,32]]
+    },
+    nyuin: {maxR8:250, maxR9:500},
+    hk: {i:[1050,1830,2100,2880], iiPer:30, iiMaxR8:18, iiMaxR9:36},
+    bearMain:3.2, bearJimu:5.7
+  }
+};
+const LS_KEY = "shoguuBupToolOverrides_v1";
+let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+(function applyOverrides(){
+  try{
+    const ov = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+    if(!ov) return;
+    (ov.paths||[]).forEach(p=>{
+      const seg = p.path.split(".");
+      let o = DATA;
+      for(let i=0;i<seg.length-1;i++){ o = o[isNaN(+seg[i])?seg[i]:+seg[i]]; if(o==null) return; }
+      const last = seg[seg.length-1];
+      o[isNaN(+last)?last:+last] = p.value;
+    });
+    DATA._hasOverride = true;
+  }catch(e){ /* 破損データは無視 */ }
+})();
+
+const yen = n => Math.round(n).toLocaleString("ja-JP") + " 円";
+const man = n => (Math.round(n/1000)/10).toLocaleString("ja-JP") + " 万円";
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ==================== タブ ==================== */
+document.querySelectorAll("nav.tabs button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on", x===b));
+    document.querySelectorAll("section.tabpane").forEach(p=>p.classList.toggle("on", p.id==="pane-"+b.dataset.tab));
+  });
+});
+function segInit(id, onChange){
+  const seg = document.getElementById(id);
+  seg.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+      onChange(b.dataset.v);
+    });
+  });
+  return () => seg.querySelector("button.on").dataset.v;
+}
+
+/* ==================== ① 制度判定 ==================== */
+const URL_KAIGO="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html";
+const URL_KAIGO_TSUCHI="https://www.mhlw.go.jp/content/12404000/001675724.pdf";
+const URL_KAIGO_RATE="https://www.mhlw.go.jp/content/12404000/001681254.pdf";
+const URL_BUP="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html";
+const URL_BUP_SHISETSU="https://www.mhlw.go.jp/content/12404000/001713811.pdf";
+const URL_SHOUGAI="https://www.mhlw.go.jp/content/12200000/001658029.pdf";
+const URL_EGOV="https://laws.e-gov.go.jp/";
+const HANTEI = {
+  kaigo: {
+    seido:'<span class="chip care">介護職員等処遇改善加算（介護保険）</span>',
+    teishutsu:"指定権者（都道府県・市町村・中核市等）",
+    yoshiki:"処遇改善計画書・実績報告書（厚労省Excel様式）・体制届出",
+    gyousai:'<span class="chip ok">社労士の独占業務</span> 介護保険法は社労士法別表第1掲記の労働社会保険諸法令。計画書・実績報告書の作成・提出代行は社労士業務。',
+    point:"6区分化（Ⅰイ〜Ⅳ）への区分アップ提案、月額賃金改善要件を満たす賃金規程整備、特例要件（生産性向上）の達成支援、期限管理（4/15計画書・7/31実績報告）。",
+    explain:"介護職員等処遇改善加算は、<b>介護職員などの賃金を引き上げた事業所に、介護報酬（利用者へのサービス費）に一定の率を上乗せして支払う</b>国の制度です。上乗せされたお金は必ず職員の賃金改善に使い、使った実績を毎年報告します。令和8年6月から区分が6段階（Ⅰイ〜Ⅳ）になり、率も引き上げられました。区分が上がるほど率は高く、必要な条件も増えます。",
+    steps:[
+      "指定を受けている全サービスと、直近の介護報酬請求額（処遇改善加算等を除く額）を把握する（→②で加算見込額を試算）。",
+      "目指す区分を決め、④要件チェックで現状どの区分まで取れるかを確認する。",
+      "不足している要件（キャリアパス・職場環境等）を整備し、賃金規程・就業規則を改定する。",
+      "処遇改善計画書を作成し、指定権者へ提出する（令和8年度は4月15日）。",
+      "計画どおり賃金改善を実施する（加算Ⅳ相当額の1/2以上を基本給・毎月の手当で）。",
+      "実績報告書を作成・提出する（通常7月31日）。<b>未提出は加算全額返還</b>。"
+    ],
+    links:[
+      {label:"厚労省 令和8年度介護報酬改定ページ（計画書・実績報告書のExcel様式）", url:URL_KAIGO},
+      {label:"事務処理手順・様式通知（老発0313第6号）PDF", url:URL_KAIGO_TSUCHI},
+      {label:"加算率・要件表（別紙1）PDF", url:URL_KAIGO_RATE}
+    ]
+  },
+  kaigoNew: {
+    seido:'<span class="chip care">介護職員等処遇改善加算（令和8年6月新規対象・単一区分）</span>',
+    teishutsu:"指定権者",
+    yoshiki:"処遇改善計画書（新規対象用）・体制届出（居宅系5/15・施設系6/1）",
+    gyousai:'<span class="chip ok">社労士の独占業務</span>（介護保険法に基づく手続）',
+    point:"加算率は訪問看護1.8％・訪問リハ1.5％・居宅介護支援2.1％。要件は「令和8年度特例要件」又は「加算Ⅳ取得に準ずる要件」のいずれか。訪問看護ステーションは医療保険側のベースアップ評価料との整理（賃金改善の按分管理）が必須。",
+    explain:"訪問看護・訪問リハビリテーション・居宅介護支援は、従来は処遇改善加算の<b>対象外</b>でしたが、<b>令和8年6月から新たに対象</b>になりました。区分は分かれておらず率は一律（訪問看護1.8％・訪問リハ1.5％・居宅介護支援2.1％）です。訪問看護ステーションが医療保険でも訪問看護を行う場合、医療保険側は別制度（ベースアップ評価料）になります。",
+    steps:[
+      "対象化されたサービスの介護報酬請求額を把握する（→②で単一区分として試算）。",
+      "算定要件を「令和8年度特例要件」か「加算Ⅳ取得に準ずる要件」のどちらで満たすか決める。",
+      "体制届出（居宅系5/15・施設系6/1）と処遇改善計画書（新規対象のみは6/15）を提出する。",
+      "訪問看護STは医療保険分と介護保険分の賃金改善原資を分けて管理する。"
+    ],
+    links:[
+      {label:"厚労省 令和8年度介護報酬改定ページ（様式・通知）", url:URL_KAIGO},
+      {label:"事務処理手順・様式通知（老発0313第6号）PDF", url:URL_KAIGO_TSUCHI}
+    ]
+  },
+  shougai: {
+    seido:'<span class="chip care">福祉・介護職員等処遇改善加算（障害福祉）</span>',
+    teishutsu:"指定権者（都道府県・政令市・中核市等）",
+    yoshiki:"処遇改善計画書・実績報告書（介護と類似のExcel様式）",
+    gyousai:'<span class="chip warn">行政書士領域（提出代行）</span> 障害者総合支援法・児童福祉法は社労士法別表非掲記のため、官公署への提出代行は行政書士業務という整理が一般的。社労士は賃金制度・キャリアパス・就業規則の整備、賃金改善額の設計で関与（要確認：各士業会の見解）。',
+    point:"介護と同じ6区分だが、キャリアパス要件Ⅳの年額賃金要件は460万円（介護は440万円）、上乗せ幅も異なる（＋0.3万円/1.0％）。相談系3サービスに5.1％で新設。",
+    explain:"福祉・介護職員等処遇改善加算は、<b>障害福祉サービスの報酬に上乗せして、障害福祉の職員の賃金を引き上げる</b>制度です。仕組みは介護とほぼ同じ（令和8年6月から6区分）ですが、根拠法が障害者総合支援法・児童福祉法で、提出先や一部の要件（キャリアパス要件Ⅳの年収は<b>460万円</b>）が異なります。相談系3サービス（計画相談支援など）に5.1％で新設されました。",
+    steps:[
+      "指定サービスごとの訓練等給付費・介護給付費の請求額を把握する（→②で試算）。",
+      "目指す区分を決め、要件を確認する（キャリアパス要件Ⅳは年収460万円）。",
+      "賃金規程・キャリアパスを整備する（<b>官公署への提出代行は行政書士領域</b>。社労士は制度設計面で関与）。",
+      "処遇改善計画書を指定権者へ提出し、賃金改善を実施、実績報告を行う。"
+    ],
+    links:[
+      {label:"厚労省 令和8年度障害福祉サービス等報酬改定 改定事項（PDF）", url:URL_SHOUGAI},
+      {label:"申請様式は指定権者（都道府県等）のHPで配布 — 要確認", url:URL_EGOV, req:true}
+    ]
+  },
+  iryo: {
+    seido:'<span class="chip med">外来・在宅ベースアップ評価料(Ⅰ)(Ⅱ)／入院ベースアップ評価料</span>',
+    teishutsu:"地方厚生（支）局",
+    yoshiki:"様式95（(Ⅰ)）・様式96（(Ⅱ)）・様式97（入院）・様式98（継続賃上げ証明）・様式100（実績報告・中間報告）",
+    gyousai:'<span class="chip warn">グレーゾーン</span> 健康保険法は社労士法別表掲記だが、診療報酬の施設基準届出の代行可否は見解が分かれる。医療機関名義の届出を支援（様式作成補助・賃金データ整理・賃金制度設計）する形が安全（要確認）。',
+    point:"令和8年6月から点数大幅増・対象職員が「40歳以上の医師等を除く全職員」に拡大。全医療機関が5月中再届出。毎年8月の実績報告＋中間報告と、職員数・回数1割変動時の変更届が継続管理のポイント。",
+    explain:"ベースアップ評価料は、<b>診療報酬（初診料・再診料・入院料などに加算する点数）を通じて、医療機関の職員の賃金を引き上げる</b>制度です。処遇改善加算（介護）と違い「％上乗せ」ではなく「<b>点数（1点＝10円）</b>」で支払われます。令和8年6月に点数が大幅増、対象職員も拡大しました。もらった点数収入は<b>全額を基本給の引上げ（ベア）に使う義務</b>があります。",
+    steps:[
+      "対象職員を新しい定義で洗い出す（勤務する全職員。40歳以上の医師・歯科医師、業務委託者、役員は除く）。",
+      "レセプト実績（初診・再診・訪問診療の回数、延べ入院患者数）を集める（→③で試算）。",
+      "厚労省の届出様式Excel（自動計算）で区分を確定し、様式95〜98を地方厚生局へ提出する（<b>全機関が5月中に再届出</b>）。",
+      "賃金改善（ベア）を実施し、令和8年3月又は5月時点の給与体系を基準として保存する。",
+      "毎年8月に実績報告書＋当年度の中間報告書（様式100）を提出する。",
+      "職員数・回数が1割以上変動して区分が変わる場合は月内に変更届。令和9年6月の第2段階で再度区分見直しの届出。"
+    ],
+    links:[
+      {label:"厚労省 ベースアップ評価料ページ（届出様式Excel・疑義解釈その1〜9）", url:URL_BUP},
+      {label:"施設基準通知（保医発0305第8号）PDF", url:URL_BUP_SHISETSU}
+    ]
+  },
+  hkSt: {
+    seido:'<span class="chip med">訪問看護ベースアップ評価料(Ⅰ)(Ⅱ)</span> ＋ <span class="chip care">処遇改善加算1.8％（介護保険分・令和8年6月〜）</span>',
+    teishutsu:"医療保険分＝地方厚生（支）局／介護保険分＝指定権者",
+    yoshiki:"医療：届出様式・様式100 ／ 介護：処遇改善計画書・実績報告書",
+    gyousai:'<span class="chip warn">二制度並行</span> 医療保険レセプト分はベースアップ評価料、介護保険レセプト分は処遇改善加算。賃金改善原資の区分経理・按分ルールの設計が事務所の腕の見せどころ。',
+    point:"(Ⅰ)は月1回・利用者1人につき1,050円（令和8年度通常）。介護保険分は計画書4/15（新規対象は6/15）・体制届出5/15。両制度の実績報告（8月と7月末）の二重管理に注意。",
+    explain:"訪問看護ステーションは、<b>医療保険の利用者には「訪問看護ベースアップ評価料」、介護保険の利用者には「処遇改善加算」（令和8年6月から対象・1.8％）という2つの別制度が同時にかかります</b>。財源も提出先も別々なので、賃金改善の原資を分けて管理（区分経理）する必要があります。",
+    steps:[
+      "医療保険分（訪問看護療養費）と介護保険分（介護給付費）を分けて集計する。",
+      "医療分＝ベースアップ評価料の届出（地方厚生局）、介護分＝処遇改善計画書（指定権者）を提出する。",
+      "両制度の賃金改善原資を区分経理し、按分ルールを決める。",
+      "実績報告を二重に管理する（医療＝8月、介護＝通常7月末）。"
+    ],
+    links:[
+      {label:"厚労省 ベースアップ評価料ページ（医療保険分）", url:URL_BUP},
+      {label:"厚労省 令和8年度介護報酬改定ページ（介護保険分）", url:URL_KAIGO}
+    ]
+  },
+  yakkyoku: {
+    seido:'<span class="chip med">調剤ベースアップ評価料</span>',
+    teishutsu:"地方厚生（支）局",
+    yoshiki:"届出様式（調剤用）",
+    gyousai:'<span class="chip warn">グレーゾーン</span>（医科と同様の整理）',
+    point:"令和8年6月から40歳未満の薬局薬剤師も対象職員に追加。<b>点数は本ツール未収載（要調査）</b>。告示69号・厚労省ベースアップ評価料ページで確認のこと。",
+    explain:"保険薬局には「調剤ベースアップ評価料」が適用されます。医科と同じく<b>診療報酬（調剤報酬）の点数で薬局職員の賃金を引き上げる</b>制度で、令和8年6月から40歳未満の薬局薬剤師も対象職員に加わりました。",
+    steps:[
+      "対象職員を確認する（40歳未満の薬局薬剤師を含む。40歳以上薬剤師の扱いは要確認）。",
+      "調剤報酬の実績を集める。",
+      "届出様式で区分を決定し、地方厚生局へ届け出る。",
+      "賃金改善を実施し、実績報告を行う。"
+    ],
+    links:[
+      {label:"厚労省 ベースアップ評価料ページ（調剤の点数・様式は要確認）", url:URL_BUP, req:true}
+    ]
+  }
+};
+function renderHantei(){
+  const h = HANTEI[document.getElementById("hanteiSel").value];
+  let html = '<dl class="kv">'+
+    '<dt>対象制度</dt><dd>'+h.seido+'</dd>'+
+    '<dt>提出先</dt><dd>'+h.teishutsu+'</dd>'+
+    '<dt>主な様式</dt><dd>'+h.yoshiki+'</dd>'+
+    '<dt>業際の整理</dt><dd>'+h.gyousai+'</dd>'+
+    '</dl>';
+  if(h.explain) html += '<div class="h-sub">📖 この制度は？</div><div class="h-explain">'+h.explain+'</div>';
+  if(h.steps){
+    html += '<div class="h-sub">✅ 事務所がやること（手順）</div><ol class="h-steps">'+
+      h.steps.map(s=>'<li>'+s+'</li>').join("")+'</ol>';
+  }
+  if(h.links){
+    html += '<div class="h-sub">📄 申請様式・公式リンク</div><div class="h-links">'+
+      h.links.map(l=>'<a href="'+l.url+'" target="_blank" rel="noopener">'+esc(l.label)+
+        (l.req?' <span class="req">（要確認）</span>':'')+'</a>').join("")+'</div>';
+  }
+  document.getElementById("hanteiOut").innerHTML = html;
+}
+document.getElementById("hanteiSel").addEventListener("change", renderHantei);
+renderHantei();
+
+/* ==================== ② 処遇改善加算 試算 ==================== */
+let seido = "kaigo", period = "r6";
+const getSeido = segInit("segSeido", v=>{ seido=v; buildSvcSel(); renderReq(); });
+const getPeriod = segInit("segPeriod", v=>{ period=v; buildKubunSel(); });
+const svcSel = document.getElementById("svcSel"), kubunSel = document.getElementById("kubunSel");
+
+function svcList(){ const d = DATA[seido]; return d.services.map((s,i)=>({kind:"multi", idx:i, name:s.name}))
+  .concat(d.single.map((s,i)=>({kind:"single", idx:i, name:s.name+"（単一区分）"}))); }
+function buildSvcSel(){
+  svcSel.innerHTML = svcList().map((s,i)=>'<option value="'+i+'">'+esc(s.name)+'</option>').join("");
+  buildKubunSel();
+}
+function buildKubunSel(){
+  const item = svcList()[+svcSel.value||0];
+  const d = DATA[seido];
+  if(item.kind==="single"){ kubunSel.innerHTML = '<option value="0">単一区分</option>'; kubunSel.disabled = true; }
+  else if(period==="r45" && seido==="kaigo"){
+    kubunSel.disabled = false;
+    kubunSel.innerHTML = d.oldKubun.map((k,i)=>'<option value="'+i+'">加算'+k+'（旧区分）</option>').join("");
+  } else {
+    kubunSel.disabled = false;
+    kubunSel.innerHTML = d.kubun.map((k,i)=>'<option value="'+i+'">加算'+k+'</option>').join("");
+  }
+  renderKasan();
+}
+svcSel.addEventListener("change", buildKubunSel);
+kubunSel.addEventListener("change", renderKasan);
+document.getElementById("hoshuIn").addEventListener("input", renderKasan);
+
+/* --- 加算区分のやさしい説明 --- */
+function kubunMeta(item, ki){
+  const nen = seido==="kaigo" ? "440万円" : "460万円";
+  const shikaku = seido==="kaigo" ? "介護福祉士などの資格を持つ職員" : "一定の資格を持つ職員";
+  if(item.kind==="single"){
+    return {group:"—", type:"", level:0,
+      body:"この加算は区分（ランク分け）が<b>ありません</b>。決まった率が一律で付くため、区分を選ぶ必要はありません。"};
+  }
+  if(period==="r45" && seido==="kaigo"){
+    const lab = DATA.kaigo.oldKubun[ki];
+    const map = {
+      "Ⅰ":{level:4, body:"令和8年5月までの旧制度で、いちばん率が高い区分です（4段階の最上位）。"},
+      "Ⅱ":{level:3, body:"旧制度で上から2番目の区分です。"},
+      "Ⅲ":{level:2, body:"旧制度で上から3番目の区分です。"},
+      "Ⅳ":{level:1, body:"旧制度でいちばん基本（入口）の区分です。"}
+    };
+    return {old:true, group:"旧"+lab, type:"", levelMax:4, level:map[lab].level, body:map[lab].body,
+      extra:"※令和8年6月からは、新しい6区分（Ⅰイ・Ⅰロ・Ⅱイ・Ⅱロ・Ⅲ・Ⅳ）に変わりました。"};
+  }
+  const lab = DATA[seido].kubun[ki];
+  const grp = lab.charAt(0);
+  const iro = lab.length>1 ? lab.charAt(1) : "";
+  const groupName = {"Ⅰ":"Ⅰ（最上位グループ）","Ⅱ":"Ⅱ","Ⅲ":"Ⅲ","Ⅳ":"Ⅳ（入口）"}[grp];
+  const level = {"Ⅳ":1,"Ⅲ":2,"Ⅱ":3,"Ⅰ":4}[grp];
+  const bodies = {
+    "Ⅳ":"6つの区分の中で<b>いちばん基本（入口）</b>の区分です。もらえる率はいちばん低いですが、必要な条件も最小限。<b>給料を上げること</b>に加えて、<b>職員が長く働ける仕組みの土台</b>（研修の実施・賃金体系の整備）と<b>職場環境の改善</b>ができていれば取れます。",
+    "Ⅲ":"Ⅳの条件に、<b>経験や資格に応じて昇給するしくみ</b>を加えた区分です。Ⅳより率が上がります。",
+    "Ⅱイ":"Ⅲよりさらに上の区分。<b>年収"+nen+"以上の職員を1人以上つくる</b>ことと、<b>職場環境の改善をより多く行う</b>ことが必要です。率はⅢより大きく上がります。",
+    "Ⅱロ":"Ⅱイに、<b>令和8年度だけの特別ルール（生産性向上の取組＝ICT機器の導入や事業所どうしの協働など）</b>を加えた区分。Ⅱイより率がさらに上乗せされます。",
+    "Ⅰイ":"最上位グループ（Ⅰ）の区分。Ⅱイの条件に加えて、<b>"+shikaku+"を一定割合以上おく</b>ことが必要です。",
+    "Ⅰロ":"いちばん上の区分。Ⅰイに<b>令和8年度の特別ルール（生産性向上の取組）</b>を加えると取れ、<b>率が最も高くなります</b>。"
+  };
+  return {group:groupName, type:iro, levelMax:4, level:level, body:bodies[lab]};
+}
+function renderKubunDesc(){
+  const box = document.getElementById("kubunDesc");
+  if(!box) return;
+  const item = svcList()[+svcSel.value||0];
+  const ki = +kubunSel.value||0;
+  const m = kubunMeta(item, ki);
+  const label = (kubunSel.options[kubunSel.selectedIndex]||{}).text || "";
+  let tags = "";
+  if(m.group!=="—") tags += '<span class="chip care">グループ '+esc(m.group)+'</span>';
+  if(m.type==="イ") tags += '<span class="chip plain">イ ＝ 標準タイプ</span>';
+  if(m.type==="ロ") tags += '<span class="chip warn">ロ ＝ 生産性向上の上乗せ（令和8年度の特別ルール）</span>';
+  let dots = "";
+  if(m.level){ for(let i=1;i<=(m.levelMax||4);i++) dots += '<span class="dot'+(i<=m.level?' on':'')+'"></span>'; }
+  let html = '<div class="explain">';
+  html += '<div class="explain-h">📘 いま選んでいる「'+esc(label)+'」とは？</div>';
+  html += '<p class="explain-intro">「処遇改善加算」は、<b>職員の給料を上げた事業所に、介護報酬・障害福祉サービス報酬を上乗せして支給するしくみ</b>です。区分（ランク）が上がるほど、もらえる率は高くなりますが、その分クリアすべき条件も増えます。</p>';
+  if(tags) html += '<div class="explain-tags">'+tags+'</div>';
+  if(m.level) html += '<div class="explain-level"><b>条件の多さ：</b><span class="dots">'+dots+'</span><small>右にいくほど条件が多く、率も高い傾向</small></div>';
+  html += '<p class="explain-body">'+m.body+'</p>';
+  if(m.extra) html += '<p class="explain-body" style="color:var(--muted); font-size:12.5px;">'+m.extra+'</p>';
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function renderKasan(){
+  renderKubunDesc();
+  const out = document.getElementById("kasanOut");
+  const d = DATA[seido];
+  const item = svcList()[+svcSel.value||0];
+  const hoshu = Math.max(0, +document.getElementById("hoshuIn").value || 0);
+  let html = "";
+
+  if(period==="r45" && seido==="shougai"){
+    out.innerHTML = '<div class="note">障害福祉の令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載）。改定告示で確認してください。6月以降の新率で試算する場合は適用時期を切り替えてください。</div>';
+    return;
+  }
+  let rate = null, rateLabel = "";
+  if(item.kind==="single"){
+    if(period==="r45"){ out.innerHTML = '<div class="note">新規対象サービスの加算は<b>令和8年6月開始</b>のため、4〜5月分はありません。</div>'; return; }
+    rate = d.single[item.idx].rate; rateLabel = "単一区分 " + rate + "％";
+  } else {
+    const svc = d.services[item.idx];
+    const ki = +kubunSel.value || 0;
+    if(period==="r45"){
+      if(!svc.r45){ out.innerHTML = '<div class="note">このサービスの令和8年4〜5月旧率は本ツール未収載（要確認）です。</div>'; return; }
+      rate = svc.r45[ki]; rateLabel = "旧加算" + d.oldKubun[ki] + " " + rate + "％";
+    } else {
+      rate = svc.r6[ki]; rateLabel = "加算" + d.kubun[ki] + " " + rate + "％";
+    }
+  }
+  const monthly = hoshu * rate / 100;
+  html += '<div class="result">';
+  html += row("適用加算率", rateLabel);
+  html += row("月間加算見込額", "約 "+yen(monthly)+' <small>（'+man(monthly)+'）</small>');
+  html += row("年間換算（×12月）", "約 "+yen(monthly*12));
+
+  // 令和8年度見込み（介護・6区分選択時のみ：4〜5月旧率×2 ＋ 6月以降新率×10）
+  if(seido==="kaigo" && item.kind==="multi" && period==="r6"){
+    const svc = d.services[item.idx];
+    if(svc.r45){
+      const oldIdx = [0,0,1,1,2,3][+kubunSel.value||0]; // Ⅰイ/Ⅰロ→旧Ⅰ, Ⅱイ/Ⅱロ→旧Ⅱ
+      const y = hoshu*svc.r45[oldIdx]/100*2 + monthly*10;
+      html += row("令和8年度見込（旧率2月＋新率10月）", "約 "+yen(y)+' <small>旧加算'+d.oldKubun[oldIdx]+' '+svc.r45[oldIdx]+'％で計算</small>');
+    }
+  }
+  html += row("必要賃金改善額（この額以上）", "約 "+yen(monthly)+' <small>／月（法定福利費等の事業主負担増を含めてよい）</small>', true);
+
+  if(item.kind==="multi"){
+    const svc = d.services[item.idx];
+    const r4 = period==="r45" ? (svc.r45?svc.r45[3]:null) : svc.r6[5];
+    if(r4!=null){
+      const getsugaku = hoshu*r4/100/2;
+      html += row("月額賃金改善要件の目安", "約 "+yen(getsugaku)+' <small>／月（加算Ⅳ相当額の1/2以上を基本給・毎月の手当で）</small>');
+    }
+  }
+  html += '</div>';
+  if(item.kind==="single"){
+    html += '<div class="note plain">新規対象サービスの算定要件：「令和8年度特例要件」<b>又は</b>「加算Ⅳ取得に準ずる要件（キャリアパス要件Ⅰ・Ⅱ＋職場環境等要件〔区分ごと1以上・生産性2以上〕）」のいずれか。</div>';
+  }
+  if(seido==="shougai"){
+    html += '<div class="note plain">障害福祉：キャリアパス要件Ⅳの年額賃金要件は<b>460万円</b>（介護は440万円）。月額賃金改善要件の細部は障害福祉側の事務処理手順通知で要確認。</div>';
+  }
+  out.innerHTML = html;
+}
+function row(k,v,total){ return '<div class="row'+(total?' total':'')+'"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+buildSvcSel();
+
+/* ==================== ③ ベースアップ評価料 試算 ==================== */
+let medPeriod="r8", medKeizoku="no";
+segInit("segMedPeriod", v=>{ medPeriod=v; buildMedInputs(); });
+segInit("segKeizoku", v=>{ medKeizoku=v; buildMedInputs(); });
+const medType = document.getElementById("medType");
+medType.addEventListener("change", buildMedInputs);
+["wageMain","wageJimu"].forEach(id=>document.getElementById(id).addEventListener("input", renderBup));
+
+function medInputsHTML(){
+  const t = medType.value;
+  const iiMax = medPeriod==="r8" ? DATA.med.ii.maxR8 : DATA.med.ii.maxR9;
+  if(t==="ika"||t==="shika"){
+    return fld("月間 初診回数","mShoshin",300)+fld("月間 再診等回数","mSaishin",1200)+
+      fld("月間 訪問診療イ回数（同一建物以外）","mHouI",0)+fld("月間 訪問診療ロ回数（同一建物）","mHouRo",0)+
+      fld("(Ⅱ)の届出区分番号（未届出は0）<span class=\"hint\"> 1〜"+iiMax+"</span>","mIiKubun",0);
+  }
+  if(t==="nyuin"){
+    const max = medPeriod==="r8" ? DATA.med.nyuin.maxR8 : DATA.med.nyuin.maxR9;
+    return fld("届出区分番号（点数＝区分番号）<span class=\"hint\"> 1〜"+max+"</span>","mNyuinKubun",50)+
+      fld("月間 延べ入院患者数（人日）","mNyuinPt",900);
+  }
+  // 訪問看護
+  const hkMax = medPeriod==="r8" ? DATA.med.hk.iiMaxR8 : DATA.med.hk.iiMaxR9;
+  return fld("月間 利用者数（(Ⅰ)算定・月1回）","mHkUsers",80)+
+    fld("(Ⅱ)の届出区分番号（未届出は0）<span class=\"hint\"> 1〜"+hkMax+"</span>","mHkKubun",0);
+}
+function fld(label,id,val){ return '<label class="fld">'+label+'<input type="number" id="'+id+'" value="'+val+'" min="0"></label>'; }
+function buildMedInputs(){
+  document.getElementById("medInputs").innerHTML = medInputsHTML();
+  document.querySelectorAll("#medInputs input").forEach(i=>i.addEventListener("input", renderBup));
+  renderBup();
+}
+function colIdx(){ return (medPeriod==="r9"?2:0) + (medKeizoku==="yes"?1:0); }
+function num(id){ const el=document.getElementById(id); return el? Math.max(0,+el.value||0):0; }
+
+function renderBup(){
+  const t = medType.value, ci = colIdx(), M = DATA.med;
+  let html = '<div class="result">', income = 0, notes = [];
+  if(t==="ika"||t==="shika"){
+    const tbl = t==="ika"?M.ika1:M.shika1;
+    const keys = Object.keys(tbl);
+    const counts = [num("mShoshin"),num("mSaishin"),num("mHouI"),num("mHouRo")];
+    let one = 0;
+    keys.forEach((k,i)=>{ one += tbl[k][ci]*counts[i]; });
+    income += one*10;
+    html += row("外来・在宅ベースアップ評価料(Ⅰ)", "約 "+yen(one*10)+' <small>／月（'+one.toLocaleString()+'点）</small>');
+    const kub = num("mIiKubun");
+    if(kub>0){
+      const max = medPeriod==="r8"?M.ii.maxR8:M.ii.maxR9;
+      if(kub>max){ notes.push("(Ⅱ)の区分番号が上限（"+max+"）を超えています。"); }
+      else{
+        let pI, pRo;
+        if(medKeizoku==="yes"){ const p=(medPeriod==="r8"?M.ii.keizokuR8:M.ii.keizokuR9)[kub-1]; pI=p[0]; pRo=p[1]; }
+        else { pI=8*kub; pRo=kub; }
+        const cntI = counts[0]+counts[2]+counts[3]; // 初診＋訪問診療時
+        const cntRo = counts[1];
+        const two = pI*cntI + pRo*cntRo;
+        income += two*10;
+        html += row("外来・在宅ベースアップ評価料(Ⅱ) 区分"+kub, "約 "+yen(two*10)+' <small>／月（イ'+pI+'点・ロ'+pRo+'点）</small>');
+      }
+    }
+    notes.push("(Ⅱ)の区分は【B】の計算により別表4で決定（届出様式Excelで自動計算）。区分13以降は令和9年6月から。");
+  } else if(t==="nyuin"){
+    const max = medPeriod==="r8"?M.nyuin.maxR8:M.nyuin.maxR9;
+    const kub = Math.min(num("mNyuinKubun"), max);
+    if(num("mNyuinKubun")>max) notes.push("入院の区分番号が上限（"+max+"・区分251以降は令和9年6月から）を超えるため上限で計算しています。");
+    const pts = kub * num("mNyuinPt");
+    income += pts*10;
+    html += row("入院ベースアップ評価料 区分"+kub+"（"+kub+"点/日）", "約 "+yen(pts*10)+' <small>／月</small>');
+    notes.push("区分は【C】の計算により別表5で決定（届出様式Excelで確認）。看護職員処遇改善評価料（区分1〜165）は別枠で併算定可。継続賃上げ機関の別点数は入院分には設定なし（区分決定側で反映）。");
+  } else {
+    const one = M.hk.i[ci] * num("mHkUsers");
+    income += one;
+    html += row("訪問看護ベースアップ評価料(Ⅰ)", "約 "+yen(one)+' <small>／月（'+M.hk.i[ci].toLocaleString()+'円×利用者数）</small>');
+    const kub = num("mHkKubun");
+    if(kub>0){
+      const max = medPeriod==="r8"?M.hk.iiMaxR8:M.hk.iiMaxR9;
+      if(kub>max){ notes.push("(Ⅱ)の区分番号が上限（"+max+"）を超えています。"); }
+      else if(medKeizoku==="yes"){ notes.push("継続賃上げ機関の訪問看護(Ⅱ)別表（40〜1,580円）は本ツール未収載のため計算対象外。届出様式で確認してください。"); }
+      else{
+        const two = M.hk.iiPer*kub*num("mHkUsers");
+        income += two;
+        html += row("訪問看護ベースアップ評価料(Ⅱ) 区分"+kub, "約 "+yen(two)+' <small>／月（'+(M.hk.iiPer*kub)+'円×利用者数）</small>');
+      }
+    }
+  }
+  html += row("評価料収入 見込み合計", "約 "+yen(income)+' <small>／月　＝年間 約 '+yen(income*12)+'</small>', true);
+  html += '</div>';
+
+  // 賃上げ目標との比較
+  const target = num("wageMain")*M.bearMain/100 + num("wageJimu")*M.bearJimu/100;
+  html += '<div class="result">';
+  html += row("賃上げ目標水準（月額の目安）", "約 "+yen(target)+' <small>／月（対象職員＋'+M.bearMain+'％、看護補助者・事務＋'+M.bearJimu+'％）</small>');
+  html += row("評価料収入との差", (income>=target?"＋":"−")+" "+yen(Math.abs(income-target))+' <small>／月</small>');
+  html += '</div>';
+  if(income>=target && income>0){
+    html += '<div class="verdict ok">評価料収入見込みが賃上げ目標水準を上回っています。収入は全額をベア等に充当する義務があるため、超過分も基本給等の引上げ（＋連動賞与・法定福利費）へ配分する設計にしてください。</div>';
+  } else if(income>0){
+    html += '<div class="verdict risk">評価料収入だけでは賃上げ目標水準（＋3.2％／＋5.7％）に届きません。目標は努力水準（未達でも算定可：疑義解釈その2 問7）ですが、不足分の原資（本体報酬・自主財源）の検討を助言してください。</div>';
+  }
+  if(notes.length) html += '<div class="note">'+notes.map(esc).join("<br>")+'</div>';
+  document.getElementById("bupOut").innerHTML = html;
+}
+buildMedInputs();
+
+/* ==================== ④ 要件チェック ==================== */
+const REQS = [
+  {id:"monthly", t:"月額賃金改善要件", need:"すべての区分で必須", d:"加算でもらったお金の一部を、必ず「毎月の給料」の引上げに使うルール。",
+    whatis:"加算で得たお金は、ボーナス（一時金）だけでなく<b>基本給か毎月決まって払う手当</b>のアップにも回しなさい、という縛りです。すべての区分（Ⅳ〜Ⅰロ）で共通して必要です。",
+    todo:"一番下の区分（加算Ⅳ）でもらえる見込額の<b>半分（1/2）以上</b>を、基本給または毎月の手当の引上げに充てます。",
+    example:"加算Ⅳの見込額が月10万円なら、そのうち<b>5万円以上</b>は毎月の給料アップに使う（残りは賞与や社会保険料の会社負担増に充ててよい）。"},
+  {id:"cp1", t:"キャリアパス要件Ⅰ", need:"Ⅳ以上（＝全区分）", d:"職位・仕事内容に応じた「任用の基準」と「賃金体系」を作り、職員に知らせること。",
+    whatis:"「キャリアパス」とは、職員がどう成長して給料が上がっていくかの<b>道筋</b>のこと。要件Ⅰはその入口で、役職や仕事内容ごとの区分と、それに応じた給料の決め方を文書にして職員に周知します。",
+    todo:"役職・職責の区分（例：一般職→リーダー→主任）と、それぞれの賃金の決め方を就業規則・賃金規程などに定め、全職員に知らせる。",
+    example:"『主任は基本給＋役職手当2万円』のように、職位ごとの賃金ルールを規程に書いて全員に配布・掲示する。"},
+  {id:"cp2", t:"キャリアパス要件Ⅱ", need:"Ⅳ以上（＝全区分）", d:"職員の技術・知識を高める「研修」の仕組みを整えること。",
+    whatis:"職員の資質を上げるための<b>研修の機会</b>を計画的に用意することを求める要件です。",
+    todo:"研修計画を立てて実施する（または外部研修の機会を確保する）。あわせて、資質向上に関する目標を職員に示す。",
+    example:"年間研修計画を作り、新人研修・介護技術研修などを実施し、受講記録を残す。"},
+  {id:"cp3", t:"キャリアパス要件Ⅲ", need:"Ⅲ以上で必要", d:"「昇給の仕組み」を規程で定めること（何をすれば給料が上がるか）。",
+    whatis:"どうすれば給料が上がるのかを<b>あらかじめ決めて明文化</b>する要件です。加算Ⅲ以上を取るために必要になります。",
+    todo:"①経験年数、②資格取得、③人事評価 のいずれか（または組合せ）に応じて昇給する仕組みを就業規則等に定め、周知する。",
+    example:"『介護福祉士を取得したら基本給を月5,000円アップ』『勤続3年ごとに昇給』などを規程に明記する。"},
+  {id:"cp4", t:"キャリアパス要件Ⅳ", need:"Ⅱ以上で必要", d:"一定以上の年収（介護440万円／障害福祉460万円）の職員を作ること。",
+    whatis:"経験・技能のあるベテラン職員について、<b>一定額以上の年収の人を実際に用意する</b>ことを求める要件です。加算Ⅱ以上で必要。",
+    todo:"改善後の見込み年収で、<b>介護は440万円以上・障害福祉は460万円以上</b>の職員を1人以上設定する（小規模事業所などの例外あり・要確認）。",
+    example:"ベテラン主任の年収を、加算の原資も使って介護なら440万円（障害福祉なら460万円）以上に引き上げる。"},
+  {id:"cp5", t:"キャリアパス要件Ⅴ", need:"Ⅰ（最上位）のみ", d:"介護福祉士など資格を持つ職員を一定割合以上配置していること。",
+    whatis:"最上位グループ（加算Ⅰ）だけで必要になる要件で、<b>有資格者を一定の割合以上そろえている</b>ことを求めます。",
+    todo:"サービスの種類ごとに決められた割合（例：介護福祉士が○割以上）を満たすよう人員を配置する。割合はサービス類型で異なるため要確認。",
+    example:"訪問介護なら介護福祉士等の割合が基準以上か確認し、足りなければ資格取得支援や採用で対応する。"},
+  {id:"envLow", t:"職場環境等要件（Ⅲ・Ⅳ 水準）", need:"Ⅲ・Ⅳ で必要", d:"働きやすい職場づくりの取組を実施すること（Ⅲ・Ⅳ向けの軽めの水準）。",
+    whatis:"厚労省が示す<b>職場改善の取組メニュー</b>から、決められた数を選んで実際に行うことを求める要件です。分野は「入職促進」「資質向上」「両立支援」「腰痛対策」「生産性向上」「やりがい」などに分かれています。",
+    todo:"分野（区分）ごとに1つ以上、かつ<b>生産性向上の分野から2つ以上</b>の取組を実施する。",
+    example:"腰痛予防研修、ICT記録システムの導入、相談窓口の設置 などを行い、実施した記録を残す。"},
+  {id:"envHigh", t:"職場環境等要件（Ⅰ・Ⅱ 水準）", need:"Ⅰ・Ⅱ で必要", d:"上と同じ職場改善だが、Ⅰ・Ⅱ向けの「より多く＋公表」の水準。",
+    whatis:"職場改善の取組を<b>Ⅰ・Ⅱ区分向けに多めに行い、内容を公表（見える化）する</b>水準です。これをチェックすると、下位のⅢ・Ⅳ水準も満たした扱いになります。",
+    todo:"分野ごとに2つ以上、<b>生産性向上の分野から3つ以上</b>（特定の取組が必須）を実施し、さらに取組内容をホームページ等で公表する。",
+    example:"介護ソフト導入＋見守り機器＋研修体系整備などを行い、その内容を自社サイトで公表する。"},
+  {id:"tokurei", t:"令和8年度特例要件（「ロ」区分用）", need:"Ⅰロ・Ⅱロ で必要", d:"区分名の末尾が「ロ」を取るための、令和8年度だけの追加条件。",
+    whatis:"区分名の末尾が<b>「ロ」（Ⅰロ・Ⅱロ）</b>を取るための追加条件で、生産性向上に本格的に取り組む事業所への上乗せです（令和8年度限定）。",
+    todo:"<b>介護：</b>①ケアプランデータ連携システムの利用、②生産性向上推進体制加算の算定、③社会福祉連携推進法人への所属 のいずれか。<br><b>障害福祉：</b>生産性向上の取組を5つ以上（特定の2つを含む）行う、または社会福祉連携推進法人に所属し、かつⅡロ相当額の半分以上を毎月の給料で配分。",
+    example:"令和9年3月末までに対応する「誓約」でも申請時は満たした扱いにできるが、<b>達成できないと返還</b>になる点に注意。"}
+];
+function moreBlock(o){
+  let h = '<details><summary>くわしく（意味・やること・例）</summary><div class="more-body">';
+  if(o.whatis) h += '<p><span class="q">これは何？</span> '+o.whatis+'</p>';
+  if(o.todo)   h += '<p><span class="q">何をすればOK？</span> '+o.todo+'</p>';
+  if(o.example)h += '<p><span class="ex"><b>具体例：</b>'+o.example+'</span></p>';
+  h += '</div></details>';
+  return h;
+}
+document.getElementById("reqList").innerHTML = REQS.map(r=>
+  '<div class="checkline"><input type="checkbox" id="rq_'+r.id+'"><div class="t"><b>'+r.t+'</b>'
+  + (r.need?'<span class="need">必要：'+r.need+'</span>':'')
+  + '<div class="d">'+r.d+'</div>'+moreBlock(r)+'</div></div>').join("");
+REQS.forEach(r=>document.getElementById("rq_"+r.id).addEventListener("change", renderReq));
+function chk(id){ return document.getElementById("rq_"+id).checked; }
+function renderReq(){
+  const envL = chk("envLow")||chk("envHigh"), envH = chk("envHigh");
+  const can = {};
+  can["Ⅳ"] = chk("monthly")&&chk("cp1")&&chk("cp2")&&envL;
+  can["Ⅲ"] = can["Ⅳ"]&&chk("cp3");
+  can["Ⅱイ"] = can["Ⅲ"]&&chk("cp4")&&envH;
+  can["Ⅱロ"] = can["Ⅱイ"]&&chk("tokurei");
+  can["Ⅰイ"] = can["Ⅱイ"]&&chk("cp5");
+  can["Ⅰロ"] = can["Ⅰイ"]&&chk("tokurei");
+  const order = ["Ⅰロ","Ⅰイ","Ⅱロ","Ⅱイ","Ⅲ","Ⅳ"];
+  const best = order.find(k=>can[k]);
+  const label = seido==="kaigo"?"介護":"障害福祉";
+  let html;
+  if(best){
+    const okList = order.filter(k=>can[k]).map(k=>"加算"+k).join("・");
+    html = '<div class="verdict ok">【'+label+'】取得可能な最上位区分：<b>加算'+best+'</b>（取得可能：'+okList+'）— 加算率は「② 処遇改善加算 試算」タブでサービス別に確認</div>';
+  } else {
+    html = '<div class="verdict risk">【'+label+'】現状では加算Ⅳの要件（月額賃金改善＋キャリアパスⅠ・Ⅱ＋職場環境等要件）を満たしていません。まず基礎3要件の整備から着手してください。</div>';
+  }
+  document.getElementById("reqVerdict").innerHTML = html;
+}
+renderReq();
+
+const MEDCHECKS = [
+  {t:"令和8年5月中の新様式届出（様式95〜98）を提出済み", d:"既届出機関を含む全医療機関が対象。",
+    whatis:"ベースアップ評価料は令和8年6月に点数が大きく変わったため、<b>これまで届け出ていた医療機関も含めて全機関が“届出のやり直し”</b>を求められました。",
+    todo:"様式95（外来・在宅(Ⅰ)）・96（(Ⅱ)）・97（入院）・98（継続賃上げ証明）を、原則5月中に地方厚生（支）局へ提出する（6月1日から新点数を取るため）。",
+    example:"未提出だと6月以降の新点数が取れません。すでに期限を過ぎている場合は所轄の厚生局に相談する。"},
+  {t:"対象職員の範囲を新定義で洗い出した", d:"賃上げの対象になる職員の範囲が令和8年6月に広がった。",
+    whatis:"評価料でベアする<b>対象職員の範囲が拡大</b>しました。40歳未満の勤務医や、これまで外れていた事務職員も新たに対象です。",
+    todo:"勤務する職員全体を対象にする。ただし<b>40歳以上の医師・歯科医師、業務委託の人、経営者・役員は除く</b>。非常勤も常勤換算で含める。",
+    example:"職員名簿を見て、誰が対象・誰が対象外かを一覧にしておく。"},
+  {t:"評価料収入の全額をベア等に充当する給与改定を実施・予定", d:"もらった評価料は全額を給料アップに使う義務がある。",
+    whatis:"評価料の収入は<b>全額</b>を職員の給料アップ（ベースアップ＝基本給の引上げ）に使う義務があります。",
+    todo:"基本給等を引き上げる。それに伴って増える賞与・時間外手当・社会保険料の会社負担分も充当対象にできる。<b>賞与だけで済ませるのは原則NG。</b>",
+    example:"評価料収入が月20万円なら、基本給の引上げを中心に20万円分の賃金改善を設計する。"},
+  {t:"賃金改善の比較基準（令和8年3月又は5月時点の給与体系）を保存した", d:"“給料が上がったか”を後で証明するための基準。",
+    whatis:"あとで「本当に給料を上げたか」を証明するため、<b>引上げ前の給与体系を記録</b>しておく必要があります。",
+    todo:"令和8年3月または5月時点の賃金規程・賃金台帳を保存する。すでに旧評価料を届けていた医療機関は、その反映後の体系が基準。",
+    example:"改定前の賃金台帳をPDF等で保管し、いつ時点のものかを明記しておく。"},
+  {t:"毎年8月の実績報告書＋中間報告書（様式100）の期限を台帳登録した", d:"毎年8月に前年度の実績と今年度の中間報告を提出。",
+    whatis:"毎年8月に、前年度に<b>いくら給料を上げたか</b>の実績報告と、今年度の中間報告（様式100）を提出します。",
+    todo:"地方厚生（支）局へ両方を提出する。根拠書類（賃金台帳など）は年度終了後3年間保管する。",
+    example:"出さないと翌年度は施設基準を満たさず算定できなくなるため、事務所の期限管理台帳に必ず登録する。"},
+  {t:"職員数・算定回数の月次モニタリング体制がある", d:"人数や回数が大きく変わると取れる点数（区分）が変わる。",
+    whatis:"対象職員の人数や算定回数が大きく変わると、取れる<b>区分（点数）が変わる</b>ことがあります。",
+    todo:"毎月チェックし、<b>1割以上変動して区分が変わる場合は、その月のうちに変更届</b>を出す（翌月から新区分）。",
+    example:"退職・採用で対象職員数が1割以上動いた月に、区分を再計算して必要なら変更届を提出する。"},
+  {t:"令和9年6月の第2段階（点数倍増・区分拡大）の再届出を予定に入れた", d:"この改定は2段階。令和9年6月にさらに点数が上がる。",
+    whatis:"今回の改定は<b>2段階</b>で、令和9年6月から点数がさらに上がり（(Ⅰ)は約2倍）、区分の範囲も広がります。",
+    todo:"令和9年6月時点でも算定できるよう、改めて区分見直しの届出を予定に入れておく。",
+    example:"年間スケジュールの令和9年5〜6月に「再届出」のリマインドを設定しておく。"}
+];
+document.getElementById("medCheckList").innerHTML = MEDCHECKS.map((c,i)=>
+  '<div class="checkline"><input type="checkbox" id="mc_'+i+'"><div class="t"><b>'+c.t+'</b><div class="d">'+c.d+'</div>'+moreBlock(c)+'</div></div>').join("");
+MEDCHECKS.forEach((c,i)=>document.getElementById("mc_"+i).addEventListener("change", ()=>{
+  const done = MEDCHECKS.filter((c,i)=>document.getElementById("mc_"+i).checked).length;
+  document.getElementById("medCheckOut").innerHTML =
+    done===MEDCHECKS.length ? '<div class="verdict ok">'+done+'／'+MEDCHECKS.length+' — 主要な管理ポイントはすべて確認済みです。</div>'
+    : '<div class="verdict '+(done>=5?'ok':'risk')+'">'+done+'／'+MEDCHECKS.length+' 項目確認済み。未チェック項目を顧問先ヒアリングで確認してください。</div>';
+}));
+
+/* ==================== ⑥ データ・出典（表示＋編集） ==================== */
+let editing = false;
+function rateCell(val, path){
+  if(val==null) return '<td class="num" style="color:var(--muted);">未確認</td>';
+  return editing
+    ? '<td class="num"><input type="number" step="0.1" min="0" style="width:5.5em; padding:2px 6px;" data-path="'+path+'" value="'+val+'"></td>'
+    : '<td class="num">'+val.toFixed(1)+'</td>';
+}
+function renderDataTables(){
+  const K = DATA.kaigo, S = DATA.shougai, M = DATA.med;
+  document.getElementById("tblKaigo6").innerHTML = '<table class="tbl-care"><tr><th>サービス</th>'+K.kubun.map(k=>'<th class="num">'+k+'</th>').join("")+'</tr>'+
+    K.services.map((s,i)=>'<tr><td>'+esc(s.name)+'</td>'+s.r6.map((v,j)=>rateCell(v,"kaigo.services."+i+".r6."+j)).join("")+'</tr>').join("")+'</table>';
+  document.getElementById("tblKaigo45").innerHTML = '<table class="tbl-care"><tr><th>サービス</th>'+K.oldKubun.map(k=>'<th class="num">'+k+'</th>').join("")+'</tr>'+
+    K.services.map((s,i)=>'<tr><td>'+esc(s.name)+'</td>'+(s.r45?s.r45.map((v,j)=>rateCell(v,"kaigo.services."+i+".r45."+j)).join(""):'<td class="num" colspan="4" style="color:var(--muted);">未収載（要確認）</td>')+'</tr>').join("")+'</table>';
+  document.getElementById("tblKaigoNew").innerHTML = '<table class="tbl-care"><tr><th>サービス</th><th class="num">加算率</th></tr>'+
+    K.single.map((s,i)=>'<tr><td>'+esc(s.name)+'</td>'+rateCell(s.rate,"kaigo.single."+i+".rate")+'</tr>').join("")+'</table>';
+  document.getElementById("tblShougai").innerHTML = '<table class="tbl-care"><tr><th>サービス</th>'+S.kubun.map(k=>'<th class="num">'+k+'</th>').join("")+'</tr>'+
+    S.services.map((s,i)=>'<tr><td>'+esc(s.name)+'</td>'+s.r6.map((v,j)=>rateCell(v,"shougai.services."+i+".r6."+j)).join("")+'</tr>').join("")+'</table>';
+  document.getElementById("tblShougaiNew").innerHTML = '<table class="tbl-care"><tr><th>相談系サービス（新設）</th><th class="num">加算率</th></tr>'+
+    S.single.map((s,i)=>'<tr><td>'+esc(s.name)+'</td>'+rateCell(s.rate,"shougai.single."+i+".rate")+'</tr>').join("")+'</table>';
+  const medRows = [];
+  Object.entries(M.ika1).forEach(([k,v])=>medRows.push(["医科(Ⅰ) "+k, v]));
+  Object.entries(M.shika1).forEach(([k,v])=>medRows.push(["歯科(Ⅰ) "+k, v]));
+  medRows.push(["訪問看護(Ⅰ)（円・月1回）", M.hk.i]);
+  document.getElementById("tblMed").innerHTML = '<table><tr><th>区分</th>'+M.cols.map(c=>'<th class="num">'+c+'</th>').join("")+'</tr>'+
+    medRows.map(r=>'<tr><td>'+esc(r[0])+'</td>'+r[1].map(v=>'<td class="num">'+v.toLocaleString()+'</td>').join("")+'</tr>').join("")+'</table>';
+  document.getElementById("ovBadge").innerHTML = DATA._hasOverride
+    ? '<span class="chip warn">既定値から変更された料率が保存されています</span>' : '<span class="chip ok">既定値（一次資料 2026-07-03 確認）を使用中</span>';
+}
+document.getElementById("btnEdit").addEventListener("click", ()=>{
+  editing = !editing;
+  document.getElementById("btnEdit").textContent = editing?"編集をやめる":"料率を編集";
+  document.getElementById("btnSave").disabled = !editing;
+  renderDataTables();
+});
+document.getElementById("btnSave").addEventListener("click", ()=>{
+  const paths = [];
+  document.querySelectorAll("#pane-data input[data-path]").forEach(inp=>{
+    const v = +inp.value;
+    if(!isNaN(v)) paths.push({path:inp.dataset.path, value:v});
+  });
+  localStorage.setItem(LS_KEY, JSON.stringify({saved:new Date().toISOString().slice(0,10), paths}));
+  paths.forEach(p=>{
+    const seg = p.path.split("."); let o = DATA;
+    for(let i=0;i<seg.length-1;i++) o = o[isNaN(+seg[i])?seg[i]:+seg[i]];
+    o[seg[seg.length-1]] = p.value;
+  });
+  DATA._hasOverride = true; editing = false;
+  document.getElementById("btnEdit").textContent = "料率を編集";
+  document.getElementById("btnSave").disabled = true;
+  renderDataTables(); buildSvcSel();
+});
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  localStorage.removeItem(LS_KEY);
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  editing = false;
+  document.getElementById("btnEdit").textContent = "料率を編集";
+  document.getElementById("btnSave").disabled = true;
+  renderDataTables(); buildSvcSel();
+});
+renderDataTables();
+
+/* ==================== ⑦ 資料依頼書 ==================== */
+const MATERIALS = {
+  shoguu: {
+    docTitle:"処遇改善加算（介護・障害福祉）の試算に必要な資料",
+    intro:"貴事業所の処遇改善加算の試算・区分検討を行うにあたり、下記の資料・情報のご提供をお願いいたします。",
+    groups:[
+      {cat:"① 事業所・サービスの情報", items:[
+        {n:"指定を受けているサービスの一覧（サービス種別・事業所番号）", w:"対象サービスと加算率を特定するため"},
+        {n:"直近12か月分のサービス別報酬請求額（処遇改善加算等を除いた額）", w:"加算の見込額を計算するため"},
+        {n:"現在算定している処遇改善加算の区分", w:"現状を把握するため"}
+      ]},
+      {cat:"② 職員の情報", items:[
+        {n:"対象職員の名簿（職種・雇用形態・常勤/非常勤・入職年月）", w:"賃金改善の対象者を把握するため"},
+        {n:"介護福祉士などの有資格者の人数と配置状況", w:"キャリアパス要件Ⅴ（上位区分）の判定のため"},
+        {n:"直近の賃金台帳（対象職員分）", w:"賃金改善額を設計するため"}
+      ]},
+      {cat:"③ 規程・体制の情報", items:[
+        {n:"就業規則・賃金規程・キャリアパスに関する規程", w:"キャリアパス要件Ⅰ〜Ⅲの充足確認のため"},
+        {n:"これまでに実施した職場環境改善の取組内容", w:"職場環境等要件の判定のため"},
+        {n:"生産性向上の取組状況（ケアプランデータ連携、生産性向上推進体制加算、社会福祉連携推進法人への所属 等）", w:"「ロ」区分の特例要件の判定のため"}
+      ]}
+    ],
+    fill:{
+      title:"記入式ヒアリングシート（数値をご記入のうえご返信ください）",
+      tables:[
+        {caption:"A. サービス別の月間報酬額（処遇改善加算等を除く・加減算後）", cols:["サービス種別","月間報酬額（円）","現在の加算区分"], rows:5},
+        {caption:"B. 職員の状況", cols:["項目","人数・内容"], preset:["対象職員数（常勤）","対象職員数（非常勤）","介護福祉士等の有資格者数","目指したい加算区分（あれば）"]}
+      ]
+    }
+  },
+  baseup: {
+    docTitle:"ベースアップ評価料（医療）の試算に必要な資料",
+    intro:"貴院のベースアップ評価料の試算・区分検討を行うにあたり、下記の資料・情報のご提供をお願いいたします。",
+    groups:[
+      {cat:"① 医療機関・施設基準の情報", items:[
+        {n:"医療機関の種別（医科／歯科、病院／診療所）と保険医療機関コード", w:"対象となる点数を特定するため"},
+        {n:"現在の施設基準の届出状況（外来・在宅(Ⅰ)(Ⅱ)・入院ベースアップ評価料の届出の有無と区分）", w:"再届出の要否と現状を把握するため"}
+      ]},
+      {cat:"② レセプト（診療報酬請求）の実績", items:[
+        {n:"月間の初診・再診の算定回数", w:"外来・在宅評価料(Ⅰ)(Ⅱ)の収入を試算するため"},
+        {n:"月間の訪問診療の算定回数（同一建物内・同一建物外の別）", w:"訪問診療分の評価料を試算するため"},
+        {n:"（入院がある場合）月間の延べ入院患者数（人日）", w:"入院ベースアップ評価料を試算するため"}
+      ]},
+      {cat:"③ 職員の情報", items:[
+        {n:"対象職員の名簿（職種・年齢・常勤/非常勤・週の勤務時間）", w:"対象職員の範囲（40歳未満の医師・週22時間以上の非常勤 等）を判定するため"},
+        {n:"対象職員の月額賃金総額（基本給等。医師・歯科医師・看護補助者・事務職員の区分別）", w:"ベースアップの必要額【B】を計算するため"}
+      ]},
+      {cat:"④ 賃金体系の情報", items:[
+        {n:"令和8年3月または5月時点の賃金規程・賃金台帳", w:"賃金改善の実績を判定する『比較の基準』とするため"},
+        {n:"現在の給与改定（ベースアップ）の実施状況", w:"収入の充当計画を確認するため"}
+      ]}
+    ],
+    fill:{
+      title:"記入式ヒアリングシート（数値をご記入のうえご返信ください）",
+      tables:[
+        {caption:"A. レセプト実績（月間）", cols:["項目","回数・人数"], preset:["初診 回数","再診等 回数","訪問診療イ（同一建物以外）回数","訪問診療ロ（同一建物）回数","延べ入院患者数（人日・入院のみ）"]},
+        {caption:"B. 対象職員の月額賃金総額（円）", cols:["区分","月額賃金総額（円）","人数"], preset:["医師・歯科医師を除く職員（看護補助者・事務除く）","看護補助者・事務職員","40歳未満の常勤 医師・歯科医師"]}
+      ]
+    }
+  }
+};
+function fillTableHTML(t){
+  let h = '<p class="fill-note" style="font-weight:700;color:var(--accent-deep);margin-top:12px;">'+esc(t.caption)+'</p>';
+  h += '<table class="fill-tbl"><tr>'+t.cols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr>';
+  if(t.preset){
+    t.preset.forEach(p=>{ h += '<tr><td>'+esc(p)+'</td>'+t.cols.slice(1).map(()=>'<td class="blank">&nbsp;</td>').join("")+'</tr>'; });
+  } else {
+    for(let i=0;i<(t.rows||4);i++){ h += '<tr>'+t.cols.map(()=>'<td class="blank">&nbsp;</td>').join("")+'</tr>'; }
+  }
+  h += '</table>';
+  return h;
+}
+function shoruiFields(){
+  return {
+    key: document.getElementById("shoruiSeido").value,
+    to: document.getElementById("shoruiTo").value.trim() || "（事業所名）",
+    from: document.getElementById("shoruiFrom").value.trim() || "（事務所名・担当者・連絡先）",
+    date: document.getElementById("shoruiDate").value.trim()
+  };
+}
+function shoruiBodyHTML(f){
+  const M = MATERIALS[f.key];
+  let h = '';
+  if(f.date) h += '<p class="date">ご提出期限：'+esc(f.date)+'</p>';
+  h += '<p class="to">'+esc(f.to)+'　御中</p>';
+  h += '<p class="doc-title">資料ご提供のお願い</p>';
+  h += '<p>（'+esc(M.docTitle)+'）</p>';
+  h += '<p>'+M.intro+'　ご不明な点は下記担当までお問い合わせください。</p>';
+  h += '<div class="h-sub" style="margin-top:14px;">■ ご提出いただく資料</div>';
+  M.groups.forEach(g=>{
+    h += '<div class="mat-group"><div class="mat-cat">'+esc(g.cat)+'</div>';
+    g.items.forEach(it=>{ h += '<div class="mat-item">'+esc(it.n)+'<span class="why">（目的：'+esc(it.w)+'）</span></div>'; });
+    h += '</div>';
+  });
+  h += '<div class="h-sub" style="margin-top:18px;">■ '+esc(M.fill.title)+'</div>';
+  M.fill.tables.forEach(t=>{ h += fillTableHTML(t); });
+  h += '<p style="margin-top:16px;">お手数をおかけしますが、ご協力のほどよろしくお願い申し上げます。</p>';
+  h += '<p class="from">'+esc(f.from)+'</p>';
+  return h;
+}
+function renderShoruiPreview(){
+  const f = shoruiFields();
+  document.getElementById("shoruiOut").innerHTML = '<div class="shorui-doc">'+shoruiBodyHTML(f)+'</div>';
+}
+function buildDocHtml(){
+  const f = shoruiFields();
+  const body = shoruiBodyHTML(f);
+  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta charset="utf-8"><title>資料依頼書</title><style>'+
+    'body{font-family:"Yu Gothic","MS PGothic",sans-serif;font-size:10.5pt;line-height:1.7;}'+
+    '.to{font-size:12pt;font-weight:bold;} .date{text-align:right;} .doc-title{text-align:center;font-size:14pt;font-weight:bold;}'+
+    '.from{text-align:right;white-space:pre-line;} .mat-cat{font-weight:bold;border-left:4px solid #2A5278;padding-left:6px;margin:10px 0 4px;}'+
+    '.mat-item{margin:2px 0;} .why{color:#555;font-size:9pt;}'+
+    '.h-sub{font-weight:bold;margin:12px 0 4px;} .fill-note{font-weight:bold;margin:8px 0 2px;}'+
+    'table.fill-tbl{border-collapse:collapse;width:100%;font-size:9.5pt;} .fill-tbl th,.fill-tbl td{border:1px solid #888;padding:4px 6px;} .fill-tbl th{background:#EDF2F7;}'+
+    '</style></head><body>'+ body.replace(/☐/g,'□') +'</body></html>';
+}
+function downloadDoc(){
+  const f = shoruiFields();
+  const html = buildDocHtml();
+  const blob = new Blob(['﻿'+html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const name = (f.key==="shoguu"?"処遇改善加算":"ベースアップ評価料")+"_資料依頼書.doc";
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+document.getElementById("btnShoruiPreview").addEventListener("click", renderShoruiPreview);
+document.getElementById("shoruiSeido").addEventListener("change", renderShoruiPreview);
+document.getElementById("btnShoruiDoc").addEventListener("click", downloadDoc);
+renderShoruiPreview();
+
+/* ==================== ⑧ 実績報告サポート ==================== */
+const JIS_LS_KEY = "shoguuBupToolJisseki_v1";
+let JIS_CLIENTS = {};
+let JIS_CURRENT = null;
+const IRYO_GROUPS = [
+  {key:"kango", label:"看護職員等（保健師・助産師・看護師・准看護師）"},
+  {key:"ishi40", label:"40歳未満の医師・歯科医師"},
+  {key:"jimu", label:"事務職員"},
+  {key:"hojo", label:"看護補助者"},
+  {key:"yaku", label:"薬剤師"},
+  {key:"shika", label:"歯科衛生士"},
+  {key:"other", label:"その他の対象職種"}
+];
+const CHINGIN_CAT = [{v:"kihon",t:"基本給"},{v:"teate",t:"手当"},{v:"ichiji",t:"一時金"}];
+const IRYO_GROUP_ALIASES = {
+  kango: ["看護職員等","看護師","保健師","助産師","准看護師"],
+  ishi40: ["40歳未満","医師","歯科医師"],
+  jimu: ["事務"],
+  hojo: ["看護補助"],
+  yaku: ["薬剤師"],
+  shika: ["歯科衛生士"]
+};
+function matchIryoGroup(raw){
+  const s = String(raw||"").trim();
+  for(const g of IRYO_GROUPS){ if(s===g.label || s===g.key) return g.key; }
+  for(const key of Object.keys(IRYO_GROUP_ALIASES)){
+    if(IRYO_GROUP_ALIASES[key].some(a=>s.includes(a))) return key;
+  }
+  return "other";
+}
+
+function jisDefaultClient(name){
+  return {
+    id: "c"+Date.now()+"_"+Math.floor(Math.random()*100000),
+    name: name || "新規顧問先",
+    seido: "kaigo",
+    nendo: "令和8年度",
+    kaigo: {
+      kasanStart: "2026-04", kasanMonthly: {},
+      chinginLedger: [],
+      kasan4: 0, ninzu440: 0,
+      fukuriPrevBenefit: 0, fukuriPrevWage: 0,
+      zenChingin: 0, zenKasan: 0, konChingin: 0
+    },
+    iryo: {
+      commonHours: 40, staff: [], kijun: "r8_3",
+      snapshot: {}, incomeStart: "2026-06", incomeMonthly: {}, bonus: {}
+    }
+  };
+}
+function jisLoadFromStorage(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(JIS_LS_KEY) || "null");
+    if(raw && raw.clients && Object.keys(raw.clients).length){ JIS_CLIENTS = raw.clients; JIS_CURRENT = raw.current; }
+  }catch(e){ /* 破損データは無視 */ }
+}
+function jisSaveToStorage(){
+  try{ localStorage.setItem(JIS_LS_KEY, JSON.stringify({clients:JIS_CLIENTS, current:JIS_CURRENT})); }catch(e){}
+}
+function curClient(){ return JIS_CLIENTS[JIS_CURRENT]; }
+function lamp(cls,text){ return '<div class="lamp '+cls+'">'+esc(text)+'</div>'; }
+function tenkiRow(k,v){ return '<tr><td>'+esc(k)+'</td><td class="num"><b>'+v+'</b></td></tr>'; }
+function monthsFrom(startYm,n){
+  const m0 = /^(\d{4})-(\d{1,2})$/.exec(String(startYm||"").trim());
+  if(!m0) return Array.from({length:n}, (_,i)=>"?"+i);
+  let y=+m0[1], mo=+m0[2];
+  const arr=[];
+  for(let i=0;i<n;i++){ arr.push(y+"-"+String(mo).padStart(2,"0")); mo++; if(mo>12){mo=1;y++;} }
+  return arr;
+}
+function jisFte(row, commonHours){
+  if(row.keitai==="full") return 1;
+  const h=+row.hours||0, ch=+commonHours||0;
+  if(!ch) return 0;
+  return Math.round(Math.min(1,h/ch)*100)/100;
+}
+
+/* ---- 12か月テーブル（共通部品：介護の加算額／医療の評価料収入で使用） ---- */
+function render12Month(tblId, monthlyObj, startYm){
+  const months = monthsFrom(startYm,12);
+  const total = months.reduce((s,m)=>s+(+monthlyObj[m]||0),0);
+  document.getElementById(tblId).innerHTML = '<table><tr>'+months.map(m=>'<th class="num">'+m+'</th>').join("")+'<th class="num">合計</th></tr><tr>'+
+    months.map(m=>'<td><input type="number" step="1" data-m12="'+m+'" value="'+(monthlyObj[m]||0)+'"></td>').join("")+
+    '<td class="sum">'+yen(total)+'</td></tr></table>';
+}
+
+/* ---- 介護・障害福祉：賃金改善台帳 ---- */
+function renderChinginLedger(){
+  const arr = curClient().kaigo.chinginLedger;
+  const el = document.getElementById("jisChinginLedger");
+  if(!arr.length){ el.innerHTML = '<p class="fill-note">まだ行がありません。上の貼り付け欄か「＋1行追加」から入力してください。</p>'; return; }
+  el.innerHTML = '<table><tr><th>職員名</th><th>年月</th><th>区分</th><th class="num">金額（円）</th><th></th></tr>'+
+    arr.map((r,i)=>'<tr>'+
+      '<td><input type="text" data-cl="staff" data-i="'+i+'" value="'+esc(r.staff||"")+'"></td>'+
+      '<td><input type="text" data-cl="ym" data-i="'+i+'" value="'+esc(r.ym||"")+'" placeholder="2026-04"></td>'+
+      '<td><select data-cl="cat" data-i="'+i+'">'+CHINGIN_CAT.map(o=>'<option value="'+o.v+'"'+(r.cat===o.v?" selected":"")+'>'+o.t+'</option>').join("")+'</select></td>'+
+      '<td><input type="number" step="1" data-cl="amount" data-i="'+i+'" value="'+(r.amount||0)+'"></td>'+
+      '<td><button type="button" class="btn ghost" data-cl-del="'+i+'" style="padding:3px 10px;font-size:11px;">削除</button></td>'+
+    '</tr>').join("") + '</table>';
+}
+
+/* ---- 医療：職員マスタ ---- */
+function renderStaffLedger(){
+  const c = curClient(); const arr = c.iryo.staff; const ch = +c.iryo.commonHours||40;
+  const el = document.getElementById("jisStaffLedger");
+  if(!arr.length){ el.innerHTML = '<p class="fill-note">まだ職員が登録されていません。</p>'; return; }
+  el.innerHTML = '<table><tr><th>氏名</th><th>職種グループ</th><th>雇用形態</th><th class="num">週所定労働時間</th><th class="num">常勤換算</th><th></th></tr>'+
+    arr.map((r,i)=>{
+      const fte = jisFte(r,ch);
+      return '<tr>'+
+        '<td><input type="text" data-st="name" data-i="'+i+'" value="'+esc(r.name||"")+'"></td>'+
+        '<td><select data-st="group" data-i="'+i+'">'+IRYO_GROUPS.map(g=>'<option value="'+g.key+'"'+(r.group===g.key?" selected":"")+'>'+esc(g.label)+'</option>').join("")+'</select></td>'+
+        '<td><select data-st="keitai" data-i="'+i+'"><option value="full"'+(r.keitai==="full"?" selected":"")+'>常勤</option><option value="part"'+(r.keitai==="part"?" selected":"")+'>非常勤</option></select></td>'+
+        '<td><input type="number" step="0.5" data-st="hours" data-i="'+i+'" value="'+(r.hours||0)+'" '+(r.keitai==="full"?"disabled":"")+'></td>'+
+        '<td class="num">'+fte.toFixed(2)+'</td>'+
+        '<td><button type="button" class="btn ghost" data-st-del="'+i+'" style="padding:3px 10px;font-size:11px;">削除</button></td>'+
+      '</tr>';
+    }).join("") + '</table>';
+}
+function renderSnapshotTbl(){
+  const c = curClient(); const S = c.iryo.snapshot; const ch = +c.iryo.commonHours||40;
+  const rows = IRYO_GROUPS.map(g=>{
+    const fteSum = c.iryo.staff.filter(s=>s.group===g.key).reduce((s,r)=>s+jisFte(r,ch),0);
+    const snap = S[g.key] || {kaizengo:0, kijun:0};
+    return '<tr><td>'+esc(g.label)+'<div class="fill-note">職員マスタからの常勤換算合計：'+fteSum.toFixed(2)+'人</div></td>'+
+      '<td><input type="number" step="1" data-sn="'+g.key+'" data-f="kaizengo" value="'+(snap.kaizengo||0)+'"></td>'+
+      '<td><input type="number" step="1" data-sn="'+g.key+'" data-f="kijun" value="'+(snap.kijun||0)+'"></td>'+
+      '</tr>';
+  }).join("");
+  document.getElementById("jisSnapshotTbl").innerHTML = '<table><tr><th>職種グループ</th><th class="num">(11)改善後の基本給等総額（1か月・円）</th><th class="num">(12)基準体系を当てはめた総額（1か月・円）</th></tr>'+rows+'</table>';
+}
+function renderBonusTbl(){
+  const c = curClient(); const B = c.iryo.bonus;
+  document.getElementById("jisBonusTbl").innerHTML = '<table><tr><th>職種グループ</th><th class="num">年間増加額（円）</th></tr>'+
+    IRYO_GROUPS.map(g=>'<tr><td>'+esc(g.label)+'</td><td><input type="number" step="1" data-bn="'+g.key+'" value="'+(B[g.key]||0)+'"></td></tr>').join("")+
+    '</table>';
+}
+
+/* ---- 集計 ---- */
+function jisAggKaigo(c){
+  const K = c.kaigo;
+  const months = monthsFrom(K.kasanStart,12);
+  const kasanTotal = months.reduce((s,m)=>s+(+K.kasanMonthly[m]||0),0);
+  const byCat = {kihon:0, teate:0, ichiji:0};
+  const monthsSeen = new Set();
+  K.chinginLedger.forEach(r=>{
+    const amt = +r.amount||0;
+    if(byCat[r.cat]!=null) byCat[r.cat]+=amt;
+    if(r.ym && (r.cat==="kihon"||r.cat==="teate")) monthsSeen.add(r.ym);
+  });
+  const kihonTeate = byCat.kihon+byCat.teate;
+  const chinginTotal = byCat.kihon+byCat.teate+byCat.ichiji;
+  const fukuriRate = K.fukuriPrevWage>0 ? K.fukuriPrevBenefit/K.fukuriPrevWage : 0;
+  const fukuriZougaku = chinginTotal*fukuriRate;
+  const chinginWithFukuri = chinginTotal+fukuriZougaku;
+  const monthCount = monthsSeen.size || 12;
+  const kihonTeateMonthlyAvg = kihonTeate/monthCount;
+  const gakuYouken = (+K.kasan4||0)*0.5;
+  const zenHikaku = (+K.zenChingin||0) - (+K.zenKasan||0);
+  return {kasanTotal, byCat, kihonTeate, chinginTotal, fukuriRate, fukuriZougaku, chinginWithFukuri, kihonTeateMonthlyAvg, gakuYouken, zenHikaku};
+}
+function jisComputeKaigo(){
+  const c = curClient(); if(!c) return;
+  const a = jisAggKaigo(c);
+  const ok1 = a.kasanTotal>0 && a.chinginWithFukuri >= a.kasanTotal;
+  const ok2 = a.gakuYouken<=0 ? null : a.kihonTeateMonthlyAvg >= a.gakuYouken;
+  const shortfall = Math.max(0, a.kasanTotal - a.chinginWithFukuri);
+  let html = '<div class="note plain">概算判定です。最終判断は必ず様式Excel（別紙様式3）と突合してください。</div>';
+  html += lamp(a.kasanTotal===0?"n":(ok1?"g":"r"),
+    a.kasanTotal===0 ? "①の加算額が未入力です" :
+    ok1 ? "①加算額以上の賃金改善ができています（差額 "+yen(a.chinginWithFukuri-a.kasanTotal)+"）"
+        : "①加算額に対して賃金改善額が不足しています（あと "+yen(shortfall)+"。一時金の追加支給などで充当できないか検討してください）");
+  if(ok2!=null){
+    html += lamp(ok2?"g":"r", ok2 ? "月額賃金改善要件を満たしています（月平均 "+yen(a.kihonTeateMonthlyAvg)+" ≧ 必要額 "+yen(a.gakuYouken)+"）"
+      : "月額賃金改善要件が不足しています（月平均 "+yen(a.kihonTeateMonthlyAvg)+" ＜ 必要額 "+yen(a.gakuYouken)+"。一時金ではなく基本給・毎月の手当での改善が必要）");
+  } else {
+    html += lamp("n", "③で「処遇改善加算Ⅳ相当額」を入力すると、月額賃金改善要件の判定が表示されます");
+  }
+  if(c.kaigo.zenChingin>0){
+    const ok3 = (+c.kaigo.konChingin||0) >= a.zenHikaku;
+    html += lamp(ok3?"g":"r", ok3 ? "賃金水準を下げていない要件を満たしています" : "令和8年度の賃金総額が前年度の水準を下回るおそれがあります（要確認）");
+  }
+  document.getElementById("jisKaigoJudge").innerHTML = html;
+  document.getElementById("jisKaigoTenki").innerHTML = '<table>'+
+    tenkiRow("①算定した加算の合計（3-2転記）", yen(a.kasanTotal))+
+    tenkiRow("②令和8年度の賃金改善額（内訳合計）", yen(a.chinginTotal))+
+    tenkiRow("　うち基本給の改善分", yen(a.byCat.kihon))+
+    tenkiRow("　うち毎月の手当の改善分", yen(a.byCat.teate))+
+    tenkiRow("　うち一時金（賞与等）", yen(a.byCat.ichiji))+
+    tenkiRow("　法定福利費等の増加分（簡便計算・率"+(a.fukuriRate*100).toFixed(1)+"％）", yen(a.fukuriZougaku))+
+    tenkiRow("②合計（賃金改善額＋法定福利費増加分）", yen(a.chinginWithFukuri))+
+    tenkiRow("月額賃金改善要件①（加算Ⅳ相当額の1/2）", yen(a.gakuYouken))+
+    tenkiRow("月額賃金改善要件②（基本給・手当の月平均改善額）", yen(a.kihonTeateMonthlyAvg))+
+    tenkiRow("改善後の賃金が年額440万円(障害460万円)以上となる者の数", (c.kaigo.ninzu440||0)+" 人")+
+    '</table>';
+}
+function jisAggIryo(c){
+  const ch = +c.iryo.commonHours||40;
+  const months = monthsFrom(c.iryo.incomeStart,12);
+  const incomeTotal = months.reduce((s,m)=>s+(+c.iryo.incomeMonthly[m]||0),0);
+  const groups = IRYO_GROUPS.map(g=>{
+    const fte = c.iryo.staff.filter(s=>s.group===g.key).reduce((s,r)=>s+jisFte(r,ch),0);
+    const snap = c.iryo.snapshot[g.key] || {kaizengo:0, kijun:0};
+    const bea = (+snap.kaizengo||0) - (+snap.kijun||0);
+    const rate = snap.kijun>0 ? bea/snap.kijun : 0;
+    const bonus = +c.iryo.bonus[g.key]||0;
+    const juten = bea*12 + bonus;
+    return {key:g.key, label:g.label, fte, kaizengo:snap.kaizengo||0, kijun:snap.kijun||0, bea, rate, bonus, juten};
+  });
+  const judenTotal = groups.reduce((s,g)=>s+g.juten,0);
+  return {incomeTotal, groups, judenTotal};
+}
+function jisComputeIryo(){
+  const c = curClient(); if(!c) return;
+  const a = jisAggIryo(c);
+  const ok = a.incomeTotal>0 && a.incomeTotal >= a.judenTotal;
+  let html = '<div class="note plain">ベア実績額は「開始月の1か月分の差額×12」で年換算した概算です。実際の様式100は算定期間・区分ごとに詳細な計算式があるため、必ず様式Excelで最終確認してください。</div>';
+  html += lamp(a.incomeTotal===0?"n":(ok?"g":"r"),
+    a.incomeTotal===0 ? "評価料収入が未入力です" :
+    ok ? "評価料収入が充当必要額以上です（差額 "+yen(a.incomeTotal-a.judenTotal)+"）"
+       : "評価料収入だけでは充当必要額に不足しています（あと "+yen(a.judenTotal-a.incomeTotal)+"）");
+  a.groups.filter(g=>g.kijun>0).forEach(g=>{
+    html += lamp(g.bea>=0?"g":"r", g.label+"：常勤換算 "+g.fte.toFixed(2)+"人／ベア実績額(1か月) "+yen(g.bea)+"／増率 "+(g.rate*100).toFixed(2)+"％");
+  });
+  document.getElementById("jisIryoJudge").innerHTML = html;
+  document.getElementById("jisIryoTenki").innerHTML = '<table><tr><th>職種グループ</th><th class="num">(10)常勤換算数</th><th class="num">(11)改善後総額(1か月)</th><th class="num">(12)基準総額(1か月)</th><th class="num">(13)ベア実績額</th><th class="num">(14)増率</th><th class="num">(15)賞与等増加分(年間)</th></tr>'+
+    a.groups.map(g=>'<tr><td>'+esc(g.label)+'</td><td class="num">'+g.fte.toFixed(2)+'</td><td class="num">'+yen(g.kaizengo)+'</td><td class="num">'+yen(g.kijun)+'</td><td class="num">'+yen(g.bea)+'</td><td class="num">'+(g.rate*100).toFixed(2)+'％</td><td class="num">'+yen(g.bonus)+'</td></tr>').join("")+
+    '<tr><td colspan="6"><b>Ⅳ．評価料収入の実績額（年間合計）</b></td><td class="num"><b>'+yen(a.incomeTotal)+'</b></td></tr>'+
+    '<tr><td colspan="6"><b>Ⅵ．充当すべき金額の合計（ベア年換算＋賞与等増加分）</b></td><td class="num"><b>'+yen(a.judenTotal)+'</b></td></tr>'+
+    '</table>';
+}
+
+/* ---- 全体描画 ---- */
+function jisPopulateClientSel(){
+  const sel = document.getElementById("jisClientSel");
+  sel.innerHTML = Object.keys(JIS_CLIENTS).map(id=>
+    '<option value="'+id+'"'+(id===JIS_CURRENT?" selected":"")+'>'+esc(JIS_CLIENTS[id].name||"(無題)")+'</option>').join("");
+}
+function jisRenderAll(){
+  if(!JIS_CURRENT || !JIS_CLIENTS[JIS_CURRENT]){
+    const ids = Object.keys(JIS_CLIENTS);
+    if(ids.length){ JIS_CURRENT = ids[0]; } else { const nc = jisDefaultClient("新規顧問先"); JIS_CLIENTS[nc.id]=nc; JIS_CURRENT=nc.id; }
+  }
+  jisPopulateClientSel();
+  const c = curClient();
+  document.getElementById("jisName").value = c.name;
+  document.getElementById("jisSeido").value = c.seido;
+  document.getElementById("jisNendo").value = c.nendo;
+  document.getElementById("jisKaigoCard").style.display = c.seido==="kaigo" ? "" : "none";
+  document.getElementById("jisIryoCard").style.display = c.seido==="iryo" ? "" : "none";
+
+  document.getElementById("jisKaigoStart").value = c.kaigo.kasanStart;
+  document.getElementById("jisKasan4").value = c.kaigo.kasan4;
+  document.getElementById("jisNinzu440").value = c.kaigo.ninzu440;
+  document.getElementById("jisFukuriPrevBenefit").value = c.kaigo.fukuriPrevBenefit;
+  document.getElementById("jisFukuriPrevWage").value = c.kaigo.fukuriPrevWage;
+  document.getElementById("jisZenChingin").value = c.kaigo.zenChingin;
+  document.getElementById("jisZenKasan").value = c.kaigo.zenKasan;
+  document.getElementById("jisKonChingin").value = c.kaigo.konChingin;
+  render12Month("jisKasan12", c.kaigo.kasanMonthly, c.kaigo.kasanStart);
+  renderChinginLedger();
+  jisComputeKaigo();
+
+  document.getElementById("jisCommonHours").value = c.iryo.commonHours;
+  document.getElementById("jisKijun").value = c.iryo.kijun;
+  document.getElementById("jisIryoStart").value = c.iryo.incomeStart;
+  renderStaffLedger();
+  renderSnapshotTbl();
+  render12Month("jisIncome12", c.iryo.incomeMonthly, c.iryo.incomeStart);
+  renderBonusTbl();
+  jisComputeIryo();
+}
+
+/* ---- クライアント管理・上部の入力 ---- */
+document.getElementById("jisClientSel").addEventListener("change", function(){ JIS_CURRENT=this.value; jisSaveToStorage(); jisRenderAll(); });
+document.getElementById("jisName").addEventListener("input", function(){ curClient().name=this.value; jisSaveToStorage(); jisPopulateClientSel(); });
+document.getElementById("jisSeido").addEventListener("change", function(){ curClient().seido=this.value; jisSaveToStorage(); jisRenderAll(); });
+document.getElementById("jisNendo").addEventListener("input", function(){ curClient().nendo=this.value; jisSaveToStorage(); });
+document.getElementById("jisBtnNew").addEventListener("click", ()=>{
+  const nc = jisDefaultClient("新規顧問先"); JIS_CLIENTS[nc.id]=nc; JIS_CURRENT=nc.id; jisSaveToStorage(); jisRenderAll();
+});
+document.getElementById("jisBtnDel").addEventListener("click", ()=>{
+  const ids = Object.keys(JIS_CLIENTS);
+  if(ids.length<=1){ alert("最後の1件は削除できません。"); return; }
+  if(!confirm('「'+curClient().name+'」のデータを削除します。よろしいですか？')) return;
+  delete JIS_CLIENTS[JIS_CURRENT];
+  JIS_CURRENT = Object.keys(JIS_CLIENTS)[0];
+  jisSaveToStorage(); jisRenderAll();
+});
+document.getElementById("jisBtnSaveFile").addEventListener("click", ()=>{
+  const c = curClient();
+  const blob = new Blob([JSON.stringify(c,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "実績報告データ_"+String(c.name||"顧問先").replace(/[\\/:*?"<>|]/g,"_")+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+});
+document.getElementById("jisBtnLoadFile").addEventListener("click", ()=>document.getElementById("jisFileInput").click());
+document.getElementById("jisFileInput").addEventListener("change", function(){
+  const file = this.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      if(!obj || !obj.kaigo || !obj.iryo) throw new Error("形式が違います");
+      if(!obj.id) obj.id = "c"+Date.now()+"_"+Math.floor(Math.random()*100000);
+      JIS_CLIENTS[obj.id] = obj; JIS_CURRENT = obj.id;
+      jisSaveToStorage(); jisRenderAll();
+    }catch(e){ alert("読み込みに失敗しました。ファイルの形式を確認してください。"); }
+    this.value = "";
+  };
+  reader.readAsText(file, "utf-8");
+});
+
+/* ---- 介護：加算額12か月 ---- */
+document.getElementById("jisKaigoStart").addEventListener("change", function(){
+  curClient().kaigo.kasanStart = this.value.trim();
+  jisSaveToStorage(); render12Month("jisKasan12", curClient().kaigo.kasanMonthly, curClient().kaigo.kasanStart); jisComputeKaigo();
+});
+document.getElementById("jisKasan12").addEventListener("input", e=>{
+  const t=e.target; if(t.dataset.m12==null) return;
+  const c=curClient(); c.kaigo.kasanMonthly[t.dataset.m12]=+t.value||0;
+  jisSaveToStorage();
+  const months = monthsFrom(c.kaigo.kasanStart,12);
+  document.querySelector("#jisKasan12 td.sum").textContent = yen(months.reduce((s,m)=>s+(+c.kaigo.kasanMonthly[m]||0),0));
+  jisComputeKaigo();
+});
+document.getElementById("jisKasanPasteBtn").addEventListener("click", ()=>{
+  const ta = document.getElementById("jisKasanPaste");
+  const nums = ta.value.split(/[\t\n\r,]+/).map(s=>s.trim()).filter(Boolean).map(s=>+s.replace(/[^\d.\-]/g,"")||0);
+  const c = curClient();
+  const months = monthsFrom(c.kaigo.kasanStart,12);
+  months.forEach((m,i)=>{ if(nums[i]!=null) c.kaigo.kasanMonthly[m]=nums[i]; });
+  ta.value="";
+  jisSaveToStorage(); render12Month("jisKasan12", c.kaigo.kasanMonthly, c.kaigo.kasanStart); jisComputeKaigo();
+});
+
+/* ---- 介護：賃金改善台帳 ---- */
+document.getElementById("jisChinginLedger").addEventListener("input", e=>{
+  const t=e.target; if(!t.dataset.cl || t.dataset.cl==="cat") return;
+  const r = curClient().kaigo.chinginLedger[+t.dataset.i]; if(!r) return;
+  r[t.dataset.cl] = t.dataset.cl==="amount" ? (+t.value||0) : t.value;
+  jisSaveToStorage(); jisComputeKaigo();
+});
+document.getElementById("jisChinginLedger").addEventListener("change", e=>{
+  const t=e.target; if(t.tagName!=="SELECT" || t.dataset.cl!=="cat") return;
+  curClient().kaigo.chinginLedger[+t.dataset.i].cat = t.value;
+  jisSaveToStorage(); jisComputeKaigo();
+});
+document.getElementById("jisChinginLedger").addEventListener("click", e=>{
+  const t=e.target; if(t.dataset.clDel==null) return;
+  curClient().kaigo.chinginLedger.splice(+t.dataset.clDel,1);
+  jisSaveToStorage(); renderChinginLedger(); jisComputeKaigo();
+});
+document.getElementById("jisChinginAddRow").addEventListener("click", ()=>{
+  curClient().kaigo.chinginLedger.push({staff:"", ym:curClient().kaigo.kasanStart||"", cat:"kihon", amount:0});
+  jisSaveToStorage(); renderChinginLedger(); jisComputeKaigo();
+});
+document.getElementById("jisChinginPasteBtn").addEventListener("click", ()=>{
+  const ta = document.getElementById("jisChinginPaste");
+  const lines = ta.value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const catMap = {"基本給":"kihon","手当":"teate","一時金":"ichiji","賞与":"ichiji",kihon:"kihon",teate:"teate",ichiji:"ichiji"};
+  const c = curClient();
+  lines.forEach(line=>{
+    const cells = line.split("\t"); if(cells.length<4) return;
+    c.kaigo.chinginLedger.push({
+      staff:(cells[0]||"").trim(), ym:(cells[1]||"").trim(),
+      cat: catMap[(cells[2]||"").trim()] || "kihon",
+      amount: +String(cells[3]).replace(/[^\d.\-]/g,"") || 0
+    });
+  });
+  ta.value="";
+  jisSaveToStorage(); renderChinginLedger(); jisComputeKaigo();
+});
+
+/* ---- 介護：判定用の数値入力 ---- */
+[["jisKasan4","kasan4"],["jisNinzu440","ninzu440"],["jisFukuriPrevBenefit","fukuriPrevBenefit"],
+ ["jisFukuriPrevWage","fukuriPrevWage"],["jisZenChingin","zenChingin"],["jisZenKasan","zenKasan"],["jisKonChingin","konChingin"]]
+  .forEach(([id,key])=>{
+    document.getElementById(id).addEventListener("input", function(){
+      curClient().kaigo[key] = +this.value||0;
+      jisSaveToStorage(); jisComputeKaigo();
+    });
+  });
+
+/* ---- 医療：職員マスタ ---- */
+document.getElementById("jisCommonHours").addEventListener("input", function(){
+  curClient().iryo.commonHours = +this.value||40;
+  jisSaveToStorage(); renderStaffLedger(); renderSnapshotTbl(); jisComputeIryo();
+});
+document.getElementById("jisStaffLedger").addEventListener("input", e=>{
+  const t=e.target; if(!t.dataset.st || t.dataset.st==="group" || t.dataset.st==="keitai") return;
+  const c=curClient(); const r=c.iryo.staff[+t.dataset.i]; if(!r) return;
+  r[t.dataset.st] = t.dataset.st==="hours" ? (+t.value||0) : t.value;
+  jisSaveToStorage(); jisComputeIryo();
+  const row = t.closest("tr");
+  if(row) row.children[4].textContent = jisFte(r, curClient().iryo.commonHours).toFixed(2);
+});
+document.getElementById("jisStaffLedger").addEventListener("change", e=>{
+  const t=e.target; if(t.tagName!=="SELECT" || !t.dataset.st) return;
+  const c=curClient(); const r=c.iryo.staff[+t.dataset.i]; if(!r) return;
+  r[t.dataset.st]=t.value;
+  jisSaveToStorage(); renderStaffLedger(); renderSnapshotTbl(); jisComputeIryo();
+});
+document.getElementById("jisStaffLedger").addEventListener("click", e=>{
+  const t=e.target; if(t.dataset.stDel==null) return;
+  curClient().iryo.staff.splice(+t.dataset.stDel,1);
+  jisSaveToStorage(); renderStaffLedger(); renderSnapshotTbl(); jisComputeIryo();
+});
+document.getElementById("jisStaffAddRow").addEventListener("click", ()=>{
+  curClient().iryo.staff.push({name:"", group:"kango", keitai:"full", hours:0});
+  jisSaveToStorage(); renderStaffLedger(); renderSnapshotTbl(); jisComputeIryo();
+});
+document.getElementById("jisStaffPasteBtn").addEventListener("click", ()=>{
+  const ta = document.getElementById("jisStaffPaste");
+  const lines = ta.value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const c = curClient();
+  lines.forEach(line=>{
+    const cells = line.split("\t"); if(cells.length<3) return;
+    const keitaiRaw = (cells[2]||"").trim();
+    c.iryo.staff.push({
+      name:(cells[0]||"").trim(),
+      group: matchIryoGroup(cells[1]),
+      keitai: (keitaiRaw==="常勤"||keitaiRaw==="full") ? "full" : "part",
+      hours: +String(cells[3]||"0").replace(/[^\d.\-]/g,"") || 0
+    });
+  });
+  ta.value="";
+  jisSaveToStorage(); renderStaffLedger(); renderSnapshotTbl(); jisComputeIryo();
+});
+
+/* ---- 医療：開始月スナップショット ---- */
+document.getElementById("jisKijun").addEventListener("change", function(){ curClient().iryo.kijun=this.value; jisSaveToStorage(); });
+document.getElementById("jisSnapshotTbl").addEventListener("input", e=>{
+  const t=e.target; if(!t.dataset.sn) return;
+  const c=curClient(); if(!c.iryo.snapshot[t.dataset.sn]) c.iryo.snapshot[t.dataset.sn]={kaizengo:0,kijun:0};
+  c.iryo.snapshot[t.dataset.sn][t.dataset.f] = +t.value||0;
+  jisSaveToStorage(); jisComputeIryo();
+});
+
+/* ---- 医療：評価料収入12か月 ---- */
+document.getElementById("jisIryoStart").addEventListener("change", function(){
+  curClient().iryo.incomeStart = this.value.trim();
+  jisSaveToStorage(); render12Month("jisIncome12", curClient().iryo.incomeMonthly, curClient().iryo.incomeStart); jisComputeIryo();
+});
+document.getElementById("jisIncome12").addEventListener("input", e=>{
+  const t=e.target; if(t.dataset.m12==null) return;
+  const c=curClient(); c.iryo.incomeMonthly[t.dataset.m12]=+t.value||0;
+  jisSaveToStorage();
+  const months = monthsFrom(c.iryo.incomeStart,12);
+  document.querySelector("#jisIncome12 td.sum").textContent = yen(months.reduce((s,m)=>s+(+c.iryo.incomeMonthly[m]||0),0));
+  jisComputeIryo();
+});
+document.getElementById("jisIncomePasteBtn").addEventListener("click", ()=>{
+  const ta = document.getElementById("jisIncomePaste");
+  const nums = ta.value.split(/[\t\n\r,]+/).map(s=>s.trim()).filter(Boolean).map(s=>+s.replace(/[^\d.\-]/g,"")||0);
+  const c = curClient();
+  const months = monthsFrom(c.iryo.incomeStart,12);
+  months.forEach((m,i)=>{ if(nums[i]!=null) c.iryo.incomeMonthly[m]=nums[i]; });
+  ta.value="";
+  jisSaveToStorage(); render12Month("jisIncome12", c.iryo.incomeMonthly, c.iryo.incomeStart); jisComputeIryo();
+});
+
+/* ---- 医療：賞与等増加分 ---- */
+document.getElementById("jisBonusTbl").addEventListener("input", e=>{
+  const t=e.target; if(!t.dataset.bn) return;
+  curClient().iryo.bonus[t.dataset.bn] = +t.value||0;
+  jisSaveToStorage(); jisComputeIryo();
+});
+
+jisLoadFromStorage();
+jisRenderAll();
+
+/* ==================== ⑨ 実務Q&A ==================== */
+const QA_THEMES = [
+  {k:"kaitei", t:"改定・切替・届出時期"},
+  {k:"zure", t:"計画と実績のズレ・区分変更"},
+  {k:"chosei", t:"賞与・一時金での調整"},
+  {k:"shukei", t:"集計・比較基準・法定福利費"},
+  {k:"taisho", t:"対象職員の範囲"},
+  {k:"houkoku", t:"実績報告書・返還"},
+  {k:"tokurei", t:"特例要件・誓約"},
+  {k:"haibun", t:"職種間の配分"},
+  {k:"houjin", t:"複数機関・法人一括"},
+  {k:"shougai", t:"障害福祉の差異"}
+];
+const U = {
+  bup:"https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html",
+  g1:"https://www.mhlw.go.jp/content/12404000/001695358.pdf",
+  g2:"https://www.mhlw.go.jp/content/12404000/001695359.pdf",
+  g3:"https://www.mhlw.go.jp/content/12404000/001695360.pdf",
+  g4:"https://www.mhlw.go.jp/content/12404000/001695362.pdf",
+  g5:"https://www.mhlw.go.jp/content/12404000/001698611.pdf",
+  g7:"https://www.mhlw.go.jp/content/12404000/001706551.pdf",
+  g9:"https://www.mhlw.go.jp/content/12404000/001717147.pdf",
+  shisetsu:"https://www.mhlw.go.jp/content/12404000/001713811.pdf",
+  kaigo:"https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html",
+  kaigoQA:"https://www.mhlw.go.jp/content/12404000/001675711.pdf",
+  kaigoTsuchi:"https://www.mhlw.go.jp/content/12404000/001675724.pdf",
+  kaigoR7QA:"https://www.mhlw.go.jp/shogu-kaizen/download/r7_inquiry_1.pdf",
+  kaigoApply:"https://www.mhlw.go.jp/shogu-kaizen/apply.html",
+  kaigoRate:"https://www.mhlw.go.jp/content/12404000/001681254.pdf",
+  shougai:"https://www.mhlw.go.jp/content/12200000/001658029.pdf"
+};
+const QA_DATA = [
+  /* ===== 医療（ベースアップ評価料）一次確認 ===== */
+  {s:"med",t:"kaitei",p:1,q:"「継続的な賃上げ」（注5等）の“令和8年3月31日時点で届出済み”に、3〜4月から算定開始した機関は含まれますか。",a:"含まれません。令和8年3月31日時点で当該評価料を算定している必要があり、同年4月以降に算定を開始する機関は該当しません。",src:"疑義解釈その1 問1",url:U.g1},
+  {s:"med",t:"kaitei",p:1,q:"毎年6月1日時点での再届出は必要ですか。",a:"必要です。外来・在宅(Ⅱ)、歯科外来・在宅(Ⅱ)、入院ベースアップ評価料は令和8・9年度に点数構造が変わり評価区分の見直しが要るため、新規届出時および毎年6月1日時点で算定できるよう地方厚生（支）局長へ届け出ます。",src:"施設基準通知 第106等",url:U.shisetsu},
+  {s:"med",t:"kaitei",p:1,q:"6月から算定するために5月に届出作業をする場合、「直近1月」はいつを指しますか。",a:"届出作業を行う時点で把握可能な直近1月を指します。令和8年6月算定開始のため5月に作業する場合、直近1月は令和8年4月になります。",src:"疑義解釈その5 問10",url:U.g5},
+  {s:"med",t:"kaitei",p:1,q:"新設した医療機関が届出する際、対象職員への給与支払い実績はどれだけ必要ですか。",a:"(Ⅰ)・調剤・訪問看護(Ⅰ)は届出前1月分、(Ⅱ)・入院・訪問看護(Ⅱ)は届出前3月分の給与支払い実績が必要です。",src:"疑義解釈その2 問3",url:U.g2},
+  {s:"med",t:"kaitei",p:1,q:"減算免除の届出（様式98）が6月1日までに間に合わなかった場合はどうなりますか。",a:"(ア)令和8年3月31日時点で入院ベア評価料または有床診の外来・在宅(Ⅱ)を届出済みの機関は6・7月診療分はみなし届出とされ、8月3日までに様式98で届け出ないと8月診療分から減算対象。(イ)それ以外で一定水準以上のベア済み機関・6月以降の新規開設機関は、7月3日までに届け出れば6月診療分以降減算対象になりません。",src:"疑義解釈その9 問1",url:U.g9},
+  {s:"med",t:"kaitei",p:1,q:"令和8年3月31日時点で入院ベア評価料を算定していた機関が6月以降に届出しない場合、入院基本料等の減算対象になりますか。",a:"減算対象とはなりません。",src:"疑義解釈その7 問6",url:U.g7},
+  {s:"med",t:"kaitei",p:1,q:"評価料の「1日につき」の文言が削除された趣旨は何ですか。",a:"同一機関で同一日に別傷病により別の診療科を初診・再診受診した場合、2つ目の診療科についても外来・在宅(Ⅰ)(Ⅱ)・歯科(Ⅰ)(Ⅱ)を算定可能とする趣旨です。",src:"疑義解釈その2 問4",url:U.g2},
+
+  {s:"med",t:"zure",p:1,q:"対象職員数や算定回数が変わったら、区分の変更届はいつ出しますか（1割変動ルール）。",a:"前回届出時点と比べて「対象職員数」または「延べ入院患者数／(Ⅰ)の合計算定回数」等に1割以上の変動があり、改めて区分を算出して区分が変わる場合は、算出を行った月内に届け出て、翌月から変更後の区分の点数を算定します。",src:"施設基準通知 第104(8)等／疑義解釈その4 問4・5",url:U.shisetsu},
+  {s:"med",t:"zure",p:1,q:"収入見込みに対して残余（上振れ）が出た場合、翌年度に繰り越せますか。",a:"令和8年度改定で繰越要件は削除されました。6月〜翌5月に得た収入は原則として翌5月までの賃金改善に用います。患者数等の変動でやむを得ず残余が生じた場合は、当該年度の実績報告書を提出する8月までの対象職員への賃金改善分に充当し、その分を含めて報告できます。",src:"疑義解釈その2 問6",url:U.g2},
+  {s:"med",t:"zure",p:1,q:"条例改正等でやむを得ず算定開始月から賃金改善できない場合はどうすればよいですか。",a:"原則は算定開始月から実施しますが、条例改正等やむを得ない理由で困難な場合、同年度末までに算定開始月（または当該年4月）まで遡及して実施すれば、その月から実施したものとみなせます。",src:"疑義解釈その2 問5",url:U.g2},
+  {s:"med",t:"zure",p:1,q:"賃上げ率3.2％（看護補助者・事務職員は5.7％）に届かなくても算定できますか。",a:"算定できます。ただし施設基準どおり、得られた収入はすべて対象職員の基本給等の引上げおよびそれに伴う賞与・時間外手当・法定福利費（事業者負担分等含む）等の増加分に用いる必要があります。",src:"疑義解釈その2 問7",url:U.g2},
+
+  {s:"med",t:"chosei",p:1,q:"計画どおりベアを実施したが収入が上振れしました。超過分を賞与等で調整してよいですか。",a:"ベア等を行った機関で、患者数等の変動により評価料収入が「増加分に用いた額」を上回り、追加でベア等を行うことが困難な場合に限り、賞与等ベア以外の方法による賃金改善が認められます。いずれの場合も改善対象項目を特定し、改善実施項目以外の賃金項目（業績連動を除く）の水準を下げないことが条件です。",src:"施設基準通知 第105(3)等／疑義解釈その2 問7",url:U.shisetsu},
+  {s:"med",t:"chosei",p:1,q:"収入の使途（充当できる範囲）は具体的にどこまでですか。",a:"ベア等（基本給または決まって毎月支払われる手当の引上げ）＋それに伴う賞与・時間外手当・法定福利費（事業者負担分等含む）等の増加分です。恒常的に夜間を含む交替制勤務の職場の夜勤手当は「決まって毎月支払われる手当」に準じて基本給等に含めて差し支えありません。",src:"施設基準通知 各区分の使途規定",url:U.shisetsu},
+  {s:"med",t:"chosei",p:1,q:"看護職員処遇改善評価料の「安定的な賃金改善」の縛りは何ですか。",a:"賃金改善合計額の3分の2以上をベア等（基本給等の引上げ）で行うことが必要です。※この3分の2要件は看護職員処遇改善評価料の規定で、ベースアップ評価料本体の各区分では明記されていない点に留意してください。",src:"施設基準通知 第104(5)",url:U.shisetsu},
+  {s:"med",t:"chosei",p:1,q:"病棟が明確に分かれていても、収入を対象職員全体の賃上げに使ってよいですか。",a:"差し支えありません。",src:"疑義解釈その7 問3",url:U.g7},
+
+  {s:"med",t:"shukei",p:1,q:"賃金改善の「実績」はどう判断しますか（比較の基準）。",a:"「令和8年3月又は5月時点の給与体系を当該年度に勤務する職員の賃金に当てはめた場合の基本給等総額」と、「当該評価料を算定した年度に勤務している職員の基本給等総額」との差分で判断します。基本給等＝基本給または決まって毎月支払われる手当。令和7年度の賃上げ・物価高騰支援事業の補助金分は含めません。",src:"施設基準通知 第104(4)・第105(3)",url:U.shisetsu},
+  {s:"med",t:"shukei",p:1,q:"期間中に定期昇給や定年後の継続雇用があった場合、どう比較しますか。",a:"算定する月時点の基本給等の合計と、その月時点の職位等に基づき令和6年3月時点の給与体系に当該職位等を当てはめた場合の合計を比較します（定期昇給・定年後再雇用による変動は職位を当てはめ直して比較）。",src:"疑義解釈その5 問4",url:U.g5},
+  {s:"med",t:"shukei",p:1,q:"令和6年4月以降〜令和8年5月以前に開業し、令和6年3月時点の総額と比較できない場合は。",a:"開業時点の給与体系に基づく基本給等総額と算定月時点の総額を比較し、施設基準の水準を満たせば継続的賃上げの取組の届出が可能です。",src:"疑義解釈その5 問5",url:U.g5},
+  {s:"med",t:"shukei",p:1,q:"実績報告に記載する「収入の実績額」に、継続的賃上げ（注5等）の評価分は含めますか。",a:"含めません。継続的賃上げ評価の点数分を除いた本体点数のみで置き換えて計算します（例：外来・在宅(Ⅰ)は令和8年度で初診17点・再診等4点で計算）。",src:"疑義解釈その5 問7",url:U.g5},
+  {s:"med",t:"shukei",p:1,q:"区分計算の「月額賃金」に含むもの・含まないものは。",a:"含む＝基本給等＋時間外手当等の月ごとに変動して支払われる手当。含まない＝賞与・期末勤勉手当等の特定時期のみ支払う手当、令和7年度の賃上げ・物価高騰支援事業の補助金分。",src:"施設基準通知 第106(3)等",url:U.shisetsu},
+  {s:"med",t:"shukei",p:1,q:"区分の計算式の概要を教えてください。",a:"【A】看護職員処遇改善＝(看護職員等の数×12,000円×1.165)÷(延べ入院患者数×10円)。【B】外来・在宅(Ⅱ)＝(賃金改善算定基礎額×0.5−(Ⅰ)算定点数見込み×10円)÷(算定回数見込み×10円)。【C】入院＝(賃金改善算定基礎額−(Ⅰ)算定点数見込み×10円)÷(延べ入院患者数×10円)。1.165は法定福利費相当を含む係数です。",src:"施設基準通知 第104(7)・第106(4)・第107(4)",url:U.shisetsu},
+  {s:"med",t:"shukei",p:1,q:"区分計算に公費負担医療・労災の患者は算入しますか。",a:"算入します（医療観察法制度等の公費負担医療や労災保険制度等で評価料が算定される患者の診療回数）。ただし自由診療の患者は料金の定め方にかかわらず算入しません。医療保険とこれらの制度で算定した額を合算して賃金改善に充当します。",src:"疑義解釈その7 問2（共通）",url:U.g7},
+
+  {s:"med",t:"taisho",p:1,q:"対象職員に開設者・管理者・法人代表者・役員は含まれますか。",a:"含まれません（外来・在宅(Ⅰ)(Ⅱ)、歯科(Ⅰ)(Ⅱ)、入院ベア評価料の対象職員）。施設基準上も「40歳以上の医師・歯科医師及び業務委託者を除く」とされています。",src:"疑義解釈その3 問1／施設基準通知 第105(2)",url:U.g3},
+  {s:"med",t:"taisho",p:1,q:"派遣職員や業務委託の職員は対象にできますか。",a:"派遣職員（労働者派遣法2条2項該当者）は一定要件を満たせば対象にできますが、業務委託（請負）職員は対象外です。派遣元と協力し当該機関職員と同程度以上の賃金改善を行い、区分計算に含め、報告書にも含めて作成します（月額賃金総額は派遣元への支払費用をそのまま記載しない）。",src:"疑義解釈その1 問2・その3 問2",url:U.g1},
+  {s:"med",t:"taisho",p:1,q:"40歳未満の医師のカウント方法（(Ⅱ)・入院の区分計算）は。",a:"区分計算では、40歳未満の常勤の医師・歯科医師の数（ウ）＋40歳未満で週22時間以上勤務（宿日直を除く）する非常勤の医師・歯科医師の数（エ）を用います。いずれも事業主・役員を除き、届出月の直近3月の各月1日時点の平均です。ここは常勤換算ではなく頭数で数えます。",src:"施設基準通知 第106(3)ウ・エ、(5)",url:U.shisetsu},
+  {s:"med",t:"taisho",p:1,q:"算定期間中に40歳になった医師・歯科医師・薬剤師はどう扱いますか。",a:"賃金支払いの対象となった月の初日時点で40歳未満なら対象職員として扱います。対象職員数に1割以上の変動があり区分が変わる場合は算出月内に届出・翌月から新区分。報告書には「対象職員として賃金改善を行った期間の基本給等総額」を「総算定月数」で除した値を1月あたり総額に計上します。",src:"疑義解釈その4 問5",url:U.g4},
+  {s:"med",t:"taisho",p:1,q:"年度途中で入職・退職した対象職員はどう扱いますか。",a:"雇用した月以降または退職した月までは対象職員として扱って差し支えありません。記載は「期間の基本給等総額÷総算定月数」で1月あたりに換算します。",src:"疑義解釈その4 問4",url:U.g4},
+  {s:"med",t:"taisho",p:1,q:"法人本部所属の職員が実態として医療機関の業務を行う場合、対象になりますか。",a:"主として当該保険医療機関の業務を行っている場合は対象職員に含まれます。",src:"疑義解釈その5 問8",url:U.g5},
+  {s:"med",t:"taisho",p:1,q:"在籍型出向者はどう扱いますか。",a:"出向先の対象職員として区分計算・報告書を作成し、出向先で得た収入は出向元へ支払う等、合議で適切に精算します。医療機関間の短期研修中の医師は出向元の対象職員として計上して差し支えありません。",src:"疑義解釈その5 問9",url:U.g5},
+  {s:"med",t:"taisho",p:1,q:"（調剤）管理薬剤師は対象職員ですか。本部兼務の薬剤師は。",a:"管理薬剤師は対象となりません。本部業務を兼務する者は、主として調剤業務等に直接従事した実績のある月のみ対象で、複数薬局での重複計上はできません。",src:"疑義解釈その1 問3・その3 問9",url:U.g1},
+  {s:"med",t:"taisho",p:0,q:"産前産後休業・育児休業中の職員は対象職員に含めますか。",a:"今回収集した公式Q&Aには明記が見当たりませんでした。在籍中の職員が「当該年度に勤務している職員」に該当するかは、所轄の地方厚生（支）局に確認することを推奨します。",src:"※公式Q&Aに明記なし・要確認",url:U.bup},
+
+  {s:"med",t:"houkoku",p:1,q:"実績報告書・中間報告書の提出時期と様式は。",a:"毎年8月に、前年度分の「賃金改善実績報告書」と当年度分の「賃金改善中間報告書」を、いずれも様式100の別添1で地方厚生（支）局長へ報告します。法人内同一給与体系の複数機関を集約する場合は別添2。根拠資料は算定年度終了後3年間保管します。",src:"施設基準通知 各区分の届出に関する事項",url:U.shisetsu},
+  {s:"med",t:"houkoku",p:1,q:"6月から算定する場合、8月提出の中間報告書の実績期間はいつですか。",a:"6月から賃上げの場合は同年6月・7月分を報告します。4月から賃上げしていても、4月・5月分ではなく6月・7月分を報告します。",src:"疑義解釈その5 問6",url:U.g5},
+  {s:"med",t:"houkoku",p:1,q:"令和7年度の評価料収入を令和8年度に繰り越した場合、実績報告はどう書きますか。",a:"改定前の施設基準に基づき令和8年12月までに賃金改善措置を行う必要があります。令和8年度の実績報告書では、繰越額を「前年度からの繰越額（令和8年度分報告時のみ記載）」欄に、実績は「ベア等に伴う賞与・時間外手当・法定福利費等の増加分に用いた額」に記載します。",src:"疑義解釈その5 問1",url:U.g5},
+  {s:"med",t:"houkoku",p:1,q:"法定福利費の増加分は概算でよいですか。上限はありますか。",a:"合理的な方法に基づく概算でよく、概算の場合は最大16.5％です。任意加入制度の増加分（退職手当共済の掛金等）や企業型確定拠出年金の掛金は含みません。範囲は健康保険・介護保険・厚生年金・子ども子育て拠出金・雇用保険・労災保険等の事業者負担増加分です。",src:"疑義解釈その7 問1",url:U.g7},
+  {s:"med",t:"houkoku",p:1,q:"賃金水準を引き下げたうえで賃金改善を行う場合の届出は。",a:"職員の賃金水準（評価料による改善分を除く）を引き下げたうえで改善する場合は、収支状況・引下げ内容等を記載した「特別事情届出書」（様式94）を届け出ます。年度を超えて引き下げる場合は、次年度の中間報告書提出時に再度届け出ます。",src:"施設基準通知 各区分の届出に関する事項(3)",url:U.shisetsu},
+
+  {s:"med",t:"houjin",p:1,q:"法人内の複数医療機関で通算して届出できますか。様式は。",a:"法人内で同一給与体系の複数機関について「月額賃金総額」「対象職員数」を通算して届出する場合、(Ⅱ)は様式96・入院は様式97の作成にあたり様式99を用います。実績報告書・中間報告書を集約する場合は様式100の別添2を用います。",src:"施設基準通知 第106(3)(5)・第107(2)(5)",url:U.shisetsu},
+  {s:"med",t:"houjin",p:1,q:"通算届出で、施設基準を満たさない機関・届出しない機関は対象に含めますか。",a:"含めません。対象職員数や社会保険診療等収入金額の割合が施設基準に満たない機関、評価料の届出を行わない機関は、報告書の実績や届出区分の算出対象に含めません。",src:"疑義解釈その5 問2",url:U.g5},
+  {s:"med",t:"houjin",p:1,q:"継続的賃上げ（注5等）の施設基準も法人通算できますか。",a:"できません。注5等の継続的賃上げに係る施設基準は法人通算不可で、届出を行う機関ごとに施設基準を満たす必要があります。",src:"疑義解釈その5 問3",url:U.g5},
+
+  /* ===== 介護・障害福祉（処遇改善加算）主に二次情報・要確認 ===== */
+  {s:"care",t:"kaitei",p:0,q:"令和8年度は4〜5月と6月以降で加算区分が違うと聞きました。どう申請しますか。",a:"4月・5月は従来の4区分（Ⅰ〜Ⅳ・令和6年度の加算率のまま）、6月から新6区分（Ⅰイ・Ⅰロ・Ⅱイ・Ⅱロ・Ⅲ・Ⅳ）に切り替わり率も変わります。計画書は「基本情報シート＋別紙様式2-1＋2-2（4-5月分）＋2-3（6月以降分）」を一体で令和8年4月15日までに提出します（4月からの算定分）。",src:"自治体解説（大阪府・大阪市ほか）※原文突合要",url:U.kaigo},
+  {s:"care",t:"kaitei",p:0,q:"6月から区分名が変わるだけの場合、体制届（一覧表）は必要ですか。",a:"「Ⅰ→Ⅰイ」等、令和8年6月改定に伴う区分名の移行のみであれば、体制届の提出は不要とする運用が示されています。加算率が実質的に変わる区分変更を行う場合は別紙様式4（変更届）の提出が必要です。",src:"自治体運用（大阪府）※要確認",url:U.kaigo},
+  {s:"care",t:"kaitei",p:0,q:"訪問看護・訪問リハ・居宅介護支援など6月から新設のサービスの申請期限は。",a:"これらは6月からの算定のため、体制届は居宅系5月15日・施設系6月1日（6月15日まで可）、計画書は6月15日が期限とされています。",src:"老発0313第6号（所在確認・本文未読）",url:U.kaigoTsuchi},
+
+  {s:"care",t:"zure",p:0,q:"加算額が計画より増えた／減った場合、賃金改善はどうすればよいですか。",a:"加算は実績（利用実績×加算率）で変動します。加算の総額以上を賃金改善に充てることが必要で、増えた分は当年度内に追加配分、減った分でも計画した賃金改善が加算を上回るよう調整します。当年度の超過分を翌年度に繰り越すことはできません。",src:"厚労省Q&A（賃金改善の方法）※原文突合要",url:U.kaigoR7QA},
+  {s:"care",t:"zure",p:0,q:"加算額が見込みを下回り、賃金改善実施額が加算額を下回りそうです。返還ですか。",a:"賃金改善実施額が加算額を下回ると原則返還対象ですが、不足分を賞与等の一時金で追加配分すれば返還を求めない取扱いが示されています。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"chosei",p:0,q:"まず基本給を計画どおり上げ、上振れ・下振れ分を賞与で調整してよいですか。",a:"可能です。実務では「基本給等で恒常的部分を引き上げ→加算の増減分を期末の一時金で調整」する方法が一般的で、不足分を一時金で埋めれば返還を回避できます。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"chosei",p:0,q:"月額賃金改善要件は一時金（賞与）だけで満たせますか。",a:"満たせません。月額賃金改善要件は「新加算Ⅳ相当額の1/2以上を基本給または決まって毎月支払われる手当で改善」することが必要で、一時金はこの1/2部分に算入できません。一時金は基本給等の改善を確保したうえでの上乗せ・調整として用います。",src:"別紙1（老発0313第6号）／解説（二次）※金額基準は原文確認要",url:U.kaigoRate},
+  {s:"care",t:"chosei",p:0,q:"これまで一時金で配分していた分を基本給の改善に振り替えてよいですか。",a:"従前に手当・一時金で行っていた賃金改善の一部を減額し、その分を基本給の改善に切り替えて月額賃金改善要件を満たすことが認められています。",src:"厚労省Q&A（賃金改善方法）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"chosei",p:0,q:"個々の職員の賃金が結果的に下がるのは問題ですか。",a:"事業所全体の賃金水準を低下させないことが前提で、加えて個々の職員の賃金が低下しないよう努めることとされています。経営悪化等で引き下げる場合も合理的理由と労使合意、業績変動部分との明確な区分が必要です。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"shukei",p:0,q:"賃金改善額はどのように集計しますか。",a:"職員に実際に支払った賃金改善額を積み上げ、これに賃金改善に伴う法定福利費等の事業主負担増加分を加えて集計できます（積み上げ方式）。",src:"実績報告の考え方（二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"shukei",p:0,q:"法定福利費等の事業主負担増加分の簡便計算式は。",a:"標準式は「加算前年度の法定福利費等の事業主負担分総額 ÷ 加算前年度の賃金総額 × 加算当年度の賃金改善実績額」です。実態に合わない場合は説明可能な他の合理的方法も認められます。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"shukei",p:0,q:"「加算がなかった場合の賃金水準」（比較基準）はいつ時点ですか。",a:"原則として、初めて処遇改善加算（旧3加算・交付金等を含む）を算定した年度の前年度の賃金水準です。職員構成の変動等で推計が困難な場合は、営業計画・賃金計画に基づく試算も可能です。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"shukei",p:0,q:"賃金改善実施期間はいつからいつまでですか。",a:"原則、当該年度の4月（年度途中で算定開始した場合はその月）から翌年3月までの最長12か月です。支給の実施月は算定対象月と同一でなくても差し支えありません。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"shukei",p:0,q:"加算の支給時期は算定対象月とずれてよいですか。",a:"よいです。①算定月中に支払、②翌月に支払、③国保連の審査後に支払、のいずれのパターンも選択できます。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"taisho",p:0,q:"一時金は賃金改善実施期間内に支給しないと算入できませんか。",a:"賃金改善実施期間内に行われた賃金改善が集計対象です。実施期間外に支払う一時金は原則として当年度の賃金改善額に算入できないため、支給時期の設計に注意してください。",src:"賃金改善実施期間の考え方（二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"taisho",p:0,q:"期中に退職した職員・入職した職員はどう扱いますか。",a:"退職者・入職者を含め、賃金改善実施期間内に在籍し実際に賃金改善を受けた職員への支給額を集計します。細目は公式明記が弱いため要確認です。",src:"実績報告の考え方（二次）※要確認",url:U.kaigoApply},
+  {s:"care",t:"taisho",p:0,q:"派遣労働者にも配分できますか。",a:"派遣元と協議し、加算が派遣職員の給与に反映される仕組みであれば対象にできます。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"houkoku",p:0,q:"実績報告書はいつまでに出しますか。",a:"最終の加算支払（国保連入金）月の翌々月末日です。令和8年度分は令和9年7月31日（令和9年3月分の支払が令和9年5月のため）。",src:"老発0313第6号（所在確認）＋自治体（二次）",url:U.kaigoTsuchi},
+  {s:"care",t:"houkoku",p:0,q:"どういう場合に返還が生じますか。回避方法は。",a:"賃金改善実施額（法定福利費増を含む）が加算総額を1円でも下回ると返還対象になり得ます。回避策は、年度末までに不足分を賞与等の一時金で追加配分することです。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"houkoku",p:0,q:"実績報告書（別紙様式3）の構成は。",a:"「基本情報入力」シート＋「別紙様式3-2」（事業所別・加算の総額等を国保連の“お知らせ”から転記）＋「別紙様式3-1」（総括・要件確認。月額賃金改善要件や年額440万円要件を満たす職員数の欄）です。令和8年度様式の欄名レベルは原本での確認を推奨します。",src:"様式（apply.html）＋既往整理 ※要確認",url:U.kaigoApply},
+  {s:"care",t:"houkoku",p:0,q:"月額賃金改善要件を満たしているかは、実績報告でどう確認しますか。",a:"別紙様式3-1に月額賃金改善要件の確認欄があり、新加算Ⅳ相当額の1/2以上を基本給等で改善したことを報告します。",src:"既往整理（R7様式）＋厚労省Q&A ※様式欄名は要確認",url:U.kaigoApply},
+
+  {s:"care",t:"tokurei",p:0,q:"令和8年度特例要件（Ⅰロ・Ⅱロ）の内容は。",a:"介護は次のいずれか＝(ア)ケアプランデータ連携システムの利用、(イ)生産性向上推進体制加算Ⅰ又はⅡの算定、(ウ)社会福祉連携推進法人への所属。",src:"別紙1（老発0313第6号・所在確認）",url:U.kaigoRate},
+  {s:"care",t:"tokurei",p:0,q:"申請時点で特例要件を満たしていない場合、誓約で申請できますか。",a:"令和9年3月末までの対応の誓約で申請時点は充足扱いにできます。達成状況は実績報告書で確認・証明し、未達の場合は返還の可能性があります。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"tokurei",p:0,q:"ケアプランデータ連携システムは「加入」だけでよいですか。",a:"加入のみでは不足です。実際に「利用」し、その利用実績を実績報告書に記載する必要があります。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"tokurei",p:0,q:"令和7年度に要件整備を誓約したが未整備でした。返還ですか。",a:"原則返還対象ですが、令和8年度特例要件を満たし令和8年4月以降に再誓約すれば返還を回避できる取扱いが示されています。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"haibun",p:0,q:"令和6年度で一本化された後、職種間の配分の柔軟性はどこまでありますか。",a:"事業所内で柔軟な配分が認められ、経験・技能のある介護職員の処遇改善を重視しつつ全職種への配分が可能です。役員報酬のみの役員を除き、PT・OT・STや事務員・本部職員にも配分できます（介護職員=介護従事者への配分を基本とすることが望ましい）。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+  {s:"care",t:"haibun",p:0,q:"年額440万円以上の職員にも加算を配分できますか。",a:"令和6年度以降は、年額440万円以上の職員も加算配分の対象に含められます。",src:"厚労省Q&A（公式引用・二次）※要確認",url:U.kaigoR7QA},
+
+  {s:"care",t:"shougai",p:0,q:"障害福祉版の6区分化・水準は介護と同じですか。",a:"介護と同時期（令和8年6月）に6区分化（Ⅰロ・Ⅱロ新設）され、対象は「福祉・介護職員」→「障害福祉従事者」に拡大しました。",src:"障害福祉報酬改定資料（所在確認）",url:U.shougai},
+  {s:"care",t:"shougai",p:0,q:"障害福祉の年収要件は介護と同じですか。",a:"異なります。障害福祉のキャリアパス要件Ⅳの年額賃金要件は460万円以上（介護は440万円）です。",src:"改定資料＋解説（二次）※要確認",url:U.shougai},
+  {s:"care",t:"shougai",p:0,q:"障害福祉で新たに対象になったサービスは。",a:"計画相談支援・地域相談支援（地域移行・地域定着）・障害児相談支援が新規対象（一律5.1％）です。要件は「加算Ⅳに準ずる要件」または「令和8年度特例要件」です。",src:"障害福祉報酬改定資料（所在確認）＋解説（二次）",url:U.shougai},
+  {s:"care",t:"shougai",p:0,q:"障害福祉の特例要件（Ⅰロ・Ⅱロ）の中身は。",a:"ア)職場環境等要件の生産性向上の取組5以上（⑱㉑必須）又はイ)社会福祉連携推進法人所属、＋ウ)加算Ⅱロ相当加算額の1/2以上を月給で配分、です。誓約可・未対応時は返還。",src:"既往整理＋障害福祉Q&A ※要確認",url:U.shougai}
+];
+
+let qaSeido="all", qaTheme="all", qaTerm="";
+function qaHi(text, term){
+  const e = esc(text);
+  if(!term) return e;
+  const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "gi");
+  return e.replace(re, m=>"<mark>"+m+"</mark>");
+}
+function qaThemeLabel(k){ const o=QA_THEMES.find(x=>x.k===k); return o?o.t:k; }
+function renderQaFilters(){
+  const seidoBtns = [["all","すべて"],["med","医療（ベースアップ）"],["care","介護・障害（処遇改善）"]];
+  document.getElementById("qaSeidoFilter").innerHTML = seidoBtns.map(([v,t])=>
+    '<button data-qseido="'+v+'"'+(qaSeido===v?' class="on"':'')+'>'+t+'</button>').join("");
+  const themesPresent = QA_THEMES.filter(th=>QA_DATA.some(d=>d.t===th.k && (qaSeido==="all"||d.s===qaSeido)));
+  document.getElementById("qaThemeFilter").innerHTML =
+    '<button data-qtheme="all"'+(qaTheme==="all"?' class="on"':'')+'>全テーマ</button>'+
+    themesPresent.map(th=>'<button data-qtheme="'+th.k+'"'+(qaTheme===th.k?' class="on"':'')+'>'+esc(th.t)+'</button>').join("");
+}
+function renderQaList(){
+  const term = qaTerm.trim();
+  const list = QA_DATA.filter(d=>{
+    if(qaSeido!=="all" && d.s!==qaSeido) return false;
+    if(qaTheme!=="all" && d.t!==qaTheme) return false;
+    if(term){ const hay=(d.q+" "+d.a+" "+d.src).toLowerCase(); if(!hay.includes(term.toLowerCase())) return false; }
+    return true;
+  });
+  document.getElementById("qaCount").textContent = list.length+" 件のQ&Aを表示中"+(term?"（「"+term+"」で検索）":"");
+  if(!list.length){ document.getElementById("qaList").innerHTML = '<div class="qa-empty">該当するQ&Aがありません。キーワードや絞り込みを変えてみてください。</div>'; return; }
+  document.getElementById("qaList").innerHTML = list.map(d=>{
+    const seidoBadge = d.s==="med" ? '<span class="qa-badge med">医療</span>' : '<span class="qa-badge care">介護・障害</span>';
+    const priBadge = d.p ? '<span class="qa-badge pri">一次確認</span>' : '<span class="qa-badge sec">二次・要確認</span>';
+    const themeBadge = '<span class="qa-badge theme">'+esc(qaThemeLabel(d.t))+'</span>';
+    return '<details class="qa-item"><summary><span class="qtext">'+qaHi(d.q,term)+
+      '<span class="qmeta">'+seidoBadge+themeBadge+priBadge+'</span></span></summary>'+
+      '<div class="qa-ans">'+qaHi(d.a,term)+
+      '<div class="src">出典：'+qaHi(d.src,term)+(d.url?' — <a href="'+d.url+'" target="_blank" rel="noopener">原文・掲載ページを開く</a>':'')+'</div>'+
+      '</div></details>';
+  }).join("");
+}
+function renderQa(){ renderQaFilters(); renderQaList(); }
+document.getElementById("qaSeidoFilter").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return; qaSeido=b.dataset.qseido; qaTheme="all"; renderQa();
+});
+document.getElementById("qaThemeFilter").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return; qaTheme=b.dataset.qtheme; renderQaList(); renderQaFilters();
+});
+document.getElementById("qaSearch").addEventListener("input", function(){ qaTerm=this.value; renderQaList(); });
+renderQa();
+</script>
+</body>
+</html>

@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>助成金ナビ</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --panel:#ffffff; --ink:#1f2933; --sub:#5b6b7b;
+    --line:#dfe4ea; --brand:#1f5c8b; --brand-d:#164562; --accent:#eef4fa;
+    --ok:#e6f4ea; --ok-ink:#1e7d3c; --warn:#fff4e0; --warn-ink:#a86400;
+    --bad:#fdecec; --bad-ink:#b3261e; --chip:#eef2f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Meiryo",sans-serif;
+    font-size:17px;line-height:1.7;}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  header.top{background:var(--brand);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header.top .brand{font-size:22px;font-weight:700;cursor:pointer}
+  header.top .office{font-size:14px;opacity:.85}
+  header.top nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  header.top nav button{background:rgba(255,255,255,.14);color:#fff;border:0;padding:8px 14px;border-radius:8px;font-size:15px;cursor:pointer}
+  header.top nav button:hover{background:rgba(255,255,255,.28)}
+  main{max-width:960px;margin:0 auto;padding:22px 18px 60px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px}
+  h2{font-size:21px;margin:.2em 0 .6em}
+  h3{font-size:18px;margin:1.2em 0 .4em;border-left:5px solid var(--brand);padding-left:10px}
+  .muted{color:var(--sub);font-size:14px}
+  .searchrow{display:flex;gap:10px;flex-wrap:wrap}
+  .searchrow input[type=text]{flex:1;min-width:220px;font-size:18px;padding:12px 14px;border:2px solid var(--line);border-radius:10px}
+  .btn{background:var(--brand);color:#fff;border:0;padding:12px 20px;border-radius:10px;font-size:16px;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--brand-d)}
+  .btn.big{font-size:19px;padding:16px 22px;width:100%;margin-top:12px}
+  .btn.ghost{background:var(--accent);color:var(--brand-d)}
+  .scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:6px}
+  .scene{background:var(--accent);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;text-align:left}
+  .scene:hover{border-color:var(--brand);background:#e5eef7}
+  .scene .ic{font-size:26px}
+  .scene .lb{font-weight:700;font-size:17px;margin-top:4px}
+  .scene .ds{font-size:13px;color:var(--sub)}
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px}
+  .filters label{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+  .filters select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff}
+  .count{margin:14px 0 8px;font-weight:700}
+  .card{border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:12px;cursor:pointer;background:#fff}
+  .card:hover{border-color:var(--brand);box-shadow:0 2px 10px rgba(31,92,139,.10)}
+  .card .nm{font-size:18px;font-weight:700}
+  .card .cs{color:var(--sub);font-weight:600;font-size:15px}
+  .card .sm{margin:6px 0;font-size:15px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  .chip{background:var(--chip);border-radius:999px;padding:2px 10px;font-size:12.5px;color:var(--sub)}
+  .badge{border-radius:6px;padding:2px 9px;font-size:12.5px;font-weight:700}
+  .b-ok{background:var(--ok);color:var(--ok-ink)}
+  .b-warn{background:var(--warn);color:var(--warn-ink)}
+  .b-bad{background:var(--bad);color:var(--bad-ink)}
+  .b-def{background:#e7eefc;color:#274b8f}
+  .b-chg{background:#efe7fb;color:#5b3ca8}
+  .b-new{background:#d3f0ec;color:#0a7d6e}
+  .chgbox{border:1px solid #f0d9a8;background:#fffaf0;border-radius:10px;padding:12px 14px;margin:12px 0}
+  .chgbox .chgttl{font-weight:700;color:#a86400;font-size:14px;margin-bottom:6px}
+  .diff{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+  .diff .d-old{background:#fdecec;color:#b3261e;padding:2px 8px;border-radius:6px;text-decoration:line-through}
+  .diff .d-new{background:#e6f4ea;color:#1e7d3c;padding:2px 8px;border-radius:6px;font-weight:700}
+  .diff .d-arw{color:#5b6b7b}
+  .chrow{border-top:1px solid var(--line);padding:8px 0;font-size:14px}
+  .chrow .chdt{color:var(--sub);font-weight:600}
+  .guidebox{border:1px solid #cfe0f0;background:var(--accent);border-radius:10px;padding:12px 14px;margin:6px 0 12px}
+  .guidebox .dlbtn{display:inline-block;background:var(--brand);color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;font-size:15px}
+  .guidebox .dlbtn:hover{background:var(--brand-d);text-decoration:none}
+  .guidebox .gt{font-size:13px;color:var(--sub);margin-top:7px}
+  .guidebox.miss{border-color:#f3c9c6;background:var(--bad)}
+  .guidebox.miss .gm{color:var(--bad-ink);font-size:14px;font-weight:600}
+  .sheet .psec{font-size:16px;font-weight:700;margin:16px 0 6px;border-left:5px solid var(--brand);padding-left:10px}
+  .sheet .pmerit{background:var(--accent);border-radius:8px;padding:12px 14px}
+  .sheet .pfall{border-left:3px solid #e0a800;background:#fffaf0;padding:8px 12px;margin-top:8px}
+  .sheet .pcta{background:var(--accent);border-radius:8px;padding:14px 16px;margin-top:16px}
+  .sheet .pchk{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+  .sheet .pchk .box2{width:15px;height:15px;border:1.5px solid #555;flex:0 0 auto;margin-top:3px}
+  .sheet .pchk.sp{color:var(--brand-d)} .sheet .pchk.sp .box2{border-color:var(--brand)}
+  .sheet .pkey{background:#fdecec;border-left:4px solid #b3261e;padding:9px 14px;margin-top:10px}
+  .sheet .pkey .pkh{color:#b3261e;font-weight:700;font-size:14px;margin-bottom:4px}
+  .sheet .pkey .pkb{font-size:14px}
+  .sheet .pkey .pkb ul{margin:2px 0 0 18px} .sheet .pkey .pkb li{margin:4px 0}
+  .simrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .simrow .simout{font-weight:700;color:var(--brand-d)}
+  .srcic{font-size:13px}
+  .dltag{display:inline-block;margin-left:8px;background:var(--accent);color:var(--brand-d);border:1px solid #cfe0f0;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}
+  .dltag:hover{background:#e5eef7;text-decoration:none}
+  .confirm{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;font-size:13.5px;color:var(--sub)}
+  .confirm b{color:var(--ink)}
+  .wq{font-size:20px;font-weight:700;margin-bottom:12px}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+  .opt{border:2px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;background:#fff;font-size:17px;text-align:left}
+  .opt:hover{border-color:var(--brand);background:var(--accent)}
+  .steps{color:var(--sub);font-size:14px;margin-bottom:8px}
+  .backlink{display:inline-block;margin-bottom:10px;cursor:pointer;color:var(--brand)}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+  table.amt{width:100%;border-collapse:collapse;margin-top:6px}
+  table.amt th,table.amt td{border:1px solid var(--line);padding:8px 10px;text-align:left;font-size:15px;vertical-align:top}
+  table.amt th{background:var(--accent);white-space:nowrap}
+  .warnbox{background:var(--bad);border:1px solid #f3c9c6;border-radius:10px;padding:12px 14px}
+  .warnbox ul{margin:6px 0 0 18px}
+  ul.clean{margin:6px 0 0 18px} ul.clean li{margin:3px 0}
+  .flow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .flow .st{flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px}
+  .flow .st .ac{font-size:12px;font-weight:700;border-radius:5px;padding:1px 7px;display:inline-block;margin-bottom:4px}
+  .ac-office{background:#e7eefc;color:#274b8f}.ac-client{background:#e6f4ea;color:#1e7d3c}.ac-gov{background:#fff4e0;color:#a86400}
+  footer{max-width:960px;margin:0 auto;padding:20px 18px 50px;color:var(--sub);font-size:13px;border-top:1px solid var(--line)}
+  .empty{padding:30px;text-align:center;color:var(--sub)}
+  .kv{margin:4px 0}.kv b{display:inline-block;min-width:6.5em;color:var(--sub);font-weight:600}
+  /* ---- 追加画面（更新情報・用語集・締切・依頼資料・進捗） ---- */
+  .sumbar{background:var(--accent);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:14px}
+  .sumbar .lbl{font-weight:700;color:var(--brand-d)}
+  .sumbar a{margin-left:auto;font-weight:600;white-space:nowrap}
+  .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:8px 0 4px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;background:#fff}
+  .stat .n{font-size:26px;font-weight:800;line-height:1.2}
+  .stat .l{font-size:13px;color:var(--sub);margin-top:2px}
+  .stat.ok .n{color:var(--ok-ink)} .stat.warn .n{color:var(--warn-ink)} .stat.bad .n{color:var(--bad-ink)}
+  .updrow{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .updrow .dt{color:var(--sub);font-size:13px;min-width:6.5em}
+  .updrow .nm{font-weight:600}
+  .gindex{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .gindex button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 13px;font-size:16px;cursor:pointer}
+  .gindex button:hover{border-color:var(--brand);background:var(--accent)}
+  .grow{border-top:1px solid var(--line);padding:12px 0}
+  .grow:first-of-type{border-top:0}
+  .grow .term{font-size:18px;font-weight:700}
+  .grow .yomi{color:var(--sub);font-size:13px;margin-left:8px}
+  .calc{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:8px}
+  .calc label{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+  .calc input,.calc select{padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .calcout{margin-top:12px;font-size:18px;font-weight:700;color:var(--brand-d)}
+  .form label{display:block;font-size:14px;color:var(--sub);margin:10px 0 2px}
+  .form input[type=text],.form input[type=date],.form select{width:100%;max-width:420px;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:16px;font-family:inherit}
+  .cklist .ckrow{display:flex;gap:8px;margin:6px 0;align-items:center}
+  .cklist .ckrow input[type=text]{flex:1;max-width:none;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .cklist .del{background:var(--bad);color:var(--bad-ink);border:0;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:700;white-space:nowrap}
+  .prog .pstep{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+  .prog .pstep .chk{width:24px;height:24px;border:2px solid var(--brand);border-radius:5px;flex:0 0 auto;cursor:pointer;margin-top:1px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+  .prog .pstep.done{background:var(--ok)} .prog .pstep.done .chk{background:var(--ok-ink);border-color:var(--ok-ink)}
+  /* A4 印刷シート（依頼資料・進捗シート共用） */
+  .sheet{background:#fff;border:1px solid var(--line);border-radius:8px;padding:26px 30px;max-width:720px;margin:16px auto;color:#000}
+  .sheet .lh{text-align:right;font-size:13px;color:#333;border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:16px}
+  .sheet .lh .on{font-size:16px;font-weight:700;color:#000}
+  .sheet h2.title{font-size:18px;border:0;margin:8px 0 14px;padding:0;text-align:center;line-height:1.5}
+  .sheet .to{font-size:16px;font-weight:700;margin-bottom:8px}
+  .sheet .ckitem{display:flex;gap:8px;align-items:flex-start;margin:7px 0;font-size:15px}
+  .sheet .box{width:16px;height:16px;border:1.5px solid #000;flex:0 0 auto;margin-top:3px}
+  .sheet .sig{margin-top:22px;text-align:right;font-size:14px}
+  @media print{
+    header.top,footer,.no-print,.backlink{display:none!important}
+    body{background:#fff;font-size:13px}
+    main{max-width:none;margin:0;padding:0}
+    .panel{border:0;padding:0;margin:0}
+    .sheet{border:0;border-radius:0;max-width:none;margin:0;padding:0;box-shadow:none}
+    .prog .pstep{break-inside:avoid;page-break-inside:avoid}
+    @page{size:A4;margin:14mm}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand" onclick="location.hash='#/'">助成金ナビ</div>
+  <div class="office" id="officeName"></div>
+  <nav>
+    <button onclick="location.hash='#/'">検索</button>
+    <button onclick="location.hash='#/wizard'">診断</button>
+    <button onclick="location.hash='#/deadlines'">締切</button>
+    <button onclick="location.hash='#/glossary'">用語集</button>
+    <button onclick="location.hash='#/updates'">更新情報</button>
+  </nav>
+</header>
+<main id="app"></main>
+<footer>
+  <div>最終判断は最新の支給要領と所轄労働局への確認によります。金額・要件は改正されることがあります。</div>
+  <div class="muted" id="builtAt"></div>
+</footer>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+"use strict";
+(function(){
+  var DATA = window.SUBSIDY_DATA;
+  var _cd = window.COMMON_DISQUALIFIERS;
+  var COMMON = Array.isArray(_cd) ? _cd : ((_cd && _cd.common_disqualifiers) || []);
+  var CFG = window.OFFICE_CONFIG || {};
+  var app = document.getElementById('app');
+
+  document.getElementById('officeName').textContent = CFG.office_name || '';
+  if (window.DATA_BUILT_AT) document.getElementById('builtAt').textContent = 'データ基準日: ' + window.DATA_BUILT_AT;
+
+  if (!Array.isArray(DATA) || DATA.length === 0){
+    app.innerHTML = '<div class="panel empty"><h2>データが読み込めません</h2>'
+      + '<p>data.js が未生成の可能性があります。<br>tools/build_data.py を実行して site/data.js を生成してください。</p></div>';
+    return;
+  }
+
+  // ---- helpers ----
+  function norm(s){ if(!s) return ''; s=(''+s).normalize('NFKC').toLowerCase();
+    return s.replace(/[ァ-ヶ]/g, function(c){return String.fromCharCode(c.charCodeAt(0)-0x60);}); }
+  var PR = {'定番':0,'標準':1,'レア':2};
+  function prRank(d){ return (d.priority in PR)?PR[d.priority]:3; }
+  function tag(d,t){ return (d.purpose_tags||[]).indexOf(t)>=0; }
+  function sizeOf(d){ return (d.target_employers && d.target_employers.size) || ''; }
+  function blob(d){ return (d.target_workers||'')+' '+(d.summary||'')+' '+(d.name||'')+' '+(d.course||''); }
+  function re(rx,d){ return rx.test(blob(d)); }
+  function smeOnly(d){ return /中小.*のみ|中小企業事業主のみ|中小建設|中小企業のみ|中小企業等のみ|中小企業・小規模事業者のみ|中小企業者又は|中小企業事業者のみ|都内中小|県内|中小企業等のみ/.test(sizeOf(d)); }
+  function largeOK(d){ return !smeOnly(d); }
+  function daysSince(iso){ var d=new Date(iso); if(isNaN(d)) return null; return Math.floor((Date.now()-d.getTime())/86400000); }
+
+  // ---- 進捗情報・日付ヘルパー ----
+  function computeStats(){
+    var s={total:DATA.length,active:0,needs_check:0,provisional:0,abolished:0,stale90:0,latest_verified:''};
+    DATA.forEach(function(d){
+      if(d.status==='active') s.active++;
+      else if(d.status==='要確認') s.needs_check++;
+      else if(d.status==='経過措置のみ') s.provisional++;
+      else if(d.status==='廃止') s.abolished++;
+      var ds=daysSince(d.last_verified);
+      if(d.status==='active' && ds!=null && ds>90) s.stale90++;
+      if(d.last_verified && d.last_verified>s.latest_verified) s.latest_verified=d.last_verified;
+    });
+    return s;
+  }
+  var STATS = window.DATA_STATS || computeStats();
+  var WD = ['日','月','火','水','木','金','土'];
+  function fmtDate(d){ return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+WD[d.getDay()]+'）'; }
+  function addMonths(d,m){ // 月末クランプ（例: 1/31 の1か月後 = 2月末）
+    var day=d.getDate();
+    var t=new Date(d.getFullYear(), d.getMonth()+m, 1);
+    var last=new Date(t.getFullYear(), t.getMonth()+1, 0).getDate();
+    t.setDate(Math.min(day,last));
+    return t;
+  }
+  function gojuonRow(reading){
+    var c=(reading||'').charAt(0);
+    var rows=[['あ','あいうえおぁぃぅぇぉ'],['か','かきくけこがぎぐげご'],['さ','さしすせそざじずぜぞ'],
+      ['た','たちつてとだぢづでどっ'],['な','なにぬねの'],['は','はひふへほばびぶべぼぱぴぷぺぽ'],
+      ['ま','まみむめも'],['や','やゆよゃゅょ'],['ら','らりるれろ'],['わ','わをんゐゑ']];
+    for(var i=0;i<rows.length;i++){ if(rows[i][1].indexOf(c)>=0) return rows[i][0]; }
+    return '他';
+  }
+  function summaryBar(){
+    var s=STATS;
+    var bar=el('div',{class:'sumbar'});
+    bar.appendChild(el('span',{class:'lbl'},'データ基準日 '+(window.DATA_BUILT_AT||'-')));
+    bar.appendChild(el('span',{class:'chip'},'確認済 '+s.active+'件'));
+    if(s.stale90) bar.appendChild(el('span',{class:'badge b-warn',text:'要再確認 '+s.stale90}));
+    if(s.needs_check) bar.appendChild(el('span',{class:'badge b-bad',text:'要確認 '+s.needs_check}));
+    if(s.provisional) bar.appendChild(el('span',{class:'badge b-warn',text:'経過措置 '+s.provisional}));
+    if(s.abolished) bar.appendChild(el('span',{class:'badge b-bad',text:'廃止 '+s.abolished}));
+    bar.appendChild(el('a',{href:'#/updates'},'更新情報を見る →'));
+    return bar;
+  }
+
+  function el(tag, attrs, kids){
+    var e=document.createElement(tag);
+    if(attrs) for(var k in attrs){
+      if(k==='class') e.className=attrs[k];
+      else if(k==='text') e.textContent=attrs[k];
+      else if(k==='html') e.innerHTML=attrs[k];
+      else if(k.slice(0,2)==='on') e[k]=attrs[k];
+      else e.setAttribute(k,attrs[k]);
+    }
+    if(kids) (Array.isArray(kids)?kids:[kids]).forEach(function(c){
+      if(c==null) return;
+      if(c && c.nodeType) e.appendChild(c);
+      else e.appendChild(document.createTextNode(typeof c==='string'?c:String(c)));
+    });
+    return e;
+  }
+  function statusBadge(d){
+    if(d.status==='廃止') return el('span',{class:'badge b-bad',text:'廃止'});
+    if(d.status==='要確認') return el('span',{class:'badge b-bad',text:'要確認'});
+    if(d.status==='経過措置のみ') return el('span',{class:'badge b-warn',text:'経過措置のみ'});
+    var ds=daysSince(d.last_verified);
+    if(ds!=null && ds>90) return el('span',{class:'badge b-warn',text:'要再確認(90日超)'});
+    return el('span',{class:'badge b-ok',text:'確認済 '+(d.last_verified||'')});
+  }
+
+  // ---- 変更履歴（change_history）ヘルパー ----
+  function latestChange(d){
+    var h=d.change_history; if(!Array.isArray(h)||!h.length) return null;
+    return h.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');})[0];
+  }
+  function changeBadge(d){ // 直近90日以内の変更のみバッジ表示
+    var c=latestChange(d); if(!c||!c.date) return null;
+    var ds=daysSince(c.date); if(ds==null||ds>90) return null;
+    return el('span',{class:'badge b-chg',text:'変更 '+c.date});
+  }
+  function isNew(d){ if(!d.added_on) return false; var ds=daysSince(d.added_on); return ds!=null && ds<=90; }
+  function newBadge(d){ // 追加から90日以内は「新規」バッジ
+    return isNew(d) ? el('span',{class:'badge b-new',text:'新規'}) : null;
+  }
+  function guidelineOf(d){ // 最新の支給要領（無ければ要綱/要領）。明示 guideline 優先、無ければ source_urls から自動検出
+    if(d.guideline && d.guideline.url) return d.guideline;
+    var srcs=d.source_urls||[];
+    function find(rx){ return srcs.filter(function(s){return rx.test(s.title||'');})[0]; }
+    var g=find(/支給要領/)||find(/交付要綱|要綱/)||find(/要領/);
+    return g?{title:g.title,url:g.url}:null;
+  }
+  function changeSummaryBox(d){ // 詳細ページ上部の「直近の変更」枠（直近90日以内のみ）
+    var c=latestChange(d); if(!c) return null;
+    var ds=daysSince(c.date); if(ds==null||ds>90) return null;
+    var box=el('div',{class:'chgbox'});
+    box.appendChild(el('div',{class:'chgttl'},'直近の変更（'+(c.date||'')+(c.field?('・'+c.field):'')+'）'));
+    if(c.summary) box.appendChild(el('div',{style:'font-size:14px;margin-bottom:6px'},c.summary));
+    if(c.before||c.after){
+      var diff=el('div',{class:'diff'});
+      if(c.before) diff.appendChild(el('span',{class:'d-old',text:'旧: '+c.before}));
+      if(c.before&&c.after) diff.appendChild(el('span',{class:'d-arw',text:'→'}));
+      if(c.after) diff.appendChild(el('span',{class:'d-new',text:'新: '+c.after}));
+      box.appendChild(diff);
+    }
+    if(c.source&&c.source.url){ var s=el('div',{class:'muted',style:'margin-top:6px'}); s.appendChild(document.createTextNode('出典: ')); s.appendChild(el('a',{href:c.source.url,target:'_blank',rel:'noopener'},c.source.title||c.source.url)); box.appendChild(s); }
+    else if(c.source&&c.source.title){ box.appendChild(el('div',{class:'muted',style:'margin-top:6px'},'出典: '+c.source.title)); }
+    return box;
+  }
+  function changeHistoryList(d){ // 詳細ページの変更履歴（全件・新しい順）
+    var h=d.change_history; if(!Array.isArray(h)||!h.length) return null;
+    var wrap=el('div');
+    wrap.appendChild(el('h3',null,'🕘 変更履歴'));
+    h.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');}).forEach(function(c){
+      var row=el('div',{class:'chrow'});
+      row.appendChild(el('span',{class:'chdt'},(c.date||'')+(c.field?('・'+c.field):'')));
+      var txt=c.summary || ((c.before||'')+' → '+(c.after||''));
+      row.appendChild(document.createTextNode(' — '+txt));
+      if(c.source&&c.source.url){ row.appendChild(document.createTextNode('　')); row.appendChild(el('a',{href:c.source.url,target:'_blank',rel:'noopener'},'出典')); }
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  // ---- facets ----
+  function distinct(fn){ var s={}; DATA.forEach(function(d){var v=fn(d); if(v) s[v]=1;}); return Object.keys(s); }
+  var CATS = ['雇用維持','在籍型出向支援','再就職支援','転職・再就職拡大支援','雇入れ','雇用環境の整備','両立支援','人材開発','労働条件・職場環境','地域独自']
+             .filter(function(c){return DATA.some(function(d){return d.category===c;});});
+  var TAGS = (function(){ var c={}; DATA.forEach(function(d){(d.purpose_tags||[]).forEach(function(t){c[t]=(c[t]||0)+1;});});
+             return Object.keys(c).sort(function(a,b){return c[b]-c[a];}); })();
+  var REGIONS = distinct(function(d){return d.region;});
+
+  // ---- diagnosis config ----
+  var DO_OPTIONS = [
+    {key:'hire',  label:'人を雇いたい',            test:function(d){return d.category==='雇入れ'||['新規雇入れ','障害者雇用','高齢者'].some(function(t){return tag(d,t);});}},
+    {key:'treat', label:'社員の待遇を良くしたい',   test:function(d){return ['賃上げ','処遇改善','正社員化','非正規雇用'].some(function(t){return tag(d,t);});}},
+    {key:'balance',label:'育児・介護と両立させたい', test:function(d){return d.category==='両立支援'||['育休','両立支援','子育て支援','女性活躍'].some(function(t){return tag(d,t);});}},
+    {key:'train', label:'教育・研修をしたい',       test:function(d){return d.category==='人材開発'||['訓練・研修','スキルアップ','リスキリング'].some(function(t){return tag(d,t);});}},
+    {key:'env',   label:'職場環境・制度をつくりたい',test:function(d){return d.category==='労働条件・職場環境'||['職場環境改善','雇用管理改善','労働時間削減','テレワーク','DX','生産性向上','施設整備','設備投資'].some(function(t){return tag(d,t);});}},
+    {key:'keep',  label:'雇用を守りたい',           test:function(d){return ['雇用維持','在籍型出向支援','再就職支援'].indexOf(d.category)>=0;}}
+  ];
+  var TARGET_OPTIONS = [
+    {key:'',      label:'特に指定しない',           test:function(){return true;}},
+    {key:'senior',label:'高齢者',                   test:function(d){return ['高齢者','高年齢'].some(function(t){return tag(d,t);})||re(/高年齢|65歳|高齢/,d);}},
+    {key:'disab', label:'障害者',                   test:function(d){return tag(d,'障害者雇用')||re(/障害者/,d);}},
+    {key:'hardship',label:'母子家庭・就職が困難な方',test:function(d){return re(/母子|ひとり親|就職困難|特定求職者|生活保護|発達障害|難病/,d);}},
+    {key:'trial', label:'経験の浅い人を試しに雇用',  test:function(d){return re(/トライアル|試行|職業経験/,d);}},
+    {key:'nonreg',label:'非正規社員の処遇改善',      test:function(d){return ['非正規雇用','正社員化'].some(function(t){return tag(d,t);});}},
+    {key:'women', label:'女性の活躍推進',            test:function(d){return tag(d,'女性活躍')||re(/女性/,d);}}
+  ];
+  var SCENES = [
+    {key:'startup', ic:'🚀', label:'スタートアップで使える', ds:'創業初期に取り組みやすい定番中心',
+      match:function(d){ return (d.priority==='定番'||['正社員化','新規雇入れ','賃上げ','育休','訓練・研修'].some(function(t){return tag(d,t);})) && d.difficulty!=='高'; }},
+    {key:'firsthire', ic:'🧑‍💼', label:'初めて人を雇う', ds:'新規雇入れ・トライアル雇用',
+      match:function(d){ return d.category==='雇入れ'||re(/トライアル/,d); }},
+    {key:'raise', ic:'💴', label:'賃上げしたい', ds:'賃金アップ・処遇改善',
+      match:function(d){ return tag(d,'賃上げ')||tag(d,'処遇改善')||re(/賃金規定|業務改善助成金/,d); }},
+    {key:'balance', ic:'👶', label:'仕事と育児の両立支援', ds:'育休・両立支援',
+      match:function(d){ return d.category==='両立支援'||['育休','両立支援','子育て支援'].some(function(t){return tag(d,t);}); }}
+  ];
+
+  // ================= ROUTER =================
+  function route(){
+    var h = location.hash || '#/';
+    if(h.indexOf('#/detail/')===0){ renderDetail(decodeURIComponent(h.slice(9))); }
+    else if(h.indexOf('#/request/')===0){ renderRequest(decodeURIComponent(h.slice(10))); }
+    else if(h.indexOf('#/progress/')===0){ renderProgress(decodeURIComponent(h.slice(11))); }
+    else if(h.indexOf('#/proposal/')===0){ renderProposal(decodeURIComponent(h.slice(11))); }
+    else if(h.indexOf('#/wizard')===0){ renderWizard(); }
+    else if(h.indexOf('#/scene/')===0){ renderScene(decodeURIComponent(h.slice(8))); }
+    else if(h.indexOf('#/deadlines')===0){ renderDeadlines(); }
+    else if(h.indexOf('#/glossary')===0){ renderGlossary(); }
+    else if(h.indexOf('#/updates')===0){ renderUpdates(); }
+    else { renderHome(); }
+    try{ window.scrollTo(0,0); }catch(e){}
+  }
+  window.addEventListener('hashchange', route);
+
+  // ================= HOME =================
+  var homeState = {q:'', category:'', tag:'', size:'', region:'', difficulty:'', status:''};
+  function renderHome(){
+    app.innerHTML='';
+    app.appendChild(summaryBar());
+    var top = el('div',{class:'panel'});
+    top.appendChild(el('h2',null,'助成金をさがす'));
+    var row = el('div',{class:'searchrow'});
+    var input = el('input',{type:'text',placeholder:'キーワード（例: 正社員 / 育休 / 障害者 / 賃上げ）',value:homeState.q});
+    input.addEventListener('input',function(){homeState.q=input.value;draw();});
+    input.addEventListener('keydown',function(e){if(e.key==='Enter')draw();});
+    row.appendChild(input);
+    row.appendChild(el('button',{class:'btn',onclick:draw},'検索'));
+    top.appendChild(row);
+    top.appendChild(el('button',{class:'btn big',onclick:function(){location.hash='#/wizard';}},'▶ かんたん診断をはじめる（質問に答えるだけ）'));
+
+    top.appendChild(el('h3',null,'シーンからさがす'));
+    var sc = el('div',{class:'scenes'});
+    SCENES.forEach(function(s){
+      var c=el('div',{class:'scene',onclick:(function(k){return function(){location.hash='#/scene/'+k;};})(s.key)});
+      c.appendChild(el('div',{class:'ic',text:s.ic}));
+      c.appendChild(el('div',{class:'lb',text:s.label}));
+      c.appendChild(el('div',{class:'ds',text:s.ds}));
+      sc.appendChild(c);
+    });
+    top.appendChild(sc);
+
+    top.appendChild(el('h3',null,'条件でしぼりこむ'));
+    var f = el('div',{class:'filters'});
+    f.appendChild(sel('category','分類',[''].concat(CATS)));
+    f.appendChild(sel('tag','目的タグ',[''].concat(TAGS)));
+    f.appendChild(sel('size','企業規模',['','中小企業でも対象','大企業でも対象']));
+    f.appendChild(sel('region','地域',[''].concat(REGIONS)));
+    f.appendChild(sel('difficulty','申請難易度',['','低','中','高']));
+    f.appendChild(sel('status','受付状況',['','active','経過措置のみ','要確認','廃止']));
+    top.appendChild(f);
+    app.appendChild(top);
+
+    var resWrap = el('div',{id:'results'});
+    app.appendChild(resWrap);
+    draw();
+
+    function sel(key,label,opts){
+      var w=el('div');
+      w.appendChild(el('label',{text:label}));
+      var s=el('select');
+      opts.forEach(function(o){ var op=el('option',{value:o,text:o===''?'すべて':o}); if(homeState[key]===o)op.selected=true; s.appendChild(op); });
+      s.addEventListener('change',function(){homeState[key]=s.value;draw();});
+      w.appendChild(s); return w;
+    }
+    function draw(){
+      var terms = norm(homeState.q).split(/\s+/).filter(Boolean);
+      var out = DATA.filter(function(d){
+        if(homeState.category && d.category!==homeState.category) return false;
+        if(homeState.tag && !tag(d,homeState.tag)) return false;
+        if(homeState.region && d.region!==homeState.region) return false;
+        if(homeState.difficulty && d.difficulty!==homeState.difficulty) return false;
+        if(homeState.status && d.status!==homeState.status) return false;
+        if(!homeState.status && d.status==='廃止') return false;
+        if(homeState.size==='大企業でも対象' && !largeOK(d)) return false;
+        if(homeState.size==='中小企業でも対象' && !/中小|全企業|不問|規模/.test(sizeOf(d))) return false;
+        if(terms.length){ var hay=norm(blob(d)+' '+(d.purpose_tags||[]).join(' ')); if(!terms.every(function(t){return hay.indexOf(t)>=0;})) return false; }
+        return true;
+      });
+      out.sort(function(a,b){ return prRank(a)-prRank(b) || a.name.localeCompare(b.name,'ja'); });
+      renderList(document.getElementById('results'), out, false);
+    }
+  }
+
+  // ================= SCENE =================
+  function renderScene(key){
+    var s = SCENES.filter(function(x){return x.key===key;})[0];
+    if(!s){ location.hash='#/'; return; }
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink',onclick:function(){location.hash='#/';}},'← 検索トップにもどる'));
+    var p=el('div',{class:'panel'});
+    p.appendChild(el('h2',null,s.ic+' '+s.label));
+    p.appendChild(el('div',{class:'muted'},s.ds+'（候補です。各カードの「確認事項」を顧客に確認してください）'));
+    app.appendChild(p);
+    var pool = DATA.filter(function(d){ return d.status!=='廃止' && s.match(d); });
+    pool.sort(function(a,b){ return prRank(a)-prRank(b) || a.name.localeCompare(b.name,'ja'); });
+    var w=el('div'); app.appendChild(w);
+    renderList(w, pool, true);
+  }
+
+  // ================= WIZARD =================
+  var wiz = {step:1, doKey:null, size:null, target:''};
+  function renderWizard(){ wiz={step:1,doKey:null,size:null,target:''}; drawWizard(); }
+  function drawWizard(){
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink',onclick:function(){location.hash='#/';}},'← 検索トップにもどる'));
+    var p=el('div',{class:'panel'});
+    if(wiz.step===1){
+      p.appendChild(el('div',{class:'steps'},'質問 1 / 3'));
+      p.appendChild(el('div',{class:'wq'},'顧客がやりたいことは？'));
+      var g=el('div',{class:'opts'});
+      DO_OPTIONS.forEach(function(o){ g.appendChild(el('div',{class:'opt',onclick:(function(k){return function(){wiz.doKey=k;wiz.step=2;drawWizard();};})(o.key)},o.label)); });
+      p.appendChild(g);
+    } else if(wiz.step===2){
+      p.appendChild(el('div',{class:'steps'},'質問 2 / 3'));
+      p.appendChild(el('div',{class:'wq'},'会社の規模は？'));
+      var g2=el('div',{class:'opts'});
+      [['sme','中小企業'],['large','大企業'],['unknown','わからない']].forEach(function(o){
+        g2.appendChild(el('div',{class:'opt',onclick:(function(v){return function(){wiz.size=v;wiz.step=3;drawWizard();};})(o[0])},o[1]));
+      });
+      p.appendChild(g2);
+      p.appendChild(el('div',{class:'muted'},'中小企業の目安: 業種により資本金・従業員数の基準があります（例: サービス業 5,000万円以下 または 100人以下）。'));
+    } else if(wiz.step===3){
+      p.appendChild(el('div',{class:'steps'},'質問 3 / 3'));
+      p.appendChild(el('div',{class:'wq'},'対象になる人は？（任意）'));
+      var g3=el('div',{class:'opts'});
+      TARGET_OPTIONS.forEach(function(o){ g3.appendChild(el('div',{class:'opt',onclick:(function(k){return function(){wiz.target=k;wiz.step=4;drawWizard();};})(o.key)},o.label)); });
+      p.appendChild(g3);
+    } else {
+      renderWizardResult(p);
+    }
+    app.appendChild(p);
+  }
+  function renderWizardResult(p){
+    var doOpt = DO_OPTIONS.filter(function(o){return o.key===wiz.doKey;})[0];
+    var tgtOpt = TARGET_OPTIONS.filter(function(o){return o.key===wiz.target;})[0];
+    p.appendChild(el('div',{class:'wq'},'診断結果'));
+    var cond = doOpt.label + '／規模: '+({sme:'中小企業',large:'大企業',unknown:'不問'}[wiz.size])
+             + (wiz.target?('／対象: '+tgtOpt.label):'');
+    p.appendChild(el('div',{class:'muted'},'条件: '+cond));
+    p.appendChild(el('button',{class:'btn ghost',onclick:function(){location.hash='#/wizard';},style:'margin-top:10px'},'↻ もう一度診断する'));
+
+    var pool = DATA.filter(function(d){
+      if(d.status==='廃止') return false;
+      if(!doOpt.test(d)) return false;
+      if(wiz.target && !tgtOpt.test(d)) return false;
+      if(wiz.size==='large' && !largeOK(d)) return false;
+      return true;
+    }).map(function(d){
+      var sc = 3 + (wiz.target?3:0) + (2-Math.min(prRank(d),2));
+      if(wiz.size==='sme' && /中小/.test(sizeOf(d))) sc+=1;
+      return {d:d,sc:sc};
+    });
+    pool.sort(function(a,b){ return b.sc-a.sc || prRank(a.d)-prRank(b.d) || a.d.name.localeCompare(b.d.name,'ja'); });
+
+    var wrap=el('div');
+    if(pool.length===0){
+      wrap.appendChild(el('div',{class:'panel empty'},'条件に合う助成金が見つかりませんでした。条件を変えてお試しください。'));
+    } else {
+      wrap.appendChild(el('div',{class:'count'},'候補 '+pool.length+' 件（該当しそうな順）'));
+      pool.forEach(function(x){ wrap.appendChild(cardFor(x.d,true)); });
+      wrap.appendChild(el('div',{class:'muted',style:'margin-top:8px'},'※ これは候補です。実際の受給可否は各カードの「確認事項」と最新の支給要領・所轄労働局への確認によります。'));
+    }
+    setTimeout(function(){ app.appendChild(wrap); },0);
+  }
+
+  // ================= LIST / CARD =================
+  function renderList(container, arr, showConfirm){
+    container.innerHTML='';
+    if(arr.length===0){ container.appendChild(el('div',{class:'panel empty'},'該当する助成金がありません。条件をゆるめてみてください。')); return; }
+    container.appendChild(el('div',{class:'count'},arr.length+' 件'));
+    arr.forEach(function(d){ container.appendChild(cardFor(d,showConfirm)); });
+  }
+  function cardFor(d, showConfirm){
+    var c=el('div',{class:'card',onclick:(function(id){return function(){location.hash='#/detail/'+id;};})(d.id)});
+    var head=el('div');
+    head.appendChild(el('span',{class:'nm'},d.name));
+    if(d.course) head.appendChild(el('span',{class:'cs'},' '+d.course));
+    c.appendChild(head);
+    c.appendChild(el('div',{class:'sm'},d.summary||''));
+    var meta=el('div',{class:'meta'});
+    var _nb=newBadge(d); if(_nb) meta.appendChild(_nb);
+    if(d.priority==='定番') meta.appendChild(el('span',{class:'badge b-def',text:'定番'}));
+    meta.appendChild(statusBadge(d));
+    var _cb=changeBadge(d); if(_cb) meta.appendChild(_cb);
+    meta.appendChild(el('span',{class:'chip'},'分類: '+d.category));
+    if(d.difficulty) meta.appendChild(el('span',{class:'chip'},'難易度: '+d.difficulty));
+    meta.appendChild(el('span',{class:'chip'},d.region));
+    c.appendChild(meta);
+    if(showConfirm){
+      var cf=el('div',{class:'confirm'});
+      cf.appendChild(el('b',null,'確認事項: '));
+      var bits=[];
+      if(sizeOf(d)) bits.push('対象企業=' + sizeOf(d).slice(0,60));
+      if(d.target_workers) bits.push('対象者=' + d.target_workers.slice(0,60));
+      cf.appendChild(document.createTextNode(bits.join(' ／ ') || '詳細は支給要領で確認'));
+      c.appendChild(cf);
+    }
+    return c;
+  }
+
+  // ================= DETAIL =================
+  function renderDetail(id){
+    var d = DATA.filter(function(x){return x.id===id;})[0];
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink',onclick:function(){ if(history.length>1){history.back();} else {location.hash='#/';} }},'← もどる'));
+    if(!d){ app.appendChild(el('div',{class:'panel empty'},'助成金が見つかりませんでした。')); return; }
+    var p=el('div',{class:'panel'});
+
+    var h=el('h2'); h.appendChild(document.createTextNode(d.name)); if(d.course) h.appendChild(el('span',{class:'cs'},' '+d.course));
+    p.appendChild(h);
+    var bs=el('div',{class:'badges'});
+    var _dnb=newBadge(d); if(_dnb) bs.appendChild(_dnb);
+    if(d.priority==='定番') bs.appendChild(el('span',{class:'badge b-def',text:'定番'}));
+    bs.appendChild(statusBadge(d));
+    var _dcb=changeBadge(d); if(_dcb) bs.appendChild(_dcb);
+    bs.appendChild(el('span',{class:'chip'},'分類: '+d.category));
+    if(d.difficulty) bs.appendChild(el('span',{class:'chip'},'難易度: '+d.difficulty));
+    bs.appendChild(el('span',{class:'chip'},d.region));
+    if(d.agency) bs.appendChild(el('span',{class:'chip'},d.agency));
+    p.appendChild(bs);
+
+    var _box=changeSummaryBox(d); if(_box) p.appendChild(_box);
+    var _hist=changeHistoryList(d); if(_hist) p.appendChild(_hist);
+
+    p.appendChild(el('button',{class:'btn ghost',style:'margin:4px 0 2px',onclick:(function(id){return function(){location.hash='#/proposal/'+id;};})(d.id)},'📢 顧客向け提案資料をつくる（印刷可）'));
+
+    p.appendChild(el('h3',null,'📌 概要'));
+    p.appendChild(el('div',null,d.summary||''));
+
+    p.appendChild(el('h3',null,'対象'));
+    var te=d.target_employers||{};
+    if(te.size) p.appendChild(kv('企業規模',te.size));
+    if(te.industry) p.appendChild(kv('業種',te.industry));
+    if(te.other && te.other.length){ p.appendChild(kv('事業主要件','')); p.appendChild(ul(te.other)); }
+    if(d.target_workers) p.appendChild(kv('対象労働者',d.target_workers));
+    if(d.application_office) p.appendChild(kv('申請先',d.application_office));
+
+    if(d.requirements && d.requirements.length){ p.appendChild(el('h3',null,'✅ 必要な取り組み')); p.appendChild(ul(d.requirements)); }
+
+    if(d.flow && d.flow.length){
+      p.appendChild(el('h3',null,'受給までの流れ'));
+      var fl=el('div',{class:'flow'});
+      d.flow.forEach(function(s){
+        var st=el('div',{class:'st'});
+        var ac=s.actor||''; var cls = ac.indexOf('顧客')>=0?'ac-client':(ac.indexOf('労働局')>=0||ac.indexOf('JEED')>=0)?'ac-gov':'ac-office';
+        if(ac) st.appendChild(el('span',{class:'ac '+cls,text:ac}));
+        st.appendChild(el('div',null,s.step||''));
+        if(s.timing) st.appendChild(el('div',{class:'muted'},s.timing));
+        fl.appendChild(st);
+      });
+      p.appendChild(fl);
+      p.appendChild(el('button',{class:'btn ghost',style:'margin-top:8px',onclick:(function(id){return function(){location.hash='#/progress/'+id;};})(d.id)},'✔ 申請の進め方をチェックシートにする（印刷可）'));
+    }
+
+    var ng=(d.disqualifiers||[]).concat(COMMON);
+    if(ng.length){
+      p.appendChild(el('h3',null,'⚠️ やってはいけないこと（不支給・要注意）'));
+      var wb=el('div',{class:'warnbox'}); wb.appendChild(ul(ng)); p.appendChild(wb);
+    }
+
+    if(d.amounts && d.amounts.length){
+      p.appendChild(el('h3',null,'💰 支給額'));
+      var tb=el('table',{class:'amt'});
+      var tr=el('tr'); tr.appendChild(el('th',null,'条件')); tr.appendChild(el('th',null,'支給額')); tr.appendChild(el('th',null,'備考')); tb.appendChild(tr);
+      d.amounts.forEach(function(a){ var r=el('tr'); r.appendChild(el('td',null,a.condition||'')); r.appendChild(el('td',null,a.amount||'')); r.appendChild(el('td',null,a.notes||'')); tb.appendChild(r); });
+      p.appendChild(tb);
+    }
+
+    if(d.schedule){
+      var s=d.schedule;
+      if(s.plan_submission||s.implementation_period||s.application_deadline||s.notes){
+        p.appendChild(el('h3',null,'📅 スケジュール'));
+        if(s.plan_submission) p.appendChild(kv('計画届等',s.plan_submission));
+        if(s.implementation_period) p.appendChild(kv('取組期間',s.implementation_period));
+        if(s.application_deadline) p.appendChild(kv('申請期限',s.application_deadline));
+        if(s.notes) p.appendChild(kv('備考',s.notes));
+      }
+    }
+
+    if(d.required_documents && d.required_documents.length){ p.appendChild(el('h3',null,'📄 必要書類')); p.appendChild(ul(d.required_documents)); }
+    if(d.client_checklist && d.client_checklist.length){
+      p.appendChild(el('h3',null,'🗂 顧客に準備を依頼するもの'));
+      p.appendChild(ul(d.client_checklist));
+      p.appendChild(el('button',{class:'btn ghost',style:'margin-top:10px',onclick:(function(id){return function(){location.hash='#/request/'+id;};})(d.id)},'📄 この内容で依頼資料を作成する'));
+    }
+
+    p.appendChild(el('h3',null,'出典'));
+    var gl=guidelineOf(d);
+    if(gl){
+      var gbox=el('div',{class:'guidebox'});
+      var a=el('a',{class:'dlbtn',href:gl.url,target:'_blank',rel:'noopener'},'📥 支給要領・交付要綱（最新）を開く');
+      gbox.appendChild(a);
+      gbox.appendChild(el('div',{class:'gt'},(gl.title||gl.url)+(gl.dated?('（'+gl.dated+'）'):'')));
+      p.appendChild(gbox);
+    } else {
+      var gmiss=el('div',{class:'guidebox miss'});
+      gmiss.appendChild(el('div',{class:'gm'},'⚠️ 支給要領の直接リンクは未登録です'));
+      gmiss.appendChild(el('div',{class:'gt'},'下記の出典・パンフレットをご確認ください（最新の支給要領・要綱の登録は要確認）。'));
+      p.appendChild(gmiss);
+    }
+    (d.source_urls||[]).forEach(function(s){
+      var line=el('div',{class:'kv'});
+      var isPdf=/\.pdf(\?|#|$)/i.test(s.url||'');
+      line.appendChild(el('span',{class:'srcic',text:(isPdf?'📄':'🔗')+' '}));
+      line.appendChild(el('a',{href:s.url,target:'_blank',rel:'noopener'},s.title||s.url));
+      if(isPdf) line.appendChild(el('a',{class:'dltag',href:s.url,target:'_blank',rel:'noopener',download:''},'⬇ ダウンロード'));
+      p.appendChild(line);
+    });
+    p.appendChild(el('div',{class:'muted',style:'margin-top:6px'},'対象年度: '+(d.fiscal_year||'-')+' ／ 最終確認日: '+(d.last_verified||'-')));
+
+    if(d.notes){ p.appendChild(el('h3',null,'実務メモ')); p.appendChild(el('div',null,d.notes)); }
+
+    app.appendChild(p);
+
+    function kv(k,v){ var e=el('div',{class:'kv'}); e.appendChild(el('b',null,k)); e.appendChild(document.createTextNode(v)); return e; }
+    function ul(arr){ var u=el('ul',{class:'clean'}); arr.forEach(function(x){ u.appendChild(el('li',null, (x&&x.nodeType)?x:String(x))); }); return u; }
+  }
+
+  // ================= 用語集 =================
+  function renderGlossary(){
+    app.innerHTML='';
+    var gstate={q:''};
+    var top=el('div',{class:'panel'});
+    top.appendChild(el('h2',null,'用語集'));
+    top.appendChild(el('div',{class:'muted'},'助成金の実務でよく出る用語を、新人スタッフにもわかるよう平易に解説します。'));
+    var row=el('div',{class:'searchrow'});
+    var input=el('input',{type:'text',placeholder:'用語・よみ・説明から検索（例: 賃金 / 計画 / 不正）'});
+    input.addEventListener('input',function(){gstate.q=input.value;draw();});
+    row.appendChild(input);
+    top.appendChild(row);
+    var idx=el('div',{class:'gindex'});
+    top.appendChild(idx);
+    app.appendChild(top);
+    var listWrap=el('div'); app.appendChild(listWrap);
+    var ORDER=['あ','か','さ','た','な','は','ま','や','ら','わ','他'];
+
+    function draw(){
+      listWrap.innerHTML=''; idx.innerHTML='';
+      var terms=norm(gstate.q).split(/\s+/).filter(Boolean);
+      var items=(GLOSSARY||[]).filter(function(g){
+        if(!terms.length) return true;
+        var hay=norm((g.term||'')+' '+(g.reading||'')+' '+(g.description||''));
+        return terms.every(function(t){return hay.indexOf(t)>=0;});
+      });
+      var groups={};
+      items.forEach(function(g){ var r=gojuonRow(g.reading); (groups[r]=groups[r]||[]).push(g); });
+      ORDER.forEach(function(r){
+        if(!groups[r]) return;
+        idx.appendChild(el('button',{onclick:(function(rr){return function(){var a=document.getElementById('g_'+rr); if(a)a.scrollIntoView({behavior:'smooth',block:'start'});};})(r)},r));
+      });
+      if(items.length===0){ listWrap.appendChild(el('div',{class:'panel empty'},'該当する用語がありません。')); return; }
+      listWrap.appendChild(el('div',{class:'count'},items.length+' 語'));
+      ORDER.forEach(function(r){
+        var arr=groups[r]; if(!arr) return;
+        arr.sort(function(a,b){return (a.reading||'').localeCompare(b.reading||'','ja');});
+        var sec=el('div',{class:'panel',id:'g_'+r});
+        sec.appendChild(el('h3',null,r+' 行'));
+        arr.forEach(function(g){
+          var gr=el('div',{class:'grow'});
+          var h=el('div'); h.appendChild(el('span',{class:'term'},g.term)); if(g.reading) h.appendChild(el('span',{class:'yomi'},'（'+g.reading+'）'));
+          gr.appendChild(h);
+          gr.appendChild(el('div',null,g.description||''));
+          var rel=(g.related_ids||[]).map(function(id){return DATA.filter(function(x){return x.id===id;})[0];}).filter(Boolean);
+          if(rel.length){
+            var rl=el('div',{class:'muted',style:'margin-top:4px'}); rl.appendChild(document.createTextNode('関連: '));
+            rel.forEach(function(x,i){ if(i)rl.appendChild(document.createTextNode('、')); rl.appendChild(el('a',{href:'#/detail/'+x.id},x.name+(x.course?(' '+x.course):''))); });
+            gr.appendChild(rl);
+          }
+          sec.appendChild(gr);
+        });
+        listWrap.appendChild(sec);
+      });
+    }
+    draw();
+  }
+
+  // ================= 締切一覧＋期限計算機 =================
+  function renderDeadlines(){
+    app.innerHTML='';
+    var cp=el('div',{class:'panel'});
+    cp.appendChild(el('h2',null,'締切・スケジュール一覧'));
+    cp.appendChild(el('h3',null,'📅 期限の目安計算機'));
+    cp.appendChild(el('div',{class:'muted'},'起算日と期間を入れると期限日の目安を計算します。※実際の起算日の定義（賃金支払日の翌日／取組完了日など）は各支給要領で必ず確認してください。'));
+    var calc=el('div',{class:'calc'});
+    var wD=el('div'); wD.appendChild(el('label',null,'起算日')); var inD=el('input',{type:'date'}); wD.appendChild(inD); calc.appendChild(wD);
+    var wN=el('div'); wN.appendChild(el('label',null,'期間')); var inN=el('input',{type:'number',value:'2',min:'0',style:'width:90px'}); wN.appendChild(inN); calc.appendChild(wN);
+    var wU=el('div'); wU.appendChild(el('label',null,'単位')); var inU=el('select'); ['か月後','日後'].forEach(function(u){inU.appendChild(el('option',{value:u,text:u}));}); wU.appendChild(inU); calc.appendChild(wU);
+    var btn=el('button',{class:'btn'},'計算'); calc.appendChild(btn);
+    cp.appendChild(calc);
+    var out=el('div',{class:'calcout'}); cp.appendChild(out);
+    function calcRun(){
+      if(!inD.value){ out.textContent='起算日を入力してください。'; return; }
+      var base=new Date(inD.value+'T00:00:00'); if(isNaN(base)){ out.textContent='日付が不正です。'; return; }
+      var n=parseInt(inN.value,10); if(isNaN(n)||n<0) n=0;
+      var res= inU.value==='か月後'? addMonths(base,n): new Date(base.getTime()+n*86400000);
+      out.textContent='期限の目安: '+fmtDate(res);
+    }
+    btn.addEventListener('click',calcRun);
+    inD.addEventListener('change',calcRun);
+    app.appendChild(cp);
+
+    var tp=el('div',{class:'panel'});
+    tp.appendChild(el('h3',null,'コース別 締切ルール一覧'));
+    tp.appendChild(el('div',{class:'muted'},'計画届→取組→申請の期限ルールです。「—」は当該コースに設定情報がないことを示します。'));
+    var rows=DATA.filter(function(d){return d.status!=='廃止';});
+    rows.sort(function(a,b){return prRank(a)-prRank(b)||a.name.localeCompare(b.name,'ja');});
+    var tb=el('table',{class:'amt'});
+    var hr=el('tr'); ['助成金 / コース','計画届等','取組期間','申請期限ルール',''].forEach(function(h){hr.appendChild(el('th',null,h));}); tb.appendChild(hr);
+    rows.forEach(function(d){
+      var s=d.schedule||{};
+      var tr=el('tr');
+      var c1=el('td'); c1.appendChild(el('div',{style:'font-weight:600'},d.name)); if(d.course)c1.appendChild(el('div',{class:'muted'},d.course)); tr.appendChild(c1);
+      tr.appendChild(el('td',null,s.plan_submission||'—'));
+      tr.appendChild(el('td',null,s.implementation_period||'—'));
+      tr.appendChild(el('td',null,s.application_deadline||'—'));
+      var c5=el('td'); c5.appendChild(el('a',{href:'#/detail/'+d.id},'詳細')); tr.appendChild(c5);
+      tb.appendChild(tr);
+    });
+    tp.appendChild(tb);
+    app.appendChild(tp);
+  }
+
+  // ================= 更新情報（進捗A） =================
+  function renderUpdates(){
+    app.innerHTML='';
+    var s=STATS;
+    var top=el('div',{class:'panel'});
+    top.appendChild(el('h2',null,'更新情報 / データの鮮度'));
+    top.appendChild(el('div',{class:'muted'},'このサイトのデータが「いつ・何を確認したものか」を表示します。データ基準日: '+(window.DATA_BUILT_AT||'-')));
+    var grid=el('div',{class:'statgrid'});
+    function stat(n,l,cls){ var e=el('div',{class:'stat'+(cls?(' '+cls):'')}); e.appendChild(el('div',{class:'n'},String(n))); e.appendChild(el('div',{class:'l'},l)); return e; }
+    grid.appendChild(stat(s.total,'総コース数'));
+    grid.appendChild(stat(s.active,'確認済（受付中）','ok'));
+    grid.appendChild(stat(s.stale90,'要再確認(90日超)','warn'));
+    grid.appendChild(stat(s.needs_check,'要確認','bad'));
+    grid.appendChild(stat(s.provisional,'経過措置のみ','warn'));
+    grid.appendChild(stat(s.abolished,'廃止','bad'));
+    var newList=DATA.filter(isNew).slice().sort(function(a,b){return (b.added_on||'').localeCompare(a.added_on||'');});
+    grid.appendChild(stat(newList.length,'新規(90日内)'));
+    top.appendChild(grid);
+    app.appendChild(top);
+
+    if(newList.length){
+      var newp=el('div',{class:'panel'});
+      newp.appendChild(el('h3',null,'🆕 新しく追加された助成金'));
+      newp.appendChild(el('div',{class:'muted'},'直近90日以内にこのサイトに追加された助成金です。'));
+      newList.forEach(function(d){
+        var r=el('div',{class:'updrow'});
+        r.appendChild(el('span',{class:'dt'},d.added_on));
+        r.appendChild(el('span',{class:'badge b-new',text:'新規'}));
+        var nm=el('span',{class:'nm'}); nm.appendChild(el('a',{href:'#/detail/'+d.id},d.name+(d.course?(' '+d.course):''))); r.appendChild(nm);
+        if(d.status && d.status!=='active') r.appendChild(statusBadge(d));
+        newp.appendChild(r);
+      });
+      app.appendChild(newp);
+    }
+
+    var rp=el('div',{class:'panel'});
+    rp.appendChild(el('h3',null,'🕒 最近確認したコース（新しい順）'));
+    var recent=DATA.filter(function(d){return d.last_verified;}).slice()
+      .sort(function(a,b){return (b.last_verified||'').localeCompare(a.last_verified||'');}).slice(0,15);
+    recent.forEach(function(d){
+      var r=el('div',{class:'updrow'});
+      r.appendChild(el('span',{class:'dt'},d.last_verified));
+      var nm=el('span',{class:'nm'}); nm.appendChild(el('a',{href:'#/detail/'+d.id},d.name+(d.course?(' '+d.course):''))); r.appendChild(nm);
+      rp.appendChild(r);
+    });
+    app.appendChild(rp);
+
+    var np=el('div',{class:'panel'});
+    np.appendChild(el('h3',null,'✨ 今年度（令和8年度）の主な変更点'));
+    var reNew=/(変更点|新設|拡充|改正|新たに|統合|廃止され|見直し)/;
+    var changed=DATA.map(function(d){
+      var c=latestChange(d);
+      if(c){ return {d:d, real:true, on:c.date||d.updated_on||d.last_verified, txt:c.summary||((c.before||'')+' → '+(c.after||'')), before:c.before, after:c.after}; }
+      var txt=d.whats_new||'';
+      if(!txt && d.notes && reNew.test(d.notes)) txt=d.notes;
+      return txt?{d:d,real:false,txt:txt,on:d.updated_on||d.last_verified}:null;
+    }).filter(Boolean);
+    // 確定した変更履歴(real)を最優先、その後は日付降順
+    changed.sort(function(a,b){return (b.real?1:0)-(a.real?1:0) || (b.on||'').localeCompare(a.on||'');});
+    var CAP=25;
+    if(changed.length===0){ np.appendChild(el('div',{class:'muted'},'記録された変更点はありません。')); }
+    changed.slice(0,CAP).forEach(function(x){
+      var r=el('div',{class:'grow'});
+      var h=el('div'); h.appendChild(el('a',{href:'#/detail/'+x.d.id,style:'font-weight:700'},x.d.name+(x.d.course?(' '+x.d.course):'')));
+      if(x.on) h.appendChild(el('span',{class:'yomi'},'（'+x.on+' 時点）'));
+      r.appendChild(h);
+      r.appendChild(el('div',{class:'muted',style:'margin-top:2px'},x.txt));
+      if(x.before||x.after){
+        var diff=el('div',{class:'diff',style:'margin-top:4px'});
+        if(x.before) diff.appendChild(el('span',{class:'d-old',text:'旧: '+x.before}));
+        if(x.before&&x.after) diff.appendChild(el('span',{class:'d-arw',text:'→'}));
+        if(x.after) diff.appendChild(el('span',{class:'d-new',text:'新: '+x.after}));
+        r.appendChild(diff);
+      }
+      np.appendChild(r);
+    });
+    if(changed.length>CAP) np.appendChild(el('div',{class:'muted',style:'margin-top:8px'},'ほか '+(changed.length-CAP)+' 件（各詳細ページの実務メモ・変更履歴を参照）'));
+    app.appendChild(np);
+
+    var ap=el('div',{class:'panel'});
+    ap.appendChild(el('h3',null,'⚠️ 要注意のコース（要確認・経過措置・廃止）'));
+    var att=DATA.filter(function(d){return d.status!=='active';});
+    if(att.length===0){ ap.appendChild(el('div',{class:'muted'},'現在ありません。')); }
+    att.forEach(function(d){
+      var r=el('div',{class:'updrow'});
+      r.appendChild(statusBadge(d));
+      var nm=el('span',{class:'nm'}); nm.appendChild(el('a',{href:'#/detail/'+d.id},d.name+(d.course?(' '+d.course):''))); r.appendChild(nm);
+      ap.appendChild(r);
+    });
+    app.appendChild(ap);
+    app.appendChild(el('div',{class:'muted',style:'margin:4px 4px 0'},'※ 鮮度バッジ: 緑=確認済／黄=要再確認・経過措置／赤=要確認・廃止。最新の支給要領は各出典リンクで確認してください。'));
+  }
+
+  // ================= 申請進捗チェックシート（進捗B） =================
+  function renderProgress(id){
+    var d=DATA.filter(function(x){return x.id===id;})[0];
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink no-print',onclick:function(){location.hash='#/detail/'+id;}},'← 詳細にもどる'));
+    if(!d){ app.appendChild(el('div',{class:'panel empty'},'助成金が見つかりませんでした。')); return; }
+    var ctl=el('div',{class:'panel no-print'});
+    ctl.appendChild(el('h2',null,'申請進捗チェックシート'));
+    ctl.appendChild(el('div',{class:'muted'},'手続きの進み具合をチェックしながら進められます。チェック状態・入力は保存されません（画面を離れると消えます）。印刷して案件ファイルに挟むこともできます。'));
+    ctl.appendChild(el('button',{class:'btn',style:'margin-top:10px',onclick:function(){window.print();}},'🖨 印刷 / PDF保存'));
+    app.appendChild(ctl);
+
+    var sh=el('div',{class:'sheet prog'});
+    sh.appendChild(el('h2',{class:'title'},'申請進捗チェックシート'));
+    var hh=el('div',{style:'text-align:center;margin-bottom:6px'});
+    hh.appendChild(el('span',{style:'font-weight:700;font-size:16px'},d.name)); if(d.course)hh.appendChild(el('span',{class:'cs'},' '+d.course));
+    sh.appendChild(hh);
+    var memo=el('div',{style:'margin:10px 0;font-size:14px'});
+    [['顧客名（会社名）'],['対象者'],['担当スタッフ']].forEach(function(m){
+      var rowm=el('div',{style:'display:flex;gap:8px;align-items:center;margin:5px 0'});
+      rowm.appendChild(el('span',{style:'min-width:9em;color:#333'},m[0]));
+      rowm.appendChild(el('input',{type:'text',style:'flex:1;padding:6px;border:1px solid #999;border-radius:6px;font-size:14px'}));
+      memo.appendChild(rowm);
+    });
+    sh.appendChild(memo);
+    sh.appendChild(el('h3',{style:'border:0;padding:0;font-size:15px;margin:12px 0 4px'},'手続きの流れ（チェックしながら進めてください）'));
+    var steps=(d.flow&&d.flow.length)?d.flow:[{step:'このコースはフロー情報が未登録です。詳細ページの「必要な取り組み」を参照してください。',timing:'',actor:''}];
+    steps.forEach(function(st,i){
+      var ps=el('div',{class:'pstep'});
+      var chk=el('span',{class:'chk'});
+      chk.addEventListener('click',function(){ if(ps.className.indexOf('done')>=0){ps.className='pstep';chk.textContent='';}else{ps.className='pstep done';chk.textContent='✓';} });
+      ps.appendChild(chk);
+      var body=el('div');
+      var ac=st.actor||''; var cls=ac.indexOf('顧客')>=0?'ac-client':(ac.indexOf('労働局')>=0||ac.indexOf('JEED')>=0)?'ac-gov':'ac-office';
+      var line=el('div'); line.appendChild(el('span',{style:'font-weight:700;margin-right:6px'},(i+1)+'.'));
+      if(ac) line.appendChild(el('span',{class:'ac '+cls,text:ac,style:'margin-right:6px'}));
+      line.appendChild(document.createTextNode(st.step||''));
+      body.appendChild(line);
+      if(st.timing) body.appendChild(el('div',{class:'muted'},'時期: '+st.timing));
+      ps.appendChild(body);
+      sh.appendChild(ps);
+    });
+    if(d.schedule){ var s=d.schedule;
+      if(s.plan_submission||s.implementation_period||s.application_deadline){
+        sh.appendChild(el('h3',{style:'border:0;padding:0;font-size:15px;margin:14px 0 4px'},'締切の目安'));
+        var u2=el('ul',{class:'clean'});
+        if(s.plan_submission) u2.appendChild(el('li',null,'計画届等: '+s.plan_submission));
+        if(s.implementation_period) u2.appendChild(el('li',null,'取組期間: '+s.implementation_period));
+        if(s.application_deadline) u2.appendChild(el('li',null,'申請期限: '+s.application_deadline));
+        sh.appendChild(u2);
+      }
+    }
+    sh.appendChild(el('div',{class:'muted',style:'margin-top:14px'},'※ 最終的な受給可否・期限は最新の支給要領と所轄窓口の確認によります。'));
+    app.appendChild(sh);
+  }
+
+  // ================= F4 依頼資料作成 =================
+  function renderRequest(id){
+    var d=DATA.filter(function(x){return x.id===id;})[0];
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink no-print',onclick:function(){location.hash='#/detail/'+id;}},'← 詳細にもどる'));
+    if(!d){ app.appendChild(el('div',{class:'panel empty'},'助成金が見つかりませんでした。')); return; }
+    var reqState={ client:'', contact:'', due:'', method:'メール', staff:'', items:(d.client_checklist||[]).slice() };
+    if(reqState.items.length===0) reqState.items=[''];
+
+    var form=el('div',{class:'panel no-print form'});
+    form.appendChild(el('h2',null,'依頼資料を作成'));
+    form.appendChild(el('div',{class:'muted'},'顧客へ「準備をお願いする資料」の案内文をA4で作成・印刷します。入力内容は保存されません（画面を離れると消えます）。'));
+
+    function field(label,key){
+      form.appendChild(el('label',null,label));
+      var inp=el('input',{type:'text',value:reqState[key]||''});
+      inp.addEventListener('input',function(){reqState[key]=inp.value;refresh();});
+      form.appendChild(inp); return inp;
+    }
+    field('顧客名（会社名）','client');
+    field('ご担当者名','contact');
+    form.appendChild(el('label',null,'提出期限（任意）'));
+    var due=el('input',{type:'date'}); due.addEventListener('input',function(){reqState.due=due.value;refresh();}); form.appendChild(due);
+    form.appendChild(el('label',null,'提出方法'));
+    var method=el('select'); ['メール','持参','郵送'].forEach(function(m){method.appendChild(el('option',{value:m,text:m}));});
+    method.addEventListener('change',function(){reqState.method=method.value;refresh();}); form.appendChild(method);
+    field('担当スタッフ名','staff');
+
+    form.appendChild(el('label',null,'ご準備いただく資料（追加・削除・編集できます）'));
+    var cklist=el('div',{class:'cklist'}); form.appendChild(cklist);
+    function drawList(){
+      cklist.innerHTML='';
+      reqState.items.forEach(function(it,i){
+        var r=el('div',{class:'ckrow'});
+        var inp=el('input',{type:'text',value:it});
+        inp.addEventListener('input',(function(idx){return function(){reqState.items[idx]=inp.value;refresh();};})(i));
+        r.appendChild(inp);
+        r.appendChild(el('button',{class:'del',onclick:(function(idx){return function(){reqState.items.splice(idx,1); if(reqState.items.length===0)reqState.items=['']; drawList(); refresh();};})(i)},'削除'));
+        cklist.appendChild(r);
+      });
+      cklist.appendChild(el('button',{class:'btn ghost',style:'margin-top:6px',onclick:function(){reqState.items.push(''); drawList(); refresh();}},'＋ 行を追加'));
+    }
+    drawList();
+    form.appendChild(el('button',{class:'btn',style:'margin-top:14px',onclick:function(){window.print();}},'🖨 印刷 / PDF保存'));
+    app.appendChild(form);
+
+    var sheet=el('div',{class:'sheet'}); app.appendChild(sheet);
+    refresh();
+
+    function refresh(){
+      sheet.innerHTML='';
+      var lh=el('div',{class:'lh'});
+      lh.appendChild(el('div',{class:'on'},CFG.office_name||''));
+      if(CFG.address) lh.appendChild(el('div',null,CFG.address));
+      var te=[]; if(CFG.tel)te.push('TEL: '+CFG.tel);
+      if(te.length) lh.appendChild(el('div',null,te.join('　')));
+      sheet.appendChild(lh);
+      sheet.appendChild(el('div',{class:'to'},(reqState.client||'（顧客名）')+' 御中'+(reqState.contact?('　'+reqState.contact+' 様'):'')));
+      sheet.appendChild(el('h2',{class:'title'},d.name+(d.course?('（'+d.course+'）'):'')+' 申請にあたり ご準備いただきたい資料のご案内'));
+      sheet.appendChild(el('div',{style:'margin:8px 0;font-size:14px'},'平素より大変お世話になっております。標記の助成金申請にあたり、下記の資料のご準備をお願い申し上げます。ご不明な点は担当までお問い合わせください。'));
+      sheet.appendChild(el('div',{style:'font-weight:700;margin:14px 0 4px'},'【ご準備いただく資料】'));
+      var any=false;
+      reqState.items.forEach(function(it){ if(!(it||'').trim())return; any=true;
+        var r=el('div',{class:'ckitem'}); r.appendChild(el('span',{class:'box'})); r.appendChild(el('span',null,it)); sheet.appendChild(r);
+      });
+      if(!any) sheet.appendChild(el('div',{class:'muted'},'（資料を1件以上入力してください）'));
+      var info=el('div',{style:'margin-top:14px;font-size:14px'});
+      if(reqState.due){ var dd=new Date(reqState.due+'T00:00:00'); info.appendChild(el('div',null,'提出期限: '+(isNaN(dd)?reqState.due:fmtDate(dd)))); }
+      info.appendChild(el('div',null,'提出方法: '+reqState.method));
+      sheet.appendChild(info);
+      sheet.appendChild(el('div',{style:'margin-top:10px;font-size:13px;color:#333'},'※ 原本・写しの別は資料により異なります。写しをご用意いただく場合は鮮明なコピーをお願いします。個人情報を含む書類の取り扱いにはご配慮ください。'));
+      var sig=el('div',{class:'sig'});
+      sig.appendChild(el('div',null,'担当: '+(CFG.office_name||'')+(reqState.staff?('　'+reqState.staff):'')));
+      var cc=[]; if(CFG.tel)cc.push('TEL: '+CFG.tel);
+      if(cc.length) sig.appendChild(el('div',null,cc.join('　')));
+      sheet.appendChild(sig);
+    }
+  }
+
+  // ================= 顧客向け提案資料 =================
+  function renderProposal(id){
+    var d=DATA.filter(function(x){return x.id===id;})[0];
+    app.innerHTML='';
+    app.appendChild(el('span',{class:'backlink no-print',onclick:function(){location.hash='#/detail/'+id;}},'← 詳細にもどる'));
+    if(!d){ app.appendChild(el('div',{class:'panel empty'},'助成金が見つかりませんでした。')); return; }
+    var ps={ client:'', staff:'', simType:'per', count:'', per:'', cost:'', rnum:'', rden:'', cap:'', rcount:'', uval:'', uunit:'円', uqty:'', uqn:'日', upers:'', ucap:'' };
+
+    var form=el('div',{class:'panel no-print form'});
+    form.appendChild(el('h2',null,'顧客向け提案資料をつくる'));
+    form.appendChild(el('div',{class:'muted'},'この助成金の「メリット・審査の厳しさ・自社診断」をまとめた提案資料をA4で作成・印刷します。入力は保存されません。金額は顧客に出す数字のため、下の支給額表を見て金額を確認して入力してください。'));
+    function fldIn(parent,label,key,ph,type){
+      parent.appendChild(el('label',null,label));
+      var i=el('input',{type:type||'text',value:ps[key]||'',placeholder:ph||''});
+      i.addEventListener('input',function(){ps[key]=i.value;refresh();});
+      parent.appendChild(i); return i;
+    }
+    fldIn(form,'顧客名（会社名・任意）','client');
+    fldIn(form,'担当スタッフ名（任意）','staff');
+
+    function selIn(parent,label,key,opts){
+      parent.appendChild(el('label',null,label));
+      var s=el('select'); opts.forEach(function(o){ var op=el('option',{value:o,text:o}); if(ps[key]===o)op.selected=true; s.appendChild(op); });
+      s.addEventListener('change',function(){ps[key]=s.value;refresh();});
+      parent.appendChild(s); return s;
+    }
+    form.appendChild(el('label',null,'概算の計算方式'));
+    var typeSel=el('select');
+    [['per','1人あたり定額（人数 × 単価）'],['rate','費用の割合（助成率 × 対象経費・上限あり）'],['unit','単価 × 数量（日額・月額・時間額 × 日数/月数/時間）']].forEach(function(o){ var op=el('option',{value:o[0],text:o[1]}); if(ps.simType===o[0])op.selected=true; typeSel.appendChild(op); });
+    typeSel.addEventListener('change',function(){ps.simType=typeSel.value;updateVis();refresh();});
+    form.appendChild(typeSel);
+
+    var perWrap=el('div');
+    fldIn(perWrap,'対象予定人数（任意）','count','例: 3','number');
+    fldIn(perWrap,'1人あたり概算額（万円・任意）','per','例: 60','number');
+    form.appendChild(perWrap);
+
+    var rateWrap=el('div');
+    fldIn(rateWrap,'対象経費（万円・1件/全体あたり・任意）','cost','例: 10','number');
+    fldIn(rateWrap,'助成率の分子（例: 3）','rnum','例: 3','number');
+    fldIn(rateWrap,'助成率の分母（例: 4）','rden','例: 4','number');
+    fldIn(rateWrap,'上限額（万円・対象経費と同じ単位あたり・任意）','cap','例: 7.5','number');
+    fldIn(rateWrap,'件数・人数（任意・既定1／例: 1人1研修を5件）','rcount','例: 5','number');
+    form.appendChild(rateWrap);
+
+    var unitWrap=el('div');
+    fldIn(unitWrap,'単価（数値）','uval','例: 8870 / 4','number');
+    selIn(unitWrap,'単価の単位','uunit',['円','万円']);
+    fldIn(unitWrap,'数量（日数・月数・時間数など）','uqty','例: 60','number');
+    selIn(unitWrap,'数量の単位','uqn',['日','月','時間','回']);
+    fldIn(unitWrap,'対象人数（任意・既定1）','upers','例: 3','number');
+    fldIn(unitWrap,'上限額（万円・任意）','ucap','例: 100','number');
+    form.appendChild(unitWrap);
+
+    function updateVis(){ perWrap.style.display=(ps.simType==='per')?'':'none'; rateWrap.style.display=(ps.simType==='rate')?'':'none'; unitWrap.style.display=(ps.simType==='unit')?'':'none'; }
+    updateVis();
+
+    if(d.amounts && d.amounts.length){
+      form.appendChild(el('label',null,'参考: 支給額表（金額・助成率・上限額をここで確認して入力）'));
+      var at=el('table',{class:'amt'});
+      var tr=el('tr'); ['条件','支給額'].forEach(function(h){tr.appendChild(el('th',null,h));}); at.appendChild(tr);
+      d.amounts.slice(0,8).forEach(function(a){ var r=el('tr'); r.appendChild(el('td',null,a.condition||'')); r.appendChild(el('td',null,a.amount||'')); at.appendChild(r); });
+      form.appendChild(at);
+    }
+    form.appendChild(el('button',{class:'btn',style:'margin-top:14px',onclick:function(){window.print();}},'🖨 印刷 / PDF保存'));
+    app.appendChild(form);
+
+    var sheet=el('div',{class:'sheet'}); app.appendChild(sheet);
+    refresh();
+
+    function pick(rx,arr,n){ return (arr||[]).filter(function(x){return rx.test(String(x));}).slice(0,n||3); }
+
+    function refresh(){
+      sheet.innerHTML='';
+      sheet.appendChild(el('div',{style:'font-size:12px;color:#555'},CFG.office_name||''));
+      sheet.appendChild(el('div',{style:'font-size:19px;font-weight:700;margin-top:2px'},d.name+(d.course?('（'+d.course+'）'):'')+' 活用のご案内'));
+      if(ps.client) sheet.appendChild(el('div',{style:'font-weight:700;margin-top:4px'},ps.client+' 御中'));
+      sheet.appendChild(el('div',{style:'color:#333;margin-top:2px;font-size:14px'},'御社の「人を大切にする仕組みづくり」を、国の助成金で後押しするご提案です。'));
+
+      sheet.appendChild(el('div',{class:'psec'},'1. まずはメリット'));
+      var m=el('div',{class:'pmerit'});
+      m.appendChild(el('div',null,d.summary||''));
+      var sim=el('div',{class:'simrow'});
+      if(ps.simType==='unit'){
+        var uv=parseFloat(ps.uval), uq=parseFloat(ps.uqty), uc=parseFloat(ps.ucap);
+        var up=parseInt(ps.upers,10), hasP=up>0; if(!hasP) up=1;
+        if(uv>0 && uq>0){
+          var man=(uv*(ps.uunit==='万円'?10000:1)*uq*up)/10000;
+          var manR=Math.round(man*10)/10, capped=false;
+          if(uc>0 && man>uc) capped=true;
+          sim.appendChild(el('span',null,'概算：'));
+          var tu='単価 '+uv+ps.uunit+' × '+uq+ps.uqn+(hasP?(' × '+up+'名'):'')+' = 約'+manR+'万円';
+          if(uc>0) tu+='（上限 '+uc+'万円'+(capped?(' → 支給目安 約'+uc+'万円'):'')+'）';
+          sim.appendChild(el('span',{class:'simout'},tu));
+        } else if(uc>0){
+          sim.appendChild(el('span',{class:'simout'},'上限額：'+uc+'万円'));
+          sim.appendChild(el('span',{style:'color:#555;font-size:12.5px'},'（単価と数量を入れると概算します）'));
+        } else {
+          sim.appendChild(el('span',{style:'color:#555;font-size:13px'},'（この助成金は「単価 × 数量（日額・月額・時間額 等）」型です。面談で単価・日数等を確認して試算します）'));
+        }
+      } else if(ps.simType==='rate'){
+        var cost=parseFloat(ps.cost), rn=parseFloat(ps.rnum), rd=parseFloat(ps.rden), cap=parseFloat(ps.cap);
+        var r1=function(x){return Math.round(x*10)/10;};
+        if(cost>0 && rn>0 && rd>0){
+          var raw=cost*rn/rd;
+          var unit=(cap>0 && raw>cap)?cap:raw, capped=(cap>0 && raw>cap);
+          var cnt=parseInt(ps.rcount,10), multi=cnt>1;
+          sim.appendChild(el('span',null,'概算：'));
+          var per='対象経費 '+cost+'万円 × 助成率 '+rn+'/'+rd+' = 約'+r1(raw)+'万円';
+          if(cap>0) per+='（上限 '+cap+'万円）';
+          var txt = multi
+            ? ('1件あたり '+per+' → 1件 約'+r1(unit)+'万円 × '+cnt+'件 = 約'+r1(unit*cnt)+'万円')
+            : (per + (capped ? ' → 支給目安 約'+cap+'万円' : ''));
+          sim.appendChild(el('span',{class:'simout'},txt));
+        } else if(cap>0){
+          sim.appendChild(el('span',{class:'simout'},'上限額：'+cap+'万円'));
+          sim.appendChild(el('span',{style:'color:#555;font-size:12.5px'},'（対象経費と助成率を入れると概算します）'));
+        } else {
+          sim.appendChild(el('span',{style:'color:#555;font-size:13px'},'（この助成金は「対象経費 × 助成率（上限あり）」型です。面談で対象経費を確認して試算します）'));
+        }
+      } else {
+        var cnt=parseInt(ps.count,10), per=parseFloat(ps.per);
+        if(!isNaN(cnt)&&cnt>0&&!isNaN(per)&&per>0){
+          sim.appendChild(el('span',null,'概算：'));
+          sim.appendChild(el('span',{class:'simout'},cnt+'名 × '+per+'万円 = 約'+Math.round(cnt*per)+'万円'));
+        } else {
+          sim.appendChild(el('span',{style:'color:#555;font-size:13px'},'（面談で対象人数・1人あたり額を確認して試算します）'));
+        }
+      }
+      m.appendChild(sim);
+      m.appendChild(el('div',{style:'color:#333;font-size:13px;margin-top:8px'},'ポイント：助成金は後払いです。計画 → 取組・実施 → 申請 → 入金 の順に進みます。'));
+      if(d.schedule){ var s=d.schedule; var sched=[s.plan_submission?('計画届: '+s.plan_submission):'', s.implementation_period?('取組: '+s.implementation_period):'', s.application_deadline?('申請: '+s.application_deadline):''].filter(Boolean).join('　→　');
+        if(sched) m.appendChild(el('div',{style:'color:#555;font-size:12.5px;margin-top:4px'},'目安：'+sched)); }
+      sheet.appendChild(m);
+
+      sheet.appendChild(el('div',{class:'psec'},'2. 大切なこと ― 審査は「約束と実態の答え合わせ」'));
+      sheet.appendChild(el('div',{style:'font-size:14px'},'労働条件は書面で明示する義務があります（労働基準法第15条）。助成金では「契約書どおりの労働条件」と「実際の働き方（出勤簿・賃金台帳）」が一致しているかを、1分・1円単位で確認されます。'));
+      var fall=el('div',{class:'pfall'});
+      fall.appendChild(el('div',{style:'font-weight:700;margin-bottom:4px'},'よくある不支給の落とし穴'));
+      ['「給料は多めだからOK」のどんぶり勘定 → 残業代が区分されず未払扱いに','契約書は週休2日なのに休日出勤だらけ → 労働条件違反','そもそも労働条件通知書を渡していない → スタートラインに立てない'].forEach(function(t){ fall.appendChild(el('div',{style:'margin:2px 0'},'・'+t)); });
+      sheet.appendChild(fall);
+      var warns=pick(/計画|前日|賃金|賃上げ|３％|3％|解雇|就業規則|台帳|出勤|明示|転換前|要件/, (d.disqualifiers||[]).concat(d.requirements||[]), 3);
+      if(warns.length){
+        var kb=el('div',{class:'pkey'});
+        kb.appendChild(el('div',{class:'pkh'},'⚠️ この助成金で特に注意する点（ここを満たさないと不支給に）'));
+        var kbody=el('div',{class:'pkb'});
+        var ulw=el('ul',{class:'clean'}); warns.forEach(function(t){ ulw.appendChild(el('li',null,String(t).replace(/^\d+\.\s*/,'').slice(0,90))); }); kbody.appendChild(ulw);
+        kb.appendChild(kbody);
+        sheet.appendChild(kb);
+      }
+
+      sheet.appendChild(el('div',{class:'psec'},'3. 自社診断 ― 挑戦前の「労務管理」健康診断'));
+      sheet.appendChild(el('div',{style:'font-size:13px;color:#333;margin-bottom:4px'},'当てはまるものにチェック。1つでも空欄があれば、まずそこから一緒に整えましょう。'));
+      ['従業員全員の労働時間を、タイムカード等で毎日客観的に記録している','賃金台帳に、労働時間・残業時間を毎月正確に記載している','労働条件通知書（雇用契約書）を必ず書面で渡している','就業規則（10人以上）を労働基準監督署に届け出ている'].forEach(function(t){ var r=el('div',{class:'pchk'}); r.appendChild(el('span',{class:'box2'})); r.appendChild(el('span',null,t)); sheet.appendChild(r); });
+      var sp=pick(/就業規則|計画|規定|整備|賃上げ|台帳|契約書/, (d.requirements||[]).concat(d.client_checklist||[]), 2);
+      sp.forEach(function(t){ var r=el('div',{class:'pchk sp'}); r.appendChild(el('span',{class:'box2'})); r.appendChild(el('span',null,'このコース用：'+String(t).replace(/^\d+\.\s*/,'').slice(0,80))); sheet.appendChild(r); });
+
+      var cta=el('div',{class:'pcta'});
+      cta.appendChild(el('div',{style:'font-weight:700'},'受給のカギは、御社自身の日々の労務管理です'));
+      cta.appendChild(el('div',{style:'color:#333;font-size:13px;margin-top:4px'},'助成金はルールを守る企業への国からのご褒美です。受給には、労働時間の客観的な記録・賃金台帳・労働条件通知書の整備など、御社ご自身の労務管理が欠かせません（実態を後からつくることはできません）。当事務所は、その仕組みづくりと申請手続きを御社と二人三脚でサポートします。まずは現状の確認からご一緒しましょう。詳しくはお問い合わせください。'));
+      var cc=[]; if(CFG.tel)cc.push('TEL: '+CFG.tel);
+      cta.appendChild(el('div',{style:'font-size:13px;margin-top:6px'},(CFG.office_name||'')+(ps.staff?('　担当: '+ps.staff):'')+(cc.length?('　'+cc.join('　')):'')));
+      sheet.appendChild(cta);
+
+      sheet.appendChild(el('div',{class:'muted',style:'margin-top:10px;font-size:12px'},'※ 支給額・要件は最新の支給要領によります。実際の受給可否は個別の状況により異なります。'));
+    }
+  }
+
+  route();
+})();
+</script>
+</body>
+</html>
