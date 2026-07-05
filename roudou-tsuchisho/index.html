@@ -789,14 +789,21 @@
           </div>
           <div class="help-note">月平均所定労働時間＝(365日−年間休日数)×1日の所定労働時間÷12。「🧮 計算する」を押すと年間休日数と1日の所定労働時間から自動計算できます（知識の浅いスタッフでも根拠を示せます）。</div>
         </div>
-        <div class="row two">
+        <div class="row three">
           <div><label>都道府県（地域別最低賃金）</label>
             <select id="calcPref" onchange="calcApplyMinWage()"><option value="">（選択すると自動入力）</option></select>
+          </div>
+          <div><label>年度</label>
+            <select id="calcMwYear" onchange="calcApplyMinWage()">
+              <option value="auto">自動（本日時点で有効）</option>
+              <option value="0">令和7年度（最新）</option>
+              <option value="1">令和6年度（1つ前）</option>
+            </select>
           </div>
           <div><label>地域別最低賃金(円/時)</label><input type="text" class="cnum" inputmode="numeric" name="calc_minwage" placeholder="例：1010"></div>
         </div>
         <div class="hint" id="calcMinWageHint"></div>
-        <div class="help-note">都道府県を選ぶと最新の地域別最低賃金が自動入力されます（手動で上書き可）。結果欄に時間単価との比較を表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項）。空欄のときは判定を表示しません。</div>
+        <div class="help-note">都道府県を選ぶと最低賃金が自動入力されます（手動で上書き可）。<b>年度が「自動」のとき、本日時点で発効済みの最新額を表示します</b>（新年度改定が出ても発効日前は前年度額のまま。発効日を過ぎると自動で新額に切り替わります）。将来・過去の契約を試算したいときは年度を手動で選べます。結果欄に時間単価との比較を、採用した年度・発効日つきで表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項）。空欄のときは判定を表示しません。</div>
         <div class="row"><button type="button" class="btn-add" onclick="calcSaveSettings()">📌 共通設定を既定値として記憶</button>
           <div class="hint">所定労働時間・割増率・端数処理・都道府県をこの端末のブラウザに記憶し、次回このツールを開いたときに復元します（顧問先ごとに異なるため、押したときだけ保存されます）。</div>
         </div>
@@ -2261,32 +2268,93 @@ function calcImportAllows(){
   alert(mapped.length+'件を取り込みました。'+(skipped>0?`（${skipped}件は月額でないため取り込みませんでした）`:''));
 }
 
-/* ===== 賃金試算タブ：地域別最低賃金（D1）
-   出典: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf
-   legal-researchサブエージェントによる一次資料確認（2026-07-05）。都道府県ごとに発効日は令和7年10月〜令和8年3月の間で異なるが、
-   最も遅い発効日（秋田県 令和8年3月31日）も本ツールの確認日時点で既に到来しているため、47都道府県すべて改定後の金額を採用。 ===== */
+/* ===== 賃金試算タブ：地域別最低賃金（D1・発効日付き／年度選択対応）
+   各都道府県について「最新年度」と「1つ前の年度」を発効日付きの配列（新しい年度が先頭）で保持する。
+   年度セレクトが「自動」のとき、本日の日付と各年度の発効日を比較し、発効済みのうち最新の額を採用する
+   （新年度改定が公布・答申されても発効日前は前年度額を使い、発効日を過ぎると自動で新額に切替）。手動で年度を選ぶこともできる。
+   出典:
+   - 令和7年度: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf ／発効日は同一覧（legal-research確認 2026-07-05）
+   - 令和6年度: 厚生労働省・兵庫労働局「地域別最低賃金全国一覧（令和6年）」ほか2ソースで相互照合（legal-research確認 2026-07-05）
+   来年度改定時は、各県配列の先頭に {year,amount,eff} を1件足すだけで自動判定・年度選択がそのまま働く。 ===== */
 const MIN_WAGE_CHECKED='2026-07-05';
-const MIN_WAGE_SOURCE='厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf';
-const MIN_WAGE={
- "北海道":1075,"青森県":1029,"岩手県":1031,"宮城県":1038,"秋田県":1031,"山形県":1032,"福島県":1033,
- "茨城県":1074,"栃木県":1068,"群馬県":1063,"埼玉県":1141,"千葉県":1140,"東京都":1226,"神奈川県":1225,
- "新潟県":1050,"富山県":1062,"石川県":1054,"福井県":1053,"山梨県":1052,"長野県":1061,"岐阜県":1065,
- "静岡県":1097,"愛知県":1140,"三重県":1087,"滋賀県":1080,"京都府":1122,"大阪府":1177,"兵庫県":1116,
- "奈良県":1051,"和歌山県":1045,"鳥取県":1030,"島根県":1033,"岡山県":1047,"広島県":1085,"山口県":1043,
- "徳島県":1046,"香川県":1036,"愛媛県":1033,"高知県":1023,"福岡県":1057,"佐賀県":1030,"長崎県":1031,
- "熊本県":1034,"大分県":1035,"宮崎県":1023,"鹿児島県":1026,"沖縄県":1023
+const MIN_WAGE_SOURCE='厚生労働省「地域別最低賃金の全国一覧」https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/';
+const MIN_WAGE_DATA={
+ "北海道":[{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
+ "青森県":[{year:"令和7年度",amount:1029,eff:"2025-11-21"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
+ "岩手県":[{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-27"}],
+ "宮城県":[{year:"令和7年度",amount:1038,eff:"2025-10-04"},{year:"令和6年度",amount:973,eff:"2024-10-01"}],
+ "秋田県":[{year:"令和7年度",amount:1031,eff:"2026-03-31"},{year:"令和6年度",amount:951,eff:"2024-10-01"}],
+ "山形県":[{year:"令和7年度",amount:1032,eff:"2025-12-23"},{year:"令和6年度",amount:955,eff:"2024-10-19"}],
+ "福島県":[{year:"令和7年度",amount:1033,eff:"2026-01-01"},{year:"令和6年度",amount:955,eff:"2024-10-05"}],
+ "茨城県":[{year:"令和7年度",amount:1074,eff:"2025-10-12"},{year:"令和6年度",amount:1005,eff:"2024-10-01"}],
+ "栃木県":[{year:"令和7年度",amount:1068,eff:"2025-10-01"},{year:"令和6年度",amount:1004,eff:"2024-10-01"}],
+ "群馬県":[{year:"令和7年度",amount:1063,eff:"2026-03-01"},{year:"令和6年度",amount:985,eff:"2024-10-04"}],
+ "埼玉県":[{year:"令和7年度",amount:1141,eff:"2025-11-01"},{year:"令和6年度",amount:1078,eff:"2024-10-01"}],
+ "千葉県":[{year:"令和7年度",amount:1140,eff:"2025-10-03"},{year:"令和6年度",amount:1076,eff:"2024-10-01"}],
+ "東京都":[{year:"令和7年度",amount:1226,eff:"2025-10-03"},{year:"令和6年度",amount:1163,eff:"2024-10-01"}],
+ "神奈川県":[{year:"令和7年度",amount:1225,eff:"2025-10-04"},{year:"令和6年度",amount:1162,eff:"2024-10-01"}],
+ "新潟県":[{year:"令和7年度",amount:1050,eff:"2025-10-02"},{year:"令和6年度",amount:985,eff:"2024-10-01"}],
+ "富山県":[{year:"令和7年度",amount:1062,eff:"2025-10-12"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "石川県":[{year:"令和7年度",amount:1054,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "福井県":[{year:"令和7年度",amount:1053,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "山梨県":[{year:"令和7年度",amount:1052,eff:"2025-12-01"},{year:"令和6年度",amount:988,eff:"2024-10-01"}],
+ "長野県":[{year:"令和7年度",amount:1061,eff:"2025-10-03"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "岐阜県":[{year:"令和7年度",amount:1065,eff:"2025-10-18"},{year:"令和6年度",amount:1001,eff:"2024-10-01"}],
+ "静岡県":[{year:"令和7年度",amount:1097,eff:"2025-11-01"},{year:"令和6年度",amount:1034,eff:"2024-10-01"}],
+ "愛知県":[{year:"令和7年度",amount:1140,eff:"2025-10-18"},{year:"令和6年度",amount:1077,eff:"2024-10-01"}],
+ "三重県":[{year:"令和7年度",amount:1087,eff:"2025-11-21"},{year:"令和6年度",amount:1023,eff:"2024-10-01"}],
+ "滋賀県":[{year:"令和7年度",amount:1080,eff:"2025-10-05"},{year:"令和6年度",amount:1017,eff:"2024-10-01"}],
+ "京都府":[{year:"令和7年度",amount:1122,eff:"2025-11-21"},{year:"令和6年度",amount:1058,eff:"2024-10-01"}],
+ "大阪府":[{year:"令和7年度",amount:1177,eff:"2025-10-16"},{year:"令和6年度",amount:1114,eff:"2024-10-01"}],
+ "兵庫県":[{year:"令和7年度",amount:1116,eff:"2025-10-04"},{year:"令和6年度",amount:1052,eff:"2024-10-01"}],
+ "奈良県":[{year:"令和7年度",amount:1051,eff:"2025-11-16"},{year:"令和6年度",amount:986,eff:"2024-10-01"}],
+ "和歌山県":[{year:"令和7年度",amount:1045,eff:"2025-11-01"},{year:"令和6年度",amount:980,eff:"2024-10-01"}],
+ "鳥取県":[{year:"令和7年度",amount:1030,eff:"2025-10-04"},{year:"令和6年度",amount:957,eff:"2024-10-05"}],
+ "島根県":[{year:"令和7年度",amount:1033,eff:"2025-11-17"},{year:"令和6年度",amount:962,eff:"2024-10-12"}],
+ "岡山県":[{year:"令和7年度",amount:1047,eff:"2025-12-01"},{year:"令和6年度",amount:982,eff:"2024-10-02"}],
+ "広島県":[{year:"令和7年度",amount:1085,eff:"2025-11-01"},{year:"令和6年度",amount:1020,eff:"2024-10-01"}],
+ "山口県":[{year:"令和7年度",amount:1043,eff:"2025-10-16"},{year:"令和6年度",amount:979,eff:"2024-10-01"}],
+ "徳島県":[{year:"令和7年度",amount:1046,eff:"2026-01-01"},{year:"令和6年度",amount:980,eff:"2024-11-01"}],
+ "香川県":[{year:"令和7年度",amount:1036,eff:"2025-10-18"},{year:"令和6年度",amount:970,eff:"2024-10-02"}],
+ "愛媛県":[{year:"令和7年度",amount:1033,eff:"2025-12-01"},{year:"令和6年度",amount:956,eff:"2024-10-13"}],
+ "高知県":[{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}],
+ "福岡県":[{year:"令和7年度",amount:1057,eff:"2025-11-16"},{year:"令和6年度",amount:992,eff:"2024-10-05"}],
+ "佐賀県":[{year:"令和7年度",amount:1030,eff:"2025-11-21"},{year:"令和6年度",amount:956,eff:"2024-10-17"}],
+ "長崎県":[{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:953,eff:"2024-10-12"}],
+ "熊本県":[{year:"令和7年度",amount:1034,eff:"2026-01-01"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
+ "大分県":[{year:"令和7年度",amount:1035,eff:"2026-01-01"},{year:"令和6年度",amount:954,eff:"2024-10-05"}],
+ "宮崎県":[{year:"令和7年度",amount:1023,eff:"2025-11-16"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
+ "鹿児島県":[{year:"令和7年度",amount:1026,eff:"2025-11-01"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
+ "沖縄県":[{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}]
 };
+let CALC_MW_META=null;   // 現在採用している最低賃金の出所 {pref, year, eff}。手動で額を直接入力したときはnull
+function calcTodayISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+// 本日時点で発効済みのうち最新の年度を返す（配列は新しい年度が先頭）
+function calcResolveMinWage(pref){
+  const arr=MIN_WAGE_DATA[pref]; if(!arr||!arr.length) return null;
+  const t=calcTodayISO();
+  for(const e of arr){ if(e.eff<=t) return e; }
+  return arr[arr.length-1];   // すべて未発効（通常あり得ない）なら最古を返す
+}
 function calcPopulatePrefSelect(){
   const sel=document.getElementById('calcPref'); if(!sel || sel.dataset.filled) return;
-  Object.keys(MIN_WAGE).forEach(pref=>{ const o=document.createElement('option'); o.value=pref; o.textContent=pref+'　'+MIN_WAGE[pref]+'円'; sel.appendChild(o); });
+  Object.keys(MIN_WAGE_DATA).forEach(pref=>{ const o=document.createElement('option'); o.value=pref; o.textContent=pref; sel.appendChild(o); });
   sel.dataset.filled='1';
   const hint=document.getElementById('calcMinWageHint');
-  if(hint) hint.textContent=`${MIN_WAGE_CHECKED} 確認時点（一次資料：${MIN_WAGE_SOURCE}）`;
+  if(hint) hint.textContent=`年度が「自動」のとき、本日時点で発効済みの最新額を表示します（${MIN_WAGE_CHECKED}確認時点・一次資料：${MIN_WAGE_SOURCE}）。`;
 }
 function calcApplyMinWage(){
   const pref=document.getElementById('calcPref').value;
+  const yearSelEl=document.getElementById('calcMwYear');
+  const yearSel=yearSelEl?yearSelEl.value:'auto';
   const el=document.getElementById('calcForm').elements['calc_minwage'];
-  if(pref && MIN_WAGE[pref]!=null) el.value=MIN_WAGE[pref];
+  if(pref && MIN_WAGE_DATA[pref]){
+    const arr=MIN_WAGE_DATA[pref];
+    const chosen = yearSel==='auto' ? calcResolveMinWage(pref) : (arr[parseInt(yearSel,10)]||arr[0]);
+    if(chosen){ el.value=chosen.amount; CALC_MW_META={pref, year:chosen.year, eff:chosen.eff}; }
+  } else {
+    CALC_MW_META=null;   // 都道府県未選択＝手動入力額
+  }
   calcRender();
 }
 function calcMinWageLine(mwBase, sched, minwage){
@@ -2295,7 +2363,8 @@ function calcMinWageLine(mwBase, sched, minwage){
   const ok=hourly>=minwage;
   const cls=ok?'calc-ok-g':'calc-warn-r';
   const mark=ok?'✔':'⚠';
-  return `<div class="${cls}">${mark} 時間単価 ${Math.round(hourly).toLocaleString('ja-JP')}円 ${ok?'≧':'＜'} 最低賃金 ${Math.round(minwage).toLocaleString('ja-JP')}円（${MIN_WAGE_CHECKED}確認時点。精皆勤・通勤・家族手当は比較から除外）</div>`;
+  const src = CALC_MW_META ? `${CALC_MW_META.year}・${CALC_MW_META.eff}発効／` : '';
+  return `<div class="${cls}">${mark} 時間単価 ${Math.round(hourly).toLocaleString('ja-JP')}円 ${ok?'≧':'＜'} 最低賃金 ${Math.round(minwage).toLocaleString('ja-JP')}円（${src}${MIN_WAGE_CHECKED}確認時点。精皆勤・通勤・家族手当は比較から除外）</div>`;
 }
 
 /* ===== 賃金試算タブ：固定残業の時間警告（D3） ===== */
@@ -2326,7 +2395,8 @@ const CALC_SETTINGS_FIELDS=['calc_sched','calc_ot_rate','calc_hol_rate','calc_ni
 function calcSaveSettings(){
   try{
     const cf=document.getElementById('calcForm');
-    const data={calc_pref:document.getElementById('calcPref').value};
+    const data={calc_pref:document.getElementById('calcPref').value,
+      calc_mw_year:(document.getElementById('calcMwYear')||{}).value||'auto'};
     CALC_SETTINGS_FIELDS.forEach(n=>{ if(cf.elements[n]) data[n]=cf.elements[n].value; });
     localStorage.setItem(CALC_SETTINGS_KEY, JSON.stringify(data));
     alert('共通設定を既定値として記憶しました。次回このツールを開いたときに復元します。');
@@ -2339,9 +2409,11 @@ function calcLoadSettings(){
     Object.entries(data).forEach(([k,v])=>{
       if(!v) return;
       if(k==='calc_pref'){ const sel=document.getElementById('calcPref'); if(sel) sel.value=v; return; }
+      if(k==='calc_mw_year'){ const sel=document.getElementById('calcMwYear'); if(sel) sel.value=v; return; }
       const el=cf.elements[k]; if(el) el.value=v;
     });
     calcResolveRounding();   // カスタム以外なら個別欄をpattern値に合わせ直す（disabled状態も含めて）
+    if(document.getElementById('calcPref') && document.getElementById('calcPref').value) calcApplyMinWage();  // 都道府県・年度から最賃額を整合させ直す
   }catch(e){ /* file://等でlocalStorage不可の場合は既定値のまま */ }
 }
 
