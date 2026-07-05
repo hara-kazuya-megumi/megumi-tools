@@ -63,7 +63,7 @@
   .seg label{display:inline-flex;align-items:center;gap:5px;background:var(--chip);border:1px solid var(--line);
     border-radius:20px;padding:5px 11px;cursor:pointer;font-size:12px;color:var(--ink);font-weight:600}
   .seg input{accent-color:var(--accent)}
-  /* ---- 賃金試算タブ（3モード・手当明細・詳細設定） ---- */
+  /* ---- 賃金試算タブ（4モード・手当明細・詳細設定） ---- */
   .calc-modes{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px}
   .calc-modes label{display:flex;gap:9px;align-items:flex-start;background:var(--chip);border:1px solid var(--line);
     border-radius:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;line-height:1.6;color:var(--ink);font-weight:400}
@@ -232,7 +232,7 @@
 
 <div id="rosterBar">
   <span class="rb-label">👥 名簿 <b id="rosterCount">0</b> 人</span>
-  <button class="btn mini" id="rosterCommitBtn" onclick="rosterCommit()" title="今フォームに入力している内容を、1名分として名簿に登録します">➕ 名簿に追加</button>
+  <button class="btn mini" id="rosterCommitBtn" onclick="rosterCommit()" title="今フォームに入力している内容を、1名分として名簿に登録します">➕ この内容を名簿に追加</button>
   <button class="btn mini ghost" onclick="rosterAddNext()" title="今の内容を名簿に追加し、氏名・賃金額・手当（支給項目）だけをクリアします。会社情報・労働時間・休日などの条件は残るので、続けて次の方を素早く入力できます">➡ 追加して次の人へ</button>
   <button class="btn mini ghost" onclick="switchMode('batch')" title="名簿の一覧・並べ替え・一括出力の画面へ移動します">👥 一括作成タブ</button>
   <span id="rosterStatus" class="rb-status"></span>
@@ -532,7 +532,7 @@
             <input type="text" class="num" inputmode="numeric" name="fixed_ot_hours" placeholder="時間数（例：20）">
             <input type="text" class="num" inputmode="numeric" name="fixed_ot_amount" placeholder="金額(円)">
           </div>
-          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_ot_auto"> 月給から自動計算（基準内賃金÷所定労働時間×時間外割増率×時間数。割増率は上の「時間外 法定超」の％＝125%等をそのまま使用）</label>
+          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_ot_auto"> 月給から自動計算（基準内賃金÷所定労働時間×時間外割増率×時間数。割増率は下の「時間外 法定超」の％＝125%等をそのまま使用）</label>
           <label style="margin-top:2px;display:block"><input type="checkbox" name="fixed_ot60_show" checked> 固定残業が月60時間を超える場合、超過分（時間数−60）の追加割増を「（月60時間超）」項目として表示・計算する（不要ならチェックを外す）</label>
         </div>
         <div class="row"><label>固定深夜（みなし深夜手当・手当名は自由）</label>
@@ -541,7 +541,7 @@
             <input type="text" class="num" inputmode="numeric" name="fixed_night_hours" placeholder="時間数（例：30）">
             <input type="text" class="num" inputmode="numeric" name="fixed_night_amount" placeholder="金額(円)">
           </div>
-          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_night_auto"> 月給から自動計算（基準内賃金÷所定労働時間×深夜割増率×時間数。割増率は上の「深夜」を使用）</label>
+          <label style="margin-top:4px;display:block;font-weight:600"><input type="checkbox" name="fixed_night_auto"> 月給から自動計算（基準内賃金÷所定労働時間×深夜割増率×時間数。割増率は下の「深夜」を使用）</label>
         </div>
       </div>
       <div id="otUnified" class="hidden">
@@ -569,7 +569,7 @@
         </div>
         <label style="display:block;margin-top:4px"><input type="checkbox" name="uni_note_clause" checked> 就業規則準拠の注記（差額精算・減額しない・日割り）を付ける</label>
         <div class="help-note"><b>チェックあり（既定）</b>＝一体型の固定手当のあとに「実際の割増賃金が本手当額を超える月は差額を追加支給」「本手当があることを理由に割増賃金を減額しない」「月途中の入退社は日割り計算」の注記文を自動で付けます（就業規則の固定残業規定に沿った、後々のトラブル防止用の文言）。不要ならチェックを外すと注記なしになります。</div>
-        <div class="help-note">割増率は下の「割増賃金率」の 時間外(125%)・法定休日(135%)・深夜(25%) を使用。按分方式は金額を<b>1円単位で配分し合計が希望額に一致</b>します（切り上げなし）。時間は「○時間分（相当）」で表示します。</div>
+        <div class="help-note">割増率は下の「割増賃金率」の 時間外(125%)・法定休日(135%)・深夜(25%) を使用。按分方式は金額を<b>1円単位で配分し合計が希望額に一致</b>します（切り上げなし）。時間は「○時間分（相当）」で表示します。<b>一体型は月60時間超の追加割増は計算しません</b>。</div>
       </div>
       <div class="row"><label>割増賃金率（％）</label>
         <div class="help-note">各割増率を％で入力します（初期値は法定：時間外125％・月60時間超は追加25％・法定休日135％・深夜は追加25％）。ここの値は通知書に記載され、<b>固定残業の自動計算にも使われます</b>。「所定超（法定内）」は所定労働時間を超えるが法定8時間内の分で、法律上は割増不要のため通常100％です。</div>
@@ -654,7 +654,7 @@
       </div>
       <div id="grpSetsumei" class="hidden">
         <label style="display:block;font-weight:600;margin:4px 0"><input type="checkbox" name="show_setsumei" checked> ①「待遇の相違の説明を求めることができる旨」を書面に明示する（令和8年10月1日以降の雇入れ・契約更新から明示義務）</label>
-        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。令和8年4月28日公布の改正パート有期則2条1項により、<b>令和8年10月1日以降の雇入れ・契約更新からは短時間・有期雇用労働者への書面明示が義務</b>になります（それまでは任意）。交付日が令和8年10月1日以降の短時間・有期の書類では自動的にチェックが固定されます。②の雇用管理改善の相談窓口はチェックに関係なく常に記載されます。</div>
+        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。令和8年4月28日公布の改正パート有期則2条1項4号により、<b>令和8年10月1日以降の雇入れ・契約更新からは短時間・有期雇用労働者への書面明示が義務</b>になります（それまでは任意）。交付日が令和8年10月1日以降の短時間・有期の書類では自動的にチェックが固定されます。②の雇用管理改善の相談窓口はチェックに関係なく常に記載されます（施行後は同項5号）。</div>
         <div class="row"><label>① 待遇の相違（内容・理由）等の説明を求める窓口</label></div>
         <div class="row three">
           <div><label>部署名</label><input type="text" name="setsumei_dept" placeholder="総務部"></div>
@@ -753,6 +753,7 @@
 <div id="modeCalc" class="hidden">
   <div class="calc-wrap">
     <form id="calcForm" oninput="calcRender()" onchange="calcRender()">
+      <div class="empty-legend">※ <b>薄い黄色</b>の欄は、選択中の試算モードで<b>計算に必要な未入力欄</b>です（都道府県・コメント等の任意欄は光りません）。</div>
       <fieldset>
         <legend>① 試算の種類</legend>
         <div class="calc-modes">
@@ -796,16 +797,14 @@
           <div><label>年度</label>
             <select id="calcMwYear" onchange="calcApplyMinWage()">
               <option value="auto">自動（本日時点で有効）</option>
-              <option value="0">令和7年度（最新）</option>
-              <option value="1">令和6年度（1つ前）</option>
             </select>
           </div>
-          <div><label>地域別最低賃金(円/時)</label><input type="text" class="cnum" inputmode="numeric" name="calc_minwage" placeholder="例：1010"></div>
+          <div><label>地域別最低賃金(円/時)</label><input type="text" class="cnum" inputmode="numeric" name="calc_minwage" placeholder="例：1100" oninput="calcMinwageManual()"></div>
         </div>
         <div class="hint" id="calcMinWageHint"></div>
-        <div class="help-note">都道府県を選ぶと最低賃金が自動入力されます（手動で上書き可）。<b>年度が「自動」のとき、本日時点で発効済みの最新額を表示します</b>（新年度改定が出ても発効日前は前年度額のまま。発効日を過ぎると自動で新額に切り替わります）。将来・過去の契約を試算したいときは年度を手動で選べます。結果欄に時間単価との比較を、採用した年度・発効日つきで表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項）。空欄のときは判定を表示しません。</div>
+        <div class="help-note">都道府県を選ぶと最低賃金が自動入力されます（手動で上書き可）。<b>年度が「自動」のとき、本日時点で発効済みの最新額を表示します</b>（新年度改定が出ても発効日前は前年度額のまま。発効日を過ぎると自動で新額に切り替わります）。将来・過去の契約を試算したいときは年度を手動で選べます。結果欄に時間単価との比較を、採用した年度・発効日つきで表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項各号・地域別最低賃金の定めによる）。空欄のときは判定を表示しません。</div>
         <div class="row"><button type="button" class="btn-add" onclick="calcSaveSettings()">📌 共通設定を既定値として記憶</button>
-          <div class="hint">所定労働時間・割増率・端数処理・都道府県をこの端末のブラウザに記憶し、次回このツールを開いたときに復元します（顧問先ごとに異なるため、押したときだけ保存されます）。</div>
+          <div class="hint">所定労働時間・割増率・端数処理・都道府県・年度・最賃額をこの端末のブラウザに記憶し、次回このツールを開いたときに復元します（顧問先ごとに異なるため、押したときだけ保存されます）。</div>
         </div>
         <details id="calcDetails">
           <summary id="calcDetailsSummary">詳細設定（通常は変更不要）</summary>
@@ -834,7 +833,7 @@
               </div>
             </div>
           </div>
-          <div class="help-note"><b>標準</b>＝途中は端数処理せず最後に切上げ（現行の計算方法と同じ）。<b>単価段階で処理</b>＝時間単価→割増単価の各段階で円未満を四捨五入する方式（顧問先の給与規程に合わせて選択）。円未満の四捨五入は通達（昭和63.3.14 基発150号）で認められていますが、<b>切捨ては労働者に不利</b>なため賃金全額払いの原則（労基法24条）との関係で注意が必要です。段階1・2の欄は「カスタム」選択時のみ編集できます。</div>
+          <div class="help-note"><b>標準</b>＝途中は端数処理せず最後に切上げ（現行の計算方法と同じ）。<b>単価段階で処理</b>＝時間単価→割増単価の各段階で円未満を四捨五入する方式（顧問先の給与規程に合わせて選択）。円未満の四捨五入は通達（昭和63.3.14 基発150号）で認められていますが、<b>切捨ては労働者に不利</b>なため賃金全額払いの原則（労基法24条）との関係で注意が必要です。<b>カスタム</b>＝時間単価・割増単価・手当額の3段階それぞれに「四捨五入／切上げ／切捨て」を個別指定できます。切捨てを含み法定額を下回ると赤い警告が出ます。段階1〜3の欄は「カスタム」選択時のみ編集できます。</div>
         </details>
       </fieldset>
 
@@ -884,7 +883,7 @@
         <div class="row" data-show="rev_base,rev_hours"><label>目標の総支給額(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_target" value="300000"></div>
         <div class="row" id="calcSplitOtRow" data-show="forward,rev_base" data-hide-style="unified"><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours" value="20"></div>
         <div class="row" id="calcSplitNightRow" data-show="forward,rev_base" data-hide-style="unified"><label>固定深夜時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours" value="0"></div>
-        <div class="help-note" data-show="rev_base">端数は基準内賃金（基本給）が吸収するため、総額は目標どおりになります。</div>
+        <div class="help-note" data-show="rev_base">端数は基準内賃金（基本給）が吸収するため、総額は目標どおりになります（端数処理が「標準」の場合。他パターンではごくわずかな端数調整が出ることがあります）。</div>
       </fieldset>
 
       <fieldset id="calcFsDiff" class="hidden">
@@ -990,25 +989,26 @@
 
     <h2>8. 賃金試算タブの使い方</h2>
     <p>通知書には反映されない独立の試算専用タブです。固定残業代を含む賃金の組み立てを、通知書を作らずに確認・検討できます。</p>
-    <p><b>①このタブでできること（3モード）</b></p>
+    <p><b>①このタブでできること（4モード）</b></p>
     <table class="roster"><thead><tr><th>モード</th><th>使う場面</th></tr></thead><tbody>
       <tr><td>A. 総支給額を計算する</td><td>基本給・手当・固定残業時間が決まっている人の、月の総支給額を確認したいとき</td></tr>
       <tr><td>B. 基本給を逆算する</td><td>「月◯円で採用したい」という希望総額から、基本給と固定残業手当の内訳を割り出したいとき</td></tr>
       <tr><td>C. 固定残業時間を逆算する</td><td>総支給額と基本給の希望が決まっていて、その差額を固定残業何時間分に設定できるか確認したいとき</td></tr>
+      <tr><td>D. 変更したらどうなる（差額を見る）</td><td>昇給・契約更新時の差額と注意点を確認したいとき</td></tr>
     </tbody></table>
     <p><b>②手順</b></p>
     <ol>
-      <li>「① 試算の種類」でA・B・Cのいずれかを選ぶ。</li>
-      <li>「② 共通設定」で月の所定労働時間を確認する（根拠が分からなければ「🧮 計算する」で年間休日数・1日の所定労働時間から自動計算できる）。都道府県を選ぶと最低賃金が自動入力される。</li>
+      <li>「① 試算の種類」でA〜Dのいずれかを選ぶ（Dの操作手順は⑧参照）。</li>
+      <li>「② 共通設定」で月の所定労働時間を確認する（根拠が分からなければ「🧮 計算する」で年間休日数・1日の所定労働時間から自動計算できる）。都道府県を選ぶと最低賃金が自動入力される。<b>年度は通常「自動」のまま</b>（本日時点で発効済みの最新額を表示する。新年度改定が出ても発効日前は前年度額のまま、発効日を過ぎると自動で新額に切り替わる）。将来・過去の契約を試算するときだけ年度を手動で選ぶ。</li>
       <li>「③ 手当」で手当明細を入力する（「📋 作成タブの手当を取り込む」で作成タブの入力をそのまま使うこともできる）。</li>
       <li>「④ 金額と時間」でモードに応じた金額・時間を入力する。</li>
-      <li>右（画面が狭い場合は下）に結果が自動表示される。最低賃金との比較、固定残業時間の注意（45時間・60時間超）もここに表示される。</li>
+      <li>右（画面が狭い場合は下）に結果が自動表示される。最低賃金との比較、固定残業時間の注意（45時間・60時間超）もここに表示される。<b>薄い黄色</b>の欄は、選択中のモード・方式で計算に必要な未入力欄（都道府県・最賃額・コメント等の任意欄は対象外）。</li>
     </ol>
     <p><b>③具体例</b>：モードBで「目標の総支給額」に280,000円、固定残業時間に20時間を入れると、月の所定労働時間（例:160h）・割増率（既定125%）から固定残業手当を割り出し、残りを基本給として表示する。結果欄の「基本給（逆算結果）」が募集要項・契約書に書く基本給の額になる。</p>
-    <p><b>④計算式の考え方</b>：固定残業手当＝基準内賃金（基本給＋基準内手当）÷月所定労働時間×割増率×時間数。逆算（モードB）は、所定時間に固定残業・深夜の時間を割増率で加重した「換算時間」で目標総額を割って単価を求め、そこから固定残業手当・深夜手当を計算し、残りを基本給とする方式（端数はすべて基本給側が吸収するため総額は目標どおりになる）。</p>
+    <p><b>④計算式の考え方</b>：固定残業手当＝基準内賃金（基本給＋基準内手当）÷月所定労働時間×割増率×時間数。逆算（モードB）は、所定時間に固定残業・深夜の時間を割増率で加重した「換算時間」で目標総額を割って単価を求め、そこから固定残業手当・深夜手当を計算し、残りを基本給とする方式（端数はすべて基本給側が吸収するため総額は目標どおりになる。端数処理が「標準」の場合。他パターンではごくわずかな端数調整が出ることがあります）。</p>
     <p><b>⑤注意</b>：保険料・税金の計算はできません（手取り額は表示されません）。試算した内容は「➡ この内容を作成タブの賃金欄に反映」ボタンを押さない限り通知書・出力には反映されません。具体的な適用は所属社労士の確認を要します。</p>
     <p><b>⑥固定残業の2方式</b>：「④ 金額と時間」の先頭で選べます。<b>区分別</b>＝固定残業手当と固定深夜手当を別々に設定する従来方式。<b>一体型</b>＝時間外・法定休日・深夜をまとめて1本の手当（固定時間外勤務手当）にし、内訳（時間数・金額）を明示する方式で、作成タブの「固定残業の方式」と同じ考え方です。一体型の「希望額から按分」は、希望額を比率（既定60:30:10）で配分します。例えば希望額75,000円・比60:30:10なら、時間外45,000円・法定休日22,500円・深夜7,500円に配分され（合計は必ず希望額と一致）、それぞれの相当時間（何時間分にあたるか）も表示されます。<b>一体型は月60時間超の追加割増（+25%）を計算しません</b>。60時間を超える設計を試算したいときは区分別方式を使ってください。</p>
-    <p><b>⑦端数処理パターン</b>：「詳細設定」の中で選べます。<b>標準</b>＝時間単価・割増単価では端数処理をせず、最後の手当額だけを切り上げる、多くの会社で採用されている方式です（従来の計算方法と同じです）。<b>単価段階で処理</b>＝時間単価を四捨五入→その割増単価も四捨五入→最後は処理なし、という顧問先の給与規程・賃金台帳の計算方法に合わせる方式です。どちらを選ぶかは、顧問先が実際に給与計算で使っている端数処理の手順に合わせて選びます。結果欄には「🔍 計算過程を表示」で各段階の数値と、法定どおりの厳密な金額との差額が表示されます（緑＝上回っている、青＝四捨五入の範囲内、赤＝切捨てにより法定額を下回る、の3色で判定）。<b>切捨てを選んで法定額を下回る設定は労働者に不利になるため、赤い警告が出たら四捨五入・切上げへの変更を検討してください。</b></p>
+    <p><b>⑦端数処理パターン</b>：「詳細設定」の中で選べます。<b>標準</b>＝時間単価・割増単価では端数処理をせず、最後の手当額だけを切り上げる、多くの会社で採用されている方式です（従来の計算方法と同じです）。<b>単価段階で処理</b>＝時間単価を四捨五入→その割増単価も四捨五入→最後は処理なし、という顧問先の給与規程・賃金台帳の計算方法に合わせる方式です。<b>カスタム</b>＝時間単価・割増単価・手当額の3段階それぞれに「四捨五入／切上げ／切捨て」を個別指定する方式です。切捨てを含み法定額を下回ると赤い警告が出ます。どちらを選ぶかは、顧問先が実際に給与計算で使っている端数処理の手順に合わせて選びます。結果欄には「🔍 計算過程を表示」で各段階の数値と、法定どおりの厳密な金額との差額が表示されます（緑＝上回っている、青＝四捨五入の範囲内、赤＝切捨てにより法定額を下回る、の3色で判定。按分方式・モードC/Dでは表示されません）。<b>切捨てを選んで法定額を下回る設定は労働者に不利になるため、赤い警告が出たら四捨五入・切上げへの変更を検討してください。</b></p>
     <p><b>⑧モードD（変更したらどうなる）の使い方</b>：①左（現在の条件）に今の基本給・手当・固定残業を入力する。②「➡ この内容を変更後へコピー」を押すと右（変更後）が編集可能になる。③右の欄だけ書き換える。金額・時間の欄には <code>+10000</code>（現在より1万円増）や <code>-5</code>（現在より5時間減）のように差額で入力すると、入力を終えて欄を出た時点で自動的に絶対額に変換されます。④差分表で基本給・各手当・固定残業計・総支給額・年間換算・割増の基礎・時間単価の現在／変更後／差額が確認できます。⑤結果欄の自動チェックで、割増単価の低下（不利益変更の論点）、固定的賃金の変動（月額変更届の検討対象）、最低賃金割れ、固定残業45時間超えへの変更を知らせます。⑥昇給が確定して次年度の変更案を検討するときは、前年に保存した試算ファイルを読み込み、「⬆ 変更後を現在へ繰上げ」で今回の「変更後」を新しい「現在」にしてから、次の変更後を入力します。</p>
     <p><b>⑨PDF試算書の出し方</b>：結果欄の下にある「🖨 試算書を印刷（PDFに保存）」を押すと、印刷ダイアログが開きます。プリンターの選択で「PDFに保存」を選ぶとPDFファイルとして保存されます。「🖨 試算書（PDF）のオプション」を開くと、宛名・対象・コメント（すべて任意入力、空欄なら試算書に印字されません）と、計算過程を試算書にも印字するかどうかを選べます。ロゴ・事務所名は印字されません（タイトルと試算日のみ）。切捨てによる法定額割れなどの赤い警告が出ている状態で印刷しようとすると、確認のダイアログが表示されます。</p>
     <p><b>試算タブの独立性について</b>：このタブは通知書に自動反映されません。反映されるのは「➡ この内容を作成タブの賃金欄に反映」（モードDでは「➡ 変更後を作成タブへ転記」）ボタンを押したときだけです。試算タブの入力内容は「💾 保存」（作成タブ側）には含まれません。試算専用の保存・読込は「💾 試算を保存」「📂 試算を読込」（モードD使用時に表示）を使います。</p>
@@ -1032,7 +1032,7 @@
 
 <div id="modeRefs" class="hidden">
   <div class="batch-wrap">
-    <div class="batch-guide">労働条件の明示について、現行有効な明示事項の一覧と、根拠となる法令・公的資料へのリンク集です。リンクはインターネット接続時のみ開けます（このツール自体はオフラインでも動作します）。掲載内容は年2回（4月・10月）の定期点検で確認し、新しい情報を追記しています。<b>最終点検日: <span id="refsChecked"></span></b></div>
+    <div class="batch-guide">労働条件の明示および賃金試算の根拠について、現行有効な明示事項の一覧と、根拠となる法令・公的資料へのリンク集です。リンクはインターネット接続時のみ開けます（このツール自体はオフラインでも動作します）。掲載内容は年2回（4月・10月）の定期点検で確認し、新しい情報を追記しています。<b>最終点検日: <span id="refsChecked"></span></b></div>
     <div id="meijiList"></div>
     <div id="refsList"></div>
   </div>
@@ -1042,7 +1042,7 @@
 "use strict";
 const $ = s => document.querySelector(s);
 const form = $('#form');
-const esc = s => String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const has = v => v!=null && String(v).trim()!=='';
 const val = n => { const el=form.elements[n]; return el ? String(el.value||'').trim() : ''; };
 const radio = n => { const el=form.elements[n]; return el ? (el.value||'') : ''; };
@@ -1088,7 +1088,7 @@ function toHalf(s){ return String(s==null?'':s).replace(/[０-９]/g,c=>String.f
 function normalizeNum(inp){ if(!inp) return; const v=toHalf(inp.value).replace(/[^\d]/g,''); if(v!==inp.value) inp.value=v; }
 function normalizeAllNumeric(){
   document.querySelectorAll('input.num').forEach(normalizeNum);           // 賃金の金額欄
-  document.querySelectorAll('.allow-row').forEach(r=>{                    // 手当（月/日/時/回は数字のみ、その他は自由）
+  document.querySelectorAll('#inAllowList .allow-row, #outAllowList .allow-row').forEach(r=>{  // 手当（月/日/時/回は数字のみ、その他は自由）
     const u=r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month';
     if(u!=='other') normalizeNum(r.querySelector('.a-amt'));
   });
@@ -1191,10 +1191,11 @@ function numH(x){ return Number(toHalf(String(x==null?'':x)).replace(/[^\d.]/g,'
 function computeUnifiedCore(p){
   const {inBase, sched, roundUp, otR, holR, nightR, mode}=p;
   const per = sched>0? inBase/sched : 0;
-  let ot={amt:0,h:0}, hol={amt:0,h:0}, ni={amt:0,h:0}, total=0;
+  let ot={amt:0,h:0}, hol={amt:0,h:0}, ni={amt:0,h:0}, total=0, ratioFallback=false;
   if(mode==='ratio'){
     const T=p.target||0;
-    const r1=p.rOt||0, r2=p.rHol||0, r3=p.rNight||0; const rs=(r1+r2+r3)||1;
+    let r1=p.rOt||0, r2=p.rHol||0, r3=p.rNight||0; let rs=r1+r2+r3;
+    if(!rs){ r1=60; r2=30; r3=10; rs=100; ratioFallback=true; }   // 比が全て0のとき既定比60:30:10にフォールバック（E-6）
     ot.amt=Math.round(T*r1/rs); hol.amt=Math.round(T*r2/rs); ni.amt=T-ot.amt-hol.amt;   // 1円単位・合計=T（切上げなし）
     ot.h = (per>0&&otR>0)? ot.amt/(per*otR):0;
     hol.h= (per>0&&holR>0)? hol.amt/(per*holR):0;
@@ -1207,7 +1208,7 @@ function computeUnifiedCore(p){
     ni.amt = ni.h>0? roundUp(per*nightR*ni.h):0;
     total=ot.amt+hol.amt+ni.amt;
   }
-  return {mode, per, otR, holR, nightR, ot, hol, ni, total};
+  return {mode, per, otR, holR, nightR, ot, hol, ni, total, ratioFallback};
 }
 function computeUnified(inBase, sched, unit, roundUp){
   const otR=(numH(val('ot_60under'))||125)/100, holR=(numH(val('hol_legal'))||135)/100, nightR=(numH(val('night_pct'))||25)/100;
@@ -1364,7 +1365,7 @@ function updateVisibility(){
   const needsPart = cat==='短時間' || per==='有期' || cat==='派遣';   // パート有期法・派遣法の明示対象
   if(needsPart && radio('worker_kind')!=='other'){ [...form.elements['worker_kind']].forEach(r=>{ r.checked=(r.value==='other'); }); }
   $('#grpSetsumei').classList.toggle('hidden', !(radio('worker_kind')==='other' || needsPart));
-  // R8.10.1施行: 短時間・有期は①説明を求めることができる旨の明示が義務（改正パート有期則2条1項）
+  // R8.10.1施行: 短時間・有期は①説明を求めることができる旨の明示が義務（改正パート有期則2条1項4号）
   const ssEl=form.elements['show_setsumei'];
   if(ssEl){ const must=(cat==='短時間'||per==='有期') && val('issue_date')>='2026-10-01';
     if(must && !ssEl.checked) ssEl.checked=true;
@@ -1845,7 +1846,9 @@ function toggleHelp(){
 function printGuide(){
   document.body.classList.add('print-guide');
   window.print();
-  setTimeout(()=>document.body.classList.remove('print-guide'),500);
+  const done=()=>{ document.body.classList.remove('print-guide'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(done, 2000);
 }
 
 // ===== タブ切替・賃金試算（通知書に反映しない独立機能）=====
@@ -1867,7 +1870,7 @@ const MEIJI=[
  ]},
  {group:'D. 短時間・有期雇用労働者への特定事項（文書交付・違反は10万円以下の過料）', note:'パート有期法6条・同施行規則2条。', items:[
   {item:'昇給の有無／退職手当の有無／賞与の有無／相談窓口', target:'短時間・有期', basis:'パート有期法6条・則2条', since:'', memo:''},
-  {item:'待遇の相違の内容・理由等の説明を求めることができる旨', target:'短時間・有期', basis:'パート有期則2条4号（令和8年厚労省令87号・2026-4-28公布）', since:'2026-10-1施行', memo:'交付日がR8.10.1以降なら必要（本ツールは交付日で自動判定）'},
+  {item:'待遇の相違の内容・理由等の説明を求めることができる旨', target:'短時間・有期', basis:'パート有期則2条1項4号（令和8年厚労省令87号・2026-4-28公布）', since:'2026-10-1施行', memo:'交付日がR8.10.1以降なら必要（本ツールは交付日で自動判定）。新設により現行4号（相談窓口）は5号に繰下げ'},
  ]},
  {group:'E. 派遣労働者（派遣元での雇入れ時）', note:'派遣の際の就業条件明示（派遣法34条）とは別立ての義務。', items:[
   {item:'昇給・退職手当・賞与の有無／協定対象派遣労働者か否か（対象の場合は労使協定の有効期間の終期）／苦情の処理に関する事項', target:'派遣', basis:'派遣法31条の2第2項・則25条の16（明示方法は則25条の15）', since:'', memo:''},
@@ -1884,17 +1887,23 @@ function renderMeiji(){
     return `<h3 style="margin:16px 0 4px;font-size:14px">${esc(g.group)}</h3>${g.note?`<p class="hint">${esc(g.note)}</p>`:''}<table class="roster"><thead><tr><th>明示する事項</th><th>対象</th><th>根拠</th><th>施行・追加</th><th>備考</th></tr></thead><tbody>${rows}</tbody></table>`;
   }).join('')+'<p class="hint">※ この一覧は事務所内の参考用の要約です。具体的事案への適用は条文原文と所属社労士の確認を要します。新しい明示義務は年2回（4月・10月）の定期点検で検知し、確認のうえこの一覧に追記されます。</p>';
 }
-const REFS_CHECKED='2026-07-05';
+const REFS_CHECKED='2026-07-06';
 const REFS=[
  {cat:'法令（e-Gov 条文）', items:[
   {name:'労働基準法', basis:'15条（労働条件の明示）', url:'https://laws.e-gov.go.jp/law/322AC0000000049', note:'明示義務の大元。2026-07-05 e-Gov法令APIで照合済み'},
   {name:'労働基準法施行規則', basis:'5条（明示事項・明示方法）', url:'https://laws.e-gov.go.jp/law/322M40000100023', note:'LawId=322M40000100023（2026-07-04・2026-07-05の二度、e-Gov法令APIでLawNum突合済み）'},
   {name:'労働契約法', basis:'18条（無期転換申込権）', url:'https://laws.e-gov.go.jp/law/419AC0000000128', note:'無期転換別紙の根拠。2026-07-05照合済み'},
   {name:'パートタイム・有期雇用労働法', basis:'6条（特定事項の文書明示）', url:'https://laws.e-gov.go.jp/law/405AC0000000076', note:'昇給・賞与・退職手当の有無、相談窓口。2026-07-05照合済み'},
-  {name:'パートタイム・有期雇用労働法施行規則', basis:'2条（特定事項）', url:'https://laws.e-gov.go.jp/law/405M50002000034', note:'R8.10.1施行で第4号（待遇差説明を求められる旨）追加。LawId=405M50002000034（2026-07-05 e-Gov法令APIでLawNum「平成五年労働省令第三十四号」と突合済み）'},
+  {name:'パートタイム・有期雇用労働法施行規則', basis:'2条1項（特定事項）', url:'https://laws.e-gov.go.jp/law/405M50002000034', note:'R8.10.1施行で2条1項に第4号（待遇差説明を求めることができる旨）を新設し、現行4号（相談窓口）は5号に繰下げ。LawId=405M50002000034（2026-07-05 e-Gov法令APIでLawNum「平成五年労働省令第三十四号」と突合済み、2026-07-06 改正省令本文で号ズレを再確認）'},
   {name:'労働者派遣法', basis:'31条の2第2項（雇入れ時の明示）', url:'https://laws.e-gov.go.jp/law/360AC0000000088', note:'2026-07-05照合済み'},
   {name:'労働者派遣法施行規則', basis:'25条の15・25条の16', url:'https://laws.e-gov.go.jp/law/361M50002000020', note:'明示方法・明示事項の細目。2026-07-05照合済み'},
   {name:'建設労働者雇用改善法', basis:'7条（雇用に関する文書の交付）', url:'https://laws.e-gov.go.jp/law/351AC0000000033', note:'帰郷旅費の根拠は労基法15条2・3項。2026-07-05照合済み'},
+ ]},
+ {cat:'賃金試算・割増賃金の根拠', items:[
+  {name:'労働基準法', basis:'37条5項（割増算定基礎の除外）・24条（全額払い）・27条（出来高払の保障給）・36条4項（36協定の限度時間＝月45時間・年360時間）・37条1項ただし書（月60時間超は5割以上の割増）', url:'https://laws.e-gov.go.jp/law/322AC0000000049', note:'賃金試算タブの計算・警告表示の根拠。2026-07-06 e-Gov法令APIで条文を照合済み。中小企業への月60時間超の適用猶予（旧138条）は令和5年4月1日廃止済み'},
+  {name:'労働基準法施行規則', basis:'21条（割増賃金の算定基礎から除外する賃金：家族手当・通勤手当のほか、別居手当［1号］・子女教育手当［2号］・住宅手当［3号］・臨時に支払われた賃金［4号］・1か月を超える期間ごとに支払われる賃金［5号］）', url:'https://laws.e-gov.go.jp/law/322M40000100023', note:'2026-07-06 e-Gov法令APIで条文の号構成を確認済み'},
+  {name:'最低賃金法', basis:'4条3項（最低賃金額に算入しない賃金の除外。1号〜3号）', url:'https://laws.e-gov.go.jp/law/334AC0000000137', note:'2026-07-06 e-Gov法令APIで照合済み。具体的な除外賃金の細目は同項の委任先（施行規則）の条番号を含め要確認'},
+  {name:'昭和63年3月14日 基発150号（賃金の端数処理に関する通達）', basis:'時間外・深夜等の割増賃金計算における1時間あたり賃金額・割増賃金額の円未満四捨五入等を認める取扱い', url:'', note:'2026-07-06時点で厚労省の一次掲載URLは未特定。通達名のみ掲載（定期点検で一次資料を確認でき次第URLを追記）'},
  ]},
  {cat:'改正情報（公布済み・施行前）', items:[
   {name:'令和8年厚生労働省令第87号（パート有期則・派遣則改正）改正省令本文', basis:'2026-4-28公布・R8.10.1施行', url:'https://www.mhlw.go.jp/content/001695908.pdf', note:'2026-07-05 WebFetchで本文確認済み（施行日を定める附則を含む）'},
@@ -1910,6 +1919,7 @@ const REFS=[
  {cat:'このツールの法令確認記録', items:[
   {name:'法令確認記録（2026-07-04 実施）', basis:'専門サブエージェント3体でe-Gov・厚労省等を一次確認', url:'', note:'事務所内ファイル（リンクなし）'},
   {name:'法令・システム点検（2026-07-05 実施）', basis:'修正仕様書に基づき24件反映済み', url:'', note:'同上'},
+  {name:'賃金試算タブ監査対応（2026-07-06 実施）', basis:'セキュリティ・機能バグ・ヘルプ文言の監査結果に基づき全項目反映済み', url:'', note:'同上。60時間超割増表現・割増算定基礎の除外根拠・パート有期則号番号はlegal-researchで一次確認済み'},
  ]},
 ];
 function renderRefs(){
@@ -2177,7 +2187,7 @@ const CALC_ALLOW_PRESETS=[
  {label:'役職手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
  {label:'資格手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
  {label:'職務手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
- {label:'精皆勤手当', cat:'in', minwage:false, help:'割増基礎には算入（労基則21条の除外列挙に無い）。ただし最低賃金の比較では除外（最賃法4条3項）'},
+ {label:'精皆勤手当', cat:'in', minwage:false, help:'割増基礎には算入（労基則21条の除外列挙に無い）。ただし最低賃金の比較では除外（最賃法4条3項各号・地域別最低賃金の定めによる）'},
  {label:'家族手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
  {label:'通勤手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
  {label:'住宅手当', cat:'out', minwage:true, help:'除外は「住宅に要する費用に応じて支給する場合」のみ。一律定額支給なら基準内（最低賃金の比較には含めます）'},
@@ -2193,7 +2203,7 @@ function calcAllowRowHTML(){
     `<select class="ca-cat"><option value="in">基準内</option><option value="out">基準外</option></select>`+
     `<button type="button" class="mini" onclick="calcDelAllowRow(this)" title="削除">×</button>`;
 }
-function calcAddAllowRow(item){
+function calcAddAllowRow(item, opts){
   const row=document.createElement('div'); row.className='allow-row'; row.innerHTML=calcAllowRowHTML();
   document.getElementById('calcAllowList').appendChild(row);
   if(item){
@@ -2203,7 +2213,7 @@ function calcAddAllowRow(item){
     row.querySelector('.ca-cat').value=item.cat||'in';
     row.dataset.minwage = item.minwage===false ? '0' : '1';
   }
-  calcRender();
+  if(!(opts&&opts.skipRender)) calcRender();
 }
 function calcAllowKindChange(row){
   if(!row) return;
@@ -2233,13 +2243,16 @@ function calcGetAllowRows(){
     name:r.querySelector('.ca-name').value.trim(),
     amount:r.querySelector('.ca-amt').value.trim(),
     cat:r.querySelector('.ca-cat').value||'in',
-    minwage: r.dataset.minwage!=='0'
+    minwage: (r.dataset.minwage!=null)
+      ? r.dataset.minwage!=='0'
+      : (function(){ const p=CALC_ALLOW_PRESETS.find(x=>x.label===(r.querySelector('.ca-name').value.trim())); return p ? p.minwage!==false : true; })()
   })).filter(a=>a.name||a.amount);
 }
 function calcSetAllowRows(arr){
   const list=document.getElementById('calcAllowList'); if(!list) return;
   list.innerHTML='';
-  (arr&&arr.length?arr:[{}]).forEach(it=>calcAddAllowRow(it));
+  (arr&&arr.length?arr:[{}]).forEach(it=>calcAddAllowRow(it,{skipRender:true}));
+  calcRender();
 }
 function calcAllowTotals(){
   const rows=calcGetAllowRows();
@@ -2338,11 +2351,19 @@ function calcResolveMinWage(pref){
 }
 function calcPopulatePrefSelect(){
   const sel=document.getElementById('calcPref'); if(!sel || sel.dataset.filled) return;
-  Object.keys(MIN_WAGE_DATA).forEach(pref=>{ const o=document.createElement('option'); o.value=pref; o.textContent=pref; sel.appendChild(o); });
+  const prefs=Object.keys(MIN_WAGE_DATA);
+  prefs.forEach(pref=>{ const o=document.createElement('option'); o.value=pref; o.textContent=pref; sel.appendChild(o); });
   sel.dataset.filled='1';
+  const yearSel=document.getElementById('calcMwYear');
+  if(yearSel && !yearSel.dataset.filled && prefs.length){
+    const years=MIN_WAGE_DATA[prefs[0]];   // 年度ラベルはMIN_WAGE_DATA先頭県の配列から動的生成（E-1）。auto以外の既存optionは無い前提
+    years.forEach((y,i)=>{ const o=document.createElement('option'); o.value=String(i); o.textContent=y.year+(i===0?'（最新）':i===1?'（1つ前）':`（${i}つ前）`); yearSel.appendChild(o); });
+    yearSel.dataset.filled='1';
+  }
   const hint=document.getElementById('calcMinWageHint');
   if(hint) hint.textContent=`年度が「自動」のとき、本日時点で発効済みの最新額を表示します（${MIN_WAGE_CHECKED}確認時点・一次資料：${MIN_WAGE_SOURCE}）。`;
 }
+function calcMinwageManual(){ CALC_MW_META=null; const p=document.getElementById('calcPref'); if(p) p.value=''; calcRender(); }
 function calcApplyMinWage(){
   const pref=document.getElementById('calcPref').value;
   const yearSelEl=document.getElementById('calcMwYear');
@@ -2364,14 +2385,14 @@ function calcMinWageLine(mwBase, sched, minwage){
   const cls=ok?'calc-ok-g':'calc-warn-r';
   const mark=ok?'✔':'⚠';
   const src = CALC_MW_META ? `${CALC_MW_META.year}・${CALC_MW_META.eff}発効／` : '';
-  return `<div class="${cls}">${mark} 時間単価 ${Math.round(hourly).toLocaleString('ja-JP')}円 ${ok?'≧':'＜'} 最低賃金 ${Math.round(minwage).toLocaleString('ja-JP')}円（${src}${MIN_WAGE_CHECKED}確認時点。精皆勤・通勤・家族手当は比較から除外）</div>`;
+  return `<div class="${cls}">${mark} 時間単価 ${Math.floor(hourly).toLocaleString('ja-JP')}円 ${ok?'≧':'＜'} 最低賃金 ${Math.round(minwage).toLocaleString('ja-JP')}円（${src}${MIN_WAGE_CHECKED}確認時点。精皆勤・通勤・家族手当は比較から除外）</div>`;
 }
 
 /* ===== 賃金試算タブ：固定残業の時間警告（D3） ===== */
 function calcOtHourWarnings(hours){
   if(!(hours>0)) return '';
   let html='';
-  if(hours>60) html+=`<div class="calc-warn-r">⚠ 月60時間超は50%以上の追加割増が必要です（労基法37条1項ただし書）</div>`;
+  if(hours>60) html+=`<div class="calc-warn-r">⚠ 月60時間超は割増率が5割以上必要です（労基法37条1項ただし書）。通常の時間外割増率を25%とした場合、60時間超部分は追加で25%以上（合計50%以上）となります。中小企業への適用猶予（旧労基法138条）は令和5年4月1日に廃止済みのため、企業規模を問わず適用されます</div>`;
   if(hours>45) html+=`<div class="calc-warn-y">⚠ 月45時間は36協定の原則の限度時間です（労基法36条4項）。恒常的に45時間を超える固定残業の設定は採用時の説明・運用に注意してください</div>`;
   return html;
 }
@@ -2436,9 +2457,6 @@ function calcUnifiedVisibility(mode, style){
   document.getElementById('calcUniModeRow').classList.toggle('hidden', isC);
   document.getElementById('calcUniTargetRow').classList.toggle('hidden', isC || umode!=='ratio');
   document.getElementById('calcUniHoursRow').classList.toggle('hidden', isC || umode!=='hours');
-}
-function calcRoundLabel(unit){
-  return unit===1000?'千円単位切上げ':unit===100?'百円単位切上げ':unit===10?'十円単位切上げ':'円未満四捨五入（切り上げなし）';
 }
 function calcYen(x){ return Math.round(x).toLocaleString('ja-JP')+'円'; }
 
@@ -2578,11 +2596,37 @@ function calcBisectBase(target, otH, nH, inSum, outSum, sched, otRate, ot60Rate,
   const r=evalBase(lo);
   return {base:lo, ...r, residual:target-r.total};
 }
+// 一体型「時間から算定」のrev_base用二分探索（第3弾§B-7）。一体型は60時間超の追加割増を扱わないため対象外
+function calcBisectUnifiedBase(target, hOt, hHol, hNight, inSum, outSum, sched, otRate, holRate, nightRate, rnd){
+  const evalBase=b=>{
+    const inBase=b+inSum;
+    const otC = hOt>0? calcOtAmount({inBase,sched,rate:otRate,hours:hOt,rnd,label:'時間外'}) : null;
+    const holC = hHol>0? calcOtAmount({inBase,sched,rate:holRate,hours:hHol,rnd,label:'法定休日'}) : null;
+    const nC = hNight>0? calcOtAmount({inBase,sched,rate:nightRate,hours:hNight,rnd,label:'深夜'}) : null;
+    const otAmt=otC?otC.amt:0, holAmt=holC?holC.amt:0, nightAmt=nC?nC.amt:0;
+    return {total:b+inSum+outSum+otAmt+holAmt+nightAmt, otAmt, holAmt, nightAmt, otC, holC, nC};
+  };
+  let lo=0, hi=Math.max(0,Math.round(target));
+  for(let i=0;i<40 && lo<hi;i++){
+    const mid=lo+Math.ceil((hi-lo)/2);
+    if(evalBase(mid).total<=target) lo=mid; else hi=mid-1;
+  }
+  const r=evalBase(lo);
+  return {base:lo, ...r, residual:target-r.total};
+}
 
 /* ===== 賃金試算タブ：変更シミュレーション（モードD・第2部§C） ===== */
 function calcDiffDefaultSide(){
   return {base:'200000', allowRows:[], otStyle:'split', otH:'0', nH:'0',
     uniMode:'ratio', uniTarget:'0', uniROt:'60', uniRHol:'30', uniRNight:'10', uniHOt:'0', uniHHol:'0', uniHNight:'0'};
+}
+function calcNormalizeSide(o){
+  const d=calcDiffDefaultSide();
+  if(!o || typeof o!=='object' || Array.isArray(o)) return d;
+  const r={...d, ...o};
+  r.allowRows = Array.isArray(o.allowRows) ? o.allowRows.filter(x=>x && typeof x==='object') : [];
+  if(!r.allowRows.length) r.allowRows=[{cat:'in'}];
+  return r;
 }
 let CALC_CUR=calcDiffDefaultSide();
 let CALC_NEW=calcDiffDefaultSide();
@@ -2664,7 +2708,8 @@ function calcDiffParseDelta(inputStr, curValue){
     if(d==null) return s;
     const sign = s[0]==='-' ? -1 : 1;
     const base = curValue!=null ? (numH(curValue)||0) : 0;
-    return String(base + sign*d);
+    const v = base + sign*d;
+    return String(v < 0 ? 0 : v);
   }
   return s;
 }
@@ -2857,13 +2902,15 @@ function calcRenderDiff(){
 /* ===== 賃金試算タブ：試算の保存/読込（§C6） ===== */
 function saveCalc(){
   const cf=document.getElementById('calcForm');
-  const s={_v:1, type:'calc', savedAt:new Date().toISOString(), fields:{}, radios:{}, cur:CALC_CUR, new:CALC_NEW, diffCopied:CALC_DIFF_COPIED};
+  const s={_v:1, type:'calc', savedAt:new Date().toISOString(), fields:{}, radios:{}, checks:{}, cur:CALC_CUR, new:CALC_NEW, diffCopied:CALC_DIFF_COPIED};
   [...cf.elements].forEach(el=>{
     const n=el.name; if(!n) return;
     if(el.type==='radio'){ if(el.checked) s.radios[n]=el.value; return; }
+    if(el.type==='checkbox'){ s.checks[n]=el.checked; return; }
     s.fields[n]=el.value;
   });
   s.pref=document.getElementById('calcPref')?document.getElementById('calcPref').value:'';
+  s.mwYear=(document.getElementById('calcMwYear')||{}).value||'auto';
   s.allow=calcGetAllowRows();
   const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -2880,12 +2927,14 @@ function loadCalc(input){
       Object.entries(obj.radios||{}).forEach(([n,v])=>{ const g=cf.elements[n]; if(!g) return; const list=g.length?[...g]:[g]; list.forEach(el=>{ if(el.type==='radio') el.checked=(el.value===v); }); });
       Object.entries(obj.fields||{}).forEach(([n,v])=>{ const el=cf.elements[n]; if(el && el.type!=='radio') el.value=v; });
       if(obj.pref){ const sel=document.getElementById('calcPref'); if(sel) sel.value=obj.pref; }
+      if(obj.mwYear){ const ySel=document.getElementById('calcMwYear'); if(ySel) ySel.value=obj.mwYear; }
+      Object.entries(obj.checks||{}).forEach(([n,v])=>{ const el=cf.elements[n]; if(el && el.type==='checkbox') el.checked=!!v; });
       calcSetAllowRows(obj.allow&&obj.allow.length?obj.allow:[{}]);
-      CALC_CUR=obj.cur||calcDiffDefaultSide();
-      CALC_NEW=obj.new||calcDiffDefaultSide();
+      CALC_CUR=calcNormalizeSide(obj.cur);
+      CALC_NEW=calcNormalizeSide(obj.new);
       CALC_DIFF_COPIED=!!obj.diffCopied;
       CALC_DIFF_BUILT=false;
-      calcRender();
+      if(obj.pref){ calcApplyMinWage(); } else { CALC_MW_META=null; calcRender(); }
       const d=obj.savedAt?`（${String(obj.savedAt).slice(0,10)} 保存のデータ）`:'';
       alert('試算データを読み込みました'+d+'。');
     }catch(e){ alert('読み込みに失敗しました：'+e.message); }
@@ -2960,15 +3009,26 @@ function calcRender(){
       const target=cnum('calc_target');
       if(uMode==='hours'){
         const hOt=cnum('calc_uni_h_ot'), hHol=cnum('calc_uni_h_hol'), hNight=cnum('calc_uni_h_night');
-        const B8=target-outSum;
-        const G=sched + otRate*hOt + holRate*hHol + nightRate*hNight;
-        const hourly=G>0?B8/G:0;
-        const roundUpFinal=v=>calcRoundStep3(v, rnd.s3unit, rnd.s3dir);
-        const otAmt=hOt>0?roundUpFinal(hourly*otRate*hOt):0;
-        const holAmt=hHol>0?roundUpFinal(hourly*holRate*hHol):0;
-        const nightAmt=hNight>0?roundUpFinal(hourly*nightRate*hNight):0;
+        let base, otAmt, holAmt, nightAmt, inBaseTotal, residualNote='';
+        if(rnd.pattern==='standard'){
+          const B8=target-outSum;
+          const G=sched + otRate*hOt + holRate*hHol + nightRate*hNight;
+          const hourly=G>0?B8/G:0;
+          const roundUpFinal=v=>calcRoundStep3(v, rnd.s3unit, rnd.s3dir);
+          otAmt=hOt>0?roundUpFinal(hourly*otRate*hOt):0;
+          holAmt=hHol>0?roundUpFinal(hourly*holRate*hHol):0;
+          nightAmt=hNight>0?roundUpFinal(hourly*nightRate*hNight):0;
+          const uniTotal0=otAmt+holAmt+nightAmt;
+          inBaseTotal=B8-uniTotal0; base=inBaseTotal-inSum;
+        } else {
+          const bis=calcBisectUnifiedBase(target-outSum, hOt, hHol, hNight, inSum, 0, sched, otRate, holRate, nightRate, rnd);
+          inBaseTotal=bis.base; base=inBaseTotal-inSum;
+          otAmt=bis.otAmt; holAmt=bis.holAmt; nightAmt=bis.nightAmt;
+          if(Math.abs(bis.residual)>0.5) residualNote=`<tr><td>端数調整（吸収しきれない分）</td><td class="r">${calcYen(bis.residual)}</td></tr>`;
+          guardHtml=calcLegalityGuardHTML([bis.otC,bis.holC,bis.nC], rnd);
+          traceHtml=calcTraceToggleHTML([bis.otC,bis.holC,bis.nC]);
+        }
         const uniTotal=otAmt+holAmt+nightAmt;
-        const inBaseTotal=B8-uniTotal, base=inBaseTotal-inSum;
         mwBase=base+minwageAllowSum;
         warnHtml=calcUnifiedWarnings(hOt, hNight);
         const warn = base<0 ? '<div class="calc-warn-r">※ 基準外手当・一体型手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
@@ -2981,9 +3041,10 @@ function calcRender(){
           <tr><td>一体型手当　時間外(${hOt}h)</td><td class="r">${calcYen(otAmt)}</td></tr>
           <tr><td>一体型手当　法定休日(${hHol}h)</td><td class="r">${calcYen(holAmt)}</td></tr>
           <tr><td>一体型手当　深夜(${hNight}h)</td><td class="r">${calcYen(nightAmt)}</td></tr>
+          ${residualNote}
           <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
           <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
-          </table>${warn}<div class="hint">換算時間＝所定${sched}h＋時間外${hOt}h×${otRate.toFixed(2)}＋法定休日${hHol}h×${holRate.toFixed(2)}＋深夜${hNight}h×${nightRate.toFixed(2)}。端数は基本給が吸収し、総額は目標どおりです。</div>`;
+          </table>${warn}<div class="hint">${rnd.pattern==='standard'?`換算時間＝所定${sched}h＋時間外${hOt}h×${otRate.toFixed(2)}＋法定休日${hHol}h×${holRate.toFixed(2)}＋深夜${hNight}h×${nightRate.toFixed(2)}。端数は基本給が吸収し、総額は目標どおりです。`:'選択した端数処理パターンで順算した総支給額が目標額以下になる最大の基本給を探索しました（二分探索）。目標との差はごくわずかです。'}</div>`;
       } else {
         const uniTarget=cnum('calc_uni_target');
         const inBaseTotal=target-outSum-uniTarget, base=inBaseTotal-inSum;
@@ -2992,6 +3053,7 @@ function calcRender(){
           target:uniTarget, rOt, rHol, rNight});
         const otRate1=calcApplyStep(rnd.s2, per1*otRate), holRate1=calcApplyStep(rnd.s2, per1*holRate), niRate1=calcApplyStep(rnd.s2, per1*nightRate);
         const otHd=calcEqH(core.ot.amt,otRate1), holHd=calcEqH(core.hol.amt,holRate1), niHd=calcEqH(core.ni.amt,niRate1);
+        core.ot.h=otHd; core.hol.h=holHd; core.ni.h=niHd;   // 画面表示（丸め後単価由来）と転記/PDFの相当時間を統一（E-7）
         mwBase=base+minwageAllowSum;
         warnHtml=calcUnifiedWarnings(otHd, niHd);
         const warn = base<0 ? '<div class="calc-warn-r">※ 基準外手当・一体型手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
@@ -3007,7 +3069,7 @@ function calcRender(){
           <tr><td>　深夜相当（比${rNight}）</td><td class="r">${calcYen(core.ni.amt)}／${calcHoursTxt(niHd,per1)}</td></tr>
           <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
           <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
-          </table>${warn}<div class="hint">基準内賃金＝目標総支給額−基準外手当−一体型手当の希望額（${calcYen(uniTarget)}）で確定し、残りが基本給になります。相当時間は比率${rOt}:${rHol}:${rNight}の内訳を時間単価から換算した参考値です。</div>`;
+          </table>${warn}<div class="hint">基準内賃金＝目標総支給額−基準外手当−一体型手当の希望額（${calcYen(uniTarget)}）で確定し、残りが基本給になります。相当時間は比率${rOt}:${rHol}:${rNight}の内訳を時間単価から換算した参考値です。${core.ratioFallback?'比が全て0のため既定比60:30:10で配分しました。':''}</div>`;
       }
     } else {
       const base=cnum('calc_base'), inBase=base+inSum;
@@ -3045,7 +3107,7 @@ function calcRender(){
         <tr><td>一体型手当　深夜</td><td class="r">${calcYen(core.ni.amt)}／${calcHoursTxt(core.ni.h,per1)}</td></tr>
         <tr><td><b>一体型手当 計</b></td><td class="r"><b>${calcYen(core.total)}</b></td></tr>
         <tr><td>参考：基準内賃金（割増算定基礎）</td><td class="r">${calcYen(inBase)}</td></tr>
-        </table><div class="hint">${uMode==='ratio'?'希望額を比率で時間外・法定休日・深夜に配分しました（1円単位・合計一致・切上げなし）。相当時間は参考値です。':'各時間×時間単価×割増率で算定しました。'}</div>`;
+        </table><div class="hint">${uMode==='ratio'?`希望額を比率で時間外・法定休日・深夜に配分しました（1円単位・合計一致・切上げなし）。相当時間は参考値です。${core.ratioFallback?'比が全て0のため既定比60:30:10で配分しました。':''}`:'各時間×時間単価×割増率で算定しました。'}</div>`;
     }
   } else if(mode==='rev_base'){
     const target=cnum('calc_target'), otH=cnum('calc_ot_hours'), nH=cnum('calc_night_hours');
@@ -3166,6 +3228,11 @@ function calcTransferToCreate(){
     form.elements['ot_style'].value='unified';
     if(form.elements['fixed_ot_auto']) form.elements['fixed_ot_auto'].checked=false;
     if(form.elements['fixed_night_auto']) form.elements['fixed_night_auto'].checked=false;
+    const schedEl=form.elements['monthly_scheduled_hours'];
+    if(schedEl && !has(schedEl.value)){
+      const cs=document.getElementById('calcForm').elements['calc_sched'];
+      if(cs && has(cs.value)) schedEl.value=cs.value;
+    }
     form.elements['uni_name'].value=lc.uni.name||'固定時間外勤務手当';
     const um=lc.uni.targetMode==='hours'?'hours':'ratio';
     [...form.elements['uni_mode']].forEach(r=>{ r.checked=(r.value===um); });
