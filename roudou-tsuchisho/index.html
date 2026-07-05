@@ -2451,8 +2451,35 @@ function calcTraceToggleHTML(calcs){
 let LAST_CALC={};
 // amtを「割増単価（円/時。時間単価×割増率に段階1・2の丸めを適用した後の値）」で割って相当時間を逆算する
 function calcEqH(amt, premiumWage){ return (premiumWage>0) ? amt/premiumWage : 0; }
+// 時間の表示用丸め：小数第3位を四捨五入し第2位まで（整数入力はそのまま整数表示）
+function calcH2(x){ return Math.round((Number(x)||0)*100)/100; }
 // 相当時間（既に計算済みのh）を表示用に整形。per<=0（基本給・所定未入力）のときはゼロ除算ガードで「—」
-function calcHoursTxt(h, per){ return (per>0) ? `${Math.round((h||0)*10)/10}時間分（相当）` : '—'; }
+function calcHoursTxt(h, per){ return (per>0) ? `${calcH2(h)}時間分（相当）` : '—'; }
+// 賃金試算タブ：そのモード・方式で計算に必要な欄が未入力なら背景を黄色にする（作成タブのmarkEmpty相当・必須欄に限定）
+function calcMarkEmpty(){
+  const cf=document.getElementById('calcForm'); if(!cf) return;
+  const CAND=['calc_sched','calc_base','calc_target','calc_ot_hours',
+    'calc_uni_target','calc_uni_h_ot','calc_uni_h_hol','calc_uni_h_night'];
+  CAND.forEach(n=>{ const el=cf.elements[n]; if(el) el.classList.remove('empty-field'); });
+  const mode=(cf.elements['calc_mode']&&cf.elements['calc_mode'].value)||'forward';
+  if(mode==='diff') return;   // 変更シミュレーションは2カラム専用UI（コピー前は右をグレー表示して区別済み）
+  const style=(cf.elements['calc_ot_style']&&cf.elements['calc_ot_style'].value)||'split';
+  const req=['calc_sched'];
+  if(mode==='forward') req.push('calc_base');
+  else if(mode==='rev_base') req.push('calc_target');
+  else if(mode==='rev_hours') req.push('calc_base','calc_target');
+  if(style==='unified'){
+    if(mode!=='rev_hours'){   // 時間逆算×一体型は比のみ使用（希望額・時間は入力不要）
+      const um=(cf.elements['calc_uni_mode']&&cf.elements['calc_uni_mode'].value)||'ratio';
+      if(um==='ratio') req.push('calc_uni_target');
+      else req.push('calc_uni_h_ot','calc_uni_h_hol','calc_uni_h_night');
+    }
+  } else if(mode==='forward'||mode==='rev_base'){
+    req.push('calc_ot_hours');
+  }
+  req.forEach(n=>{ const el=cf.elements[n]; if(!el) return;
+    if(el.offsetParent!==null && String(el.value||'').trim()==='') el.classList.add('empty-field'); });
+}
 function calcUnifiedWarnings(otHoursEq, nightHoursEq){
   let html='';
   if(otHoursEq>60) html+=`<div class="calc-warn-r">⚠ <b>一体型は月60時間超の追加割増（＋25%）を計算しません</b>（作成タブの一体型と同じ仕様です）。60時間を超える設計は区分別方式で試算してください</div>`;
@@ -2809,7 +2836,7 @@ function calcRender(){
   if(fsDiff) fsDiff.classList.toggle('hidden', !isDiff);
   const transferBtn=document.getElementById('calcTransferBtn');
   if(transferBtn) transferBtn.textContent = isDiff ? '➡ 変更後を作成タブへ転記' : '➡ この内容を作成タブの賃金欄に反映';
-  if(isDiff){ calcRenderDiff(); return; }
+  if(isDiff){ calcMarkEmpty(); calcRenderDiff(); return; }
   LAST_CALC_TRACES=[];   // トレース非対応の分岐(rev_base標準・rev_hours・unified比按分)ではPDFにも古いトレースを残さない
 
   calcVisibility(mode, style);
@@ -3041,6 +3068,7 @@ function calcRender(){
   html += traceHtml;
   document.getElementById('calcResult').innerHTML=html;
   calcBuildSheet();
+  calcMarkEmpty();
 }
 
 /* ===== 賃金試算タブ：作成タブへ反映（D4） ===== */
@@ -3109,11 +3137,11 @@ function calcSheetBodyNonDiff(style){
   allowRows.forEach(a=>{ const amt=parseYen(a.amount); if(amt==null) return; rows+=`<tr><td>${esc(a.name||a.kind||'手当')}（${a.cat==='out'?'基準外':'基準内'}）</td><td style="text-align:right">${calcYen(amt)}</td></tr>`; });
   if(style==='unified' && lc.uni){
     rows+=`<tr><td>${esc(lc.uni.name)}　計</td><td style="text-align:right">${calcYen(lc.uni.total)}</td></tr>`;
-    rows+=`<tr><td colspan="2" style="padding-left:18px;font-size:9pt">・時間外 ${calcYen(lc.uni.ot.amt)}（${Math.round((lc.uni.ot.h||0)*10)/10}時間相当）／法定休日 ${calcYen(lc.uni.hol.amt)}（${Math.round((lc.uni.hol.h||0)*10)/10}時間相当）／深夜 ${calcYen(lc.uni.ni.amt)}（${Math.round((lc.uni.ni.h||0)*10)/10}時間相当）</td></tr>`;
+    rows+=`<tr><td colspan="2" style="padding-left:18px;font-size:9pt">・時間外 ${calcYen(lc.uni.ot.amt)}（${calcH2(lc.uni.ot.h)}時間相当）／法定休日 ${calcYen(lc.uni.hol.amt)}（${calcH2(lc.uni.hol.h)}時間相当）／深夜 ${calcYen(lc.uni.ni.amt)}（${calcH2(lc.uni.ni.h)}時間相当）</td></tr>`;
   } else {
-    if(lc.otAmt) rows+=`<tr><td>固定残業手当（${lc.otH}時間分）</td><td style="text-align:right">${calcYen(lc.otAmt)}</td></tr>`;
-    if(lc.ot60Amt) rows+=`<tr><td>固定残業手当（60時間超）</td><td style="text-align:right">${calcYen(lc.ot60Amt)}</td></tr>`;
-    if(lc.nightAmt) rows+=`<tr><td>固定深夜手当（${lc.nH}時間分）</td><td style="text-align:right">${calcYen(lc.nightAmt)}</td></tr>`;
+    if(lc.otAmt) rows+=`<tr><td>固定残業手当（${calcH2(lc.otH)}時間分）</td><td style="text-align:right">${calcYen(lc.otAmt)}</td></tr>`;
+    if(lc.ot60Amt) rows+=`<tr><td>固定残業手当（60時間超 ${calcH2(lc.ot60H)}時間分）</td><td style="text-align:right">${calcYen(lc.ot60Amt)}</td></tr>`;
+    if(lc.nightAmt) rows+=`<tr><td>固定深夜手当（${calcH2(lc.nH)}時間分）</td><td style="text-align:right">${calcYen(lc.nightAmt)}</td></tr>`;
   }
   const total = lc.total!=null ? lc.total : lc.target;
   rows+=`<tr><td><b>総支給額</b></td><td style="text-align:right"><b>${calcYen(total)}</b></td></tr>`;
