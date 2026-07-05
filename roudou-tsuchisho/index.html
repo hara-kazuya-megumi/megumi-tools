@@ -149,6 +149,18 @@
   #modeGuide ol,#modeGuide ul{padding-left:1.4em;margin:6px 0}
   #modeGuide .qa dt{font-weight:700;margin-top:12px}
   #modeGuide .qa dd{margin:2px 0 0 1.2em;color:var(--sub)}
+  /* 使い方タブ内の操作ボタン（縦つぶれ防止＋見やすいデザイン） */
+  #modeGuide .guide-lead{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+  #modeGuide .guide-lead .guide-lead-text{flex:1 1 300px;min-width:0}
+  #modeGuide .guide-nav{margin:12px 0 0}
+  #modeGuide .guide-btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+    background:var(--accent2);color:#fff;border:1px solid var(--accent2);border-radius:8px;
+    padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;line-height:1;
+    box-shadow:0 1px 3px rgba(48,84,150,.25);transition:filter .15s,transform .05s}
+  #modeGuide .guide-btn:hover{filter:brightness(1.08)}
+  #modeGuide .guide-btn:active{transform:translateY(1px)}
+  #modeGuide .guide-btn.secondary{background:#fff;color:var(--accent2);box-shadow:none}
+  #modeGuide .guide-btn.secondary:hover{background:#eef2f8;filter:none}
 </style>
 </head>
 <body>
@@ -752,8 +764,9 @@
 
 <div id="modeGuide" class="hidden">
   <div class="batch-wrap">
-    <div class="batch-guide">このページはツール全体の使い方マニュアルです。入力欄ごとの短い説明は、右上の「❓ ヘルプ」ボタンでON/OFFできる緑のヒントをご覧ください。
-      <button class="btn mini ghost" onclick="printGuide()" style="margin-left:8px">🖨 このマニュアルを印刷</button>
+    <div class="batch-guide guide-lead">
+      <span class="guide-lead-text">このページはツール全体の使い方マニュアルです。入力欄ごとの短い説明は、右上の「❓ ヘルプ」ボタンでON/OFFできる緑のヒントをご覧ください。</span>
+      <button class="guide-btn" onclick="printGuide()">🖨 このマニュアルを印刷</button>
     </div>
 
     <h2>1. このツールでできること</h2>
@@ -768,7 +781,7 @@
       <li>「印刷/PDF」「Word」「Excel」のいずれかで出力する。</li>
       <li>続きから作業する可能性があれば「💾 保存」でJSONファイルを保存しておく。</li>
     </ol>
-    <p><button class="btn mini ghost" onclick="switchMode('create')">▶ 作成タブを開く</button></p>
+    <p class="guide-nav"><button class="guide-btn secondary" onclick="switchMode('create')">▶ 作成タブを開く</button></p>
 
     <h2>3. 作成タブの各欄</h2>
     <ul>
@@ -788,7 +801,7 @@
       <li>「一括作成」タブで一覧の編集・複製・並べ替え・削除ができます。名簿はJSONで保存・読込できます。</li>
       <li>出力は「まとめて1ファイル」（全員印刷／Word連結／Excelは1人1シート）と「1人ずつ個別ファイル」が選べます。</li>
     </ol>
-    <p><button class="btn mini ghost" onclick="switchMode('batch')">▶ 一括作成タブを開く</button></p>
+    <p class="guide-nav"><button class="guide-btn secondary" onclick="switchMode('batch')">▶ 一括作成タブを開く</button></p>
 
     <h2>5. 保存と読込</h2>
     <p>「💾 保存」は入力途中の内容を丸ごとJSONファイルに書き出します。ファイル名の末尾に保存日（例: <code>_20260705</code>）が付くので、どれが最新か一目で分かります。読み込むと保存日が表示されます。名簿の保存も同様です。日付が付いていない古い保存ファイルもそのまま読み込めます。</p>
