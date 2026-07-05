@@ -63,6 +63,48 @@
   .seg label{display:inline-flex;align-items:center;gap:5px;background:var(--chip);border:1px solid var(--line);
     border-radius:20px;padding:5px 11px;cursor:pointer;font-size:12px;color:var(--ink);font-weight:600}
   .seg input{accent-color:var(--accent)}
+  /* ---- 賃金試算タブ（3モード・手当明細・詳細設定） ---- */
+  .calc-modes{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px}
+  .calc-modes label{display:flex;gap:9px;align-items:flex-start;background:var(--chip);border:1px solid var(--line);
+    border-radius:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;line-height:1.6;color:var(--ink);font-weight:400}
+  .calc-modes label input{margin-top:4px;flex:0 0 auto}
+  .calc-modes label b{color:var(--accent2);font-size:13px;display:block;font-weight:700}
+  .calc-modes label:has(input:checked){background:#eaf1fb;border-color:var(--accent2)}
+  #modeCalc details{margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fafcfe}
+  #modeCalc details summary{cursor:pointer;font-weight:700;color:var(--accent2);font-size:12.5px}
+  #modeCalc details[open] summary{margin-bottom:6px}
+  #calcAllowList{background:#f5f8fb;border:1px solid var(--line);border-radius:7px;padding:7px 8px}
+  #calcAllowList .allow-row .ca-kind{flex:1 1 140px}
+  #calcAllowList .allow-row .ca-name{flex:1 1 150px}
+  #calcAllowList .allow-row .ca-amt{flex:0 0 110px}
+  #calcAllowList .allow-row .ca-cat{flex:0 0 92px}
+  .calc-warn-y{background:#fff7d6;border:1px solid #ecd98a;color:#7a5b00;border-radius:6px;padding:7px 9px;font-size:12px;margin-top:7px;line-height:1.6}
+  .calc-warn-r{background:#fdecec;border:1px solid #e7b3b3;color:#8a1f1f;border-radius:6px;padding:7px 9px;font-size:12px;margin-top:7px;font-weight:700;line-height:1.6}
+  .calc-ok-g{background:#eef6ef;border:1px solid #bcd8bf;color:#245a2b;border-radius:6px;padding:7px 9px;font-size:12px;margin-top:7px;line-height:1.6}
+  .calc-info-b{background:#eaf1fb;border:1px solid #cfe0f5;color:#1f4e79;border-radius:6px;padding:7px 9px;font-size:12px;margin-top:7px;line-height:1.6}
+  .calc-diff-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.calc-diff-cols{grid-template-columns:1fr}}
+  .calc-diff-col{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel)}
+  .calc-diff-col.locked{background:#f3f5f7;opacity:.75}
+  .calc-diff-col h4{margin:0 0 8px;font-size:13px;color:var(--accent2)}
+  .calc-badge-changed{display:inline-block;background:#fff2c4;color:#7a5b00;border:1px solid #ecd98a;border-radius:10px;padding:1px 8px;font-size:10.5px;font-weight:700;margin-left:6px}
+  table.calc-diff-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  table.calc-diff-table td,table.calc-diff-table th{padding:5px 6px;border-bottom:1px solid #eef1f4;text-align:right}
+  table.calc-diff-table td:first-child,table.calc-diff-table th:first-child{text-align:left}
+  table.calc-diff-table .up{color:#1f5aa8;font-weight:700}
+  table.calc-diff-table .down{color:#b00;font-weight:700}
+  #calcSheet{display:none}
+  @media print{
+    body.print-calc header.appbar,body.print-calc .tabbar,body.print-calc #rosterBar,
+    body.print-calc #modeCreate,body.print-calc #modeBatch,body.print-calc #modeGuide,body.print-calc #modeRefs{display:none !important}
+    body.print-calc #modeCalc{display:block !important}
+    body.print-calc .calc-wrap{max-width:none;padding:0;margin:0}
+    body.print-calc #calcForm,body.print-calc #calcResult,body.print-calc #calcActions{display:none !important}
+    body.print-calc #calcSheet{display:block !important;color:#000;font-family:var(--mincho);width:auto;padding:15mm;font-size:10.5pt;line-height:1.55}
+    body.print-calc #calcSheet table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10pt}
+    body.print-calc #calcSheet td,body.print-calc #calcSheet th{border:1px solid #000;padding:4px 6px}
+    @page{size:A4 portrait;margin:12mm}
+  }
   .note-law{font-size:11px;color:var(--warn);background:#fdf3f2;border:1px solid #f3d3cf;border-radius:6px;padding:6px 8px;margin-top:6px}
   .break-row{display:flex;gap:6px;margin-bottom:5px;align-items:center}
   .break-row input{flex:1}
@@ -712,53 +754,172 @@
   <div class="calc-wrap">
     <form id="calcForm" oninput="calcRender()" onchange="calcRender()">
       <fieldset>
-        <legend>試算の種類</legend>
-        <div class="seg">
-          <label><input type="radio" name="calc_mode" value="forward" checked> 順算（時間→総額）</label>
-          <label><input type="radio" name="calc_mode" value="reverse"> 逆算（総額→固定残業）</label>
+        <legend>① 試算の種類</legend>
+        <div class="calc-modes">
+          <label><input type="radio" name="calc_mode" value="forward" checked>
+            <span><b>A. 総支給額を計算する</b>基本給・手当・固定残業時間を入れて、月の総支給額を求めます。</span></label>
+          <label><input type="radio" name="calc_mode" value="rev_base">
+            <span><b>B. 基本給を逆算する</b>「月◯円で採用したい」から、基本給と固定残業手当の内訳を求めます。</span></label>
+          <label><input type="radio" name="calc_mode" value="rev_hours">
+            <span><b>C. 固定残業時間を逆算する</b>総支給額と基本給を決めて、固定残業を何時間分にできるか求めます。</span></label>
+          <label><input type="radio" name="calc_mode" value="diff">
+            <span><b>D. 変更したらどうなる（差額を見る）</b>現在の賃金と変更案を並べて、差額と注意点を出します。</span></label>
+        </div>
+        <div class="help-note">
+          <b>A（総額を計算）</b>の典型シーン：時給・時間数が決まっている方の、月の総支給額を確認したいとき。<br>
+          <b>B（基本給を逆算）</b>の典型シーン：クライアントから「月30万円・残業20時間込みで採用したい」と言われ、募集要項や契約書に書く基本給・固定残業手当の内訳を出したいとき。<br>
+          <b>C（固定残業時間を逆算）</b>の典型シーン：総支給額と基本給の希望が決まっていて、その差額で固定残業を何時間分に設定できるか確認したいとき。<br>
+          <b>D（変更したらどうなる）</b>の典型シーン：①現在の賃金を入力→②「変更後へコピー」→③変えたい欄だけ上書き。`+10000`のように差額で入力することもできます。昇給・契約更新の際の説明資料づくりに使います。
         </div>
       </fieldset>
+
       <fieldset>
-        <legend>共通設定</legend>
-        <div class="row two">
-          <div><label>月の所定労働時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_sched" value="160"></div>
-          <div><label>端数の切り上げ単位</label>
-            <select name="calc_round"><option value="0">切り上げなし</option><option value="10">十の位</option><option value="100">百の位</option><option value="1000" selected>千の位</option></select></div>
-        </div>
-        <div class="row two">
-          <div><label>時間外割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_rate" value="125"></div>
-          <div><label>深夜割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_rate" value="25"></div>
-        </div>
-        <div class="row"><label>時間外 月60時間超の追加率(%)（固定残業が60時間超のとき使用）</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot60_rate" value="25"></div>
-        <div class="row two">
-          <div><label>基準内手当 合計(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_in" value="0"></div>
-          <div><label>基準外手当 合計(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_out" value="0"></div>
-        </div>
-      </fieldset>
-      <fieldset id="calcFwd">
-        <legend>順算の入力</legend>
-        <div class="row two">
-          <div><label>基本給(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_base" value="200000"></div>
-          <div><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours" value="20"></div>
-        </div>
-        <div class="row"><label>固定深夜時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours" value="0"></div>
-      </fieldset>
-      <fieldset id="calcRev" class="hidden">
-        <legend>逆算の入力</legend>
-        <div class="row"><label>目標の総支給額(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_target" value="300000"></div>
-        <div class="row"><label>求めたい値</label>
-          <div class="seg">
-            <label><input type="radio" name="calc_solve" value="base" checked> 固定残業・深夜時間を指定 → 基準内賃金/基本給を逆算（総額固定・切上げ）</label>
-            <label><input type="radio" name="calc_solve" value="hours"> 基本給を指定 → 固定残業時間を逆算</label>
+        <legend>② 共通設定</legend>
+        <div class="row"><label>月の所定労働時間</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" class="cnum" inputmode="numeric" name="calc_sched" value="160" style="flex:1 1 auto">
+            <button type="button" class="btn-add" style="flex:0 0 auto" onclick="toggleSchedHelper()">🧮 計算する</button>
           </div>
+          <div id="schedHelper" class="hidden" style="margin-top:6px;background:#eef4ff;border:1px solid #cfe0f5;border-radius:7px;padding:8px 10px">
+            <div class="row two">
+              <div><label>年間休日数</label><input type="text" class="cnum" inputmode="numeric" id="schedAnnualHoliday" placeholder="例：105"></div>
+              <div><label>1日の所定労働時間</label><input type="text" class="cnum" inputmode="numeric" id="schedDailyHours" placeholder="例：8"></div>
+            </div>
+            <button type="button" class="btn-add" onclick="applySchedHelper()">↩ 所定労働時間欄へ反映</button>
+          </div>
+          <div class="help-note">月平均所定労働時間＝(365日−年間休日数)×1日の所定労働時間÷12。「🧮 計算する」を押すと年間休日数と1日の所定労働時間から自動計算できます（知識の浅いスタッフでも根拠を示せます）。</div>
         </div>
-        <div class="row" id="calcRevHours"><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours2" value="20"></div>
-        <div class="row" id="calcRevNight"><label>深夜勤務時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours2" value="0"></div>
-        <div class="row hidden" id="calcRevBase"><label>基本給(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_base2" value="200000"></div>
+        <div class="row two">
+          <div><label>都道府県（地域別最低賃金）</label>
+            <select id="calcPref" onchange="calcApplyMinWage()"><option value="">（選択すると自動入力）</option></select>
+          </div>
+          <div><label>地域別最低賃金(円/時)</label><input type="text" class="cnum" inputmode="numeric" name="calc_minwage" placeholder="例：1010"></div>
+        </div>
+        <div class="hint" id="calcMinWageHint"></div>
+        <div class="help-note">都道府県を選ぶと最新の地域別最低賃金が自動入力されます（手動で上書き可）。結果欄に時間単価との比較を表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項）。空欄のときは判定を表示しません。</div>
+        <div class="row"><button type="button" class="btn-add" onclick="calcSaveSettings()">📌 共通設定を既定値として記憶</button>
+          <div class="hint">所定労働時間・割増率・端数処理・都道府県をこの端末のブラウザに記憶し、次回このツールを開いたときに復元します（顧問先ごとに異なるため、押したときだけ保存されます）。</div>
+        </div>
+        <details id="calcDetails">
+          <summary id="calcDetailsSummary">詳細設定（通常は変更不要）</summary>
+          <div class="row three">
+            <div><label>時間外割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_rate" value="125"></div>
+            <div><label>法定休日割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_hol_rate" value="135"></div>
+            <div><label>深夜割増率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_rate" value="25"></div>
+          </div>
+          <div class="row"><label>60時間超 追加率(%)</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot60_rate" value="25"></div>
+          <div class="row"><label>端数処理のパターン</label>
+            <select name="calc_rnd_pattern" onchange="calcRndPatternChange()">
+              <option value="standard" selected>標準（最後にまとめて切上げ）</option>
+              <option value="stepwise">単価段階で処理（単価・割増単価を円未満四捨五入）</option>
+              <option value="custom">カスタム</option>
+            </select>
+          </div>
+          <div class="row three">
+            <div><label>段階1：時間単価の処理</label>
+              <select name="calc_rnd_s1" disabled><option value="none">処理なし</option><option value="round">四捨五入</option><option value="ceil">切上げ</option><option value="floor">切捨て</option></select></div>
+            <div><label>段階2：割増単価の処理</label>
+              <select name="calc_rnd_s2" disabled><option value="none">処理なし</option><option value="round">四捨五入</option><option value="ceil">切上げ</option><option value="floor">切捨て</option></select></div>
+            <div><label>段階3：手当額の単位・処理</label>
+              <div style="display:flex;gap:4px">
+                <select name="calc_rnd_s3_unit" disabled style="flex:1"><option value="0">なし</option><option value="1">1円</option><option value="10">10円</option><option value="100">100円</option><option value="1000" selected>1000円</option></select>
+                <select name="calc_rnd_s3_dir" disabled style="flex:1"><option value="ceil" selected>切上げ</option><option value="round">四捨五入</option><option value="floor">切捨て</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="help-note"><b>標準</b>＝途中は端数処理せず最後に切上げ（現行の計算方法と同じ）。<b>単価段階で処理</b>＝時間単価→割増単価の各段階で円未満を四捨五入する方式（顧問先の給与規程に合わせて選択）。円未満の四捨五入は通達（昭和63.3.14 基発150号）で認められていますが、<b>切捨ては労働者に不利</b>なため賃金全額払いの原則（労基法24条）との関係で注意が必要です。段階1・2の欄は「カスタム」選択時のみ編集できます。</div>
+        </details>
       </fieldset>
-      <p class="hint" style="color:var(--warn)">※ このタブは試算専用です。通知書・出力には反映されません。金額は「基準内賃金＝基本給＋基準内手当」を基礎に算定します。</p>
+
+      <fieldset id="calcFsAllow">
+        <legend>③ 手当</legend>
+        <button type="button" class="btn-add" onclick="calcImportAllows()">📋 作成タブの手当を取り込む</button>
+        <div id="calcAllowList" style="margin-top:8px"></div>
+        <div style="margin-top:6px"><button type="button" class="btn-add" onclick="calcAddAllowRow()">＋ 手当を追加</button></div>
+        <div class="hint"><b>固定残業手当・固定深夜手当はこのリストに入れないでください</b>（④の時間欄から自動計算されるため、二重計上になります）。</div>
+        <div class="total-box" id="calcAllowSubtotal" style="margin-top:8px"></div>
+        <div class="help-note">「手当の種類」を選ぶと手当名と区分（基準内／基準外）が自動入力されます（手動で上書き可）。割増賃金の算定基礎から除外できる手当は<b>限定列挙7種</b>（家族手当・通勤手当・別居手当・子女教育手当・住宅手当・臨時に支払われた賃金・1か月を超える期間ごとの賃金。労基法37条5項・労基則21条）で、名称でなく実態で判断します。</div>
+      </fieldset>
+
+      <fieldset id="calcFsAmounts">
+        <legend>④ 金額と時間</legend>
+        <div class="row"><label>固定残業の方式</label>
+          <select name="calc_ot_style" onchange="calcRender()">
+            <option value="split" selected>区分別（固定残業＋固定深夜）</option>
+            <option value="unified">一体型（固定時間外勤務手当・内訳明示）</option>
+          </select>
+          <div class="help-note"><b>区分別</b>＝残業と深夜を別の手当として設定。<b>一体型</b>＝時間外・法定休日・深夜をまとめて1本の手当にし、内訳（時間数・金額）を明示する方式。一体型は内訳の明示が固定残業代の有効性の要件に直結します。</div>
+        </div>
+
+        <div id="calcOtUnified" class="hidden">
+          <div class="row" id="calcUniModeRow"><label>入力方式</label>
+            <div class="seg">
+              <label><input type="radio" name="calc_uni_mode" value="ratio" checked onchange="calcRender()"> 希望額から按分</label>
+              <label><input type="radio" name="calc_uni_mode" value="hours" onchange="calcRender()"> 時間から算定</label>
+            </div>
+          </div>
+          <div class="row" id="calcUniTargetRow"><label>希望する固定時間外勤務手当（円）</label>
+            <input type="text" class="cnum" inputmode="numeric" name="calc_uni_target" value="75000"></div>
+          <div class="row three" id="calcUniHoursRow">
+            <div><label>時間外(h)</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_h_ot" value="30"></div>
+            <div><label>法定休日(h)</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_h_hol" value="4"></div>
+            <div><label>深夜(h)</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_h_night" value="5"></div>
+          </div>
+          <div class="row three">
+            <div><label>時間外の比</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_r_ot" value="60"></div>
+            <div><label>法定休日の比</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_r_hol" value="30"></div>
+            <div><label>深夜の比</label><input type="text" class="cnum" inputmode="numeric" name="calc_uni_r_night" value="10"></div>
+          </div>
+          <div class="help-note">希望額を比率（既定6:3:1）で時間外・法定休日・深夜に配分します。配分は1円単位で、合計が希望額に一致します（切上げなし）。「固定残業時間を逆算」モードでは、この比を使って残額（目標総支給額−基本給−手当）を配分します。</div>
+        </div>
+
+        <div class="row" data-show="forward,rev_hours"><label>基本給(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_base" value="200000"></div>
+        <div class="row" data-show="rev_base,rev_hours"><label>目標の総支給額(円)</label><input type="text" class="cnum" inputmode="numeric" name="calc_target" value="300000"></div>
+        <div class="row" id="calcSplitOtRow" data-show="forward,rev_base" data-hide-style="unified"><label>固定残業時間</label><input type="text" class="cnum" inputmode="numeric" name="calc_ot_hours" value="20"></div>
+        <div class="row" id="calcSplitNightRow" data-show="forward,rev_base" data-hide-style="unified"><label>固定深夜時間（任意）</label><input type="text" class="cnum" inputmode="numeric" name="calc_night_hours" value="0"></div>
+        <div class="help-note" data-show="rev_base">端数は基準内賃金（基本給）が吸収するため、総額は目標どおりになります。</div>
+      </fieldset>
+
+      <fieldset id="calcFsDiff" class="hidden">
+        <legend>④ 変更シミュレーション</legend>
+        <div class="row" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-add" onclick="calcDiffCopy()">➡ この内容を変更後へコピー</button>
+          <button type="button" class="btn-add" onclick="calcDiffClearNew()">↺ 現在へ戻す（右をクリア）</button>
+          <button type="button" class="btn-add" onclick="calcDiffPromote()">⬆ 変更後を現在へ繰上げ</button>
+        </div>
+        <div class="help-note">①左（現在）を入力 → ②「変更後へコピー」で右を編集可能化 → ③右の欄を直接上書き（<code>+10000</code>のように現在との差額で入力すると自動で絶対額に変換されます）。「変更後を現在へ繰上げ」は、昇給が確定した翌年度に前回ファイルを読み込んで次の変更案を検討するときに使います。</div>
+        <div class="calc-diff-cols">
+          <div class="calc-diff-col" id="calcDiffCurCol"><h4>現在の条件</h4><div id="calcDiffCurBody"></div></div>
+          <div class="calc-diff-col locked" id="calcDiffNewCol"><h4>変更後の条件</h4><div id="calcDiffNewBody">
+            <div class="hint">まず現在の条件を入れて、下のボタンでコピーしてください。</div>
+          </div></div>
+        </div>
+        <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button type="button" class="btn-add" onclick="saveCalc()">💾 試算を保存</button>
+          <button type="button" class="btn-add" onclick="document.getElementById('calcLoadFile').click()">📂 試算を読込</button>
+          <input type="file" id="calcLoadFile" accept=".json,application/json" style="display:none" onchange="loadCalc(this)">
+        </div>
+      </fieldset>
+
+      <details>
+        <summary style="cursor:pointer;color:var(--accent2);font-weight:700">🖨 試算書（PDF）のオプション（宛名・コメント）</summary>
+        <div class="row two">
+          <div><label>宛名（任意）</label><input type="text" name="calc_client_name" placeholder="例：株式会社○○"></div>
+          <div><label>対象（任意）</label><input type="text" name="calc_subject" placeholder="例：田中太郎さんの採用条件"></div>
+        </div>
+        <div class="row"><label>コメント（任意）</label><textarea name="calc_comment" placeholder="試算書に印字する補足コメント"></textarea></div>
+        <label style="display:block;margin-top:4px"><input type="checkbox" name="calc_pdf_trace"> 計算過程（トレース）を試算書にも印字する</label>
+        <div class="help-note">印刷ダイアログのプリンター選択で「PDFに保存」を選ぶとPDFファイルになります。ロゴ・事務所名は印字されません（タイトルと試算日のみ）。</div>
+      </details>
+
+      <p class="hint" style="color:var(--warn)">※ このタブは試算専用です。<b>「反映」ボタンを押さない限り</b>通知書・出力には反映されません。金額は「基準内賃金＝基本給＋基準内手当」を基礎に算定します。保険料・所得税の計算は行いません（手取りは出ません）。</p>
     </form>
     <div id="calcResult" class="calc-result"></div>
+    <div id="calcSheet"></div>
+    <div id="calcActions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" class="btn" id="calcTransferBtn" onclick="calcTransferToCreate()">➡ この内容を作成タブの賃金欄に反映</button>
+      <button type="button" class="btn print" onclick="printCalcSheet()">🖨 試算書を印刷（PDFに保存）</button>
+    </div>
   </div>
 </div>
 
@@ -820,7 +981,33 @@
       <li><b>書面の中の赤字の注意書き</b> — 固定残業代の時間数未入力、出来高払の保障給未入力など、このまま交付すると法令上問題になり得る箇所です。下書きを完成品と取り違えないよう、印刷にもあえて赤字が印字されます。入力を補うと消えます。</li>
     </ul>
 
-    <h2>8. よくある質問</h2>
+    <h2>8. 賃金試算タブの使い方</h2>
+    <p>通知書には反映されない独立の試算専用タブです。固定残業代を含む賃金の組み立てを、通知書を作らずに確認・検討できます。</p>
+    <p><b>①このタブでできること（3モード）</b></p>
+    <table class="roster"><thead><tr><th>モード</th><th>使う場面</th></tr></thead><tbody>
+      <tr><td>A. 総支給額を計算する</td><td>基本給・手当・固定残業時間が決まっている人の、月の総支給額を確認したいとき</td></tr>
+      <tr><td>B. 基本給を逆算する</td><td>「月◯円で採用したい」という希望総額から、基本給と固定残業手当の内訳を割り出したいとき</td></tr>
+      <tr><td>C. 固定残業時間を逆算する</td><td>総支給額と基本給の希望が決まっていて、その差額を固定残業何時間分に設定できるか確認したいとき</td></tr>
+    </tbody></table>
+    <p><b>②手順</b></p>
+    <ol>
+      <li>「① 試算の種類」でA・B・Cのいずれかを選ぶ。</li>
+      <li>「② 共通設定」で月の所定労働時間を確認する（根拠が分からなければ「🧮 計算する」で年間休日数・1日の所定労働時間から自動計算できる）。都道府県を選ぶと最低賃金が自動入力される。</li>
+      <li>「③ 手当」で手当明細を入力する（「📋 作成タブの手当を取り込む」で作成タブの入力をそのまま使うこともできる）。</li>
+      <li>「④ 金額と時間」でモードに応じた金額・時間を入力する。</li>
+      <li>右（画面が狭い場合は下）に結果が自動表示される。最低賃金との比較、固定残業時間の注意（45時間・60時間超）もここに表示される。</li>
+    </ol>
+    <p><b>③具体例</b>：モードBで「目標の総支給額」に280,000円、固定残業時間に20時間を入れると、月の所定労働時間（例:160h）・割増率（既定125%）から固定残業手当を割り出し、残りを基本給として表示する。結果欄の「基本給（逆算結果）」が募集要項・契約書に書く基本給の額になる。</p>
+    <p><b>④計算式の考え方</b>：固定残業手当＝基準内賃金（基本給＋基準内手当）÷月所定労働時間×割増率×時間数。逆算（モードB）は、所定時間に固定残業・深夜の時間を割増率で加重した「換算時間」で目標総額を割って単価を求め、そこから固定残業手当・深夜手当を計算し、残りを基本給とする方式（端数はすべて基本給側が吸収するため総額は目標どおりになる）。</p>
+    <p><b>⑤注意</b>：保険料・税金の計算はできません（手取り額は表示されません）。試算した内容は「➡ この内容を作成タブの賃金欄に反映」ボタンを押さない限り通知書・出力には反映されません。具体的な適用は所属社労士の確認を要します。</p>
+    <p><b>⑥固定残業の2方式</b>：「④ 金額と時間」の先頭で選べます。<b>区分別</b>＝固定残業手当と固定深夜手当を別々に設定する従来方式。<b>一体型</b>＝時間外・法定休日・深夜をまとめて1本の手当（固定時間外勤務手当）にし、内訳（時間数・金額）を明示する方式で、作成タブの「固定残業の方式」と同じ考え方です。一体型の「希望額から按分」は、希望額を比率（既定60:30:10）で配分します。例えば希望額75,000円・比60:30:10なら、時間外45,000円・法定休日22,500円・深夜7,500円に配分され（合計は必ず希望額と一致）、それぞれの相当時間（何時間分にあたるか）も表示されます。<b>一体型は月60時間超の追加割増（+25%）を計算しません</b>。60時間を超える設計を試算したいときは区分別方式を使ってください。</p>
+    <p><b>⑦端数処理パターン</b>：「詳細設定」の中で選べます。<b>標準</b>＝時間単価・割増単価では端数処理をせず、最後の手当額だけを切り上げる、多くの会社で採用されている方式です（従来の計算方法と同じです）。<b>単価段階で処理</b>＝時間単価を四捨五入→その割増単価も四捨五入→最後は処理なし、という顧問先の給与規程・賃金台帳の計算方法に合わせる方式です。どちらを選ぶかは、顧問先が実際に給与計算で使っている端数処理の手順に合わせて選びます。結果欄には「🔍 計算過程を表示」で各段階の数値と、法定どおりの厳密な金額との差額が表示されます（緑＝上回っている、青＝四捨五入の範囲内、赤＝切捨てにより法定額を下回る、の3色で判定）。<b>切捨てを選んで法定額を下回る設定は労働者に不利になるため、赤い警告が出たら四捨五入・切上げへの変更を検討してください。</b></p>
+    <p><b>⑧モードD（変更したらどうなる）の使い方</b>：①左（現在の条件）に今の基本給・手当・固定残業を入力する。②「➡ この内容を変更後へコピー」を押すと右（変更後）が編集可能になる。③右の欄だけ書き換える。金額・時間の欄には <code>+10000</code>（現在より1万円増）や <code>-5</code>（現在より5時間減）のように差額で入力すると、入力を終えて欄を出た時点で自動的に絶対額に変換されます。④差分表で基本給・各手当・固定残業計・総支給額・年間換算・割増の基礎・時間単価の現在／変更後／差額が確認できます。⑤結果欄の自動チェックで、割増単価の低下（不利益変更の論点）、固定的賃金の変動（月額変更届の検討対象）、最低賃金割れ、固定残業45時間超えへの変更を知らせます。⑥昇給が確定して次年度の変更案を検討するときは、前年に保存した試算ファイルを読み込み、「⬆ 変更後を現在へ繰上げ」で今回の「変更後」を新しい「現在」にしてから、次の変更後を入力します。</p>
+    <p><b>⑨PDF試算書の出し方</b>：結果欄の下にある「🖨 試算書を印刷（PDFに保存）」を押すと、印刷ダイアログが開きます。プリンターの選択で「PDFに保存」を選ぶとPDFファイルとして保存されます。「🖨 試算書（PDF）のオプション」を開くと、宛名・対象・コメント（すべて任意入力、空欄なら試算書に印字されません）と、計算過程を試算書にも印字するかどうかを選べます。ロゴ・事務所名は印字されません（タイトルと試算日のみ）。切捨てによる法定額割れなどの赤い警告が出ている状態で印刷しようとすると、確認のダイアログが表示されます。</p>
+    <p><b>試算タブの独立性について</b>：このタブは通知書に自動反映されません。反映されるのは「➡ この内容を作成タブの賃金欄に反映」（モードDでは「➡ 変更後を作成タブへ転記」）ボタンを押したときだけです。試算タブの入力内容は「💾 保存」（作成タブ側）には含まれません。試算専用の保存・読込は「💾 試算を保存」「📂 試算を読込」（モードD使用時に表示）を使います。</p>
+    <p class="guide-nav"><button class="guide-btn secondary" onclick="switchMode('calc')">▶ 賃金試算タブを開く</button></p>
+
+    <h2>9. よくある質問</h2>
     <dl class="qa">
       <dt>Q. 緑のヒントを消したい／出したい</dt>
       <dd>右上の「❓ ヘルプ」ボタンで切り替えられます。</dd>
@@ -992,28 +1179,36 @@ function fmtAllow(a,cat){
   return `${label}　${ALLOW_UNIT_PRE[a.unit||'month']}${numStr(a.amount)}`;
 }
 function numH(x){ return Number(toHalf(String(x==null?'':x)).replace(/[^\d.]/g,''))||0; }
-// 一体型（固定時間外勤務手当）：時間外125%・法定休日135%・深夜0.25を1本にまとめ内訳明示
-function computeUnified(inBase, sched, unit, roundUp){
+// 一体型（固定時間外勤務手当）：時間外・法定休日・深夜を1本にまとめ内訳明示。
+// computeUnifiedCore は作成タブ・賃金試算タブの両方から呼ばれる純関数（form/valに依存しない。第2部§A2）。
+function computeUnifiedCore(p){
+  const {inBase, sched, roundUp, otR, holR, nightR, mode}=p;
   const per = sched>0? inBase/sched : 0;
-  const otR=(numH(val('ot_60under'))||125)/100, holR=(numH(val('hol_legal'))||135)/100, nightR=(numH(val('night_pct'))||25)/100;
-  const mode=(form.elements['uni_mode']&&form.elements['uni_mode'].value)||'ratio';
   let ot={amt:0,h:0}, hol={amt:0,h:0}, ni={amt:0,h:0}, total=0;
   if(mode==='ratio'){
-    const T=numH(val('uni_target'));
-    const r1=numH(val('uni_r_ot')), r2=numH(val('uni_r_hol')), r3=numH(val('uni_r_night')); const rs=(r1+r2+r3)||1;
+    const T=p.target||0;
+    const r1=p.rOt||0, r2=p.rHol||0, r3=p.rNight||0; const rs=(r1+r2+r3)||1;
     ot.amt=Math.round(T*r1/rs); hol.amt=Math.round(T*r2/rs); ni.amt=T-ot.amt-hol.amt;   // 1円単位・合計=T（切上げなし）
     ot.h = (per>0&&otR>0)? ot.amt/(per*otR):0;
     hol.h= (per>0&&holR>0)? hol.amt/(per*holR):0;
     ni.h = (per>0&&nightR>0)? ni.amt/(per*nightR):0;
     total=T;
   } else {
-    ot.h=numH(val('uni_h_ot')); hol.h=numH(val('uni_h_hol')); ni.h=numH(val('uni_h_night'));
+    ot.h=p.hOt||0; hol.h=p.hHol||0; ni.h=p.hNight||0;
     ot.amt = ot.h>0? roundUp(per*otR*ot.h):0;
     hol.amt= hol.h>0? roundUp(per*holR*hol.h):0;
     ni.amt = ni.h>0? roundUp(per*nightR*ni.h):0;
     total=ot.amt+hol.amt+ni.amt;
   }
-  return {mode, per, otR, holR, nightR, ot, hol, ni, total,
+  return {mode, per, otR, holR, nightR, ot, hol, ni, total};
+}
+function computeUnified(inBase, sched, unit, roundUp){
+  const otR=(numH(val('ot_60under'))||125)/100, holR=(numH(val('hol_legal'))||135)/100, nightR=(numH(val('night_pct'))||25)/100;
+  const mode=(form.elements['uni_mode']&&form.elements['uni_mode'].value)||'ratio';
+  const core=computeUnifiedCore({inBase, sched, roundUp, otR, holR, nightR, mode,
+    target:numH(val('uni_target')), rOt:numH(val('uni_r_ot')), rHol:numH(val('uni_r_hol')), rNight:numH(val('uni_r_night')),
+    hOt:numH(val('uni_h_ot')), hHol:numH(val('uni_h_hol')), hNight:numH(val('uni_h_night'))});
+  return {...core,
     name: val('uni_name')||'固定時間外勤務手当',
     note: !!(form.elements['uni_note_clause']&&form.elements['uni_note_clause'].checked)};
 }
@@ -1970,89 +2165,1023 @@ function bulkExportEach(kind){
     i++; setTimeout(next, 500);
   })();
 }
+/* ===== 賃金試算タブ：手当プリセット（種類→区分・最賃算入の既定。§B1） ===== */
+const CALC_ALLOW_PRESETS=[
+ {label:'役職手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
+ {label:'資格手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
+ {label:'職務手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
+ {label:'精皆勤手当', cat:'in', minwage:false, help:'割増基礎には算入（労基則21条の除外列挙に無い）。ただし最低賃金の比較では除外（最賃法4条3項）'},
+ {label:'家族手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
+ {label:'通勤手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
+ {label:'住宅手当', cat:'out', minwage:true, help:'除外は「住宅に要する費用に応じて支給する場合」のみ。一律定額支給なら基準内（最低賃金の比較には含めます）'},
+ {label:'別居手当', cat:'out', minwage:true, help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
+ {label:'子女教育手当', cat:'out', minwage:true, help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
+ {label:'その他（手動選択）', cat:'in', minwage:true, help:'迷ったら基準内（労働者有利側）に入れてください'}
+];
+function calcAllowRowHTML(){
+  const opts='<option value="">（種類を選択）</option>'+CALC_ALLOW_PRESETS.map(p=>`<option value="${esc(p.label)}">${esc(p.label)}</option>`).join('');
+  return `<select class="ca-kind" onchange="calcAllowKindChange(this.closest('.allow-row'))">${opts}</select>`+
+    `<input type="text" class="ca-name a-name" placeholder="手当名（自由入力可）">`+
+    `<input type="text" class="ca-amt a-amt" placeholder="月額(円)">`+
+    `<select class="ca-cat"><option value="in">基準内</option><option value="out">基準外</option></select>`+
+    `<button type="button" class="mini" onclick="calcDelAllowRow(this)" title="削除">×</button>`;
+}
+function calcAddAllowRow(item){
+  const row=document.createElement('div'); row.className='allow-row'; row.innerHTML=calcAllowRowHTML();
+  document.getElementById('calcAllowList').appendChild(row);
+  if(item){
+    row.querySelector('.ca-kind').value=item.kind||'';
+    row.querySelector('.ca-name').value=item.name||'';
+    row.querySelector('.ca-amt').value=item.amount||'';
+    row.querySelector('.ca-cat').value=item.cat||'in';
+    row.dataset.minwage = item.minwage===false ? '0' : '1';
+  }
+  calcRender();
+}
+function calcAllowKindChange(row){
+  if(!row) return;
+  const kind=row.querySelector('.ca-kind').value;
+  const preset=CALC_ALLOW_PRESETS.find(p=>p.label===kind);
+  if(preset){
+    const nameEl=row.querySelector('.ca-name');
+    const prevWasPreset = !nameEl.value.trim() || CALC_ALLOW_PRESETS.some(p=>p.label===nameEl.value.trim());
+    if(prevWasPreset) nameEl.value = kind==='その他（手動選択）' ? '' : kind;
+    row.querySelector('.ca-cat').value=preset.cat;
+    row.dataset.minwage = preset.minwage===false ? '0' : '1';
+  }
+  calcRender();
+}
+function calcDelAllowRow(btn){
+  const row=btn.closest('.allow-row'), list=row.parentElement;
+  if(list.querySelectorAll('.allow-row').length<=1){
+    row.querySelectorAll('input').forEach(i=>i.value='');
+    row.querySelector('.ca-kind').value=''; row.querySelector('.ca-cat').value='in'; delete row.dataset.minwage;
+  } else { row.remove(); }
+  calcRender();
+}
+function calcGetAllowRows(){
+  const list=document.getElementById('calcAllowList'); if(!list) return [];
+  return [...list.querySelectorAll('.allow-row')].map(r=>({
+    kind:r.querySelector('.ca-kind').value,
+    name:r.querySelector('.ca-name').value.trim(),
+    amount:r.querySelector('.ca-amt').value.trim(),
+    cat:r.querySelector('.ca-cat').value||'in',
+    minwage: r.dataset.minwage!=='0'
+  })).filter(a=>a.name||a.amount);
+}
+function calcSetAllowRows(arr){
+  const list=document.getElementById('calcAllowList'); if(!list) return;
+  list.innerHTML='';
+  (arr&&arr.length?arr:[{}]).forEach(it=>calcAddAllowRow(it));
+}
+function calcAllowTotals(){
+  const rows=calcGetAllowRows();
+  let inSum=0, outSum=0, minwageAllowSum=0;
+  rows.forEach(a=>{
+    const amt=parseYen(a.amount); if(amt==null) return;
+    if(a.cat==='out') outSum+=amt; else inSum+=amt;
+    if(a.minwage) minwageAllowSum+=amt;
+  });
+  return {rows, inSum, outSum, minwageAllowSum};
+}
+function calcImportAllows(){
+  const inAll=getAllows('in'), outAll=getAllows('out');
+  const inRows=inAll.filter(a=>(a.unit||'month')==='month' && parseYen(a.amount)!=null);
+  const outRows=outAll.filter(a=>(a.unit||'month')==='month' && parseYen(a.amount)!=null);
+  const skipped=(inAll.length-inRows.length)+(outAll.length-outRows.length);
+  const mapped=[...inRows.map(a=>({...a,cat:'in'})), ...outRows.map(a=>({...a,cat:'out'}))].map(a=>{
+    const preset=CALC_ALLOW_PRESETS.find(p=>p.label===a.name);
+    return {kind:preset?preset.label:'', name:a.name, amount:a.amount, cat:a.cat, minwage: preset? preset.minwage!==false : true};
+  });
+  if(!mapped.length){ alert('作成タブに月額の手当がありません（取り込めるのは単位が「月額」の行だけです）。'); return; }
+  const list=document.getElementById('calcAllowList');
+  const hasExisting=[...list.querySelectorAll('.allow-row')].some(r=>r.querySelector('.ca-name').value.trim()||r.querySelector('.ca-amt').value.trim());
+  if(hasExisting && !confirm('現在の手当明細を作成タブの内容で置き換えます。よろしいですか？')) return;
+  calcSetAllowRows(mapped);
+  alert(mapped.length+'件を取り込みました。'+(skipped>0?`（${skipped}件は月額でないため取り込みませんでした）`:''));
+}
+
+/* ===== 賃金試算タブ：地域別最低賃金（D1）
+   出典: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf
+   legal-researchサブエージェントによる一次資料確認（2026-07-05）。都道府県ごとに発効日は令和7年10月〜令和8年3月の間で異なるが、
+   最も遅い発効日（秋田県 令和8年3月31日）も本ツールの確認日時点で既に到来しているため、47都道府県すべて改定後の金額を採用。 ===== */
+const MIN_WAGE_CHECKED='2026-07-05';
+const MIN_WAGE_SOURCE='厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf';
+const MIN_WAGE={
+ "北海道":1075,"青森県":1029,"岩手県":1031,"宮城県":1038,"秋田県":1031,"山形県":1032,"福島県":1033,
+ "茨城県":1074,"栃木県":1068,"群馬県":1063,"埼玉県":1141,"千葉県":1140,"東京都":1226,"神奈川県":1225,
+ "新潟県":1050,"富山県":1062,"石川県":1054,"福井県":1053,"山梨県":1052,"長野県":1061,"岐阜県":1065,
+ "静岡県":1097,"愛知県":1140,"三重県":1087,"滋賀県":1080,"京都府":1122,"大阪府":1177,"兵庫県":1116,
+ "奈良県":1051,"和歌山県":1045,"鳥取県":1030,"島根県":1033,"岡山県":1047,"広島県":1085,"山口県":1043,
+ "徳島県":1046,"香川県":1036,"愛媛県":1033,"高知県":1023,"福岡県":1057,"佐賀県":1030,"長崎県":1031,
+ "熊本県":1034,"大分県":1035,"宮崎県":1023,"鹿児島県":1026,"沖縄県":1023
+};
+function calcPopulatePrefSelect(){
+  const sel=document.getElementById('calcPref'); if(!sel || sel.dataset.filled) return;
+  Object.keys(MIN_WAGE).forEach(pref=>{ const o=document.createElement('option'); o.value=pref; o.textContent=pref+'　'+MIN_WAGE[pref]+'円'; sel.appendChild(o); });
+  sel.dataset.filled='1';
+  const hint=document.getElementById('calcMinWageHint');
+  if(hint) hint.textContent=`${MIN_WAGE_CHECKED} 確認時点（一次資料：${MIN_WAGE_SOURCE}）`;
+}
+function calcApplyMinWage(){
+  const pref=document.getElementById('calcPref').value;
+  const el=document.getElementById('calcForm').elements['calc_minwage'];
+  if(pref && MIN_WAGE[pref]!=null) el.value=MIN_WAGE[pref];
+  calcRender();
+}
+function calcMinWageLine(mwBase, sched, minwage){
+  if(!(mwBase>0) || !(sched>0) || !(minwage>0)) return '';
+  const hourly=mwBase/sched;
+  const ok=hourly>=minwage;
+  const cls=ok?'calc-ok-g':'calc-warn-r';
+  const mark=ok?'✔':'⚠';
+  return `<div class="${cls}">${mark} 時間単価 ${Math.round(hourly).toLocaleString('ja-JP')}円 ${ok?'≧':'＜'} 最低賃金 ${Math.round(minwage).toLocaleString('ja-JP')}円（${MIN_WAGE_CHECKED}確認時点。精皆勤・通勤・家族手当は比較から除外）</div>`;
+}
+
+/* ===== 賃金試算タブ：固定残業の時間警告（D3） ===== */
+function calcOtHourWarnings(hours){
+  if(!(hours>0)) return '';
+  let html='';
+  if(hours>60) html+=`<div class="calc-warn-r">⚠ 月60時間超は50%以上の追加割増が必要です（労基法37条1項ただし書）</div>`;
+  if(hours>45) html+=`<div class="calc-warn-y">⚠ 月45時間は36協定の原則の限度時間です（労基法36条4項）。恒常的に45時間を超える固定残業の設定は採用時の説明・運用に注意してください</div>`;
+  return html;
+}
+
+/* ===== 賃金試算タブ：所定労働時間の計算補助（D2） ===== */
+function toggleSchedHelper(){ document.getElementById('schedHelper').classList.toggle('hidden'); }
+function applySchedHelper(){
+  const hol=numH(document.getElementById('schedAnnualHoliday').value);
+  const daily=numH(document.getElementById('schedDailyHours').value);
+  if(!(hol>0) || !(daily>0)){ alert('年間休日数と1日の所定労働時間を入力してください。'); return; }
+  const v=Math.floor((365-hol)*daily/12*100)/100;
+  document.getElementById('calcForm').elements['calc_sched'].value=v;
+  document.getElementById('schedHelper').classList.add('hidden');
+  calcRender();
+}
+
+/* ===== 賃金試算タブ：共通設定の記憶（D7） ===== */
+const CALC_SETTINGS_KEY='roudouCalcCommonSettings_v1';
+const CALC_SETTINGS_FIELDS=['calc_sched','calc_ot_rate','calc_hol_rate','calc_night_rate','calc_ot60_rate',
+  'calc_rnd_pattern','calc_rnd_s1','calc_rnd_s2','calc_rnd_s3_unit','calc_rnd_s3_dir','calc_minwage'];
+function calcSaveSettings(){
+  try{
+    const cf=document.getElementById('calcForm');
+    const data={calc_pref:document.getElementById('calcPref').value};
+    CALC_SETTINGS_FIELDS.forEach(n=>{ if(cf.elements[n]) data[n]=cf.elements[n].value; });
+    localStorage.setItem(CALC_SETTINGS_KEY, JSON.stringify(data));
+    alert('共通設定を既定値として記憶しました。次回このツールを開いたときに復元します。');
+  }catch(e){ alert('この環境では設定の記憶が利用できません（file:// で開いている場合など）。既定値のまま動作します。'); }
+}
+function calcLoadSettings(){
+  try{
+    const raw=localStorage.getItem(CALC_SETTINGS_KEY); if(!raw) return;
+    const data=JSON.parse(raw); const cf=document.getElementById('calcForm');
+    Object.entries(data).forEach(([k,v])=>{
+      if(!v) return;
+      if(k==='calc_pref'){ const sel=document.getElementById('calcPref'); if(sel) sel.value=v; return; }
+      const el=cf.elements[k]; if(el) el.value=v;
+    });
+    calcResolveRounding();   // カスタム以外なら個別欄をpattern値に合わせ直す（disabled状態も含めて）
+  }catch(e){ /* file://等でlocalStorage不可の場合は既定値のまま */ }
+}
+
+/* ===== 賃金試算タブ：モード別表示制御（第1部§A2・第2部§A1で拡張） ===== */
+function calcVisibility(mode, style){
+  document.querySelectorAll('#calcForm [data-show]').forEach(el=>{
+    let show=el.dataset.show.split(',').includes(mode);
+    if(show && el.dataset.hideStyle && el.dataset.hideStyle.split(',').includes(style)) show=false;
+    el.classList.toggle('hidden', !show);
+  });
+}
+function calcUnifiedVisibility(mode, style){
+  const wrap=document.getElementById('calcOtUnified');
+  const show = style==='unified';
+  wrap.classList.toggle('hidden', !show);
+  if(!show) return;
+  const cf=document.getElementById('calcForm');
+  const umode=(cf.elements['calc_uni_mode']&&cf.elements['calc_uni_mode'].value)||'ratio';
+  const isC = mode==='rev_hours';
+  document.getElementById('calcUniModeRow').classList.toggle('hidden', isC);
+  document.getElementById('calcUniTargetRow').classList.toggle('hidden', isC || umode!=='ratio');
+  document.getElementById('calcUniHoursRow').classList.toggle('hidden', isC || umode!=='hours');
+}
+function calcRoundLabel(unit){
+  return unit===1000?'千円単位切上げ':unit===100?'百円単位切上げ':unit===10?'十円単位切上げ':'円未満四捨五入（切り上げなし）';
+}
+function calcYen(x){ return Math.round(x).toLocaleString('ja-JP')+'円'; }
+
+/* ===== 賃金試算タブ：端数処理の計算パターン（第2部§B） ===== */
+const CALC_RND_PRESETS={
+  standard:{s1:'none', s2:'none', s3unit:1000, s3dir:'ceil'},
+  stepwise:{s1:'round', s2:'round', s3unit:0, s3dir:'round'}
+};
+const CALC_RND_LABEL={none:'処理なし', round:'四捨五入', ceil:'切上げ', floor:'切捨て'};
+function calcApplyStep(kind, v){
+  if(kind==='round') return Math.round(v);
+  if(kind==='ceil') return Math.ceil(v);
+  if(kind==='floor') return Math.floor(v);
+  return v; // 'none'：円未満を残す
+}
+function calcRoundStep3(v, unit, dir){
+  const u=(unit>0)?unit:1;   // 「なし」も最終的には1円単位（金額に小数を残さない）
+  return calcApplyStep(dir==='round'?'round':(dir==='floor'?'floor':'ceil'), v/u)*u;
+}
+function calcRndPatternName(p){
+  return p==='stepwise'?'単価段階で処理':(p==='custom'?'カスタム':'標準');
+}
+function calcResolveRounding(){
+  const cf=document.getElementById('calcForm');
+  const pattern=cf.elements['calc_rnd_pattern']?cf.elements['calc_rnd_pattern'].value:'standard';
+  const isCustom=pattern==='custom';
+  ['calc_rnd_s1','calc_rnd_s2','calc_rnd_s3_unit','calc_rnd_s3_dir'].forEach(n=>{ if(cf.elements[n]) cf.elements[n].disabled=!isCustom; });
+  if(isCustom){
+    return {pattern, s1:cf.elements['calc_rnd_s1'].value||'none', s2:cf.elements['calc_rnd_s2'].value||'none',
+      s3unit:parseInt(cf.elements['calc_rnd_s3_unit'].value||'0',10), s3dir:cf.elements['calc_rnd_s3_dir'].value||'ceil'};
+  }
+  const preset=CALC_RND_PRESETS[pattern]||CALC_RND_PRESETS.standard;
+  cf.elements['calc_rnd_s1'].value=preset.s1; cf.elements['calc_rnd_s2'].value=preset.s2;
+  cf.elements['calc_rnd_s3_unit'].value=String(preset.s3unit); cf.elements['calc_rnd_s3_dir'].value=preset.s3dir;
+  return {pattern, ...preset};
+}
+function calcRndPatternChange(){ calcResolveRounding(); calcRender(); }
+// 時間単価÷割増単価÷手当額の3段階で丸めを適用し、各段階のトレースを返す（第2部§B2）
+function calcFmt2(x){ const r=Math.round(x*100)/100; return r.toLocaleString('ja-JP',{maximumFractionDigits:2}); }
+function calcOtAmount({inBase, sched, rate, hours, rnd, label}){
+  const per0 = sched>0 ? inBase/sched : 0;
+  const per1 = calcApplyStep(rnd.s1, per0);
+  const rate0 = per1*rate;
+  const rate1 = calcApplyStep(rnd.s2, rate0);
+  const amt0 = rate1*(hours||0);
+  const amt1 = calcRoundStep3(amt0, rnd.s3unit, rnd.s3dir);
+  const strict = per0*rate*(hours||0);
+  const s3Label = (rnd.s3unit>0?rnd.s3unit+'円単位・':'')+(CALC_RND_LABEL[rnd.s3dir]||'切上げ');
+  const trace=[
+    `${(label?label+'：':'')}${calcFmt2(inBase)}円 ÷ ${sched}h ＝ ${calcFmt2(per0)}円 ${rnd.s1==='none'?'（処理なし）':`→ <b>${CALC_RND_LABEL[rnd.s1]}</b> →`} ${calcFmt2(per1)}円`,
+    `${calcFmt2(per1)}円 × ${Math.round(rate*1000)/10}% ＝ ${calcFmt2(rate0)}円 ${rnd.s2==='none'?'（処理なし）':`→ <b>${CALC_RND_LABEL[rnd.s2]}</b> →`} ${calcFmt2(rate1)}円`,
+    `${calcFmt2(rate1)}円 × ${hours}h ＝ ${calcFmt2(amt0)}円 → <b>${s3Label}</b> → ${calcYen(amt1)}`,
+    `参考: 端数処理なしの法定計算額 ${calcFmt2(strict)}円（差 ${(amt1-strict)>=0?'+':'−'}${calcFmt2(Math.abs(amt1-strict))}円）`
+  ];
+  return {amt:amt1, strict, per0, per1, rate0, rate1, amt0, trace};
+}
+
+/* ===== 賃金試算タブ：適法性ガード（第2部§B3）・計算過程トレース（§E2） ===== */
+function calcLegalityGuardHTML(calcs, rnd){
+  const active=calcs.filter(Boolean);
+  if(!active.length) return '';
+  const amt=active.reduce((s,c)=>s+c.amt,0);
+  const strict=active.reduce((s,c)=>s+c.strict,0);
+  const diff=amt-strict;
+  if(diff>=-0.005) return `<div class="calc-ok-g">✔ 法定どおりの計算額${calcYen(strict)}を${diff>0.005?calcYen(diff)+'上回っており、':''}不足はありません</div>`;
+  const hasFloor = rnd.s1==='floor' || rnd.s2==='floor' || rnd.s3dir==='floor';
+  if(!hasFloor) return `<div class="calc-info-b">法定計算額を${calcYen(Math.abs(diff))}下回りますが、円未満の四捨五入によるものです（昭和63.3.14 基発150号で認められた端数処理）</div>`;
+  return `<div class="calc-warn-r">切捨てにより法定計算額を${calcYen(Math.abs(diff))}下回ります。賃金全額払いの原則（労基法24条）との関係で問題になり得ます。四捨五入または切上げへの変更をご提案ください</div>`;
+}
+let CALC_TRACE_OPEN=false;
+let LAST_CALC_TRACES=[];
+function calcTraceToggleHTML(calcs){
+  const active=calcs.filter(Boolean);
+  LAST_CALC_TRACES=active;   // PDF試算書のトレース印字（calc_pdf_trace）用に最後のトレースを保持
+  if(!active.length) return '';
+  const body=active.map(c=>c.trace.map(l=>`<div>${l}</div>`).join('')).join('<div style="height:6px"></div>');
+  return `<details class="hint" style="margin-top:8px" ${CALC_TRACE_OPEN?'open':''} ontoggle="CALC_TRACE_OPEN=this.open">
+    <summary style="cursor:pointer;color:var(--accent2);font-weight:700">🔍 計算過程を表示</summary>
+    <div style="margin-top:6px;line-height:1.8">${body}</div></details>`;
+}
+
+let LAST_CALC={};
+// amtを「割増単価（円/時。時間単価×割増率に段階1・2の丸めを適用した後の値）」で割って相当時間を逆算する
+function calcEqH(amt, premiumWage){ return (premiumWage>0) ? amt/premiumWage : 0; }
+// 相当時間（既に計算済みのh）を表示用に整形。per<=0（基本給・所定未入力）のときはゼロ除算ガードで「—」
+function calcHoursTxt(h, per){ return (per>0) ? `${Math.round((h||0)*10)/10}時間分（相当）` : '—'; }
+function calcUnifiedWarnings(otHoursEq, nightHoursEq){
+  let html='';
+  if(otHoursEq>60) html+=`<div class="calc-warn-r">⚠ <b>一体型は月60時間超の追加割増（＋25%）を計算しません</b>（作成タブの一体型と同じ仕様です）。60時間を超える設計は区分別方式で試算してください</div>`;
+  if(otHoursEq>45) html+=`<div class="calc-warn-y">⚠ 月45時間は36協定の原則の限度時間です（労基法36条4項）。恒常的に45時間を超える固定残業の設定は採用時の説明・運用に注意してください</div>`;
+  if(nightHoursEq>30) html+=`<div class="calc-warn-y">⚠ 深夜の相当時間が大きくなっています。実態（深夜勤務の見込み）と合っているか確認してください</div>`;
+  return html;
+}
+// 基本給を二分探索（選択した端数処理パターンで順算した総支給額 ≦ target を満たす最大の基準内賃金）。第2部§B2
+function calcBisectBase(target, otH, nH, inSum, outSum, sched, otRate, ot60Rate, nightRate, rnd){
+  const ot60H0=Math.max(0,otH-60);
+  const evalBase=b=>{
+    const inBase=b+inSum;
+    const otC = otH>0? calcOtAmount({inBase,sched,rate:otRate,hours:otH,rnd,label:'時間外'}) : null;
+    const ot60C = ot60H0>0? calcOtAmount({inBase,sched,rate:ot60Rate,hours:ot60H0,rnd,label:'60時間超'}) : null;
+    const nC = nH>0? calcOtAmount({inBase,sched,rate:nightRate,hours:nH,rnd,label:'深夜'}) : null;
+    const otAmt=otC?otC.amt:0, ot60Amt=ot60C?ot60C.amt:0, nightAmt=nC?nC.amt:0;
+    return {total:b+inSum+outSum+otAmt+ot60Amt+nightAmt, otAmt, ot60Amt, nightAmt, otC, ot60C, nC};
+  };
+  let lo=0, hi=Math.max(0,Math.round(target));
+  for(let i=0;i<40 && lo<hi;i++){
+    const mid=lo+Math.ceil((hi-lo)/2);
+    if(evalBase(mid).total<=target) lo=mid; else hi=mid-1;
+  }
+  const r=evalBase(lo);
+  return {base:lo, ...r, residual:target-r.total};
+}
+
+/* ===== 賃金試算タブ：変更シミュレーション（モードD・第2部§C） ===== */
+function calcDiffDefaultSide(){
+  return {base:'200000', allowRows:[], otStyle:'split', otH:'0', nH:'0',
+    uniMode:'ratio', uniTarget:'0', uniROt:'60', uniRHol:'30', uniRNight:'10', uniHOt:'0', uniHHol:'0', uniHNight:'0'};
+}
+let CALC_CUR=calcDiffDefaultSide();
+let CALC_NEW=calcDiffDefaultSide();
+let CALC_DIFF_BUILT=false, CALC_DIFF_COPIED=false;
+function calcDiffSideObj(side){ return side==='cur'?CALC_CUR:CALC_NEW; }
+
+function calcDiffAllowRowHTML(side, idx, row){
+  row=row||{};
+  const opts='<option value="">（種類を選択）</option>'+CALC_ALLOW_PRESETS.map(p=>`<option value="${esc(p.label)}"${row.kind===p.label?' selected':''}>${esc(p.label)}</option>`).join('');
+  return `<div class="allow-row">
+    <select class="ca-kind" onchange="calcDiffAllowKindChange('${side}',${idx},this.value)">${opts}</select>
+    <input type="text" class="ca-name a-name" value="${esc(row.name||'')}" placeholder="手当名" oninput="calcDiffAllowInput('${side}',${idx},'name',this.value)">
+    <input type="text" class="ca-amt a-amt" value="${esc(row.amount||'')}" placeholder="月額(円)"
+      oninput="calcDiffAllowInput('${side}',${idx},'amount',this.value)"${side==='new'?` onblur="calcDiffAllowBlurAmount(${idx},this)"`:''}>
+    <select class="ca-cat" onchange="calcDiffAllowInput('${side}',${idx},'cat',this.value)">
+      <option value="in"${(row.cat||'in')==='in'?' selected':''}>基準内</option>
+      <option value="out"${row.cat==='out'?' selected':''}>基準外</option>
+    </select>
+    <button type="button" class="mini" onclick="calcDiffDelAllowRow('${side}',${idx})" title="削除">×</button>
+  </div>`;
+}
+function calcDiffRenderInputs(side){
+  const state=calcDiffSideObj(side);
+  const body=document.getElementById(side==='cur'?'calcDiffCurBody':'calcDiffNewBody'); if(!body) return;
+  const col=document.getElementById(side==='cur'?'calcDiffCurCol':'calcDiffNewCol');
+  if(side==='new' && !CALC_DIFF_COPIED){
+    body.innerHTML='<div class="hint">まず現在の条件を入れて、下のボタンでコピーしてください。</div>';
+    if(col) col.classList.add('locked');
+    return;
+  }
+  if(col) col.classList.remove('locked');
+  const rows=(state.allowRows&&state.allowRows.length)?state.allowRows:[{cat:'in'}];
+  if(!state.allowRows.length) state.allowRows=[{cat:'in'}];
+  const allowHtml=rows.map((r,i)=>calcDiffAllowRowHTML(side,i,r)).join('');
+  const blurAttr=(f)=>side==='new'?` onblur="calcDiffFieldBlur('${side}','${f}',this)"`:'';
+  let html=`
+    <div class="row"><label>基本給(円)</label>
+      <input type="text" class="cnum" value="${esc(state.base)}" oninput="calcDiffFieldInput('${side}','base',this.value)"${blurAttr('base')}></div>
+    <div class="row"><label>手当</label>
+      <div>${allowHtml}</div>
+      <button type="button" class="btn-add" style="margin-top:4px" onclick="calcDiffAddAllowRow('${side}')">＋ 手当を追加</button>
+    </div>
+    <div class="row"><label>固定残業の方式</label>
+      <select onchange="calcDiffStyleChange('${side}',this.value)">
+        <option value="split"${state.otStyle==='split'?' selected':''}>区分別</option>
+        <option value="unified"${state.otStyle==='unified'?' selected':''}>一体型</option>
+      </select></div>`;
+  if(state.otStyle==='unified'){
+    html+=`<div class="row"><div class="seg">
+      <label><input type="radio" ${state.uniMode==='ratio'?'checked':''} onchange="calcDiffUniModeChange('${side}','ratio')"> 希望額から按分</label>
+      <label><input type="radio" ${state.uniMode==='hours'?'checked':''} onchange="calcDiffUniModeChange('${side}','hours')"> 時間から算定</label>
+    </div></div>`;
+    if(state.uniMode==='hours'){
+      html+=`<div class="row three">
+        <div><label>時間外(h)</label><input type="text" class="cnum" value="${esc(state.uniHOt)}" oninput="calcDiffFieldInput('${side}','uniHOt',this.value)"${blurAttr('uniHOt')}></div>
+        <div><label>法定休日(h)</label><input type="text" class="cnum" value="${esc(state.uniHHol)}" oninput="calcDiffFieldInput('${side}','uniHHol',this.value)"${blurAttr('uniHHol')}></div>
+        <div><label>深夜(h)</label><input type="text" class="cnum" value="${esc(state.uniHNight)}" oninput="calcDiffFieldInput('${side}','uniHNight',this.value)"${blurAttr('uniHNight')}></div>
+      </div>`;
+    } else {
+      html+=`<div class="row"><label>希望する固定時間外勤務手当（円）</label><input type="text" class="cnum" value="${esc(state.uniTarget)}" oninput="calcDiffFieldInput('${side}','uniTarget',this.value)"${blurAttr('uniTarget')}></div>`;
+    }
+    html+=`<div class="row three">
+      <div><label>時間外の比</label><input type="text" class="cnum" value="${esc(state.uniROt)}" oninput="calcDiffFieldInput('${side}','uniROt',this.value)"></div>
+      <div><label>法定休日の比</label><input type="text" class="cnum" value="${esc(state.uniRHol)}" oninput="calcDiffFieldInput('${side}','uniRHol',this.value)"></div>
+      <div><label>深夜の比</label><input type="text" class="cnum" value="${esc(state.uniRNight)}" oninput="calcDiffFieldInput('${side}','uniRNight',this.value)"></div>
+    </div>`;
+  } else {
+    html+=`<div class="row two">
+      <div><label>固定残業時間</label><input type="text" class="cnum" value="${esc(state.otH)}" oninput="calcDiffFieldInput('${side}','otH',this.value)"${blurAttr('otH')}></div>
+      <div><label>固定深夜時間</label><input type="text" class="cnum" value="${esc(state.nH)}" oninput="calcDiffFieldInput('${side}','nH',this.value)"${blurAttr('nH')}></div>
+    </div>`;
+  }
+  body.innerHTML=html;
+}
+function calcDiffParseDelta(inputStr, curValue){
+  const s=String(inputStr==null?'':inputStr).trim();
+  if(/^[+-]/.test(s)){
+    const d=parseYen(s.slice(1));
+    if(d==null) return s;
+    const sign = s[0]==='-' ? -1 : 1;
+    const base = curValue!=null ? (numH(curValue)||0) : 0;
+    return String(base + sign*d);
+  }
+  return s;
+}
+function calcDiffFieldInput(side, field, value){ calcDiffSideObj(side)[field]=value; calcRender(); }
+function calcDiffFieldBlur(side, field, el){
+  const parsed=calcDiffParseDelta(el.value, CALC_CUR[field]);
+  if(parsed!==el.value){ el.value=parsed; }
+  calcDiffSideObj(side)[field]=parsed;
+  calcRender();
+}
+function calcDiffStyleChange(side, value){ calcDiffSideObj(side).otStyle=value; calcDiffRenderInputs(side); calcRender(); }
+function calcDiffUniModeChange(side, value){ calcDiffSideObj(side).uniMode=value; calcDiffRenderInputs(side); calcRender(); }
+function calcDiffAllowInput(side, idx, field, value){
+  const st=calcDiffSideObj(side); if(!st.allowRows[idx]) st.allowRows[idx]={cat:'in'};
+  st.allowRows[idx][field]=value; calcRender();
+}
+function calcDiffAllowKindChange(side, idx, kind){
+  const st=calcDiffSideObj(side); if(!st.allowRows[idx]) st.allowRows[idx]={cat:'in'};
+  const preset=CALC_ALLOW_PRESETS.find(p=>p.label===kind);
+  st.allowRows[idx].kind=kind;
+  if(preset){
+    const nm=st.allowRows[idx].name||'';
+    if(!nm.trim() || CALC_ALLOW_PRESETS.some(p=>p.label===nm.trim())) st.allowRows[idx].name = kind==='その他（手動選択）'?'':kind;
+    st.allowRows[idx].cat=preset.cat;
+    st.allowRows[idx].minwage=preset.minwage!==false;
+  }
+  calcDiffRenderInputs(side); calcRender();
+}
+function calcDiffAllowBlurAmount(idx, el){
+  const nm=CALC_NEW.allowRows[idx]&&(CALC_NEW.allowRows[idx].name||CALC_NEW.allowRows[idx].kind);
+  const curRow = nm ? (CALC_CUR.allowRows||[]).find(r=>(r.name||r.kind)===nm) : null;
+  const parsed=calcDiffParseDelta(el.value, curRow?curRow.amount:null);
+  if(parsed!==el.value) el.value=parsed;
+  CALC_NEW.allowRows[idx].amount=parsed;
+  calcRender();
+}
+function calcDiffAddAllowRow(side){ calcDiffSideObj(side).allowRows.push({cat:'in'}); calcDiffRenderInputs(side); calcRender(); }
+function calcDiffDelAllowRow(side, idx){
+  const st=calcDiffSideObj(side);
+  if(st.allowRows.length<=1){ st.allowRows=[{cat:'in'}]; } else { st.allowRows.splice(idx,1); }
+  calcDiffRenderInputs(side); calcRender();
+}
+function calcDiffCopy(){
+  CALC_NEW=JSON.parse(JSON.stringify(CALC_CUR));
+  CALC_DIFF_COPIED=true;
+  calcDiffRenderInputs('new');
+  calcRender();
+}
+function calcDiffClearNew(){
+  if(!confirm('変更後の内容を消去し、コピー前の状態に戻します。よろしいですか？')) return;
+  CALC_NEW=calcDiffDefaultSide();
+  CALC_DIFF_COPIED=false;
+  calcDiffRenderInputs('new');
+  calcRender();
+}
+function calcDiffPromote(){
+  if(!CALC_DIFF_COPIED){ alert('変更後の内容がまだありません。'); return; }
+  if(!confirm('変更後の内容を「現在の条件」に繰り上げます。新しい変更案の検討を始めます。よろしいですか？')) return;
+  CALC_CUR=JSON.parse(JSON.stringify(CALC_NEW));
+  calcDiffRenderInputs('cur');
+  calcRender();
+}
+// 状態オブジェクト(state)から順算方式で賃金を計算する純関数（モードA・diffの両カラムで共用）
+function calcComputeForward(state, ctx){
+  const {sched,rnd,otRate,holRate,ot60Rate,nightRate}=ctx;
+  const rows=state.allowRows||[];
+  let inSum=0,outSum=0,minwageAllowSum=0;
+  rows.forEach(a=>{
+    const amt=parseYen(a.amount); if(amt==null) return;
+    if(a.cat==='out') outSum+=amt; else inSum+=amt;
+    if(a.minwage!==false) minwageAllowSum+=amt;
+  });
+  const base=numH(state.base);
+  const inBase=base+inSum;
+  let detail={}, otFixedTotal=0;
+  if(state.otStyle==='unified'){
+    if(state.uniMode==='hours'){
+      const hOt=numH(state.uniHOt), hHol=numH(state.uniHHol), hNight=numH(state.uniHNight);
+      const otC=hOt>0?calcOtAmount({inBase,sched,rate:otRate,hours:hOt,rnd}):null;
+      const holC=hHol>0?calcOtAmount({inBase,sched,rate:holRate,hours:hHol,rnd}):null;
+      const niC=hNight>0?calcOtAmount({inBase,sched,rate:nightRate,hours:hNight,rnd}):null;
+      detail={ot:{amt:otC?otC.amt:0,h:hOt}, hol:{amt:holC?holC.amt:0,h:hHol}, ni:{amt:niC?niC.amt:0,h:hNight}};
+      otFixedTotal=detail.ot.amt+detail.hol.amt+detail.ni.amt;
+    } else {
+      const target=numH(state.uniTarget);
+      const core=computeUnifiedCore({inBase,sched,roundUp:v=>v,otR:otRate,holR:holRate,nightR:nightRate,mode:'ratio',
+        target, rOt:numH(state.uniROt), rHol:numH(state.uniRHol), rNight:numH(state.uniRNight)});
+      detail={ot:core.ot, hol:core.hol, ni:core.ni};
+      otFixedTotal=core.total;
+    }
+  } else {
+    const otH=numH(state.otH), nH=numH(state.nH);
+    const ot60H=Math.max(0,otH-60);
+    const otC=otH>0?calcOtAmount({inBase,sched,rate:otRate,hours:otH,rnd}):null;
+    const ot60C=ot60H>0?calcOtAmount({inBase,sched,rate:ot60Rate,hours:ot60H,rnd}):null;
+    const nC=nH>0?calcOtAmount({inBase,sched,rate:nightRate,hours:nH,rnd}):null;
+    detail={ot:{amt:otC?otC.amt:0,h:otH}, ot60:{amt:ot60C?ot60C.amt:0,h:ot60H}, ni:{amt:nC?nC.amt:0,h:nH}};
+    otFixedTotal=detail.ot.amt+detail.ot60.amt+detail.ni.amt;
+  }
+  const total=base+inSum+outSum+otFixedTotal;
+  const strictHourly=sched>0?inBase/sched:0;
+  const otHoursEq = state.otStyle==='unified' ? (state.uniMode==='hours'?numH(state.uniHOt):detail.ot.h) : numH(state.otH);
+  const nightHoursEq = state.otStyle==='unified' ? (state.uniMode==='hours'?numH(state.uniHNight):detail.ni.h) : numH(state.nH);
+  return {base, inSum, outSum, inBase, otStyle:state.otStyle, detail, otFixedTotal, total, minwageAllowSum, mwBase:base+minwageAllowSum, strictHourly, otHoursEq, nightHoursEq};
+}
+function calcRenderDiff(){
+  LAST_CALC_TRACES=[];   // diffモードはトレース非対応（PDF試算書のトレース印字も対象外）
+  if(!CALC_DIFF_BUILT){ calcDiffRenderInputs('cur'); calcDiffRenderInputs('new'); CALC_DIFF_BUILT=true; }
+  const cf=document.getElementById('calcForm');
+  const cnum=n=>{ const el=cf.elements[n]; return el?numH(el.value):0; };
+  const sched=cnum('calc_sched')||160;
+  const rnd=calcResolveRounding();
+  const otRate=(cnum('calc_ot_rate')||125)/100, holRate=(cnum('calc_hol_rate')||135)/100,
+        ot60Rate=(cnum('calc_ot60_rate')||25)/100, nightRate=(cnum('calc_night_rate')||25)/100;
+  const minwage=cnum('calc_minwage');
+  const ctx={sched,rnd,otRate,holRate,ot60Rate,nightRate};
+  const summaryEl=document.getElementById('calcDetailsSummary');
+  if(summaryEl) summaryEl.textContent=`詳細設定（月所定${sched}h・割増${Math.round(otRate*100)}%・${calcRndPatternName(rnd.pattern)}端数処理）`;
+
+  const curR=calcComputeForward(CALC_CUR, ctx);
+  const newR=CALC_DIFF_COPIED?calcComputeForward(CALC_NEW, ctx):null;
+
+  const names=[...new Set([...(CALC_CUR.allowRows||[]).map(a=>(a.name||a.kind||'').trim()).filter(Boolean),
+                            ...(CALC_DIFF_COPIED?(CALC_NEW.allowRows||[]):[]).map(a=>(a.name||a.kind||'').trim()).filter(Boolean)])];
+  const findAmt=(rows,nm)=>{ const r=(rows||[]).find(a=>(a.name||a.kind||'').trim()===nm); const v=r?parseYen(r.amount):null; return v; };
+  const fmtDiff=(c,n)=>{
+    if(n==null && c==null) return {c:'—', n:'—', d:'—', cls:''};
+    if(n==null) return {c:calcYen(c), n:'—', d:'—', cls:''};
+    if(c==null) return {c:'—', n:calcYen(n), d:calcYen(n)+'（新設）', cls:'up'};
+    const d=n-c;
+    if(Math.abs(d)<0.5) return {c:calcYen(c), n:calcYen(n), d:'—', cls:''};
+    return {c:calcYen(c), n:calcYen(n), d:(d>0?'+':'')+calcYen(d), cls:d>0?'up':'down'};
+  };
+  let rowsHtml='';
+  const pushRow=(label,c,n)=>{ const f=fmtDiff(c,n); rowsHtml+=`<tr><td>${esc(label)}</td><td>${f.c}</td><td>${f.n}</td><td class="${f.cls}">${f.d}</td></tr>`; };
+  pushRow('基本給', curR.base, newR?newR.base:null);
+  names.forEach(nm=>{
+    const c=findAmt(CALC_CUR.allowRows, nm);
+    const n=CALC_DIFF_COPIED?findAmt(CALC_NEW.allowRows, nm):null;
+    if(c!=null && n==null && CALC_DIFF_COPIED){
+      rowsHtml+=`<tr><td>${esc(nm)}（廃止）</td><td>${calcYen(c)}</td><td>—</td><td class="down">${calcYen(-c)}</td></tr>`;
+    } else { pushRow(nm, c, n); }
+  });
+  pushRow('固定残業 計', curR.otFixedTotal, newR?newR.otFixedTotal:null);
+  pushRow('総支給額（月）', curR.total, newR?newR.total:null);
+  pushRow('年間換算（×12）', curR.total*12, newR?newR.total*12:null);
+  pushRow('割増の基礎（基準内賃金）', curR.inBase, newR?newR.inBase:null);
+  { const cv=curR.strictHourly, nv=newR?newR.strictHourly:null;
+    const d = nv!=null ? nv-cv : null;
+    rowsHtml+=`<tr><td>1時間あたり単価（厳密値）</td><td>${cv?calcFmt2(cv)+'円':'—'}</td><td>${nv?calcFmt2(nv)+'円':'—'}</td>`+
+      `<td class="${d==null?'':(d>0?'up':(d<0?'down':''))}">${d==null||Math.abs(d)<0.005?'—':(d>0?'+':'')+calcFmt2(d)+'円'}</td></tr>`; }
+  const tableHtml=`<table class="calc-diff-table"><thead><tr><th>項目</th><th>現在</th><th>変更後</th><th>差額</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+
+  let checksHtml='';
+  if(CALC_DIFF_COPIED && newR){
+    const hasAnyDiff = Math.abs(newR.total-curR.total)>0.5 || Math.abs(newR.base-curR.base)>0.5 || Math.abs(newR.strictHourly-curR.strictHourly)>0.005;
+    if(hasAnyDiff){
+      if(newR.strictHourly < curR.strictHourly - 0.005)
+        checksHtml+=`<div class="calc-warn-y">⚠ 割増単価が下がる変更です。総額が増えていても不利益変更（労契法8〜10条）の論点になり得ます。労働者の合意取得等の手続をご確認ください</div>`;
+      if(Math.abs(newR.base-curR.base)>0.5)
+        checksHtml+=`<div class="calc-warn-y">⚠ 固定的賃金の変動があります。社会保険の随時改定（月額変更届）の検討対象になり得ます（本ツールは等級判定を行いません）</div>`;
+      const newMwCheck=calcMinWageLine(newR.mwBase, sched, minwage);
+      if(newMwCheck.includes('calc-warn-r')) checksHtml+=newMwCheck;
+      if(curR.otHoursEq<=45 && newR.otHoursEq>45)
+        checksHtml+=`<div class="calc-warn-y">⚠ 固定残業時間が月45時間を超える変更です（労基法36条4項）。恒常的な設定は採用時の説明・運用に注意してください</div>`;
+    }
+    if(!checksHtml) checksHtml=`<div class="calc-ok-g">✔ 割増単価・時間単価とも低下なし。最低賃金も充足しています</div>`;
+  }
+  const curMwLine=calcMinWageLine(curR.mwBase, sched, minwage);
+  const newMwLineDisp=(CALC_DIFF_COPIED&&newR)?calcMinWageLine(newR.mwBase, sched, minwage):'';
+
+  document.getElementById('calcResult').innerHTML =
+    `<div>総支給額（現在）<span class="big">${calcYen(curR.total)}</span>${(CALC_DIFF_COPIED&&newR)?` → 変更後<span class="big">${calcYen(newR.total)}</span>`:''}</div>`
+    + tableHtml
+    + (curMwLine?`<div class="hint">現在：${curMwLine}</div>`:'')
+    + (newMwLineDisp?`<div class="hint">変更後：${newMwLineDisp}</div>`:'')
+    + checksHtml;
+  calcBuildSheet();
+
+  LAST_CALC = (CALC_DIFF_COPIED && newR) ? {ready:true, mode:'diff', style:newR.otStyle, base:newR.base, inSum:newR.inSum, outSum:newR.outSum,
+      otH:newR.detail.ot?newR.detail.ot.h:0, otAmt:newR.detail.ot?newR.detail.ot.amt:0,
+      ot60H:newR.detail.ot60?newR.detail.ot60.h:0, ot60Amt:newR.detail.ot60?newR.detail.ot60.amt:0,
+      nH:newR.detail.ni?newR.detail.ni.h:0, nightAmt:newR.detail.ni?newR.detail.ni.amt:0, total:newR.total,
+      uni: newR.otStyle==='unified' ? {name:val('uni_name')||'固定時間外勤務手当', targetMode:CALC_NEW.uniMode, target:numH(CALC_NEW.uniTarget),
+        rOt:numH(CALC_NEW.uniROt), rHol:numH(CALC_NEW.uniRHol), rNight:numH(CALC_NEW.uniRNight),
+        hOt:numH(CALC_NEW.uniHOt), hHol:numH(CALC_NEW.uniHHol), hNight:numH(CALC_NEW.uniHNight),
+        ot:newR.detail.ot, hol:newR.detail.hol, ni:newR.detail.ni, total:newR.otFixedTotal} : undefined}
+    : {ready:false};
+}
+/* ===== 賃金試算タブ：試算の保存/読込（§C6） ===== */
+function saveCalc(){
+  const cf=document.getElementById('calcForm');
+  const s={_v:1, type:'calc', savedAt:new Date().toISOString(), fields:{}, radios:{}, cur:CALC_CUR, new:CALC_NEW, diffCopied:CALC_DIFF_COPIED};
+  [...cf.elements].forEach(el=>{
+    const n=el.name; if(!n) return;
+    if(el.type==='radio'){ if(el.checked) s.radios[n]=el.value; return; }
+    s.fields[n]=el.value;
+  });
+  s.pref=document.getElementById('calcPref')?document.getElementById('calcPref').value:'';
+  s.allow=calcGetAllowRows();
+  const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`賃金試算_${ymd()}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function loadCalc(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(String(r.result).replace(/^﻿/,''));
+      const cf=document.getElementById('calcForm');
+      Object.entries(obj.radios||{}).forEach(([n,v])=>{ const g=cf.elements[n]; if(!g) return; const list=g.length?[...g]:[g]; list.forEach(el=>{ if(el.type==='radio') el.checked=(el.value===v); }); });
+      Object.entries(obj.fields||{}).forEach(([n,v])=>{ const el=cf.elements[n]; if(el && el.type!=='radio') el.value=v; });
+      if(obj.pref){ const sel=document.getElementById('calcPref'); if(sel) sel.value=obj.pref; }
+      calcSetAllowRows(obj.allow&&obj.allow.length?obj.allow:[{}]);
+      CALC_CUR=obj.cur||calcDiffDefaultSide();
+      CALC_NEW=obj.new||calcDiffDefaultSide();
+      CALC_DIFF_COPIED=!!obj.diffCopied;
+      CALC_DIFF_BUILT=false;
+      calcRender();
+      const d=obj.savedAt?`（${String(obj.savedAt).slice(0,10)} 保存のデータ）`:'';
+      alert('試算データを読み込みました'+d+'。');
+    }catch(e){ alert('読み込みに失敗しました：'+e.message); }
+    input.value='';
+  };
+  r.readAsText(f,'utf-8');
+}
+
 function calcRender(){
   const cf=document.getElementById('calcForm');
   const cget=n=>{ const el=cf.elements[n]; return el?el.value:''; };
   const cnum=n=>numH(cget(n));
-  const mode=cget('calc_mode');
-  document.getElementById('calcFwd').classList.toggle('hidden', mode!=='forward');
-  document.getElementById('calcRev').classList.toggle('hidden', mode!=='reverse');
+  const mode=cget('calc_mode')||'forward';
+  const style=cget('calc_ot_style')||'split';
+
+  const fsAllow=document.getElementById('calcFsAllow'), fsAmounts=document.getElementById('calcFsAmounts'), fsDiff=document.getElementById('calcFsDiff');
+  const isDiff = mode==='diff';
+  if(fsAllow) fsAllow.classList.toggle('hidden', isDiff);
+  if(fsAmounts) fsAmounts.classList.toggle('hidden', isDiff);
+  if(fsDiff) fsDiff.classList.toggle('hidden', !isDiff);
+  const transferBtn=document.getElementById('calcTransferBtn');
+  if(transferBtn) transferBtn.textContent = isDiff ? '➡ 変更後を作成タブへ転記' : '➡ この内容を作成タブの賃金欄に反映';
+  if(isDiff){ calcRenderDiff(); return; }
+  LAST_CALC_TRACES=[];   // トレース非対応の分岐(rev_base標準・rev_hours・unified比按分)ではPDFにも古いトレースを残さない
+
+  calcVisibility(mode, style);
+  calcUnifiedVisibility(mode, style);
+
   const sched=cnum('calc_sched')||160;
-  const unit=parseInt(cget('calc_round')||'0',10);
-  const roundUp=x=> unit>0?Math.ceil(x/unit)*unit:Math.round(x);
-  const otRate=(cnum('calc_ot_rate')||125)/100;      // 時間外は総率(125→1.25)
-  const ot60Rate=(cnum('calc_ot60_rate')||25)/100;   // 月60時間超の追加分(25→0.25)
-  const nightRate=(cnum('calc_night_rate')||25)/100; // 深夜は追加分(25→0.25)
-  const inA=cnum('calc_in'), outA=cnum('calc_out');
-  const yen=x=>Math.round(x).toLocaleString('ja-JP')+'円';
-  let html='';
-  if(mode==='forward'){
-    const base=cnum('calc_base'), otH=cnum('calc_ot_hours'), nH=cnum('calc_night_hours');
-    const inBase=base+inA;
-    const otAmt=otH>0?roundUp(inBase/sched*otRate*otH):0;
-    const ot60H=Math.max(0, otH-60);
-    const ot60Amt=ot60H>0?roundUp(inBase/sched*ot60Rate*ot60H):0;
-    const nightAmt=nH>0?roundUp(inBase/sched*nightRate*nH):0;
-    const total=base+inA+outA+otAmt+ot60Amt+nightAmt;
-    html=`<div>総支給額<span class="big">${yen(total)}</span></div><table>
-      <tr><td>基本給</td><td class="r">${yen(base)}</td></tr>
-      <tr><td>基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
-      <tr><td>基準外手当 合計</td><td class="r">${yen(outA)}</td></tr>
-      <tr><td>固定残業手当（${otH}時間分）</td><td class="r">${yen(otAmt)}</td></tr>
-      ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分の追加）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
-      ${nH>0?`<tr><td>固定深夜手当（${nH}時間分）</td><td class="r">${yen(nightAmt)}</td></tr>`:''}
-      <tr><td>参考：基準内賃金（割増算定基礎）</td><td class="r">${yen(inBase)}</td></tr>
-      </table><div class="hint">固定残業額＝基準内賃金÷所定労働時間×割増率×時間数（切り上げ：${unit?unit+'円単位':'なし'}）${ot60H>0?'。月60時間超の分は追加率で別途計上。':''}</div>`;
-  } else {
-    const target=cnum('calc_target'), solve=cget('calc_solve');
-    document.getElementById('calcRevHours').classList.toggle('hidden', solve!=='base');
-    document.getElementById('calcRevNight').classList.toggle('hidden', solve!=='base');
-    document.getElementById('calcRevBase').classList.toggle('hidden', solve!=='hours');
-    if(solve==='base'){
-      // Excel方式：総額固定。換算時間で単価を求め、固定残業/60超/深夜を切上げ、基準内賃金が端数を吸収
-      const otH=cnum('calc_ot_hours2'), nH=cnum('calc_night_hours2');
-      const ot60H=Math.max(0, otH-60);
-      const B8=target-outA;                                          // 基準内賃金+固定残業(+60超)+深夜 の合計
-      const G=sched + otRate*otH + ot60Rate*ot60H + nightRate*nH;    // 換算時間
-      const hourly = G>0? B8/G : 0;
-      const otAmt = otH>0? roundUp(hourly*otRate*otH):0;
-      const ot60Amt = ot60H>0? roundUp(hourly*ot60Rate*ot60H):0;
-      const nightAmt = nH>0? roundUp(hourly*nightRate*nH):0;
-      const inBaseTotal = B8 - otAmt - ot60Amt - nightAmt;           // 基準内賃金合計（端数吸収）
-      const base = inBaseTotal - inA;                                // 基本給 = 基準内賃金 − 基準内手当
-      const warn = base<0 ? '<div class="hint" style="color:#c00">※ 基準内手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
-      html=`<div>基準内賃金 合計<span class="big">${yen(inBaseTotal)}</span></div><table>
-        <tr><td>基準内賃金 合計</td><td class="r">${yen(inBaseTotal)}</td></tr>
-        <tr><td>　うち基本給（＝基準内賃金−基準内手当）</td><td class="r">${yen(base)}</td></tr>
-        <tr><td>　うち基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
-        <tr><td>固定残業手当（${otH}時間分・切上げ）</td><td class="r">${yen(otAmt)}</td></tr>
-        ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分・切上げ）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
-        ${nH>0?`<tr><td>深夜勤務手当（${nH}時間分・切上げ）</td><td class="r">${yen(nightAmt)}</td></tr>`:''}
-        <tr><td>基準外賃金 合計</td><td class="r">${yen(outA)}</td></tr>
-        <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${yen(target)}</b></td></tr>
-        <tr><td>参考：1時間あたり単価（基準内賃金÷所定）</td><td class="r">${G>0?yen(inBaseTotal/sched):'—'}</td></tr>
-        </table>${warn}<div class="hint">換算時間＝所定${sched}h＋固定残業${otH}h×${(otRate).toFixed(2)}${ot60H>0?`＋60時間超${ot60H}h×${ot60Rate.toFixed(2)}`:''}${nH>0?`＋深夜${nH}h×${nightRate.toFixed(2)}`:''}。固定残業・深夜は切上げ（${unit?unit+'円単位':'なし'}）＝実残業がその時間内なら不足せず違反になりません。端数は基準内賃金が吸収し、総額は目標どおりです。</div>`;
-    } else {
-      const base=cnum('calc_base2'), inBase=base+inA;
-      const rem=target-base-inA-outA;             // 固定残業に充てられる額
-      const per=inBase>0?inBase/sched:0;          // 通常1時間あたり
-      const cost60=per*otRate*60;                 // 60時間分（総率）の固定残業額
-      let hours=0, otAmt=0, ot60Amt=0;
-      if(rem>0 && per>0){
-        if(rem<=cost60){ hours=rem/(per*otRate); otAmt=rem; }
-        else { const extra=rem-cost60; const exH=ot60Rate>0?extra/(per*ot60Rate):0; hours=60+exH; otAmt=cost60; ot60Amt=extra; }
+  const rnd=calcResolveRounding();
+  const otRate=(cnum('calc_ot_rate')||125)/100;       // 時間外は総率(125→1.25)
+  const holRate=(cnum('calc_hol_rate')||135)/100;      // 法定休日は総率(135→1.35)
+  const ot60Rate=(cnum('calc_ot60_rate')||25)/100;     // 月60時間超の追加分(25→0.25)
+  const nightRate=(cnum('calc_night_rate')||25)/100;   // 深夜は追加分(25→0.25)
+  const {inSum, outSum, minwageAllowSum}=calcAllowTotals();
+  const minwage=cnum('calc_minwage');
+  const subtotalEl=document.getElementById('calcAllowSubtotal');
+  if(subtotalEl) subtotalEl.textContent=`基準内手当 計 ${inSum.toLocaleString('ja-JP')}円／基準外手当 計 ${outSum.toLocaleString('ja-JP')}円`;
+  const summaryEl=document.getElementById('calcDetailsSummary');
+  if(summaryEl) summaryEl.textContent=`詳細設定（月所定${sched}h・割増${Math.round(otRate*100)}%・${calcRndPatternName(rnd.pattern)}端数処理）`;
+
+  let html='', mwBase=0, warnHtml='', guardHtml='', traceHtml='';
+
+  if(style==='unified'){
+    const uMode=(cf.elements['calc_uni_mode']&&cf.elements['calc_uni_mode'].value)||'ratio';
+    const rOt=cnum('calc_uni_r_ot'), rHol=cnum('calc_uni_r_hol'), rNight=cnum('calc_uni_r_night');
+    const uniName=val('uni_name')||'固定時間外勤務手当';
+
+    if(mode==='rev_hours'){
+      const target=cnum('calc_target'), base=cnum('calc_base'), inBase=base+inSum;
+      const rem=target-base-inSum-outSum;
+      const per=inBase>0?inBase/sched:0, per1=calcApplyStep(rnd.s1, per);
+      const rs=(rOt+rHol+rNight)||1;
+      let otAmt=0, holAmt=0, niAmt=0;
+      if(rem>0){ otAmt=Math.round(rem*rOt/rs); holAmt=Math.round(rem*rHol/rs); niAmt=rem-otAmt-holAmt; }
+      const otRate1=calcApplyStep(rnd.s2, per1*otRate), holRate1=calcApplyStep(rnd.s2, per1*holRate), niRate1=calcApplyStep(rnd.s2, per1*nightRate);
+      const otH=calcEqH(otAmt,otRate1), holH=calcEqH(holAmt,holRate1), niH=calcEqH(niAmt,niRate1);
+      mwBase=base+minwageAllowSum;
+      warnHtml=calcUnifiedWarnings(otH, niH);
+      LAST_CALC={ready:true, mode, style, base, inSum, outSum, target,
+        uni:{name:uniName, targetMode:'ratio', rOt, rHol, rNight, ot:{amt:otAmt,h:otH}, hol:{amt:holAmt,h:holH}, ni:{amt:niAmt,h:niH}, total:Math.max(0,rem)}};
+      html=`<div>一体型手当（逆算）<span class="big">${rem>0?calcYen(rem):'0円'}</span></div><table>
+        <tr><td>基本給（指定）</td><td class="r">${calcYen(base)}</td></tr>
+        <tr><td>基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+        <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+        <tr><td>　時間外相当（比${rOt}）</td><td class="r">${calcYen(otAmt)}／${calcHoursTxt(otH,per1)}</td></tr>
+        <tr><td>　法定休日相当（比${rHol}）</td><td class="r">${calcYen(holAmt)}／${calcHoursTxt(holH,per1)}</td></tr>
+        <tr><td>　深夜相当（比${rNight}）</td><td class="r">${calcYen(niAmt)}／${calcHoursTxt(niH,per1)}</td></tr>
+        <tr><td><b>総支給額</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
+        </table><div class="hint">${rem<=0?'※ 基本給＋手当が総額以上のため、一体型手当は0円です。':`残額 ${calcYen(rem)} を比 ${rOt}:${rHol}:${rNight} で時間外・法定休日・深夜に配分し、各相当時間に換算しました。`}</div>`;
+    } else if(mode==='rev_base'){
+      const target=cnum('calc_target');
+      if(uMode==='hours'){
+        const hOt=cnum('calc_uni_h_ot'), hHol=cnum('calc_uni_h_hol'), hNight=cnum('calc_uni_h_night');
+        const B8=target-outSum;
+        const G=sched + otRate*hOt + holRate*hHol + nightRate*hNight;
+        const hourly=G>0?B8/G:0;
+        const roundUpFinal=v=>calcRoundStep3(v, rnd.s3unit, rnd.s3dir);
+        const otAmt=hOt>0?roundUpFinal(hourly*otRate*hOt):0;
+        const holAmt=hHol>0?roundUpFinal(hourly*holRate*hHol):0;
+        const nightAmt=hNight>0?roundUpFinal(hourly*nightRate*hNight):0;
+        const uniTotal=otAmt+holAmt+nightAmt;
+        const inBaseTotal=B8-uniTotal, base=inBaseTotal-inSum;
+        mwBase=base+minwageAllowSum;
+        warnHtml=calcUnifiedWarnings(hOt, hNight);
+        const warn = base<0 ? '<div class="calc-warn-r">※ 基準外手当・一体型手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
+        LAST_CALC={ready:true, mode, style, base, inSum, outSum, target,
+          uni:{name:uniName, targetMode:'hours', hOt, hHol, hNight, ot:{amt:otAmt,h:hOt}, hol:{amt:holAmt,h:hHol}, ni:{amt:nightAmt,h:hNight}, total:uniTotal}};
+        html=`<div>基本給（逆算結果）<span class="big">${calcYen(base)}</span></div><table>
+          <tr><td>基準内賃金 合計</td><td class="r">${calcYen(inBaseTotal)}</td></tr>
+          <tr><td>　うち基本給</td><td class="r">${calcYen(base)}</td></tr>
+          <tr><td>　うち基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+          <tr><td>一体型手当　時間外(${hOt}h)</td><td class="r">${calcYen(otAmt)}</td></tr>
+          <tr><td>一体型手当　法定休日(${hHol}h)</td><td class="r">${calcYen(holAmt)}</td></tr>
+          <tr><td>一体型手当　深夜(${hNight}h)</td><td class="r">${calcYen(nightAmt)}</td></tr>
+          <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+          <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
+          </table>${warn}<div class="hint">換算時間＝所定${sched}h＋時間外${hOt}h×${otRate.toFixed(2)}＋法定休日${hHol}h×${holRate.toFixed(2)}＋深夜${hNight}h×${nightRate.toFixed(2)}。端数は基本給が吸収し、総額は目標どおりです。</div>`;
+      } else {
+        const uniTarget=cnum('calc_uni_target');
+        const inBaseTotal=target-outSum-uniTarget, base=inBaseTotal-inSum;
+        const per=sched>0?inBaseTotal/sched:0, per1=calcApplyStep(rnd.s1,per);
+        const core=computeUnifiedCore({inBase:inBaseTotal, sched, roundUp:v=>v, otR:otRate, holR:holRate, nightR:nightRate, mode:'ratio',
+          target:uniTarget, rOt, rHol, rNight});
+        const otRate1=calcApplyStep(rnd.s2, per1*otRate), holRate1=calcApplyStep(rnd.s2, per1*holRate), niRate1=calcApplyStep(rnd.s2, per1*nightRate);
+        const otHd=calcEqH(core.ot.amt,otRate1), holHd=calcEqH(core.hol.amt,holRate1), niHd=calcEqH(core.ni.amt,niRate1);
+        mwBase=base+minwageAllowSum;
+        warnHtml=calcUnifiedWarnings(otHd, niHd);
+        const warn = base<0 ? '<div class="calc-warn-r">※ 基準外手当・一体型手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
+        LAST_CALC={ready:true, mode, style, base, inSum, outSum, target,
+          uni:{name:uniName, targetMode:'ratio', target:uniTarget, rOt, rHol, rNight, ot:core.ot, hol:core.hol, ni:core.ni, total:core.total}};
+        html=`<div>基本給（逆算結果）<span class="big">${calcYen(base)}</span></div><table>
+          <tr><td>基準内賃金 合計</td><td class="r">${calcYen(inBaseTotal)}</td></tr>
+          <tr><td>　うち基本給</td><td class="r">${calcYen(base)}</td></tr>
+          <tr><td>　うち基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+          <tr><td>一体型手当　希望額</td><td class="r">${calcYen(uniTarget)}</td></tr>
+          <tr><td>　時間外相当（比${rOt}）</td><td class="r">${calcYen(core.ot.amt)}／${calcHoursTxt(otHd,per1)}</td></tr>
+          <tr><td>　法定休日相当（比${rHol}）</td><td class="r">${calcYen(core.hol.amt)}／${calcHoursTxt(holHd,per1)}</td></tr>
+          <tr><td>　深夜相当（比${rNight}）</td><td class="r">${calcYen(core.ni.amt)}／${calcHoursTxt(niHd,per1)}</td></tr>
+          <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+          <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
+          </table>${warn}<div class="hint">基準内賃金＝目標総支給額−基準外手当−一体型手当の希望額（${calcYen(uniTarget)}）で確定し、残りが基本給になります。相当時間は比率${rOt}:${rHol}:${rNight}の内訳を時間単価から換算した参考値です。</div>`;
       }
-      html=`<div>逆算した固定残業<span class="big">${hours>0?hours.toFixed(1)+'時間分':'0時間'}</span></div><table>
-        <tr><td>基本給（指定）</td><td class="r">${yen(base)}</td></tr>
-        <tr><td>基準内手当 合計</td><td class="r">${yen(inA)}</td></tr>
-        <tr><td>基準外手当 合計</td><td class="r">${yen(outA)}</td></tr>
-        <tr><td>固定残業手当（60時間まで${ot60Amt>0?'／60時間分':''}）</td><td class="r">${yen(Math.max(0,otAmt))}</td></tr>
-        ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${(hours-60).toFixed(1)}時間分の追加）</td><td class="r">${yen(ot60Amt)}</td></tr>`:''}
-        <tr><td><b>総支給額</b></td><td class="r"><b>${yen(target)}</b></td></tr>
-        </table><div class="hint">${rem<=0?'※ 基本給＋手当が総額以上のため、固定残業は0時間です。':`固定残業に充てられる額 ${yen(rem)} は約 ${hours.toFixed(1)} 時間分に相当します${hours>60?'（うち60時間超は追加率で換算）':''}。`}</div>`;
+    } else {
+      const base=cnum('calc_base'), inBase=base+inSum;
+      const per=sched>0?inBase/sched:0, per1=calcApplyStep(rnd.s1, per);
+      let core, otHd, niHd;
+      if(uMode==='hours'){
+        const hOt=cnum('calc_uni_h_ot'), hHol=cnum('calc_uni_h_hol'), hNight=cnum('calc_uni_h_night');
+        const otC=hOt>0?calcOtAmount({inBase,sched,rate:otRate,hours:hOt,rnd,label:'時間外'}):null;
+        const holC=hHol>0?calcOtAmount({inBase,sched,rate:holRate,hours:hHol,rnd,label:'法定休日'}):null;
+        const niC=hNight>0?calcOtAmount({inBase,sched,rate:nightRate,hours:hNight,rnd,label:'深夜'}):null;
+        core={ot:{amt:otC?otC.amt:0,h:hOt}, hol:{amt:holC?holC.amt:0,h:hHol}, ni:{amt:niC?niC.amt:0,h:hNight}, total:(otC?otC.amt:0)+(holC?holC.amt:0)+(niC?niC.amt:0)};
+        otHd=hOt; niHd=hNight;
+        guardHtml=calcLegalityGuardHTML([otC,holC,niC], rnd);
+        traceHtml=calcTraceToggleHTML([otC,holC,niC]);
+      } else {
+        const target=cnum('calc_uni_target');
+        core=computeUnifiedCore({inBase, sched, roundUp:v=>v, otR:otRate, holR:holRate, nightR:nightRate, mode:'ratio', target, rOt, rHol, rNight});
+        const otRate1=calcApplyStep(rnd.s2, per1*otRate), holRate1=calcApplyStep(rnd.s2, per1*holRate), niRate1=calcApplyStep(rnd.s2, per1*nightRate);
+        core.ot.h=calcEqH(core.ot.amt,otRate1); core.hol.h=calcEqH(core.hol.amt,holRate1); core.ni.h=calcEqH(core.ni.amt,niRate1);
+        otHd=core.ot.h; niHd=core.ni.h;
+      }
+      const total=base+inSum+outSum+core.total;
+      mwBase=base+minwageAllowSum;
+      warnHtml=calcUnifiedWarnings(otHd, niHd);
+      LAST_CALC={ready:true, mode:'forward', style, base, inSum, outSum, total,
+        uni:{name:uniName, targetMode:uMode, target:cnum('calc_uni_target'),
+          rOt, rHol, rNight, hOt:cnum('calc_uni_h_ot'), hHol:cnum('calc_uni_h_hol'), hNight:cnum('calc_uni_h_night'),
+          ot:core.ot, hol:core.hol, ni:core.ni, total:core.total}};
+      html=`<div>総支給額<span class="big">${calcYen(total)}</span></div><table>
+        <tr><td>基本給</td><td class="r">${calcYen(base)}</td></tr>
+        <tr><td>基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+        <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+        <tr><td>一体型手当　時間外</td><td class="r">${calcYen(core.ot.amt)}／${calcHoursTxt(core.ot.h,per1)}</td></tr>
+        <tr><td>一体型手当　法定休日</td><td class="r">${calcYen(core.hol.amt)}／${calcHoursTxt(core.hol.h,per1)}</td></tr>
+        <tr><td>一体型手当　深夜</td><td class="r">${calcYen(core.ni.amt)}／${calcHoursTxt(core.ni.h,per1)}</td></tr>
+        <tr><td><b>一体型手当 計</b></td><td class="r"><b>${calcYen(core.total)}</b></td></tr>
+        <tr><td>参考：基準内賃金（割増算定基礎）</td><td class="r">${calcYen(inBase)}</td></tr>
+        </table><div class="hint">${uMode==='ratio'?'希望額を比率で時間外・法定休日・深夜に配分しました（1円単位・合計一致・切上げなし）。相当時間は参考値です。':'各時間×時間単価×割増率で算定しました。'}</div>`;
     }
+  } else if(mode==='rev_base'){
+    const target=cnum('calc_target'), otH=cnum('calc_ot_hours'), nH=cnum('calc_night_hours');
+    const ot60H=Math.max(0, otH-60);
+    let base, otAmt, ot60Amt, nightAmt, inBaseTotal, residualNote='';
+    if(rnd.pattern==='standard'){
+      const B8=target-outSum;
+      const G=sched + otRate*otH + ot60Rate*ot60H + nightRate*nH;
+      const hourly = G>0? B8/G : 0;
+      const roundUpFinal=v=>calcRoundStep3(v, rnd.s3unit, rnd.s3dir);
+      otAmt = otH>0? roundUpFinal(hourly*otRate*otH):0;
+      ot60Amt = ot60H>0? roundUpFinal(hourly*ot60Rate*ot60H):0;
+      nightAmt = nH>0? roundUpFinal(hourly*nightRate*nH):0;
+      inBaseTotal = B8 - otAmt - ot60Amt - nightAmt;
+      base = inBaseTotal - inSum;
+    } else {
+      const bis=calcBisectBase(target-outSum, otH, nH, 0, 0, sched, otRate, ot60Rate, nightRate, rnd);
+      inBaseTotal = bis.base; base = inBaseTotal - inSum;
+      otAmt=bis.otAmt; ot60Amt=bis.ot60Amt; nightAmt=bis.nightAmt;
+      if(Math.abs(bis.residual)>0.5) residualNote=`<tr><td>端数調整（吸収しきれない分）</td><td class="r">${calcYen(bis.residual)}</td></tr>`;
+      guardHtml=calcLegalityGuardHTML([bis.otC,bis.ot60C,bis.nC], rnd);
+      traceHtml=calcTraceToggleHTML([bis.otC,bis.ot60C,bis.nC]);
+    }
+    mwBase=base+minwageAllowSum;
+    warnHtml=calcOtHourWarnings(otH);
+    LAST_CALC={ready:true, mode, style, base, otH, otAmt, ot60H, ot60Amt, nH, nightAmt, inSum, outSum, target};
+    const warn = base<0 ? '<div class="calc-warn-r">※ 基準内手当が大きい／総額が小さいため基本給がマイナスになります。条件を見直してください。</div>' : '';
+    html=`<div>基本給（逆算結果）<span class="big">${calcYen(base)}</span></div><table>
+      <tr><td>基準内賃金 合計</td><td class="r">${calcYen(inBaseTotal)}</td></tr>
+      <tr><td>　うち基本給（＝基準内賃金−基準内手当）</td><td class="r">${calcYen(base)}</td></tr>
+      <tr><td>　うち基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+      <tr><td>固定残業手当（${otH}時間分）</td><td class="r">${calcYen(otAmt)}</td></tr>
+      ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分）</td><td class="r">${calcYen(ot60Amt)}</td></tr>`:''}
+      ${nH>0?`<tr><td>深夜勤務手当（${nH}時間分）</td><td class="r">${calcYen(nightAmt)}</td></tr>`:''}
+      ${residualNote}
+      <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+      <tr><td><b>総支給額（目標どおり）</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
+      <tr><td>参考：1時間あたり単価（基準内賃金÷所定）</td><td class="r">${sched>0?calcYen(inBaseTotal/sched):'—'}</td></tr>
+      </table>${warn}<div class="hint">${rnd.pattern==='standard'?`換算時間＝所定${sched}h＋固定残業${otH}h×${otRate.toFixed(2)}${ot60H>0?`＋60時間超${ot60H}h×${ot60Rate.toFixed(2)}`:''}${nH>0?`＋深夜${nH}h×${nightRate.toFixed(2)}`:''}。端数は基準内賃金が吸収し、総額は目標どおりです。`:'選択した端数処理パターンで順算した総支給額が目標額以下になる最大の基本給を探索しました（二分探索）。目標との差はごくわずかです。'}</div>`;
+  } else if(mode==='rev_hours'){
+    const target=cnum('calc_target'), base=cnum('calc_base'), inBase=base+inSum;
+    const rem=target-base-inSum-outSum;
+    const per0=inBase>0?inBase/sched:0;
+    const per1=calcApplyStep(rnd.s1, per0);
+    const premRate=calcApplyStep(rnd.s2, per1*otRate);
+    const prem60Rate=calcApplyStep(rnd.s2, per1*ot60Rate);
+    const cost60=premRate*60;
+    let hours=0, otAmt=0, ot60Amt=0;
+    if(rem>0 && premRate>0){
+      if(rem<=cost60){ hours=rem/premRate; otAmt=rem; }
+      else { const extra=rem-cost60; const exH=prem60Rate>0?extra/prem60Rate:0; hours=60+exH; otAmt=cost60; ot60Amt=extra; }
+    }
+    mwBase=base+minwageAllowSum;
+    warnHtml=calcOtHourWarnings(hours);
+    LAST_CALC={ready:true, mode, style, base, otH:hours, otAmt, ot60H:Math.max(0,hours-60), ot60Amt, nH:0, nightAmt:0, inSum, outSum, target};
+    html=`<div>逆算した固定残業<span class="big">${hours>0?hours.toFixed(1)+'時間分':'0時間'}</span></div><table>
+      <tr><td>基本給（指定）</td><td class="r">${calcYen(base)}</td></tr>
+      <tr><td>基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+      <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+      <tr><td>固定残業手当（60時間まで${ot60Amt>0?'／60時間分':''}）</td><td class="r">${calcYen(Math.max(0,otAmt))}</td></tr>
+      ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${(hours-60).toFixed(1)}時間分の追加）</td><td class="r">${calcYen(ot60Amt)}</td></tr>`:''}
+      <tr><td><b>総支給額</b></td><td class="r"><b>${calcYen(target)}</b></td></tr>
+      </table><div class="hint">${rem<=0?'※ 基本給＋手当が総額以上のため、固定残業は0時間です。':`固定残業に充てられる額 ${calcYen(rem)} は約 ${hours.toFixed(1)} 時間分に相当します${hours>60?'（うち60時間超は追加率で換算）':''}。`}</div>`;
+  } else { // forward + split
+    const base=cnum('calc_base'), otH=cnum('calc_ot_hours'), nH=cnum('calc_night_hours');
+    const inBase=base+inSum;
+    const ot60H=Math.max(0, otH-60);
+    const otC=otH>0?calcOtAmount({inBase,sched,rate:otRate,hours:otH,rnd,label:'時間外'}):null;
+    const ot60C=ot60H>0?calcOtAmount({inBase,sched,rate:ot60Rate,hours:ot60H,rnd,label:'60時間超'}):null;
+    const nC=nH>0?calcOtAmount({inBase,sched,rate:nightRate,hours:nH,rnd,label:'深夜'}):null;
+    const otAmt=otC?otC.amt:0, ot60Amt=ot60C?ot60C.amt:0, nightAmt=nC?nC.amt:0;
+    const total=base+inSum+outSum+otAmt+ot60Amt+nightAmt;
+    mwBase=base+minwageAllowSum;
+    warnHtml=calcOtHourWarnings(otH);
+    guardHtml=calcLegalityGuardHTML([otC,ot60C,nC], rnd);
+    traceHtml=calcTraceToggleHTML([otC,ot60C,nC]);
+    LAST_CALC={ready:true, mode:'forward', style, base, otH, otAmt, ot60H, ot60Amt, nH, nightAmt, inSum, outSum, total};
+    html=`<div>総支給額<span class="big">${calcYen(total)}</span></div><table>
+      <tr><td>基本給</td><td class="r">${calcYen(base)}</td></tr>
+      <tr><td>基準内手当 計</td><td class="r">${calcYen(inSum)}</td></tr>
+      <tr><td>基準外手当 計</td><td class="r">${calcYen(outSum)}</td></tr>
+      <tr><td>固定残業手当（${otH}時間分）</td><td class="r">${calcYen(otAmt)}</td></tr>
+      ${ot60Amt>0?`<tr><td>固定残業手当（月60時間超 ${ot60H}時間分の追加）</td><td class="r">${calcYen(ot60Amt)}</td></tr>`:''}
+      ${nH>0?`<tr><td>固定深夜手当（${nH}時間分）</td><td class="r">${calcYen(nightAmt)}</td></tr>`:''}
+      <tr><td>参考：基準内賃金（割増算定基礎）</td><td class="r">${calcYen(inBase)}</td></tr>
+      </table>`;
   }
+
+  html += calcMinWageLine(mwBase, sched, minwage);
+  html += warnHtml;
+  html += guardHtml;
+  html += traceHtml;
   document.getElementById('calcResult').innerHTML=html;
+  calcBuildSheet();
+}
+
+/* ===== 賃金試算タブ：作成タブへ反映（D4） ===== */
+function calcTransferToCreate(){
+  const lc=LAST_CALC;
+  if(!lc || !lc.ready){ alert('試算結果がありません。'); return; }
+  if(lc.base<0){ alert('基本給がマイナスになっています。条件を見直してから反映してください。'); return; }
+  if(val('wage_type')!=='月給'){ alert('作成タブの賃金体系が月給のときに使えます（「賃金」の「基本賃金の種類」を月給にしてください）。'); return; }
+  const isUni = lc.style==='unified';
+  let confirmMsg='作成タブの基本給・手当・固定残業の入力を上書きします。';
+  if(isUni && lc.uni.targetMode==='hours') confirmMsg+='\n※ 一体型「時間から算定」は作成タブ側で金額を再計算します。作成タブは試算タブの端数処理パターンに対応していないため、「標準」以外のパターンを選んでいる場合は金額が試算結果とわずかに異なることがあります。';
+  if(!isUni) confirmMsg+='\n※ 固定残業手当・固定深夜手当は試算どおりの金額を直接セットし、「月給から自動計算」のチェックは自動でOFFにします（ONのままだと作成タブ側の設定で金額が再計算され、試算結果とズレるため）。';
+  confirmMsg+='\nよろしいですか？';
+  if(!confirm(confirmMsg)) return;
+
+  form.elements['monthly_wage'].value = Math.round(lc.base)||'';
+  const {rows}=calcAllowTotals();
+  const usable=rows.filter(a=>parseYen(a.amount)!=null);
+  setAllows('in', usable.filter(a=>a.cat==='in').map(a=>({name:a.name||a.kind||'手当', unit:'month', amount:a.amount})));
+  setAllows('out', usable.filter(a=>a.cat==='out').map(a=>({name:a.name||a.kind||'手当', unit:'month', amount:a.amount})));
+
+  if(isUni){
+    form.elements['ot_style'].value='unified';
+    if(form.elements['fixed_ot_auto']) form.elements['fixed_ot_auto'].checked=false;
+    if(form.elements['fixed_night_auto']) form.elements['fixed_night_auto'].checked=false;
+    form.elements['uni_name'].value=lc.uni.name||'固定時間外勤務手当';
+    const um=lc.uni.targetMode==='hours'?'hours':'ratio';
+    [...form.elements['uni_mode']].forEach(r=>{ r.checked=(r.value===um); });
+    form.elements['uni_target'].value = lc.uni.target!=null ? Math.round(lc.uni.target) : Math.round((lc.uni.ot.amt||0)+(lc.uni.hol.amt||0)+(lc.uni.ni.amt||0));
+    form.elements['uni_r_ot'].value = lc.uni.rOt!=null?lc.uni.rOt:60;
+    form.elements['uni_r_hol'].value = lc.uni.rHol!=null?lc.uni.rHol:30;
+    form.elements['uni_r_night'].value = lc.uni.rNight!=null?lc.uni.rNight:10;
+    form.elements['uni_h_ot'].value = lc.uni.hOt!=null?lc.uni.hOt:Math.round((lc.uni.ot.h||0)*10)/10;
+    form.elements['uni_h_hol'].value = lc.uni.hHol!=null?lc.uni.hHol:Math.round((lc.uni.hol.h||0)*10)/10;
+    form.elements['uni_h_night'].value = lc.uni.hNight!=null?lc.uni.hNight:Math.round((lc.uni.ni.h||0)*10)/10;
+  } else {
+    if(form.elements['ot_style']) form.elements['ot_style'].value='split';
+    const otHours=Math.round((lc.otH||0)*10)/10, otTotalAmt=Math.round((lc.otAmt||0)+(lc.ot60Amt||0));
+    if(form.elements['fixed_ot_auto']) form.elements['fixed_ot_auto'].checked=false;
+    form.elements['fixed_ot_hours'].value = otHours>0?otHours:'';
+    delete form.elements['fixed_ot_amount'].dataset.auto;   // render()の「自動値クリア」を防ぐ（転記直後はdisabled/自動値が残っている場合がある）
+    form.elements['fixed_ot_amount'].disabled=false;
+    form.elements['fixed_ot_amount'].value = otTotalAmt>0?otTotalAmt:'';
+    if(form.elements['fixed_night_auto']) form.elements['fixed_night_auto'].checked=false;
+    form.elements['fixed_night_hours'].value = (lc.nH>0?lc.nH:'');
+    delete form.elements['fixed_night_amount'].dataset.auto;
+    form.elements['fixed_night_amount'].disabled=false;
+    form.elements['fixed_night_amount'].value = Math.round(lc.nightAmt||0)||'';
+  }
+  render();
+  switchMode('create');
+  setTimeout(()=>{ const el=document.getElementById('totalRow'); if(el) el.scrollIntoView({block:'center', behavior:'smooth'}); }, 50);
+}
+
+/* ===== 賃金試算タブ：PDF試算書（第2部§D） ===== */
+function calcRndPatternSummaryText(rnd){
+  if(rnd.pattern==='standard') return '最後にまとめて切上げ（標準）';
+  if(rnd.pattern==='stepwise') return '時間単価・割増単価を円未満四捨五入（単価段階で処理）';
+  return `カスタム（時間単価:${CALC_RND_LABEL[rnd.s1]||'処理なし'}／割増単価:${CALC_RND_LABEL[rnd.s2]||'処理なし'}／手当額:${(rnd.s3unit>0?rnd.s3unit+'円単位・':'1円単位・')}${CALC_RND_LABEL[rnd.s3dir]||'切上げ'}）`;
+}
+function calcSheetBodyNonDiff(style){
+  const lc=LAST_CALC;
+  if(!lc || !lc.ready) return '<div>試算結果がありません。先に③④を入力してください。</div>';
+  let rows=`<tr><td>基本給</td><td style="text-align:right">${calcYen(lc.base)}</td></tr>`;
+  const {rows:allowRows}=calcAllowTotals();
+  allowRows.forEach(a=>{ const amt=parseYen(a.amount); if(amt==null) return; rows+=`<tr><td>${esc(a.name||a.kind||'手当')}（${a.cat==='out'?'基準外':'基準内'}）</td><td style="text-align:right">${calcYen(amt)}</td></tr>`; });
+  if(style==='unified' && lc.uni){
+    rows+=`<tr><td>${esc(lc.uni.name)}　計</td><td style="text-align:right">${calcYen(lc.uni.total)}</td></tr>`;
+    rows+=`<tr><td colspan="2" style="padding-left:18px;font-size:9pt">・時間外 ${calcYen(lc.uni.ot.amt)}（${Math.round((lc.uni.ot.h||0)*10)/10}時間相当）／法定休日 ${calcYen(lc.uni.hol.amt)}（${Math.round((lc.uni.hol.h||0)*10)/10}時間相当）／深夜 ${calcYen(lc.uni.ni.amt)}（${Math.round((lc.uni.ni.h||0)*10)/10}時間相当）</td></tr>`;
+  } else {
+    if(lc.otAmt) rows+=`<tr><td>固定残業手当（${lc.otH}時間分）</td><td style="text-align:right">${calcYen(lc.otAmt)}</td></tr>`;
+    if(lc.ot60Amt) rows+=`<tr><td>固定残業手当（60時間超）</td><td style="text-align:right">${calcYen(lc.ot60Amt)}</td></tr>`;
+    if(lc.nightAmt) rows+=`<tr><td>固定深夜手当（${lc.nH}時間分）</td><td style="text-align:right">${calcYen(lc.nightAmt)}</td></tr>`;
+  }
+  const total = lc.total!=null ? lc.total : lc.target;
+  rows+=`<tr><td><b>総支給額</b></td><td style="text-align:right"><b>${calcYen(total)}</b></td></tr>`;
+  return `<table><tbody>${rows}</tbody></table>`;
+}
+function calcSheetBodyDiff(){
+  if(!CALC_DIFF_COPIED) return '<div>変更後の内容が未入力です。「変更後へコピー」を行ってから印刷してください。</div>';
+  const cf=document.getElementById('calcForm');
+  const sched=numH(cf.elements['calc_sched'].value)||160, rnd=calcResolveRounding();
+  const otRate=(numH(cf.elements['calc_ot_rate'].value)||125)/100, holRate=(numH(cf.elements['calc_hol_rate'].value)||135)/100,
+        ot60Rate=(numH(cf.elements['calc_ot60_rate'].value)||25)/100, nightRate=(numH(cf.elements['calc_night_rate'].value)||25)/100;
+  const ctx={sched,rnd,otRate,holRate,ot60Rate,nightRate};
+  const curR=calcComputeForward(CALC_CUR,ctx), newR=calcComputeForward(CALC_NEW,ctx);
+  const names=[...new Set([...(CALC_CUR.allowRows||[]).map(a=>(a.name||a.kind||'').trim()).filter(Boolean), ...(CALC_NEW.allowRows||[]).map(a=>(a.name||a.kind||'').trim()).filter(Boolean)])];
+  const findAmt=(rows,nm)=>{ const r=(rows||[]).find(a=>(a.name||a.kind||'').trim()===nm); return r?parseYen(r.amount):null; };
+  let rows=`<tr><td>基本給</td><td style="text-align:right">${calcYen(curR.base)}</td><td style="text-align:right">${calcYen(newR.base)}</td></tr>`;
+  names.forEach(nm=>{
+    const c=findAmt(CALC_CUR.allowRows,nm), n=findAmt(CALC_NEW.allowRows,nm);
+    rows+=`<tr><td>${esc(nm)}</td><td style="text-align:right">${c!=null?calcYen(c):'—'}</td><td style="text-align:right">${n!=null?calcYen(n):'—'}</td></tr>`;
+  });
+  rows+=`<tr><td>固定残業 計</td><td style="text-align:right">${calcYen(curR.otFixedTotal)}</td><td style="text-align:right">${calcYen(newR.otFixedTotal)}</td></tr>`;
+  rows+=`<tr><td><b>総支給額</b></td><td style="text-align:right"><b>${calcYen(curR.total)}</b></td><td style="text-align:right"><b>${calcYen(newR.total)}</b></td></tr>`;
+  return `<table><thead><tr><th>項目</th><th>現在</th><th>変更後</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function calcBuildSheet(){
+  const sheet=document.getElementById('calcSheet'); if(!sheet) return;
+  const cf=document.getElementById('calcForm');
+  const mode=(cf.elements['calc_mode']&&cf.elements['calc_mode'].value)||'forward';
+  const style=(cf.elements['calc_ot_style']&&cf.elements['calc_ot_style'].value)||'split';
+  const sched=numH(cf.elements['calc_sched'].value)||160;
+  const rnd=calcResolveRounding();
+  const otRate=(numH(cf.elements['calc_ot_rate'].value)||125)/100, holRate=(numH(cf.elements['calc_hol_rate'].value)||135)/100,
+        ot60Rate=(numH(cf.elements['calc_ot60_rate'].value)||25)/100, nightRate=(numH(cf.elements['calc_night_rate'].value)||25)/100;
+  const clientName=cf.elements['calc_client_name']?cf.elements['calc_client_name'].value.trim():'';
+  const subject=cf.elements['calc_subject']?cf.elements['calc_subject'].value.trim():'';
+  const comment=cf.elements['calc_comment']?cf.elements['calc_comment'].value.trim():'';
+  const showTrace=cf.elements['calc_pdf_trace']&&cf.elements['calc_pdf_trace'].checked;
+  const now=new Date(); const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+
+  let html=`<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px">
+    <div style="font-size:15pt;font-weight:bold">賃金試算書${mode==='diff'?'（ご提案）':''}</div>
+    <div style="font-size:10pt">試算日: ${esc(dateStr)}</div></div>`;
+  if(clientName) html+=`<div style="margin-bottom:4px;font-size:11pt">${esc(clientName)}　御中</div>`;
+  if(subject) html+=`<div style="margin-bottom:8px;font-size:10pt">対象: ${esc(subject)}</div>`;
+  html+=`<div style="font-size:9.5pt;color:#333;margin-bottom:10px;line-height:1.7">
+    月所定労働時間 ${sched}h／割増率：時間外${Math.round(otRate*100)}%・法定休日${Math.round(holRate*100)}%・深夜${Math.round(nightRate*100)}%・60時間超追加${Math.round(ot60Rate*100)}%<br>
+    端数処理：${esc(calcRndPatternSummaryText(rnd))}／固定残業の方式：${style==='unified'?'一体型（固定時間外勤務手当）':'区分別'}</div>`;
+  html += mode==='diff' ? calcSheetBodyDiff() : calcSheetBodyNonDiff(style);
+  if(showTrace && LAST_CALC_TRACES && LAST_CALC_TRACES.length){
+    html+=`<div style="margin-top:10px"><div style="font-weight:bold;font-size:10pt;margin-bottom:4px">計算過程</div>`+
+      LAST_CALC_TRACES.map(c=>`<div style="font-size:9pt;line-height:1.7;margin-bottom:4px">${c.trace.map(l=>`<div>${l}</div>`).join('')}</div>`).join('')+`</div>`;
+  }
+  if(comment) html+=`<div style="margin-top:10px;border:1px solid #ccc;padding:8px;font-size:9.5pt;white-space:pre-wrap">${esc(comment)}</div>`;
+  html+=`<div style="margin-top:14px;font-size:8.5pt;color:#333;line-height:1.7">
+    ※ 本試算は支給総額の概算であり、社会保険料・所得税等の控除は含みません。<br>
+    ※ 固定残業手当の計算式：割増賃金の基礎となる賃金 ÷ 月所定労働時間 × 割増率 × 時間数。実際の時間外労働等が固定残業時間を超える月は、超過分を別途支給する必要があります。<br>
+    ※ 具体的な適用は担当社労士にご確認ください。</div>`;
+  sheet.innerHTML=html;
+}
+function printCalcSheet(){
+  calcBuildSheet();
+  const hasRedWarning = /calc-warn-r/.test(document.getElementById('calcResult').innerHTML);
+  if(hasRedWarning && !confirm('切捨てによる法定額割れ、または最低賃金割れの警告が出ています。このまま出力しますか？')) return;
+  document.body.classList.add('print-calc');
+  window.print();
+  const done=()=>{ document.body.classList.remove('print-calc'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(done, 2000);
 }
 
 function exportWord(){
@@ -2173,6 +3302,10 @@ function loadSample(){
   render();
 }
 
+calcSetAllowRows([{}]);
+calcPopulatePrefSelect();
+calcLoadSettings();
+calcRender();
 render();
 </script>
 </body>
