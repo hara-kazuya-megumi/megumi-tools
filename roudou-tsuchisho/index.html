@@ -96,19 +96,18 @@
   .sheet table.doc td.k{width:18%;background:#f6f6f6;font-weight:700;text-align:center;white-space:normal}
   .sheet .lines div{margin:1px 0}
   .sheet .note{font-size:8.5pt;color:#333;margin-top:1px}
+  .sheet .warn{font-size:8.5pt;color:#b00;font-weight:700;margin-top:1px}
   .sheet .after{margin-top:10px;font-size:10pt}
   .sheet .sign{margin-top:14px;font-size:10.5pt;line-height:2.0}
   .sheet .chg-meta{font-size:10pt;margin:4px 0}
   .sheet .mark{color:#b00;font-weight:700}
-  .pagebreak{height:0}
   .empty-hint{color:#999;text-align:center;padding:40px}
   .page-note{background:#fff6e5;border:1px solid #f0d9a0;color:#7a5b00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
-  /* scale toggle for screen */
-  .preview.fit .sheet{transform:scale(var(--scale,1));transform-origin:top center}
+  .gap-note{background:#fdecec;border:1px solid #e7b3b3;color:#8a1f1f;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
   /* ---- 名簿バー・一括作成 ---- */
   /* 明るい面ではゴースト白文字が見えないので上書き */
-  #rosterBar .btn.ghost,#modeBatch .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  #rosterBar .btn.ghost:hover,#modeBatch .btn.ghost:hover{background:#eef2f7}
+  #rosterBar .btn.ghost,#modeBatch .btn.ghost,#modeGuide .btn.ghost,#modeRefs .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  #rosterBar .btn.ghost:hover,#modeBatch .btn.ghost:hover,#modeGuide .btn.ghost:hover,#modeRefs .btn.ghost:hover{background:#eef2f7}
   #rosterBar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#eef4ff;border:1px solid #cfe0f5;border-radius:8px;padding:8px 12px;margin:10px 16px 0}
   #rosterBar .btn{white-space:nowrap;flex:0 0 auto;min-width:max-content}
   #modeBatch .brow .btn{white-space:nowrap;flex:0 0 auto;min-width:max-content}
@@ -133,16 +132,23 @@
   .batch-sec .brow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   /* ---- print ---- */
   @media print{
-    header.appbar,.form,.toolbar,#rosterBar,#modeBatch,#modeCalc{display:none !important}
+    header.appbar,.form,#rosterBar,#modeBatch,#modeCalc,#modeGuide,#modeRefs{display:none !important}
+    body.print-guide #modeCreate,body.print-guide #preview{display:none !important}
+    body.print-guide #modeGuide{display:block !important;color:#000}
     body{background:#fff}
     .wrap{display:block}
     .preview{padding:0;overflow:visible;max-height:none}
-    .page-note{display:none !important}
+    .page-note,.gap-note{display:none !important}
     .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 12mm;
       page-break-after:always;font-size:10pt}
     .sheet:last-child{page-break-after:auto}
     @page{size:A4 portrait;margin:0}
   }
+  #modeGuide h2,#modeRefs h2{font-size:16px;border-left:4px solid var(--accent2);padding-left:8px;margin:24px 0 8px}
+  #modeGuide p,#modeGuide li{font-size:13.5px;line-height:1.85}
+  #modeGuide ol,#modeGuide ul{padding-left:1.4em;margin:6px 0}
+  #modeGuide .qa dt{font-weight:700;margin-top:12px}
+  #modeGuide .qa dd{margin:2px 0 0 1.2em;color:var(--sub)}
 </style>
 </head>
 <body>
@@ -166,6 +172,8 @@
   <button id="tabCreate" class="tab active" onclick="switchMode('create')">作成</button>
   <button id="tabBatch" class="tab" onclick="switchMode('batch')">一括作成</button>
   <button id="tabCalc" class="tab" onclick="switchMode('calc')">賃金試算</button>
+  <button id="tabGuide" class="tab" onclick="switchMode('guide')">使い方</button>
+  <button id="tabRefs" class="tab" onclick="switchMode('refs')">法令資料</button>
 </div>
 
 <div id="rosterBar">
@@ -290,7 +298,7 @@
             <label><input type="radio" name="muki_flag" value="無" checked> 無</label>
             <label><input type="radio" name="muki_flag" value="有"> 有（別紙を添付）</label>
           </div>
-          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。</div>
+          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の労働条件をそのまま複製します。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合は、出力後に別紙の該当箇所を手修正してください。</b></div>
         </div>
       </div>
       <div id="grpHiyatoi" class="hidden">
@@ -526,6 +534,14 @@
         <div><label>賃金締切日</label><input type="text" name="wage_closing" placeholder="毎月末日"></div>
         <div><label>賃金支払日</label><input type="text" name="wage_payday" placeholder="翌月10日"></div>
       </div>
+      <div class="row two">
+        <div><label>賃金の支払方法</label>
+          <select name="pay_method"><option value="">（選択）</option><option value="口座振込（本人同意による）">口座振込（本人同意による）</option><option value="通貨払（現金手渡し）">通貨払（現金手渡し）</option><option value="その他（備考に記載）">その他（備考に記載）</option></select></div>
+        <div><label>労使協定に基づく賃金支払時の控除</label>
+          <select name="pay_deduction"><option value="">（選択）</option><option value="無">無</option><option value="有">有（内容は備考に記載）</option></select></div>
+      </div>
+      <div class="row"><label>支払方法・控除の備考（任意）</label><input type="text" name="pay_method_note" placeholder="例：本人名義の指定口座へ振込／控除項目：社宅費・親睦会費"></div>
+      <div class="help-note">賃金の<b>支払方法</b>（口座振込・現金等）は労基則5条1項3号の書面明示事項です。口座振込には本人の同意が必要（労基則7条の2）。<b>労使協定に基づく控除</b>（社宅費・親睦会費など法定控除以外の天引き）がある場合は「有」を選び備考に控除項目を記載します。</div>
       <div class="row three">
         <div><label>昇給</label>
           <select name="raise_flag"><option value="有">有</option><option value="無">無</option></select></div>
@@ -580,11 +596,11 @@
           <label><input type="radio" name="worker_kind" value="normal" checked> 通常の労働者（正社員等）</label>
           <label><input type="radio" name="worker_kind" value="other"> それ以外（短時間・有期・派遣等）</label>
         </div>
-        <div class="help-note"><b>それ以外</b>を選ぶと、待遇の相違の説明窓口・相談窓口（部署名・担当者・連絡先）の入力欄が出ます。①の窓口はチェックで表示/非表示、②雇用管理改善の相談窓口は常に表示されます。</div>
+        <div class="help-note">雇用形態で「短時間」「派遣」、期間区分で「有期」を選ぶと、この区分は<b>自動的に「それ以外」になり、下の相談窓口欄が必ず表示されます</b>（パート有期法の法定明示事項のため）。正社員でも説明窓口を載せたい場合は手動で「それ以外」を選べます。①の窓口はチェックで表示/非表示、②雇用管理改善の相談窓口は対象者には常に書面に記載されます。</div>
       </div>
       <div id="grpSetsumei" class="hidden">
-        <label style="display:block;font-weight:600;margin:4px 0"><input type="checkbox" name="show_setsumei" checked> ①「待遇の相違の説明を求める窓口」を書面に明示する（R8.10改正／現時点は任意。②雇用管理改善の相談窓口は常に表示）</label>
-        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。R8.10改正で新設された項目で、現時点では書面明示は任意のため、記載しない運用なら<b>チェックを外す</b>と①欄が通知書から消えます。②の雇用管理改善の相談窓口はチェックに関係なく常に表示されます。</div>
+        <label style="display:block;font-weight:600;margin:4px 0"><input type="checkbox" name="show_setsumei" checked> ①「待遇の相違の説明を求めることができる旨」を書面に明示する（令和8年10月1日以降の雇入れ・契約更新から明示義務）</label>
+        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。令和8年4月28日公布の改正パート有期則2条1項により、<b>令和8年10月1日以降の雇入れ・契約更新からは短時間・有期雇用労働者への書面明示が義務</b>になります（それまでは任意）。交付日が令和8年10月1日以降の短時間・有期の書類では自動的にチェックが固定されます。②の雇用管理改善の相談窓口はチェックに関係なく常に記載されます。</div>
         <div class="row"><label>① 待遇の相違（内容・理由）等の説明を求める窓口</label></div>
         <div class="row three">
           <div><label>部署名</label><input type="text" name="setsumei_dept" placeholder="総務部"></div>
@@ -603,6 +619,14 @@
           <div><label>派遣元事業主</label><input type="text" name="haken_moto" placeholder="株式会社○○スタッフ"></div>
           <div><label>派遣先</label><input type="text" name="haken_saki" placeholder="株式会社△△商事"></div>
         </div>
+        <div class="row two">
+          <div><label>協定対象派遣労働者か否か</label>
+            <select name="haken_kyotei"><option value="">（選択）</option><option value="協定対象派遣労働者である">である（労使協定方式）</option><option value="協定対象派遣労働者ではない">ではない（派遣先均等・均衡方式）</option></select></div>
+          <div><label>労使協定の有効期間の終期（協定対象の場合）</label><input type="date" name="haken_kyotei_end"></div>
+        </div>
+        <div class="row"><label>苦情の処理に関する事項</label>
+          <input type="text" name="haken_kujo" placeholder="例：苦情申出先：営業担当○○（TEL○○）。申出を受けたときは誠実かつ遅滞なく処理する。"></div>
+        <div class="help-note">派遣労働者の雇入れ時は、昇給・退職手当・賞与の有無に加えて<b>「協定対象派遣労働者か否か」</b>（労使協定方式なら協定の有効期間の終期も）と<b>「苦情の処理に関する事項」</b>の文書明示が必要です（派遣法31条の2第2項・同法施行規則25条の16各号／明示方法は同25条の15）。就業条件の詳細（派遣期間・就業場所等）は派遣の都度交付する就業条件明示書で別途明示します（派遣法34条）。</div>
       </div>
       <div class="ex ex-kensetsu hidden">
         <div class="row"><label>帰郷旅費（建設）</label>
@@ -723,6 +747,87 @@
       <p class="hint" style="color:var(--warn)">※ このタブは試算専用です。通知書・出力には反映されません。金額は「基準内賃金＝基本給＋基準内手当」を基礎に算定します。</p>
     </form>
     <div id="calcResult" class="calc-result"></div>
+  </div>
+</div>
+
+<div id="modeGuide" class="hidden">
+  <div class="batch-wrap">
+    <div class="batch-guide">このページはツール全体の使い方マニュアルです。入力欄ごとの短い説明は、右上の「❓ ヘルプ」ボタンでON/OFFできる緑のヒントをご覧ください。
+      <button class="btn mini ghost" onclick="printGuide()" style="margin-left:8px">🖨 このマニュアルを印刷</button>
+    </div>
+
+    <h2>1. このツールでできること</h2>
+    <p>労働条件通知書 兼 雇用契約書と、労働条件変更通知書を作成できます。雇用形態（一般・短時間・派遣・建設・林業など）×契約期間（無期・有期）×労働時間制度×賃金体系の組み合わせに応じて、必要な入力欄と書面の文言が自動で切り替わります。有期契約の無期転換ルールの別紙にも対応しています。書式は厚生労働省のモデル様式（令和8年10月版）に準拠しています。</p>
+    <p>入力した内容はすべてお使いのパソコンのブラウザ内だけで処理され、<b>外部には一切送信されません</b>。</p>
+
+    <h2>2. 基本の流れ</h2>
+    <ol>
+      <li>「作成」タブで書類の種類と交付日を選ぶ（交付日は法改正の適用判定にも使われます）。</li>
+      <li>上から順に入力する。入力するとA4プレビューが自動で更新されます。</li>
+      <li>プレビュー上部に赤い警告が出ていないか確認する（意味は「7. 警告表示」参照）。</li>
+      <li>「印刷/PDF」「Word」「Excel」のいずれかで出力する。</li>
+      <li>続きから作業する可能性があれば「💾 保存」でJSONファイルを保存しておく。</li>
+    </ol>
+    <p><button class="btn mini ghost" onclick="switchMode('create')">▶ 作成タブを開く</button></p>
+
+    <h2>3. 作成タブの各欄</h2>
+    <ul>
+      <li><b>書類の種類</b> — 通知書兼契約書か変更通知書かを選びます。</li>
+      <li><b>契約期間</b> — 有期を選ぶと「更新の有無・更新の基準」「通算契約期間」など有期特有の欄が現れます。無期転換に関する明示が必要な場合は別紙が自動で付きます。</li>
+      <li><b>就業場所・業務</b> — 現在の内容に加えて「変更の範囲」の明示が必須です（令和6年4月改正）。</li>
+      <li><b>労働時間</b> — 選んだ制度（通常・変形・フレックス・裁量など）で欄が変わります。休憩は複数行登録できます。</li>
+      <li><b>賃金</b> — 基準内手当は淡い青、基準外手当は淡いオレンジで背景色が分かれています。固定残業代を使う場合は時間数の入力が必須です。</li>
+      <li><b>相談窓口ほか</b> — 雇用区分に応じて必要な欄（昇給・賞与・退職手当の有無、相談窓口など）が自動で表示されます。</li>
+    </ul>
+    <p>各欄の細かい説明は緑のヒント（❓ヘルプON）に書いてあります。</p>
+
+    <h2>4. 一括作成（名簿）</h2>
+    <ol>
+      <li>「作成」タブで1人目を作り込み、名簿バーの「➕ この内容を名簿に追加」で登録します。</li>
+      <li>2人目以降は「➡ 追加して次の人へ」を使うと、氏名・賃金だけクリアされ他の条件は引き継がれます（同条件の大量作成向け）。</li>
+      <li>「一括作成」タブで一覧の編集・複製・並べ替え・削除ができます。名簿はJSONで保存・読込できます。</li>
+      <li>出力は「まとめて1ファイル」（全員印刷／Word連結／Excelは1人1シート）と「1人ずつ個別ファイル」が選べます。</li>
+    </ol>
+    <p><button class="btn mini ghost" onclick="switchMode('batch')">▶ 一括作成タブを開く</button></p>
+
+    <h2>5. 保存と読込</h2>
+    <p>「💾 保存」は入力途中の内容を丸ごとJSONファイルに書き出します。ファイル名の末尾に保存日（例: <code>_20260705</code>）が付くので、どれが最新か一目で分かります。読み込むと保存日が表示されます。名簿の保存も同様です。日付が付いていない古い保存ファイルもそのまま読み込めます。</p>
+    <p>※ JSONファイルは作業データであり、交付する書類そのものではありません。</p>
+
+    <h2>6. 出力形式の違い</h2>
+    <ul>
+      <li><b>印刷/PDF</b> — レイアウトの再現性が最も高く、交付用には基本これを推奨。ブラウザの印刷画面で「PDFに保存」を選べばPDFになります。</li>
+      <li><b>Word（.doc）</b> — 出力後に文言を手直ししたい場合に。開くとき「ファイル形式と拡張子が一致しません」という警告が出ることがありますが「はい」で開いて問題ありません。</li>
+      <li><b>Excel（.xls）</b> — Wordと同様の警告が出ることがあります。内容が多いときはA4に収まるようフォントが自動調整されます。</li>
+    </ul>
+
+    <h2>7. 警告表示の意味</h2>
+    <ul>
+      <li><b>画面上部の赤いバナー「⚠ 法定明示事項の未入力」</b> — 労基法上必ず明示しなければならない項目が空欄です。出力時にも確認ダイアログが出ます。</li>
+      <li><b>書面の中の赤字の注意書き</b> — 固定残業代の時間数未入力、出来高払の保障給未入力など、このまま交付すると法令上問題になり得る箇所です。下書きを完成品と取り違えないよう、印刷にもあえて赤字が印字されます。入力を補うと消えます。</li>
+    </ul>
+
+    <h2>8. よくある質問</h2>
+    <dl class="qa">
+      <dt>Q. 緑のヒントを消したい／出したい</dt>
+      <dd>右上の「❓ ヘルプ」ボタンで切り替えられます。</dd>
+      <dt>Q. 入力した個人情報はどこかに送られますか？</dt>
+      <dd>送られません。処理はすべてブラウザ内で完結し、ファイルとして残るのはご自身で保存したJSONと出力書類だけです。</dd>
+      <dt>Q. ブラウザを閉じたら入力内容はどうなりますか？</dt>
+      <dd>保存していない内容は消えます。長い入力の途中では「💾 保存」をこまめに使ってください。</dd>
+      <dt>Q. 一括出力で2件目以降がダウンロードされない</dt>
+      <dd>ブラウザが複数ファイルの連続ダウンロードをブロックしています。アドレスバー付近の許可表示から「許可」を選んでください。</dd>
+      <dt>Q. 法改正には対応していますか？</dt>
+      <dd>年2回（4月・10月）、法令・様式の変更を定期点検して更新しています。根拠となる法令・資料は「法令資料」タブにまとまっています。</dd>
+    </dl>
+  </div>
+</div>
+
+<div id="modeRefs" class="hidden">
+  <div class="batch-wrap">
+    <div class="batch-guide">労働条件の明示について、現行有効な明示事項の一覧と、根拠となる法令・公的資料へのリンク集です。リンクはインターネット接続時のみ開けます（このツール自体はオフラインでも動作します）。掲載内容は年2回（4月・10月）の定期点検で確認し、新しい情報を追記しています。<b>最終点検日: <span id="refsChecked"></span></b></div>
+    <div id="meijiList"></div>
+    <div id="refsList"></div>
   </div>
 </div>
 
@@ -900,7 +1005,7 @@ function computeUnified(inBase, sched, unit, roundUp){
     note: !!(form.elements['uni_note_clause']&&form.elements['uni_note_clause'].checked)};
 }
 function wageTotals(){
-  const base=parseYen(val('monthly_wage'))||0;
+  const base = val('wage_type')==='月給' ? (parseYen(val('monthly_wage'))||0) : 0;   // 非月給時は旧月額の残留値を混入させない
   const sumMonth=arr=>arr.filter(a=>(a.unit||'month')==='month').reduce((s,a)=>s+(parseYen(a.amount)||0),0);
   const inSum=sumMonth(getAllows('in')), outSum=sumMonth(getAllows('out'));
   const inBase=base+inSum;
@@ -943,10 +1048,7 @@ function wageTotals(){
 // ===== 休憩時間（複数可・時刻ピッカー 開始〜終了）=====
 function _breakRowHTML(){ return '<input type="time" class="b-start">〜<input type="time" class="b-end"><button type="button" class="mini" onclick="delBreak(this)" title="削除">×</button>'; }
 function getBreaks(){
-  return [...document.querySelectorAll('#breakList .break-row')].map(r=>{
-    const s=r.querySelector('.b-start').value.trim(), e=r.querySelector('.b-end').value.trim();
-    return (s&&e)?`${s}〜${e}`:(s||e);
-  }).filter(Boolean);
+  return getBreaksRaw().map(b=>{ const s=(b.start||'').trim(), e=(b.end||'').trim(); return (s&&e)?`${s}〜${e}`:(s||e); }).filter(Boolean);
 }
 function addBreak(item){
   const row=document.createElement('div'); row.className='break-row'; row.innerHTML=_breakRowHTML();
@@ -1044,14 +1146,21 @@ function updateVisibility(){
     $('#uniHours').classList.toggle('hidden', um!=='hours'); }
   // その他（固有）
   const isShort = cat==='短時間';
-  $('#grpSetsumei').classList.toggle('hidden', radio('worker_kind')!=='other');
+  const needsPart = cat==='短時間' || per==='有期' || cat==='派遣';   // パート有期法・派遣法の明示対象
+  if(needsPart && radio('worker_kind')!=='other'){ [...form.elements['worker_kind']].forEach(r=>{ r.checked=(r.value==='other'); }); }
+  $('#grpSetsumei').classList.toggle('hidden', !(radio('worker_kind')==='other' || needsPart));
+  // R8.10.1施行: 短時間・有期は①説明を求めることができる旨の明示が義務（改正パート有期則2条1項）
+  const ssEl=form.elements['show_setsumei'];
+  if(ssEl){ const must=(cat==='短時間'||per==='有期') && val('issue_date')>='2026-10-01';
+    if(must && !ssEl.checked) ssEl.checked=true;
+    ssEl.disabled=must; }
   $('.ex-haken').classList.toggle('hidden', cat!=='派遣');
   $('.ex-kensetsu').classList.toggle('hidden', cat!=='建設');
   // ラベル切替
   $('#lblEmployer').textContent = (cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名';
   $('#lblHoliday').textContent = (cat==='短時間'||cat==='派遣')?'休日及び勤務日':'休日';
   $('#lblRetireAllow').textContent = '退職金';
-  $('#hintShort').textContent = isShort?'短時間・有期は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条）。空欄なら「無」と印字します。':'';
+  $('#hintShort').textContent = (isShort||per==='有期'||cat==='派遣')?'短時間・有期・派遣は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条・派遣法31条の2）。空欄なら「無」と印字します。':'';
   // 無効な組合せ
   const bad = (per==='日雇' && (cat==='短時間'||cat==='林業'));
   $('#warnCombo').classList.toggle('hidden', !bad);
@@ -1064,7 +1173,7 @@ function updateVisibility(){
 function show(sel){ if(sel) document.querySelectorAll(sel).forEach(e=>e.classList.remove('hidden')); }
 
 // deemed hours：裁量用は別name → 統合
-function deemedHours(){ return val('deemed_hours2')||val('deemed_hours'); }
+function deemedHours(wt){ return (wt==='専門業務型裁量'||wt==='企画業務型裁量')? val('deemed_hours2') : val('deemed_hours'); }
 
 // ===== ドキュメント組立（CLIの可変式に対応）=====
 function buildBlocks(st){
@@ -1077,8 +1186,11 @@ function buildBlocks(st){
   else if(per==='有期'){
     if(has(val('contract_start'))||has(val('contract_end'))) term.push(`${fmtDate(val('contract_start'))}から${fmtDate(val('contract_end'))}まで`);
     if(has(val('renewal'))) term.push('更新の有無　'+val('renewal'));
-    if(has(val('renewal_criteria'))) term.push('更新の判断基準　'+val('renewal_criteria').replace(/,/g,'、'));
-    if(has(val('renewal_cap'))) term.push('更新上限　'+val('renewal_cap'));
+    const rnv=val('renewal');
+    if(rnv==='自動的に更新する'||rnv==='更新する場合があり得る'){
+      if(has(val('renewal_criteria'))) term.push('更新の判断基準　'+val('renewal_criteria').replace(/,/g,'、'));
+      if(has(val('renewal_cap'))) term.push('更新上限　'+val('renewal_cap'));
+    }
     if(radio('muki_flag')==='有'){
       term.push('無期転換申込機会　本契約期間中に、会社に対して期間の定めのない労働契約（無期労働契約）の締結を申し込むことができる');
       term.push('無期転換後の労働条件　別紙のとおり');
@@ -1111,10 +1223,10 @@ function buildBlocks(st){
     if(has(val('core_time'))) t.push('コアタイム　'+val('core_time'));
     if(has(val('flex_time'))) t.push('フレキシブルタイム　'+val('flex_time'));
   } else if(wt==='事業場外みなし'){
-    if(has(deemedHours())) t.push('みなし労働時間　'+deemedHours());
+    if(has(deemedHours(wt))) t.push('みなし労働時間　'+deemedHours(wt));
   } else if(wt==='専門業務型裁量'||wt==='企画業務型裁量'){
     if(has(val('target_work'))) t.push('対象業務　'+val('target_work'));
-    if(has(deemedHours())) t.push('みなし労働時間　'+deemedHours());
+    if(has(deemedHours(wt))) t.push('みなし労働時間　'+deemedHours(wt));
     if(has(val('consent_flag'))) t.push('本人同意　'+val('consent_flag'));
     if(has(val('health_measure'))) t.push('健康・福祉確保措置　'+val('health_measure'));
   }
@@ -1143,7 +1255,7 @@ function buildBlocks(st){
   let w=[]; let n=0;
   const baseName=val('base_wage_name')||'基本給';
   const baseMap={'月給':['monthly_wage',`${baseName}（月給）`],'日給':['daily_wage',`${baseName}（日給）`],'時給':['hourly_wage',`${baseName}（時給）`],'年俸':['annual_wage','年俸']};
-  if(wg==='出来高'){ if(has(val('unit_price'))){n++;w.push(`${n}　基本単価（出来高）　${numStr(val('unit_price'))}`);} if(has(val('guaranteed_wage'))){n++;w.push(`${n}　保障給　${numStr(val('guaranteed_wage'))}`);} }
+  if(wg==='出来高'){ if(has(val('unit_price'))){n++;w.push(`${n}　基本単価（出来高）　${numStr(val('unit_price'))}`);} if(has(val('guaranteed_wage'))){n++;w.push(`${n}　保障給　${numStr(val('guaranteed_wage'))}`);} else { w.push('__WARN__※ 保障給が未入力です。出来高払制には保障給の定めが必要です（労基法27条）。'); } }
   else { const b=baseMap[wg]; if(b&&has(val(b[0]))){n++;w.push(`${n}　${b[1]}　${numStr(val(b[0]))}`);} }
   const inA=getAllows('in'), outA=getAllows('out');
   const showBk = !form.elements['show_breakdown'] || form.elements['show_breakdown'].checked;
@@ -1168,8 +1280,9 @@ function buildBlocks(st){
   } else {
   // 固定残業（みなし残業手当）
   if(tt.otAmt>0){
-    const hrs = tt.otHours>0 ? `時間外${tt.otHours}時間分${tt.otAuto&&tt.rounded?'（相当）':''}` : '';
-    n++; w.push(`${n}　${val('fixed_ot_name')||'固定残業手当'}　${numStr(tt.otAmt)}${hrs?`（${hrs}を含む。これを超える時間外労働は別途割増賃金を支給する）`:''}`);
+    const hrs = tt.otHours>0 ? `時間外${tt.otHours}時間分${tt.otAuto&&tt.rounded?'（相当）':''}を含む。` : '';
+    n++; w.push(`${n}　${val('fixed_ot_name')||'固定残業手当'}　${numStr(tt.otAmt)}（${hrs}これを超える時間外労働は別途割増賃金を支給する）`);
+    if(!(tt.otHours>0)) w.push('__WARN__※ 固定残業手当の時間数が未入力です。時間数の明示がない固定残業代は無効と判断されるおそれがあります。時間数を入力してください。');
   }
   // 固定残業が月60時間超の追加割増分
   if(tt.ot60Include){
@@ -1177,8 +1290,9 @@ function buildBlocks(st){
   }
   // 固定深夜（みなし深夜手当）
   if(tt.nightAmt>0){
-    const hrs = tt.nightHours>0 ? `深夜${tt.nightHours}時間分${tt.nightAuto&&tt.rounded?'（相当）':''}` : '';
-    n++; w.push(`${n}　${val('fixed_night_name')||'固定深夜手当'}　${numStr(tt.nightAmt)}${hrs?`（${hrs}を含む。これを超える深夜労働は別途割増賃金を支給する）`:''}`);
+    const hrs = tt.nightHours>0 ? `深夜${tt.nightHours}時間分${tt.nightAuto&&tt.rounded?'（相当）':''}を含む。` : '';
+    n++; w.push(`${n}　${val('fixed_night_name')||'固定深夜手当'}　${numStr(tt.nightAmt)}（${hrs}これを超える深夜労働は別途割増賃金を支給する）`);
+    if(!(tt.nightHours>0)) w.push('__WARN__※ 固定深夜手当の時間数が未入力です。時間数を入力してください。');
   }
   }
   if(wg==='月給'){ if(tt.total){ n++;w.push(`${n}　総支給額（月額固定分）　${tt.total.toLocaleString('ja-JP')}円`); if(showBk) w.push(`__NOTE__※ 割増賃金の算定基礎（基準内賃金）＝${baseName}＋基準内手当＝${tt.inBase.toLocaleString('ja-JP')}円（基準外手当・固定残業手当は算入しない）`); if(tt.hasVar) w.push(`__NOTE__※ 日額・時間額・回数等の変動手当は上記総支給額に含みません`); } }
@@ -1188,7 +1302,13 @@ function buildBlocks(st){
   w.push(`　　ロ 休日　法定休日 ${pc('hol_legal','135')}％／法定外休日 ${pc('hol_nonlegal','125')}％`);
   w.push(`　　ハ 深夜　（上記に追加して）${pc('night_pct','25')}％`);
   if(has(val('wage_closing'))||has(val('wage_payday'))){n++;w.push(`${n}　賃金締切日 ${val('wage_closing')}　賃金支払日 ${val('wage_payday')}`);}
-  const short=st.isShort;
+  if(has(val('pay_method'))||has(val('pay_deduction'))||has(val('pay_method_note'))){
+    n++; let pm=`${n}　支払方法　${val('pay_method')||'―'}`;
+    if(has(val('pay_deduction'))) pm+=`　／　労使協定に基づく賃金支払時の控除　${val('pay_deduction')}`;
+    w.push(pm);
+    if(has(val('pay_method_note'))) w.push(`　　（${val('pay_method_note')}）`);
+  }
+  const short = st.isShort || st.per==='有期' || st.cat==='派遣';   // パート有期法6条・派遣法31条の2（有無明示の対象）
   // 昇給（絶対的明示・常に記載）
   { const f=val('raise_flag')||'無'; const note=(f==='有'&&has(val('raise_note')))?`（${val('raise_note')}）`:''; n++; w.push(`${n}　昇給　${f}${note}`); }
   // 賞与（定めがあれば記載／短時間・有期は有無明示）
@@ -1225,10 +1345,10 @@ function buildBlocks(st){
   o.push(si);
   if(val('kigyou_nenkin')==='有') o.push('・企業年金等　有'+(has(val('kigyou_nenkin_name'))?`（${val('kigyou_nenkin_name')}）`:''));
   o.push(`・雇用保険の適用　${val('emp_ins')||'無'}　労災保険　${val('rousai')||'有'}`);
-  if(radio('worker_kind')==='other'){
+  if(radio('worker_kind')==='other' || cat==='短時間' || per==='有期' || cat==='派遣'){
     // 待遇の相違の説明窓口：チェックした時のみ表示
     if(form.elements['show_setsumei'] && form.elements['show_setsumei'].checked){
-      o.push('・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる相談窓口。');
+      o.push('・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。');
       o.push(`　　部署名 ${val('setsumei_dept')}　担当者職氏名 ${val('setsumei_person')}（連絡先 ${val('setsumei_contact')}）`);
     }
     // 雇用管理の改善等に関する相談窓口：常に表示
@@ -1236,6 +1356,8 @@ function buildBlocks(st){
     o.push(`　　部署名 ${val('consult_dept')}　担当者職氏名 ${val('consult_person')}（連絡先 ${val('consult_contact')}）`);
   }
   if(cat==='派遣'){ if(has(val('haken_moto')))o.push('・派遣元事業主　'+val('haken_moto')); if(has(val('haken_saki')))o.push('・派遣先　'+val('haken_saki'));
+    if(has(val('haken_kyotei'))){ let hk='・'+val('haken_kyotei'); if(val('haken_kyotei')==='協定対象派遣労働者である'&&has(val('haken_kyotei_end'))) hk+=`（労使協定の有効期間の終期　${fmtDate(val('haken_kyotei_end'))}）`; o.push(hk); }
+    if(has(val('haken_kujo'))) o.push('・苦情の処理に関する事項　'+val('haken_kujo'));
     if(has(val('haken_moto'))||has(val('haken_saki')))o.push('・就業条件の詳細は別途交付する就業条件明示書による'); }
   if(cat==='建設' && has(val('kikyo'))) o.push('・帰郷旅費　'+val('kikyo'));
   if(has(val('rules_place'))) o.push('・就業規則を確認できる場所　'+val('rules_place'));
@@ -1246,6 +1368,55 @@ function buildBlocks(st){
   return B;
 }
 
+// 法定明示事項（労基則5条1項1〜4号等）の未入力を列挙（画面警告・出力前確認用）
+function requiredGaps(st){
+  const g=[]; const need=(cond,label)=>{ if(cond) g.push(label); };
+  if(st.bad) g.push('雇用区分と期間区分の組合せ（短時間・林業に日雇様式なし）');
+  if(st.per==='有期'){
+    need(!has(val('contract_start'))||!has(val('contract_end')),'契約期間（始期・終期）');
+    need(!has(val('renewal')),'更新の有無');
+    const rn=val('renewal');
+    if(rn==='自動的に更新する'||rn==='更新する場合があり得る'){
+      need(!has(val('renewal_criteria')),'更新の判断基準');
+      need(!has(val('renewal_cap')),'更新上限（上限なしの場合もその旨）');
+    }
+  }
+  if(st.per==='日雇') need(!has(val('work_days')),'就労日');
+  need(!has(val('workplace_now')),'就業の場所（雇入れ直後）');
+  need(!has(val('workplace_scope')),'就業の場所（変更の範囲）');
+  need(!has(val('job_now')),'業務の内容（雇入れ直後）');
+  need(!has(val('job_scope')),'業務の内容（変更の範囲）');
+  if(!st.isHiyatoi){
+    need(!has(val('holiday')),'休日');
+    need(!has(val('paid_leave')),'年次有給休暇');
+    need(!has(val('self_retire')),'自己都合退職の手続');
+    need(getDismissals().length===0,'解雇の事由');
+  }
+  const amtMap={'月給':'monthly_wage','日給':'daily_wage','時給':'hourly_wage','年俸':'annual_wage'};
+  if(st.wg==='出来高'){ need(!has(val('unit_price')),'基本単価'); need(!has(val('guaranteed_wage')),'保障給（労基法27条）'); }
+  else need(!has(val(amtMap[st.wg]||'monthly_wage')),'基本給の額');
+  need(!has(val('wage_closing')),'賃金締切日');
+  need(!has(val('wage_payday')),'賃金支払日');
+  need(!has(val('pay_method')),'賃金の支払方法');
+  if(st.isShort || st.per==='有期' || st.cat==='派遣'){
+    need(!has(val('consult_dept'))&&!has(val('consult_person')),'②雇用管理改善の相談窓口（部署名・担当者）');
+  }
+  if(st.cat==='派遣'){
+    need(!has(val('haken_kyotei')),'協定対象派遣労働者か否か');
+    need(!has(val('haken_kujo')),'苦情の処理に関する事項');
+  }
+  const tt=wageTotals();
+  if(tt.otStyle!=='unified'){
+    if(tt.otAmt>0 && !(tt.otHours>0)) g.push('固定残業手当の時間数');
+    if(tt.nightAmt>0 && !(tt.nightHours>0)) g.push('固定深夜手当の時間数');
+  }
+  return g;
+}
+function confirmGaps(action){
+  const g=requiredGaps(updateVisibility());
+  if(!g.length) return true;
+  return confirm('未入力の法定明示事項があります：\n・'+g.join('\n・')+'\n\nこのまま'+action+'しますか？（下書きとしては出力できます）');
+}
 function officeLines(cat){
   const L=[]; if(has(val('office_addr')))L.push('事業場所在地　'+val('office_addr'));
   if(has(val('office_name')))L.push('事業場名称　'+val('office_name'));
@@ -1276,6 +1447,7 @@ function sheetHTML(title, lead, blocks, opts={}){
   blocks.forEach(b=>{
     const lines=b.lines.map(l=>{
       if(String(l).startsWith('__NOTE__')) return `<div class="note">${esc(l.slice(8))}</div>`;
+      if(String(l).startsWith('__WARN__')) return `<div class="warn">${esc(l.slice(8))}</div>`;
       return `<div>${esc(l)}</div>`;
     }).join('');
     const mark = opts.changed && opts.changed.has(b.k) ? '<span class="mark">★</span>' : '';
@@ -1328,7 +1500,7 @@ function updatePageIndicator(){
   let b=document.getElementById('pageNote');
   if(multi){
     if(!b){ b=document.createElement('div'); b.id='pageNote'; b.className='page-note'; pv.insertBefore(b, pv.firstChild); }
-    b.textContent=`※ この内容は約${pages}ページになります。印刷／PDFでは各ページ左上に「全${pages}ページ中○ページ目」が表示されます。1ページに収めたい場合は項目・文言を減らしてください。`;
+    b.textContent=`※ この内容は約${pages}ページになります。Word・Excel出力では各ページのヘッダーに「全${pages}ページ中○ページ目」が入ります（ブラウザ印刷ではページ番号が付かない場合があります）。1ページに収めたい場合は項目・文言を減らしてください。`;
   } else if(b){ b.remove(); }
 }
 
@@ -1363,8 +1535,12 @@ function render(){
     sheets.push(sheetHTML('労働条件通知書（別紙）　無期転換後の労働条件', lead2, bb, {sign:false, leave:true}));
   }
   const tt=wageTotals();
-  const otInp=form.elements['fixed_ot_amount']; if(otInp){ otInp.disabled=tt.otAuto; if(tt.otAuto) otInp.value=tt.otAmt; }
-  const ngInp=form.elements['fixed_night_amount']; if(ngInp){ ngInp.disabled=tt.nightAuto; if(tt.nightAuto) ngInp.value=tt.nightAmt; }
+  const otInp=form.elements['fixed_ot_amount'];
+  if(otInp){ if(tt.otAuto){ otInp.disabled=true; otInp.value=tt.otAmt; otInp.dataset.auto='1'; }
+    else { otInp.disabled=false; if(otInp.dataset.auto==='1'){ otInp.value=''; delete otInp.dataset.auto; } } }
+  const ngInp=form.elements['fixed_night_amount'];
+  if(ngInp){ if(tt.nightAuto){ ngInp.disabled=true; ngInp.value=tt.nightAmt; ngInp.dataset.auto='1'; }
+    else { ngInp.disabled=false; if(ngInp.dataset.auto==='1'){ ngInp.value=''; delete ngInp.dataset.auto; } } }
   const td=$('#totalDisp');
   if(td){ td.value=`${tt.total.toLocaleString('ja-JP')}円　（うち基準内賃金 ${tt.inBase.toLocaleString('ja-JP')}円／基準外 ${tt.outSum.toLocaleString('ja-JP')}円）`; }
   LAST_SHEETS=sheets;
@@ -1377,16 +1553,21 @@ function render(){
   }
   const bd=document.getElementById('breakTotalDisp'); if(bd){ const t=breakTotalMinutes(); bd.textContent = t>0? `合計休憩時間 ${fmtDur(t)}` : ''; }
   updatePageIndicator();
+  { const gaps=requiredGaps(st); let gb=document.getElementById('gapNote');
+    if(gaps.length){ if(!gb){ gb=document.createElement('div'); gb.id='gapNote'; gb.className='gap-note'; pv.insertBefore(gb, pv.firstChild); }
+      gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／'); }
+    else if(gb){ gb.remove(); } }
   markEmpty();
 }
 
-function doPrint(){ render(); window.print(); }
+function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; window.print(); }
 
 function download(filename, content, mime){
   const blob=new Blob(['﻿'+content],{type:mime});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
+function ymd(){ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
 function fname(ext){ const nm=(val('employee_name')||'無題').replace(/[\\\/:*?"<>|]/g,''); const base=docMeta(radio('docType')).base; return `${base}_${nm}.${ext}`; }
 
 // ===== 入力データの保存／読込（続きから作業用）=====
@@ -1411,28 +1592,32 @@ function serializeState(){
   });
   s.allowIn=getAllows('in'); s.allowOut=getAllows('out');
   s.times=getTimes(); s.breaks=getBreaksRaw(); s.others=getOthers();
+  s.dismissals=getDismissals();
   return s;
 }
 function restoreState(s){
   if(!s||typeof s!=='object') throw new Error('データ形式が不正です');
+  form.reset();   // 保存データに無い欄（後から追加した欄）へ前の値が残留しないよう全初期化してから適用
   Object.entries(s.radios||{}).forEach(([n,v])=>{ const g=form.elements[n]; if(!g)return; const list=g.length?[...g]:[g]; list.forEach(r=>{ if(r.type==='radio') r.checked=(r.value===v); }); });
   Object.entries(s.checks||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type==='checkbox') el.checked=!!v; });
   Object.entries(s.fields||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type!=='radio'&&el.type!=='checkbox'&&!el.readOnly) el.value=v; });
   setAllows('in', s.allowIn||[{}]); setAllows('out', s.allowOut||[{}]);
   setTimes(s.times||[{}]); setBreaks(s.breaks||[{}]); setOthers(s.others||[{}]);
+  setDismissals(s.dismissals||['']);
   render();
 }
 function saveData(){
   const s=serializeState();
+  s.savedAt=new Date().toISOString();
   const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`労働条件_入力データ_${(val('employee_name')||'無題').replace(/[\\\/:*?"<>|]/g,'')}.json`;
+  a.download=`労働条件_入力データ_${(val('employee_name')||'無題').replace(/[\\\/:*?"<>|]/g,'')}_${ymd()}.json`;
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
 function loadData(input){
   const f=input.files&&input.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{ const txt=String(r.result).replace(/^﻿/,''); restoreState(JSON.parse(txt)); alert('入力データを読み込みました。続きから作業できます。'); }
+  r.onload=()=>{ try{ const txt=String(r.result).replace(/^﻿/,''); const obj=JSON.parse(txt); restoreState(obj); const d=(obj&&obj.savedAt)?`（${String(obj.savedAt).slice(0,10)} 保存のデータ）`:''; alert('入力データを読み込みました'+d+'。続きから作業できます。'); }
     catch(e){ alert('読み込みに失敗しました：'+e.message); } input.value=''; };
   r.readAsText(f,'utf-8');
 }
@@ -1442,25 +1627,109 @@ function toggleHelp(){
   const off=document.body.classList.toggle('help-off');
   const b=document.getElementById('helpBtn'); if(b) b.textContent = off?'❓ ヘルプOFF':'❓ ヘルプON';
 }
+function printGuide(){
+  document.body.classList.add('print-guide');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('print-guide'),500);
+}
 
 // ===== タブ切替・賃金試算（通知書に反映しない独立機能）=====
+const MEIJI_CHECKED='2026-07-04';
+const MEIJI=[
+ {group:'A. 全労働者に共通する明示事項（書面等の交付が必要）', note:'労基法15条1項・労基則5条。契約締結時と有期契約の更新時に明示。書面交付が原則で、労働者が希望した場合はFAX・電子メール等（出力できるもの）でも可（労基則5条4項）。', items:[
+  {item:'労働契約の期間', target:'全員', basis:'労基則5条1項1号', since:'', memo:''},
+  {item:'有期契約を更新する場合の基準、更新上限（通算契約期間または更新回数の上限）の有無と内容', target:'有期', basis:'労基則5条1項1号の2', since:'更新上限は2024-4-1追加', memo:''},
+  {item:'就業の場所・従事すべき業務（変更の範囲を含む）', target:'全員', basis:'労基則5条1項1号の3', since:'変更の範囲は2024-4-1追加', memo:''},
+  {item:'始業・終業の時刻、所定時間外労働の有無、休憩時間、休日、休暇、交替制のルール', target:'全員', basis:'労基則5条1項2号', since:'', memo:''},
+  {item:'賃金の決定・計算・支払の方法、賃金の締切り・支払の時期', target:'全員', basis:'労基則5条1項3号', since:'', memo:'昇給に関する事項は明示必要だが書面交付義務の対象外（労基則5条3項）'},
+  {item:'退職に関する事項（解雇の事由を含む）', target:'全員', basis:'労基則5条1項4号', since:'', memo:''},
+ ]},
+ {group:'B. 定めがある場合に明示する事項（口頭でも可）', note:'相対的明示事項。', items:[
+  {item:'退職手当／臨時の賃金・賞与等／食費・作業用品等の負担／安全衛生／職業訓練／災害補償・業務外の傷病扶助／表彰・制裁／休職', target:'定めのある事業場', basis:'労基則5条1項4号の2〜11号', since:'', memo:''},
+ ]},
+ {group:'C. 無期転換に関する明示（有期）', note:'', items:[
+  {item:'無期転換を申し込むことができる旨（申込機会）と、無期転換後の労働条件', target:'無期転換申込権が発生する契約更新時ごと', basis:'労基則5条5項・6項（無期転換ルール自体は労契法18条）', since:'2024-4-1追加', memo:'本ツールでは別紙で対応'},
+ ]},
+ {group:'D. 短時間・有期雇用労働者への特定事項（文書交付・違反は10万円以下の過料）', note:'パート有期法6条・同施行規則2条。', items:[
+  {item:'昇給の有無／退職手当の有無／賞与の有無／相談窓口', target:'短時間・有期', basis:'パート有期法6条・則2条', since:'', memo:''},
+  {item:'待遇の相違の内容・理由等の説明を求めることができる旨', target:'短時間・有期', basis:'パート有期則2条4号（令和8年厚労省令87号・2026-4-28公布）', since:'2026-10-1施行', memo:'交付日がR8.10.1以降なら必要（本ツールは交付日で自動判定）'},
+ ]},
+ {group:'E. 派遣労働者（派遣元での雇入れ時）', note:'派遣の際の就業条件明示（派遣法34条）とは別立ての義務。', items:[
+  {item:'昇給・退職手当・賞与の有無／協定対象派遣労働者か否か（対象の場合は労使協定の有効期間の終期）／苦情の処理に関する事項', target:'派遣', basis:'派遣法31条の2第2項・則25条の16（明示方法は則25条の15）', since:'', memo:''},
+ ]},
+ {group:'F. 建設労働者ほか', note:'', items:[
+  {item:'事業主の氏名、事業所の名称・所在地、雇用期間、従事する業務の内容（雇用に関する文書の交付）', target:'建設', basis:'建設労働者雇用改善法7条', since:'', memo:'施行規則への細目委任なし（7条本則で完結）'},
+  {item:'帰郷旅費（明示された条件と事実が相違して即時解除し、14日以内に帰郷する場合の旅費負担）', target:'全員（実務上は建設等で記載）', basis:'労基法15条2項・3項', since:'', memo:''},
+ ]},
+];
+function renderMeiji(){
+  const wrap=document.getElementById('meijiList'); if(!wrap) return;
+  wrap.innerHTML='<h2>現行有効な明示事項の一覧（最終確認日: '+MEIJI_CHECKED+'）</h2>'+MEIJI.map(g=>{
+    const rows=g.items.map(it=>`<tr><td>${esc(it.item)}</td><td>${esc(it.target)}</td><td>${esc(it.basis)}</td><td>${esc(it.since||'')}</td><td>${esc(it.memo||'')}</td></tr>`).join('');
+    return `<h3 style="margin:16px 0 4px;font-size:14px">${esc(g.group)}</h3>${g.note?`<p class="hint">${esc(g.note)}</p>`:''}<table class="roster"><thead><tr><th>明示する事項</th><th>対象</th><th>根拠</th><th>施行・追加</th><th>備考</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }).join('')+'<p class="hint">※ この一覧は事務所内の参考用の要約です。具体的事案への適用は条文原文と所属社労士の確認を要します。新しい明示義務は年2回（4月・10月）の定期点検で検知し、確認のうえこの一覧に追記されます。</p>';
+}
+const REFS_CHECKED='2026-07-05';
+const REFS=[
+ {cat:'法令（e-Gov 条文）', items:[
+  {name:'労働基準法', basis:'15条（労働条件の明示）', url:'https://laws.e-gov.go.jp/law/322AC0000000049', note:'明示義務の大元。2026-07-05 e-Gov法令APIで照合済み'},
+  {name:'労働基準法施行規則', basis:'5条（明示事項・明示方法）', url:'https://laws.e-gov.go.jp/law/322M40000100023', note:'LawId=322M40000100023（2026-07-04・2026-07-05の二度、e-Gov法令APIでLawNum突合済み）'},
+  {name:'労働契約法', basis:'18条（無期転換申込権）', url:'https://laws.e-gov.go.jp/law/419AC0000000128', note:'無期転換別紙の根拠。2026-07-05照合済み'},
+  {name:'パートタイム・有期雇用労働法', basis:'6条（特定事項の文書明示）', url:'https://laws.e-gov.go.jp/law/405AC0000000076', note:'昇給・賞与・退職手当の有無、相談窓口。2026-07-05照合済み'},
+  {name:'パートタイム・有期雇用労働法施行規則', basis:'2条（特定事項）', url:'https://laws.e-gov.go.jp/law/405M50002000034', note:'R8.10.1施行で第4号（待遇差説明を求められる旨）追加。LawId=405M50002000034（2026-07-05 e-Gov法令APIでLawNum「平成五年労働省令第三十四号」と突合済み）'},
+  {name:'労働者派遣法', basis:'31条の2第2項（雇入れ時の明示）', url:'https://laws.e-gov.go.jp/law/360AC0000000088', note:'2026-07-05照合済み'},
+  {name:'労働者派遣法施行規則', basis:'25条の15・25条の16', url:'https://laws.e-gov.go.jp/law/361M50002000020', note:'明示方法・明示事項の細目。2026-07-05照合済み'},
+  {name:'建設労働者雇用改善法', basis:'7条（雇用に関する文書の交付）', url:'https://laws.e-gov.go.jp/law/351AC0000000033', note:'帰郷旅費の根拠は労基法15条2・3項。2026-07-05照合済み'},
+ ]},
+ {cat:'改正情報（公布済み・施行前）', items:[
+  {name:'令和8年厚生労働省令第87号（パート有期則・派遣則改正）改正省令本文', basis:'2026-4-28公布・R8.10.1施行', url:'https://www.mhlw.go.jp/content/001695908.pdf', note:'2026-07-05 WebFetchで本文確認済み（施行日を定める附則を含む）'},
+  {name:'改正リーフレット（No.11・令和8年4月作成）', basis:'厚労省・全6ページ', url:'https://www.mhlw.go.jp/content/001698010.pdf', note:'2026-07-05 全6ページ確認済み'},
+ ]},
+ {cat:'厚生労働省の解説・モデル様式', items:[
+  {name:'改正後モデル労働条件通知書（R8.10対応版・一般労働者用）', basis:'厚労省・同一労働同一賃金特集ページ経由', url:'https://www.mhlw.go.jp/content/001696984.pdf', note:'2026-07-05内容確認済み（待遇差説明窓口の新設項目を反映）。同一内容が主要様式ダウンロードコーナー掲載の001697542.pdfにも掲載'},
+  {name:'モデル労働条件通知書ほか様式集（掲載ページ）', basis:'主要様式ダウンロードコーナー（労働基準法等関係主要様式）', url:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/roudoukijunkankei.html', note:'2026-07-05確認済み。R8.10.1以降用の新様式（短時間労働者用等含む）を掲載'},
+  {name:'2024年4月 労働条件明示ルール改正の解説', basis:'厚労省特設ページ', url:'https://www.mhlw.go.jp/stf/newpage_32105.html', note:'変更の範囲・更新上限・無期転換明示の追加。2026-07-05確認済み'},
+  {name:'無期転換ルール ポータルサイト', basis:'厚労省', url:'https://muki.mhlw.go.jp/', note:'2026-07-05確認済み'},
+  {name:'同一労働同一賃金 特集ページ', basis:'厚労省', url:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000144972.html', note:'パート有期法関係の起点ページ。R8改正資料の集約先。2026-07-05確認済み'},
+ ]},
+ {cat:'このツールの法令確認記録', items:[
+  {name:'法令確認記録（2026-07-04 実施）', basis:'専門サブエージェント3体でe-Gov・厚労省等を一次確認', url:'', note:'事務所内ファイル（リンクなし）'},
+  {name:'法令・システム点検（2026-07-05 実施）', basis:'修正仕様書に基づき24件反映済み', url:'', note:'同上'},
+ ]},
+];
+function renderRefs(){
+  renderMeiji();
+  const chk=document.getElementById('refsChecked'); if(chk) chk.textContent=REFS_CHECKED;
+  const wrap=document.getElementById('refsList'); if(!wrap) return;
+  wrap.innerHTML=REFS.map(g=>{
+    const rows=g.items.map(it=>{
+      const isPdf=/\.pdf(\?|$)/i.test(it.url||'');
+      const link=it.url?`<a href="${it.url}" target="_blank" rel="noopener">${isPdf?'📄 PDFを開く':'🔗 開く'}</a>`:`<span style="color:var(--sub)">未登録（定期点検で確定）</span>`;
+      return `<tr><td>${esc(it.name)}</td><td>${esc(it.basis||'')}</td><td>${link}</td><td>${esc(it.note||'')}</td></tr>`;
+    }).join('');
+    return `<h2>${esc(g.cat)}</h2><table class="roster"><thead><tr><th>名称</th><th>根拠・版</th><th>リンク</th><th>備考</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }).join('');
+}
+
 function switchMode(m){
-  document.getElementById('modeCreate').classList.toggle('hidden', m!=='create');
-  document.getElementById('modeBatch').classList.toggle('hidden', m!=='batch');
-  document.getElementById('modeCalc').classList.toggle('hidden', m!=='calc');
+  const MODES=['create','batch','calc','guide','refs'];
+  MODES.forEach(k=>{
+    const cap=k[0].toUpperCase()+k.slice(1);
+    const pane=document.getElementById('mode'+cap); if(pane) pane.classList.toggle('hidden', m!==k);
+    const tab=document.getElementById('tab'+cap); if(tab) tab.classList.toggle('active', m===k);
+  });
   document.getElementById('createActions').style.display = (m==='create')?'flex':'none';
   const rb=document.getElementById('rosterBar'); if(rb) rb.style.display = (m==='create')?'flex':'none';
-  document.getElementById('tabCreate').classList.toggle('active', m==='create');
-  document.getElementById('tabBatch').classList.toggle('active', m==='batch');
-  document.getElementById('tabCalc').classList.toggle('active', m==='calc');
   if(m==='calc') calcRender();
   if(m==='batch') renderRoster();
+  if(m==='refs') renderRefs();
 }
 
 /* ===================== 名簿（複数人一括作成） ===================== */
 let ROSTER=[];          // [{id, state}]
 let ROSTER_SEQ=0;
 let EDIT_ID=null;       // 編集中の名簿ID（null＝新規追加モード）
+let BULK_MODE=false;    // 一括出力中はtrue（単票confirmGapsをスキップし、bulkGapReportで一括確認する）
 
 function sf(s,n){ return (s&&s.fields&&s.fields[n]!=null)?s.fields[n]:''; }
 function sr(s,n){ return (s&&s.radios&&s.radios[n]!=null)?s.radios[n]:''; }
@@ -1493,6 +1762,7 @@ function rosterAddNext(){
   EDIT_ID=null;
   // 次の人用に「氏名」「賃金額」「手当（支給項目）」だけをクリア（他条件は維持）
   ['employee_name','monthly_wage','daily_wage','hourly_wage','annual_wage',
+   'unit_price','guaranteed_wage','uni_target','uni_h_ot','uni_h_hol','uni_h_night',
    'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount']
     .forEach(n=>{ const el=form.elements[n]; if(el){ el.disabled=false; el.value=''; } });
   setAllows('in',[{}]); setAllows('out',[{}]);
@@ -1572,10 +1842,10 @@ function renderRoster(){
 }
 function saveRoster(){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
-  const data={_v:1, type:'roster', savedAt:'', people:ROSTER.map(e=>({name:sf(e.state,'employee_name')||'', state:e.state}))};
+  const data={_v:1, type:'roster', savedAt:new Date().toISOString(), people:ROSTER.map(e=>({name:sf(e.state,'employee_name')||'', state:e.state}))};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`労働条件_名簿_${ROSTER.length}名.json`;
+  a.download=`労働条件_名簿_${ROSTER.length}名_${ymd()}.json`;
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
 function loadRoster(input){
@@ -1604,16 +1874,16 @@ function loadRoster(input){
 }
 
 /* ===== 一括出力 ===== */
-function _withRoster(perPerson, done){
-  if(!ROSTER.length){ alert('名簿が空です。まず「作成」タブで入力し名簿に追加してください。'); return false; }
-  const backup=serializeState();
-  ROSTER.forEach((e,i)=>{ restoreState(e.state); perPerson(e,i); });
-  restoreState(backup);   // 作業中の内容を復元
-  if(done) done();
-  return true;
+function bulkGapReport(){
+  const backup=serializeState(); const lines=[];
+  ROSTER.forEach(e=>{ restoreState(e.state); const g=requiredGaps(updateVisibility()); if(g.length) lines.push((sf(e.state,'employee_name')||'無題')+'：'+g.join('、')); });
+  restoreState(backup);
+  if(!lines.length) return true;
+  return confirm('未入力の法定明示事項がある人がいます：\n'+lines.join('\n')+'\n\nこのまま出力しますか？');
 }
 function bulkPrint(){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  if(!bulkGapReport())return;
   const backup=serializeState();
   const all=[];
   ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>all.push(s)); });
@@ -1624,23 +1894,27 @@ function bulkPrint(){
   window.print();
   setTimeout(()=>{ restoreState(backup); switchMode('batch'); }, 300);
 }
-function bulkWordCombined(){
-  if(!ROSTER.length){ alert('名簿が空です。'); return; }
-  const backup=serializeState();
-  const parts=[];
-  ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>parts.push(s)); });
-  restoreState(backup);
-  const css=`body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
+function wordDocCss(headerRef){
+  return `body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
     .form-kind{text-align:right;font-size:9.5pt}
     .title{text-align:center;font-size:16pt;font-weight:bold}
     .issue{text-align:right}.office{text-align:right}.addr{font-size:12pt}.lead{margin:8px 0}
     table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
     table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
     td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
-    .note{font-size:8.5pt}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
+    .note{font-size:8.5pt}.warn{color:#b00;font-size:8.5pt;font-weight:bold}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
     p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
-    @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;mso-header:h1}
+    @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;${headerRef}}
     div.WordSection1{page:WordSection1;}`;
+}
+function bulkWordCombined(){
+  if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  if(!bulkGapReport())return;
+  const backup=serializeState();
+  const parts=[];
+  ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>parts.push(s)); });
+  restoreState(backup);
+  const css=wordDocCss('mso-header:h1;');
   const body=parts.map((s,i)=>`<div style="${i?'page-break-before:always;':''}">${s}</div>`).join('');
   const headerDiv=`<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>`;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
@@ -1651,14 +1925,17 @@ function bulkWordCombined(){
 }
 function bulkExcelCombined(){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  if(!bulkGapReport())return;
   const backup=serializeState();
+  switchMode('create');   // estimatePages がプレビュー実測のため作成タブで実行
   const tables=[], sheets=[], used={};
   ROSTER.forEach((e,i)=>{
     restoreState(e.state);
     tables.push(excelTableForCurrent());
-    sheets.push(excelWorksheetOptionsXml(excelSheetName(val('employee_name'), i, used), false));
+    sheets.push(excelWorksheetOptionsXml(excelSheetName(val('employee_name'), i, used), estimatePages()>=2));
   });
   restoreState(backup);
+  switchMode('batch');
   const body=tables.map((t,i)=>(i?`<br style="page-break-before:always"/>`:'')+t).join('');
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
   <head><meta charset="utf-8">
@@ -1668,10 +1945,13 @@ function bulkExcelCombined(){
 }
 function bulkExportEach(kind){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
+  if(!bulkGapReport())return;
   const backup=serializeState();
+  switchMode('create');   // estimatePages がプレビュー実測のため作成タブで実行
+  BULK_MODE=true;
   let i=0;
   (function next(){
-    if(i>=ROSTER.length){ restoreState(backup); rosterStatus('個別ファイル '+ROSTER.length+'件を出力しました。'); return; }
+    if(i>=ROSTER.length){ BULK_MODE=false; restoreState(backup); switchMode('batch'); rosterStatus('個別ファイル '+ROSTER.length+'件を出力しました。'); return; }
     restoreState(ROSTER[i].state);
     if(kind==='doc') exportWord(); else exportExcel();
     i++; setTimeout(next, 500);
@@ -1764,19 +2044,10 @@ function calcRender(){
 
 function exportWord(){
   render();
+  if(!BULK_MODE && !confirmGaps('Word出力'))return;
   const multi = estimatePages()>=2;   // 2ページ以上のときだけヘッダーにページ番号
   const headerRef = multi ? 'mso-header:h1;' : '';
-  const css=`body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
-    .form-kind{text-align:right;font-size:9.5pt}
-    .title{text-align:center;font-size:16pt;font-weight:bold}
-    .issue{text-align:right}.office{text-align:right}.addr{font-size:12pt}.lead{margin:8px 0}
-    table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
-    table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
-    td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
-    .note{font-size:8.5pt}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
-    p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
-    @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;${headerRef}}
-    div.WordSection1{page:WordSection1;}`;
+  const css=wordDocCss(headerRef);
   const body=LAST_SHEETS.map((s,i)=>`<div style="${i? 'page-break-before:always;':''}">${s}</div>`).join('');
   const headerDiv = multi ? `<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>` : '';
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
@@ -1816,7 +2087,7 @@ function excelTableForCurrent(){
   chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
   rows.push(`<tr>${cell(esc(dm.lead),{span:2,border:false})}</tr>`);
   blocks.forEach(b=>{
-    const content=b.lines.map(l=>esc(String(l).startsWith('__NOTE__')?l.slice(8):l)).join(BR);
+    const content=b.lines.map(l=>{ const s=String(l); return esc((s.startsWith('__NOTE__')||s.startsWith('__WARN__'))?s.slice(8):s); }).join(BR);
     rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true})}</tr>`);
   });
   rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:2,border:false})}</tr>`);
@@ -1836,6 +2107,7 @@ function excelSheetName(base, idx, used){
 }
 function exportExcel(){
   render();
+  if(!BULK_MODE && !confirmGaps('Excel出力'))return;
   const table=excelTableForCurrent();
   const multi = estimatePages()>=2;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -1844,9 +2116,17 @@ function exportExcel(){
   <body>${table}</body></html>`;
   download(fname('xls'), html, 'application/vnd.ms-excel');
 }
-function resetForm(){ if(confirm('入力内容をクリアします。よろしいですか？')){ form.reset(); render(); } }
+function clearFormAll(){
+  form.reset();
+  setAllows('in',[{}]); setAllows('out',[{}]);
+  setTimes([{}]); setBreaks([{}]); setOthers([{}]); setDismissals(['']);
+  EDIT_ID=null; updateRosterBar();
+  render();
+}
+function resetForm(){ if(confirm('入力内容をクリアします。よろしいですか？（名簿は消えません）')){ clearFormAll(); } }
 
 function loadSample(){
+  clearFormAll();
   const set=(n,v)=>{ const el=form.elements[n]; if(!el)return; if(el.type==='radio'){[...form.elements[n]].forEach(r=>r.checked=(r.value===v));} else el.value=v; };
   set('docType','NOTICE'); set('issue_date','2026-07-01'); set('employee_name','田中　太郎');
   set('office_addr','仙台市宮城野区榴岡３－'); set('office_name','株式会社　○○○○'); set('employer','代表取締役　○○○○');
@@ -1868,6 +2148,7 @@ function loadSample(){
   set('fixed_night_name','固定深夜手当'); set('fixed_night_hours',''); if(form.elements['fixed_night_auto'])form.elements['fixed_night_auto'].checked=false;
   set('ot_60under','125'); set('ot_60over','25'); set('ot_shotei','100'); set('hol_legal','135'); set('hol_nonlegal','125'); set('night_pct','25');
   set('wage_closing','毎月末日'); set('wage_payday','翌月10日');
+  set('pay_method','口座振込（本人同意による）'); set('pay_deduction','無');
   set('raise_flag','有'); set('raise_note','毎年8月、会社業績による');
   set('bonus_flag','有'); set('bonus_note','年2回（7月・12月）');
   set('retire_flag','有'); set('retire_note','勤続3年以上、就業規則第40条による');
