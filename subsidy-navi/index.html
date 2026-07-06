@@ -153,6 +153,8 @@
   @media print{
     header.top,footer,.no-print,.backlink{display:none!important}
     body{background:#fff;font-size:12.5px}
+    /* 印刷ダイアログの「背景のグラフィック」がオフでも背景色を必ず印刷する */
+    .sheet,.sheet *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
     main{max-width:none;margin:0;padding:0}
     .panel{border:0;padding:0;margin:0}
     .sheet{border:0;border-radius:0;max-width:none;margin:0;padding:0;box-shadow:none}
