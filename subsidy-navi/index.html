@@ -72,17 +72,17 @@
   .guidebox .gt{font-size:13px;color:var(--sub);margin-top:7px}
   .guidebox.miss{border-color:#f3c9c6;background:var(--bad)}
   .guidebox.miss .gm{color:var(--bad-ink);font-size:14px;font-weight:600}
-  .sheet .psec{font-size:16px;font-weight:700;margin:16px 0 6px;border-left:5px solid var(--brand);padding-left:10px}
-  .sheet .pmerit{background:var(--accent);border-radius:8px;padding:12px 14px}
-  .sheet .pfall{border-left:3px solid #e0a800;background:#fffaf0;padding:8px 12px;margin-top:8px}
-  .sheet .pcta{background:var(--accent);border-radius:8px;padding:14px 16px;margin-top:16px}
-  .sheet .pchk{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+  .sheet .psec{font-size:15px;font-weight:700;margin:10px 0 4px;border-left:5px solid var(--brand);padding-left:10px}
+  .sheet .pmerit{background:var(--accent);border-radius:8px;padding:9px 13px}
+  .sheet .pfall{border-left:3px solid #e0a800;background:#fffaf0;padding:6px 12px;margin-top:6px}
+  .sheet .pcta{background:var(--accent);border-radius:8px;padding:10px 15px;margin-top:10px}
+  .sheet .pchk{display:flex;gap:8px;align-items:flex-start;margin:4px 0}
   .sheet .pchk .box2{width:15px;height:15px;border:1.5px solid #555;flex:0 0 auto;margin-top:3px}
   .sheet .pchk.sp{color:var(--brand-d)} .sheet .pchk.sp .box2{border-color:var(--brand)}
-  .sheet .pkey{background:#fdecec;border-left:4px solid #b3261e;padding:9px 14px;margin-top:10px}
-  .sheet .pkey .pkh{color:#b3261e;font-weight:700;font-size:14px;margin-bottom:4px}
-  .sheet .pkey .pkb{font-size:14px}
-  .sheet .pkey .pkb ul{margin:2px 0 0 18px} .sheet .pkey .pkb li{margin:4px 0}
+  .sheet .pkey{background:#fdecec;border-left:4px solid #b3261e;padding:7px 13px;margin-top:8px}
+  .sheet .pkey .pkh{color:#b3261e;font-weight:700;font-size:13.5px;margin-bottom:2px}
+  .sheet .pkey .pkb{font-size:13px}
+  .sheet .pkey .pkb ul{margin:2px 0 0 18px} .sheet .pkey .pkb li{margin:2px 0}
   .simrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
   .simrow .simout{font-weight:700;color:var(--brand-d)}
   .srcic{font-size:13px}
@@ -152,12 +152,13 @@
   .sheet .sig{margin-top:22px;text-align:right;font-size:14px}
   @media print{
     header.top,footer,.no-print,.backlink{display:none!important}
-    body{background:#fff;font-size:13px}
+    body{background:#fff;font-size:12.5px}
     main{max-width:none;margin:0;padding:0}
     .panel{border:0;padding:0;margin:0}
     .sheet{border:0;border-radius:0;max-width:none;margin:0;padding:0;box-shadow:none}
     .prog .pstep{break-inside:avoid;page-break-inside:avoid}
-    @page{size:A4;margin:14mm}
+    .sheet .psec{break-after:avoid;page-break-after:avoid}
+    @page{size:A4;margin:11mm}
   }
 </style>
 </head>
@@ -1100,13 +1101,14 @@
     function refresh(){
       sheet.innerHTML='';
       sheet.appendChild(el('div',{style:'font-size:12px;color:#555'},CFG.office_name||''));
-      sheet.appendChild(el('div',{style:'font-size:19px;font-weight:700;margin-top:2px'},d.name+(d.course?('（'+d.course+'）'):'')+' 活用のご案内'));
+      sheet.appendChild(el('div',{style:'font-size:17px;font-weight:700;margin-top:2px;line-height:1.3'},d.name+(d.course?('（'+d.course+'）'):'')+' 活用のご案内'));
       if(ps.client) sheet.appendChild(el('div',{style:'font-weight:700;margin-top:4px'},ps.client+' 御中'));
       sheet.appendChild(el('div',{style:'color:#333;margin-top:2px;font-size:14px'},'御社の「人を大切にする仕組みづくり」を、国の助成金で後押しするご提案です。'));
 
       sheet.appendChild(el('div',{class:'psec'},'1. まずはメリット'));
       var m=el('div',{class:'pmerit'});
-      m.appendChild(el('div',null,d.summary||''));
+      var _sm=(d.summary||''); if(_sm.length>150){ var _c=_sm.slice(0,150), _p=_c.lastIndexOf('。'); _sm=(_p>=100?_sm.slice(0,_p+1):_c+'…'); }
+      m.appendChild(el('div',null,_sm));
       var sim=el('div',{class:'simrow'});
       if(ps.simType==='unit'){
         var uv=parseFloat(ps.uval), uq=parseFloat(ps.uqty), uc=parseFloat(ps.ucap);
@@ -1156,17 +1158,17 @@
       }
       m.appendChild(sim);
       m.appendChild(el('div',{style:'color:#333;font-size:13px;margin-top:8px'},'ポイント：助成金は後払いです。計画 → 取組・実施 → 申請 → 入金 の順に進みます。'));
-      if(d.schedule){ var s=d.schedule; var sched=[s.plan_submission?('計画届: '+s.plan_submission):'', s.implementation_period?('取組: '+s.implementation_period):'', s.application_deadline?('申請: '+s.application_deadline):''].filter(Boolean).join('　→　');
+      if(d.schedule){ var s=d.schedule; var _clip=function(x){x=String(x);return x.length>26?x.slice(0,26)+'…':x;}; var sched=[s.plan_submission?('計画届: '+_clip(s.plan_submission)):'', s.implementation_period?('取組: '+_clip(s.implementation_period)):'', s.application_deadline?('申請: '+_clip(s.application_deadline)):''].filter(Boolean).join('　→　');
         if(sched) m.appendChild(el('div',{style:'color:#555;font-size:12.5px;margin-top:4px'},'目安：'+sched)); }
       sheet.appendChild(m);
 
       sheet.appendChild(el('div',{class:'psec'},'2. 大切なこと ― 審査は「約束と実態の答え合わせ」'));
-      sheet.appendChild(el('div',{style:'font-size:14px'},'労働条件は書面で明示する義務があります（労働基準法第15条）。助成金では「契約書どおりの労働条件」と「実際の働き方（出勤簿・賃金台帳）」が一致しているかを、1分・1円単位で確認されます。'));
+      sheet.appendChild(el('div',{style:'font-size:13px'},'労働条件は書面で明示する義務があります（労基法15条）。助成金審査では「契約書どおりの労働条件」と「実際の働き方（出勤簿・賃金台帳）」が1分・1円単位で一致しているかを確認されます。'));
       var fall=el('div',{class:'pfall'});
       fall.appendChild(el('div',{style:'font-weight:700;margin-bottom:4px'},'よくある不支給の落とし穴'));
       ['「給料は多めだからOK」のどんぶり勘定 → 残業代が区分されず未払扱いに','契約書は週休2日なのに休日出勤だらけ → 労働条件違反','そもそも労働条件通知書を渡していない → スタートラインに立てない','シフト制・交代制なのにシフト表（勤務割表）がない → 実際の労働時間・休日が確認できず不支給に'].forEach(function(t){ fall.appendChild(el('div',{style:'margin:2px 0'},'・'+t)); });
       sheet.appendChild(fall);
-      var warns=pick(/計画|前日|賃金|賃上げ|３％|3％|解雇|就業規則|台帳|出勤|明示|転換前|要件/, (d.disqualifiers||[]).concat(d.requirements||[]), 3);
+      var warns=pick(/計画|前日|賃金|賃上げ|３％|3％|解雇|就業規則|台帳|出勤|明示|転換前|要件/, (d.disqualifiers||[]).concat(d.requirements||[]), 2);
       if(warns.length){
         var kb=el('div',{class:'pkey'});
         kb.appendChild(el('div',{class:'pkh'},'⚠️ この助成金で特に注意する点（ここを満たさないと不支給に）'));
@@ -1179,12 +1181,10 @@
       sheet.appendChild(el('div',{class:'psec'},'3. 自社診断 ― 挑戦前の「労務管理」健康診断'));
       sheet.appendChild(el('div',{style:'font-size:13px;color:#333;margin-bottom:4px'},'当てはまるものにチェック。1つでも空欄があれば、まずそこから一緒に整えましょう。'));
       ['従業員全員の労働時間を、タイムカード等で毎日客観的に記録している','賃金台帳に、労働時間・残業時間を毎月正確に記載している','労働条件通知書（雇用契約書）を必ず書面で渡している','就業規則（10人以上）を労働基準監督署に届け出ている'].forEach(function(t){ var r=el('div',{class:'pchk'}); r.appendChild(el('span',{class:'box2'})); r.appendChild(el('span',null,t)); sheet.appendChild(r); });
-      var sp=pick(/就業規則|計画|規定|整備|賃上げ|台帳|契約書/, (d.requirements||[]).concat(d.client_checklist||[]), 2);
-      sp.forEach(function(t){ var r=el('div',{class:'pchk sp'}); r.appendChild(el('span',{class:'box2'})); r.appendChild(el('span',null,'このコース用：'+String(t).replace(/^\d+\.\s*/,'').slice(0,80))); sheet.appendChild(r); });
 
       var cta=el('div',{class:'pcta'});
       cta.appendChild(el('div',{style:'font-weight:700'},'受給のカギは、御社自身の日々の労務管理です'));
-      cta.appendChild(el('div',{style:'color:#333;font-size:13px;margin-top:4px'},'助成金はルールを守る企業への国からのご褒美です。受給には、労働時間の客観的な記録・賃金台帳・労働条件通知書の整備など、御社ご自身の労務管理が欠かせません（実態を後からつくることはできません）。当事務所は、その仕組みづくりと申請手続きを御社と二人三脚でサポートします。まずは現状の確認からご一緒しましょう。詳しくはお問い合わせください。'));
+      cta.appendChild(el('div',{style:'color:#333;font-size:13px;margin-top:4px'},'助成金はルールを守る企業への国からの後押しです。受給のカギは、労働時間の客観的な記録・賃金台帳・労働条件通知書など、御社ご自身の日々の労務管理（実態を後からつくることはできません）。その仕組みづくりから申請まで、当事務所が二人三脚でサポートします。まずは現状確認からご一緒しましょう。'));
       var cc=[]; if(CFG.tel)cc.push('TEL: '+CFG.tel);
       cta.appendChild(el('div',{style:'font-size:13px;margin-top:6px'},(CFG.office_name||'')+(ps.staff?('　担当: '+ps.staff):'')+(cc.length?('　'+cc.join('　')):'')));
       sheet.appendChild(cta);
