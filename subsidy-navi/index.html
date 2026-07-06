@@ -1164,7 +1164,7 @@
       sheet.appendChild(el('div',{style:'font-size:14px'},'労働条件は書面で明示する義務があります（労働基準法第15条）。助成金では「契約書どおりの労働条件」と「実際の働き方（出勤簿・賃金台帳）」が一致しているかを、1分・1円単位で確認されます。'));
       var fall=el('div',{class:'pfall'});
       fall.appendChild(el('div',{style:'font-weight:700;margin-bottom:4px'},'よくある不支給の落とし穴'));
-      ['「給料は多めだからOK」のどんぶり勘定 → 残業代が区分されず未払扱いに','契約書は週休2日なのに休日出勤だらけ → 労働条件違反','そもそも労働条件通知書を渡していない → スタートラインに立てない'].forEach(function(t){ fall.appendChild(el('div',{style:'margin:2px 0'},'・'+t)); });
+      ['「給料は多めだからOK」のどんぶり勘定 → 残業代が区分されず未払扱いに','契約書は週休2日なのに休日出勤だらけ → 労働条件違反','そもそも労働条件通知書を渡していない → スタートラインに立てない','シフト制・交代制なのにシフト表（勤務割表）がない → 実際の労働時間・休日が確認できず不支給に'].forEach(function(t){ fall.appendChild(el('div',{style:'margin:2px 0'},'・'+t)); });
       sheet.appendChild(fall);
       var warns=pick(/計画|前日|賃金|賃上げ|３％|3％|解雇|就業規則|台帳|出勤|明示|転換前|要件/, (d.disqualifiers||[]).concat(d.requirements||[]), 3);
       if(warns.length){
