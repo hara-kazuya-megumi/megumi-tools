@@ -27,7 +27,7 @@
   @media(max-width:900px){.wrap{grid-template-columns:1fr}}
   /* ---- form ---- */
   .form{padding:14px 16px 60px;max-height:calc(100vh - 56px);overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
-  @media(max-width:900px){.form{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+  @media(max-width:900px){.form{max-height:none;border-right:0;border-bottom:1px solid var(--line)}.form-nav{position:static;margin:-14px -16px 12px}}
   fieldset{border:1px solid var(--line);border-radius:10px;margin:0 0 14px;padding:10px 12px 12px;background:var(--panel)}
   legend{font-weight:700;color:var(--accent);padding:0 6px;font-size:13px}
   .row{display:flex;flex-direction:column;gap:3px;margin:7px 0}
@@ -180,7 +180,7 @@
     body{background:#fff}
     .wrap{display:block}
     .preview{padding:0;overflow:visible;max-height:none}
-    .page-note,.gap-note{display:none !important}
+    .page-note,.gap-note,.lang-note,.form-nav{display:none !important}
     .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 12mm;
       page-break-after:always;font-size:10pt}
     .sheet:last-child{page-break-after:auto}
@@ -203,6 +203,29 @@
   #modeGuide .guide-btn:active{transform:translateY(1px)}
   #modeGuide .guide-btn.secondary{background:#fff;color:var(--accent2);box-shadow:none}
   #modeGuide .guide-btn.secondary:hover{background:#eef2f8;filter:none}
+  /* ---- §E UI改善（画面のみ・出力書面には影響しない） ---- */
+  /* タブバーの2群化：作る系（作成/一括/試算）｜調べる系（使い方/資料） */
+  .tab-sep{width:1px;background:#b9c6d2;margin:6px 8px;align-self:stretch}
+  .tab.ref:not(.active){background:#e9efe9;color:#4d5c50}
+  /* 作成タブ先頭のジャンプナビ（フォーム列の中で上部に固定） */
+  .form-nav{position:sticky;top:0;z-index:6;background:var(--panel);margin:-14px -16px 12px;padding:8px 12px;
+    border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+  .form-nav .nav-cap{font-size:11px;font-weight:700;color:var(--sub);white-space:nowrap}
+  .form-nav .nav-chip{border:1px solid var(--line);background:var(--chip);color:var(--accent2);border-radius:12px;
+    padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer;line-height:1.5}
+  .form-nav .nav-chip:hover{background:#dde8f2}
+  .form-nav .nav-gap{margin-left:auto;font-size:11px;font-weight:700;border-radius:12px;padding:2px 9px;border:1px solid;line-height:1.5}
+  .form-nav .nav-gap.ok{background:#eef6ef;border-color:#bcd8bf;color:#245a2b;cursor:default;opacity:1}
+  .form-nav .nav-gap.ng{background:#fdecec;border-color:#e7b3b3;color:#8a1f1f;cursor:pointer}
+  #form fieldset{scroll-margin-top:52px}
+  /* セクション個別ヘルプ：全体ヘルプOFFのとき、各欄の「？」でその欄のヒントだけ表示できる */
+  .fs-help{display:none;margin-left:6px;border:1px solid #c4e2c6;background:#e9f6ea;color:#245a2b;border-radius:50%;
+    width:19px;height:19px;line-height:1;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;padding:0}
+  body.help-off .fs-help{display:inline-block}
+  body.help-off fieldset.help-on .help-note{display:block}
+  fieldset.help-on .fs-help{background:#245a2b;color:#fff;border-color:#245a2b}
+  /* 対訳モードの画面バナー（印刷には出さない） */
+  .lang-note{background:#eaf1fb;border:1px solid #cfe0f5;color:#1f4e79;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -226,8 +249,9 @@
   <button id="tabCreate" class="tab active" onclick="switchMode('create')">作成</button>
   <button id="tabBatch" class="tab" onclick="switchMode('batch')">一括作成</button>
   <button id="tabCalc" class="tab" onclick="switchMode('calc')">賃金試算</button>
-  <button id="tabGuide" class="tab" onclick="switchMode('guide')">使い方</button>
-  <button id="tabRefs" class="tab" onclick="switchMode('refs')">法令資料</button>
+  <span class="tab-sep" aria-hidden="true"></span>
+  <button id="tabGuide" class="tab ref" onclick="switchMode('guide')">使い方</button>
+  <button id="tabRefs" class="tab ref" onclick="switchMode('refs')">法令資料</button>
 </div>
 
 <div id="rosterBar">
@@ -243,6 +267,8 @@
   <!-- ============ FORM ============ -->
   <form class="form" id="form" oninput="render()" onchange="render()">
 
+    <nav id="formNav" class="form-nav" aria-label="入力セクションへ移動"></nav>
+
     <div class="empty-legend">※ <b>薄い黄色</b>の欄は未入力です（入力すると色が消えます）。表示中の欄のみ対象です。</div>
 
     <div class="help-guide">
@@ -252,7 +278,7 @@
       ③ 入力し終えたら右上の「印刷/PDF・Word・Excel」で出力。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。
     </div>
 
-    <fieldset>
+    <fieldset id="fsDisplay">
       <legend>表示設定</legend>
       <div class="row"><label>日付の表示形式（全書類共通）</label>
         <div class="seg">
@@ -263,7 +289,27 @@
       </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsLang">
+      <legend>外国語対応（対訳表示）</legend>
+      <div class="row"><label>言語</label>
+        <select name="doc_lang">
+          <option value="ja" selected>日本語のみ</option>
+          <option value="en">日本語＋English（対訳）</option>
+        </select>
+        <div class="help-note">日本語以外を選ぶと、見出し・定型文言の下に<i>翻訳を斜体で併記</i>します（対訳表示）。業務内容・特記事項などの<b>自由記入欄は翻訳されません</b>（入力した日本語のまま表示されます）。</div>
+      </div>
+      <div class="row hidden" id="grpLangStatus"><label>対象者の在留資格区分</label>
+        <div class="seg">
+          <label><input type="radio" name="lang_status" value="none" checked> 該当なし</label>
+          <label><input type="radio" name="lang_status" value="ginou"> 技能実習</label>
+          <label><input type="radio" name="lang_status" value="tokutei"> 特定技能</label>
+        </div>
+        <div class="help-note">技能実習・特定技能の場合のみ選びます。それ以外（一般の外国人従業員等）は「該当なし」のままで構いません。</div>
+      </div>
+      <div id="langGuardWarn" class="gap-note hidden" role="alert" aria-live="polite">⚠ <b>本ツールでは技能実習・特定技能の法定様式は作成できません。</b>技能実習は外国人技能実習機構（OTIT）公表の「雇用条件書」（<a href="https://www.otit.go.jp/system/format/06/" target="_blank" rel="noopener">参考様式・翻訳版はこちら</a>）、特定技能は出入国在留管理庁公表の「雇用条件書」（<a href="https://www.moj.go.jp/isa/applications/ssw/10_00020.html" target="_blank" rel="noopener">参考様式第1-6号等はこちら</a>）が在留資格の申請・届出手続上必要です。リンク先からダウンロードしてご利用ください。根拠：平成19年厚生労働省告示第276号「外国人労働者の雇用管理の改善等に関して事業主が適切に対処するための指針」（母国語その他理解できる言語での明示の努力義務）。</div>
+    </fieldset>
+
+    <fieldset id="fsDoctype">
       <legend>書類の種類</legend>
       <div class="row"><label>書類種別</label>
         <div class="seg" id="docTypeSeg">
@@ -280,7 +326,7 @@
       </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsBasic">
       <legend>基本情報</legend>
       <div class="row two">
         <div><label>交付日</label><input type="date" name="issue_date"></div>
@@ -293,7 +339,7 @@
       </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsEmpcat">
       <legend>雇用区分（まず選ぶ）</legend>
       <div class="row"><label>雇用形態</label>
         <div class="seg">
@@ -320,7 +366,7 @@
       <div class="note-law hidden" id="warnCombo">短時間・林業に「日雇」の様式はありません。期間区分を見直してください。</div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsTerm">
       <legend>契約期間</legend>
       <div class="row" id="grpMuki">
         <label>入社日（無期）</label>
@@ -360,7 +406,7 @@
       </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsPlace">
       <legend>就業の場所・業務</legend>
       <div class="help-note">「雇入れ直後」＝入社してすぐの場所・業務。「変更の範囲」＝将来の配置転換等で変わりうる範囲（2024年4月改正で明示が必要）。当面変わらなければ「変更なし」や雇入れ直後と同じ内容を記載します。</div>
       <div class="row"><label>就業の場所（雇入れ直後）</label><input type="text" name="workplace_now" placeholder="本社（仙台市…）"></div>
@@ -381,7 +427,7 @@
         <input type="text" name="probation_text" placeholder="令和8年7月1日から6か月（就業規則第9条）"></div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsWorktime">
       <legend>労働時間</legend>
       <div class="row"><label>労働時間制度</label>
         <select name="worktime_system">
@@ -473,7 +519,7 @@
       <div class="row"><label>その他の休暇</label><input type="text" name="other_leave" placeholder="特別休暇（慶弔等）"></div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsWage">
       <legend>賃金</legend>
       <div class="row"><label>基本賃金の種類</label>
         <select name="wage_type">
@@ -628,7 +674,7 @@
       <div class="row"><label><input type="checkbox" name="dismissal_full"> 解雇事由を全て列挙する（オフのときは先頭1件＋「等（詳細は就業規則による）」）</label></div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="fsOther">
       <legend>その他</legend>
       <div class="row two">
         <div><label>厚生年金</label><select name="kounen"><option value="有">有</option><option value="無">無</option></select></div>
@@ -937,7 +983,7 @@
     </div>
 
     <h2>1. このツールでできること</h2>
-    <p>労働条件通知書 兼 雇用契約書と、労働条件変更通知書を作成できます。雇用形態（一般・短時間・派遣・建設・林業など）×契約期間（無期・有期）×労働時間制度×賃金体系の組み合わせに応じて、必要な入力欄と書面の文言が自動で切り替わります。有期契約の無期転換ルールの別紙にも対応しています。書式は厚生労働省のモデル様式（令和8年10月版）に準拠しています。</p>
+    <p>労働条件通知書 兼 雇用契約書と、労働条件変更通知書を作成できます。雇用形態（一般・短時間・派遣・建設・林業など）×契約期間（無期・有期）×労働時間制度×賃金体系の組み合わせに応じて、必要な入力欄と書面の文言が自動で切り替わります。有期契約の無期転換ルールの別紙にも対応しています。書式は厚生労働省のモデル様式（令和8年10月版）に準拠しています。外国人労働者向けに、見出し・定型文言へ英訳を併記する<b>対訳モード（日本語＋English）</b>も使えます（訳文は厚労省の多言語モデル通知書に準拠）。</p>
     <p>入力した内容はすべてお使いのパソコンのブラウザ内だけで処理され、<b>外部には一切送信されません</b>。</p>
 
     <h2>2. 基本の流れ</h2>
@@ -958,8 +1004,16 @@
       <li><b>労働時間</b> — 選んだ制度（通常・変形・フレックス・裁量など）で欄が変わります。休憩は複数行登録できます。</li>
       <li><b>賃金</b> — 基準内手当は淡い青、基準外手当は淡いオレンジで背景色が分かれています。固定残業代を使う場合は時間数の入力が必須です。</li>
       <li><b>相談窓口ほか</b> — 雇用区分に応じて必要な欄（昇給・賞与・退職手当の有無、相談窓口など）が自動で表示されます。</li>
+      <li><b>外国語対応</b> — 言語で「日本語＋English」を選ぶと、見出し・定型文言の下に英訳が斜体で併記されます（自由記入欄は日本語のまま）。<b>技能実習・特定技能</b>の方には制度別の法定様式が必要なため、選択すると案内と出力前の確認が表示されます。</li>
     </ul>
-    <p>各欄の細かい説明は緑のヒント（❓ヘルプON）に書いてあります。</p>
+    <p class="guide-nav">該当の入力欄へ直接移動：
+      <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsTerm')">▶ 契約期間</button>
+      <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsPlace')">▶ 就業場所・業務</button>
+      <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsWorktime')">▶ 労働時間</button>
+      <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsWage')">▶ 賃金</button>
+      <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsLang')">▶ 外国語対応</button>
+    </p>
+    <p>各欄の細かい説明は緑のヒント（❓ヘルプON）に書いてあります。ヘルプOFFのときも、各欄タイトル横の「？」でその欄のヒントだけ表示できます。作成タブ最上部のナビ（章ボタン）からも各欄へ移動できます。</p>
 
     <h2>4. 一括作成（名簿）</h2>
     <ol>
@@ -1633,6 +1687,96 @@ function confirmGaps(action){
   if(!g.length) return true;
   return confirm('未入力の法定明示事項があります：\n・'+g.join('\n・')+'\n\nこのまま'+action+'しますか？（下書きとしては出力できます）');
 }
+// 技能実習・特定技能は制度別の法定様式を使うのが実務上必須のため、出力直前に念押し確認する（confirmGapsと同じ位置づけ）
+function confirmLangGuard(action){
+  if((val('doc_lang')||'ja')==='ja') return true;
+  const st=radio('lang_status');
+  if(st!=='ginou' && st!=='tokutei') return true;
+  const label = st==='ginou' ? '技能実習' : '特定技能';
+  return confirm(`対象者の在留資格区分が「${label}」に設定されています。${label}の外国人には、この通知書ではなく制度別の法定様式（技能実習は外国人技能実習機構、特定技能は出入国在留管理庁の雇用条件書）を使用するのが実務上必須です。\n\nこのまま本ツールの書式で${action}しますか？`);
+}
+// ===== 外国語対応（対訳表示）: 出力直前に日本語文字列をキーに訳文を引く「後付け対訳レイヤー」 =====
+// 翻訳しない範囲: ユーザー自由記述（業務内容・特記事項・手当名・住所等）。辞書に無いテキストはそのまま日本語で表示される。
+// 辞書の一次ソースは厚労省「外国人労働者向けモデル労働条件通知書」の公式訳文からの転記（転記日2026-07-07）。
+const I18N = {
+  en: { name:'English',
+    // 層1: 通知書の見出し（block.k と完全一致）
+    headings:{
+      '契約期間':'Term of Contract','就業の場所':'Place of Employment',
+      '従事すべき業務の内容':'Contents of Duties','試用期間':'Probationary Period',
+      '始業・終業の時刻等':'Working Hours','休日':'Holidays','休日及び勤務日':'Holidays and Working Days',
+      '休暇':'Leave','賃金':'Wages',
+      '退職に関する事項':'Matters concerning Retirement','その他':'Other'
+    },
+    // 層2: 「ラベル＋全角空白＋値」形式の行のラベル部分
+    labels:{
+      '更新の有無':'Renewal of Contract','更新の判断基準':'Criteria for Renewal','更新上限':'Upper Limit of Renewal',
+      '就労日':'Working Days','労働時間制度':'Working Hours System','変形期間の起算日':'Start Date of the Variable Period',
+      '対象期間':'Applicable Period','特定期間':'Specific Period','年間労働日数':'Annual Working Days','連続労働日数':'Consecutive Working Days',
+      '清算期間':'Settlement Period','清算期間の総労働時間':'Total Working Hours in the Settlement Period',
+      '標準となる1日の労働時間':'Standard Daily Working Hours','コアタイム':'Core Time','フレキシブルタイム':'Flexible Time',
+      'みなし労働時間':'Deemed Working Hours','対象業務':'Applicable Duties','本人同意':'Consent of the Employee',
+      '健康・福祉確保措置':'Health and Welfare Measures','休憩時間':'Break Time','所定時間外労働':'Overtime Work',
+      '年次有給休暇':'Annual Paid Leave','その他の休暇':'Other Leave',
+      '事業場所在地':'Address of the Workplace','事業場名称':'Name of the Workplace',
+      '使用者職氏名':'Employer (Title and Name)','事業主の氏名又は名称':'Name of the Employer',
+      '変更日':'Date of Change','変更理由':'Reason for Change','変更根拠':'Basis for Change'
+    },
+    // 層2: ラベルの値側で完全一致する定型語（自由記述の値はそのまま日本語で残る）
+    enums:{
+      '有':'Yes','無':'No','自動的に更新する':'Automatically renewed','更新する場合があり得る':'May be renewed',
+      '契約の更新はしない':'Not renewed'
+    },
+    // 層1/タイトル・リード文・定型フレーズ（完全一致）
+    fixed:{
+      '労働条件通知書':'Notice of Employment','以下のとおり労働条件を通知します。':'We hereby notify you of the following working conditions.',
+      '雇用契約書':'Employment Contract','次の労働条件により、雇用契約を締結します。':'This Employment Contract is concluded under the following working conditions.',
+      '労働条件変更通知書':'Notice of Change in Working Conditions','下記のとおり労働条件を変更します。':'We hereby notify you of the following changes to your working conditions.',
+      '以上のほかは、当社就業規則による。':"Matters not stipulated above shall be governed by the Company's work rules.",
+      '上記の労働条件の変更に同意します。':'I hereby agree to the above changes in working conditions.',
+      '上記のとおり労働契約（雇用契約）を締結し、本書2通を作成して使用者・労働者が各1通を保有する。':'The Employer and the Employee hereby conclude this Employment Contract as stated above. Two copies of this document shall be made, one to be retained by each party.',
+      '令和　　年　　月　　日':'Date: ______ (Year) ______ (Month) ______ (Day)',
+      '（使用者）　所在地・名称　　　　　　　　　　　':'(Employer) Address / Name:',
+      '　　　　　　氏名　　　　　　　　　　　　　　㊞':'Name: ________________________ (Seal)',
+      '（労働者）　住所　　　　　　　　　　　　　　　':'(Employee) Address:',
+      '（労働者）　氏名　　　　　　　　　　　㊞':'(Employee) Name: ________________________ (Seal)'
+    }
+  }
+};
+function docLang(){ return val('doc_lang')||'ja'; }
+function i18nDict(){ const l=docLang(); return l!=='ja' ? I18N[l] : null; }
+// 対訳行のラップ方式: 画面/印刷/Wordは<div>（既存の.note等と同じ入れ子構造）、
+// Excelはセル分裂を防ぐため既存のBR定数(mso-data-placement:same-cell)と同じ流儀で<span>にする
+function biWrap(tr, size, excel){
+  if(excel) return `<br style="mso-data-placement:same-cell"><span style="font-size:${size};color:#555;font-style:italic">${tr}</span>`;
+  return `<div style="font-size:${size};color:#555;font-style:italic;margin-top:1px">${tr}</div>`;
+}
+// テキストが完全一致で辞書にあれば「ラベル＋全角空白＋値」の分割訳、無ければ日本語のみを返す（ja選択時と常に同一の出力）
+function biLine(text, opts){
+  const t=String(text==null?'':text);
+  const d=i18nDict(); if(!d||!t) return esc(t);
+  const excel=!!(opts&&opts.excel);
+  const full=d.fixed && d.fixed[t];
+  if(full) return `${esc(t)}${biWrap(esc(full),'8.5pt',excel)}`;
+  const idx=t.indexOf('　');
+  if(idx>0){
+    const label=t.slice(0,idx), rest=t.slice(idx+1);
+    const trLabel=d.labels && d.labels[label];
+    if(trLabel){
+      const trRest=(d.enums && d.enums[rest]) || rest;
+      return `${esc(t)}${biWrap(esc(trLabel)+'　'+esc(trRest),'8.5pt',excel)}`;
+    }
+  }
+  return esc(t);
+}
+function biHeading(text, opts){
+  const t=String(text==null?'':text);
+  const d=i18nDict(); const tr=d && d.headings && d.headings[t];
+  if(!tr) return esc(t);
+  const excel=!!(opts&&opts.excel);
+  return `${esc(t)}${biWrap(esc(tr),'8pt',excel)}`;
+}
+
 function officeLines(cat){
   const L=[]; if(has(val('office_addr')))L.push('事業場所在地　'+val('office_addr'));
   if(has(val('office_name')))L.push('事業場名称　'+val('office_name'));
@@ -1653,27 +1797,27 @@ function sheetHTML(title, lead, blocks, opts={}){
   let h='';
   const kind=val('display_category');
   if(has(kind) && !opts.leave) h+=`<div class="form-kind">${esc(kind)}</div>`;
-  h+=`<div class="title">${esc(title)}</div>`;
+  h+=`<div class="title">${biLine(title)}</div>`;
   h+=`<div class="issue">${esc(fmtDate(val('issue_date')))}</div>`;
   h+=`<div class="addr">${esc(val('employee_name'))}　殿</div>`;
-  h+=`<div class="office">${officeLines(cat).map(esc).join('<br>')}</div>`;
-  if(opts.chgMeta && opts.chgMeta.length) h+=`<div class="chg-meta">${opts.chgMeta.map(esc).join('<br>')}</div>`;
-  h+=`<div class="lead">${esc(lead)}</div>`;
+  h+=`<div class="office">${officeLines(cat).map(biLine).join('<br>')}</div>`;
+  if(opts.chgMeta && opts.chgMeta.length) h+=`<div class="chg-meta">${opts.chgMeta.map(biLine).join('<br>')}</div>`;
+  h+=`<div class="lead">${biLine(lead)}</div>`;
   h+=`<table class="doc"><tbody>`;
   blocks.forEach(b=>{
     const lines=b.lines.map(l=>{
-      if(String(l).startsWith('__NOTE__')) return `<div class="note">${esc(l.slice(8))}</div>`;
-      if(String(l).startsWith('__WARN__')) return `<div class="warn">${esc(l.slice(8))}</div>`;
-      return `<div>${esc(l)}</div>`;
+      if(String(l).startsWith('__NOTE__')) return `<div class="note">${biLine(l.slice(8))}</div>`;
+      if(String(l).startsWith('__WARN__')) return `<div class="warn">${biLine(l.slice(8))}</div>`;
+      return `<div>${biLine(l)}</div>`;
     }).join('');
     const mark = opts.changed && opts.changed.has(b.k) ? '<span class="mark">★</span>' : '';
-    h+=`<tr><td class="k">${mark}${esc(b.k)}</td><td class="lines">${lines}</td></tr>`;
+    h+=`<tr><td class="k">${mark}${biHeading(b.k)}</td><td class="lines">${lines}</td></tr>`;
   });
   h+=`</tbody></table>`;
   if(opts.leave) return h;
-  h+=`<div class="after">以上のほかは、当社就業規則による。</div>`;
+  h+=`<div class="after">${biLine('以上のほかは、当社就業規則による。')}</div>`;
   const s=signatureLines(opts.sign);   // 'notice'は署名欄なし
-  if(s.length){ h+=`<div class="sign">${s.map(esc).join('<br>')}</div>`; }
+  if(s.length){ h+=`<div class="sign">${s.map(biLine).join('<br>')}</div>`; }
   return h;
 }
 
@@ -1731,8 +1875,16 @@ function markEmpty(){
 }
 
 let LAST_SHEETS=[];
+function updateLangGuard(){
+  const lang=val('doc_lang')||'ja';
+  const grp=$('#grpLangStatus'); if(grp) grp.classList.toggle('hidden', lang==='ja');
+  const st=radio('lang_status');
+  const warn=$('#langGuardWarn');
+  if(warn) warn.classList.toggle('hidden', lang==='ja' || !(st==='ginou'||st==='tokutei'));
+}
 function render(){
   normalizeAllNumeric();
+  updateLangGuard();
   const st=updateVisibility();
   const dm=docMeta(st.doc);
   const chgMeta = dm.chg?[
@@ -1772,11 +1924,77 @@ function render(){
   { const gaps=requiredGaps(st); let gb=document.getElementById('gapNote');
     if(gaps.length){ if(!gb){ gb=document.createElement('div'); gb.id='gapNote'; gb.className='gap-note'; pv.insertBefore(gb, pv.firstChild); }
       gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／'); }
-    else if(gb){ gb.remove(); } }
+    else if(gb){ gb.remove(); }
+    updateFormNav(gaps); }
+  { let lb=document.getElementById('langNote');
+    if(docLang()!=='ja'){
+      if(!lb){ lb=document.createElement('div'); lb.id='langNote'; lb.className='lang-note';
+        const gb2=document.getElementById('gapNote'); pv.insertBefore(lb, gb2 ? gb2.nextSibling : pv.firstChild); }
+      lb.textContent='🌐 対訳モード（'+(((I18N[docLang()]||{}).name)||docLang())+'）：見出しと定型文言に翻訳を斜体で併記しています。業務内容・就業場所・手当名などの自由記入欄は、入力した日本語のまま出力されます。';
+    } else if(lb){ lb.remove(); } }
   markEmpty();
 }
 
-function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; window.print(); }
+// ===== §E 画面UI（出力書面には影響しない） =====
+// 作成タブ先頭のジャンプナビ：フォームのfieldsetから自動生成し、表示状態と法定明示の残数をrender()ごとに同期する
+const NAV_LABELS={'表示設定':'表示','外国語対応（対訳表示）':'外国語','書類の種類':'書類','基本情報':'基本情報',
+  '雇用区分（まず選ぶ）':'雇用区分','契約期間':'契約期間','就業の場所・業務':'場所・業務','試用期間':'試用',
+  '労働時間':'労働時間','休日・休暇':'休日・休暇','賃金':'賃金','退職に関する事項':'退職','その他':'その他'};
+function buildFormNav(){
+  const nav=document.getElementById('formNav'); if(!nav) return;
+  const cap=document.createElement('span'); cap.className='nav-cap'; cap.textContent='▶ 目次'; cap.setAttribute('aria-hidden','true');
+  nav.appendChild(cap);
+  let firstGapFsId=null;
+  [...document.querySelectorAll('#form > fieldset')].forEach((fs,i)=>{
+    const lg=fs.querySelector('legend'); if(!lg) return;
+    if(!fs.id) fs.id='fsNav'+i;
+    const b=document.createElement('button'); b.type='button'; b.className='nav-chip'; b.dataset.fs=fs.id;
+    const t=lg.textContent.trim(); b.textContent=NAV_LABELS[t]||t; b.title=t+' へ移動'; b.setAttribute('aria-label',t+' へ移動');
+    b.onclick=()=>{ try{ fs.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ fs.scrollIntoView(); } };
+    nav.appendChild(b);
+  });
+  const gb=document.createElement('button'); gb.type='button'; gb.id='navGap'; gb.className='nav-gap ok';
+  gb.textContent='✓ 法定明示OK'; gb.disabled=true; gb.setAttribute('aria-live','polite');
+  nav.appendChild(gb);
+  return firstGapFsId;
+}
+function updateFormNav(gaps){
+  const nav=document.getElementById('formNav'); if(!nav||!nav.children.length) return;
+  nav.querySelectorAll('.nav-chip').forEach(ch=>{
+    const fs=document.getElementById(ch.dataset.fs);
+    ch.classList.toggle('hidden', !fs || fs.classList.contains('hidden'));
+  });
+  const gb=document.getElementById('navGap'); if(!gb) return;
+  if(gaps.length){ gb.className='nav-gap ng'; gb.disabled=false; gb.textContent='⚠ 法定明示 残'+gaps.length+'件';
+    gb.title='クリックで先頭の未入力欄へ移動：'+gaps.join('／'); gb.setAttribute('aria-label',gb.title);
+    gb.onclick=()=>{ const first=[...nav.querySelectorAll('.nav-chip')].find(c=>!c.classList.contains('hidden'));
+      const fs=first&&document.getElementById(first.dataset.fs); if(fs){ try{fs.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){fs.scrollIntoView();} } }; }
+  else { gb.className='nav-gap ok'; gb.disabled=true; gb.textContent='✓ 法定明示OK'; gb.title=''; gb.removeAttribute('aria-label'); gb.onclick=null; }
+}
+// 全体ヘルプOFFのとき、各欄の legend の「？」でその欄のヒントだけ開閉できる
+function buildFsHelp(){
+  [...document.querySelectorAll('#form > fieldset')].forEach(fs=>{
+    if(!fs.querySelector('.help-note')) return;
+    const lg=fs.querySelector('legend'); if(!lg) return;
+    const title=lg.textContent.trim();
+    const b=document.createElement('button'); b.type='button'; b.className='fs-help'; b.textContent='？';
+    b.title='「'+title+'」のヒントだけを表示／非表示（全欄まとめては右上の❓ヘルプ）';
+    b.setAttribute('aria-label',title+'のヒントを表示');
+    b.setAttribute('aria-pressed','false');
+    b.onclick=(ev)=>{ ev.preventDefault(); const on=fs.classList.toggle('help-on');
+      b.setAttribute('aria-pressed', on?'true':'false');
+      b.setAttribute('aria-label', title+'のヒントを'+(on?'非表示':'表示')); };
+    lg.appendChild(b);
+  });
+}
+// 使い方タブから作成タブの該当欄へ直接ジャンプ
+function jumpToCreate(fsId){
+  switchMode('create');
+  const el=document.getElementById(fsId);
+  if(el) setTimeout(()=>{ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ el.scrollIntoView(); } },60);
+}
+
+function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; if(!BULK_MODE && !confirmLangGuard('印刷'))return; window.print(); }
 
 function download(filename, content, mime){
   const blob=new Blob(['﻿'+content],{type:mime});
@@ -1916,6 +2134,12 @@ const REFS=[
   {name:'無期転換ルール ポータルサイト', basis:'厚労省', url:'https://muki.mhlw.go.jp/', note:'2026-07-05確認済み'},
   {name:'同一労働同一賃金 特集ページ', basis:'厚労省', url:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000144972.html', note:'パート有期法関係の起点ページ。R8改正資料の集約先。2026-07-05確認済み'},
  ]},
+ {cat:'外国語対応・外国人労働者関係', items:[
+  {name:'外国人労働者の雇用管理の改善等に関して事業主が適切に対処するための指針', basis:'平成19年厚生労働省告示第276号（母国語その他理解できる言語での明示の努力義務）', url:'https://www.mhlw.go.jp/bunya/koyou/gaigokujin13/sisin01.html', note:'2026-07-07 legal-researchで確認。労基法15条・同規則5条は明示の使用言語を問わないが、本指針が努力義務として言語配慮を求める'},
+  {name:'外国人労働者向けモデル労働条件通知書（多言語版）', basis:'厚労省・13言語・PDF入力可能フォーム（英中韓ポ西タガログ・インドネシア・ベトナム・カンボジア・モンゴル・ミャンマー・ネパール・タイ）', url:'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000056460.html', note:'2026-07-07確認。単一パターン(一般常用)のみで当ツールの全9様式には非対応。本ツールの英語対訳辞書の一次ソース'},
+  {name:'技能実習生の雇用条件書等 参考様式（翻訳版）', basis:'外国人技能実習機構（OTIT）・9言語', url:'https://www.otit.go.jp/system/format/06/', note:'2026-07-07確認。技能実習生は在留資格の手続上この法定様式を使用（本ツールでは代替生成しない）'},
+  {name:'特定技能外国人の雇用条件書 参考様式', basis:'出入国在留管理庁・参考様式第1-6号等・英語+9言語', url:'https://www.moj.go.jp/isa/applications/ssw/10_00020.html', note:'2026-07-07確認。特定技能外国人は在留資格の手続上この法定様式を使用（本ツールでは代替生成しない）'},
+ ]},
  {cat:'このツールの法令確認記録', items:[
   {name:'法令確認記録（2026-07-04 実施）', basis:'専門サブエージェント3体でe-Gov・厚労省等を一次確認', url:'', note:'事務所内ファイル（リンクなし）'},
   {name:'法令・システム点検（2026-07-05 実施）', basis:'修正仕様書に基づき24件反映済み', url:'', note:'同上'},
@@ -1991,8 +2215,11 @@ function rosterAddNext(){
    'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount']
     .forEach(n=>{ const el=form.elements[n]; if(el){ el.disabled=false; el.value=''; } });
   setAllows('in',[{}]); setAllows('out',[{}]);
+  // 言語設定も人ごとに異なりうるため既定(日本語)に戻す（前の人の外国語設定を次の人に持ち越さない）
+  const langEl=form.elements['doc_lang']; if(langEl) langEl.value='ja';
+  const stEl=form.elements['lang_status']; if(stEl){ [...stEl].forEach(r=>{ r.checked=(r.value==='none'); }); }
   render(); renderRoster(); updateRosterBar();
-  rosterStatus('名簿に追加し、氏名・手当をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
+  rosterStatus('名簿に追加し、氏名・手当・言語設定をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
   const nm=form.elements['employee_name']; if(nm){ try{nm.focus();nm.scrollIntoView({block:'center'});}catch(e){} }
 }
 function rosterEdit(id){
@@ -2046,12 +2273,17 @@ function renderRoster(){
     const doc=esc(docMeta(sr(s,'docType')).base);
     const cat=esc(sr(s,'emp_category')||'—');
     const wage=esc(wageSummary(s));
+    const lang=sf(s,'doc_lang')||'ja';
+    const langStatus=sr(s,'lang_status')||'none';
+    const langCell = lang==='ja' ? '—' :
+      `<span style="color:${(langStatus==='ginou'||langStatus==='tokutei')?'#b00':'#333'};font-weight:${(langStatus==='ginou'||langStatus==='tokutei')?'700':'400'}">${esc((I18N[lang]&&I18N[lang].name)||lang)}${(langStatus==='ginou'||langStatus==='tokutei')?' ⚠'+esc(langStatus==='ginou'?'技能実習':'特定技能'):''}</span>`;
     const editing = e.id===EDIT_ID ? ' class="editing"' : '';
     rows+=`<tr${editing}>
       <td class="num">${i+1}</td>
       <td><b>${nm}</b></td>
       <td>${doc}</td>
       <td>${cat}</td>
+      <td>${langCell}</td>
       <td>${wage}</td>
       <td class="ops">
         <button class="rowbtn" onclick="rosterEdit(${e.id})">編集</button>
@@ -2062,7 +2294,7 @@ function renderRoster(){
       </td></tr>`;
   });
   wrap.innerHTML=`<table class="roster"><thead><tr>
-    <th class="num">#</th><th>氏名</th><th>書類種別</th><th>雇用形態</th><th>賃金の概要</th><th class="ops">操作</th>
+    <th class="num">#</th><th>氏名</th><th>書類種別</th><th>雇用形態</th><th>言語</th><th>賃金の概要</th><th class="ops">操作</th>
     </tr></thead><tbody>${rows}</tbody></table>`;
 }
 function saveRoster(){
@@ -3354,6 +3586,7 @@ function printCalcSheet(){
 function exportWord(){
   render();
   if(!BULK_MODE && !confirmGaps('Word出力'))return;
+  if(!BULK_MODE && !confirmLangGuard('Word出力'))return;
   const multi = estimatePages()>=2;   // 2ページ以上のときだけヘッダーにページ番号
   const headerRef = multi ? 'mso-header:h1;' : '';
   const css=wordDocCss(headerRef);
@@ -3389,18 +3622,18 @@ function excelTableForCurrent(){
   };
   const rows=[];
   if(has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:2,align:'right',border:false,size:'9.5pt'})}</tr>`);
-  rows.push(`<tr style="height:34px">${cell(esc(dm.title),{span:2,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
+  rows.push(`<tr style="height:34px">${cell(biLine(dm.title,{excel:true}),{span:2,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
   rows.push(`<tr>${cell(esc(fmtDate(val('issue_date'))),{span:2,align:'right',border:false})}</tr>`);
   rows.push(`<tr>${cell(esc(val('employee_name'))+'　殿',{span:2,border:false,size:'12pt'})}</tr>`);
-  officeLines(cat).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,align:'right',border:false})}</tr>`));
-  chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
-  rows.push(`<tr>${cell(esc(dm.lead),{span:2,border:false})}</tr>`);
+  officeLines(cat).forEach(l=>rows.push(`<tr>${cell(biLine(l,{excel:true}),{span:2,align:'right',border:false})}</tr>`));
+  chgMeta.forEach(l=>rows.push(`<tr>${cell(biLine(l,{excel:true}),{span:2,border:false})}</tr>`));
+  rows.push(`<tr>${cell(biLine(dm.lead,{excel:true}),{span:2,border:false})}</tr>`);
   blocks.forEach(b=>{
-    const content=b.lines.map(l=>{ const s=String(l); return esc((s.startsWith('__NOTE__')||s.startsWith('__WARN__'))?s.slice(8):s); }).join(BR);
-    rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true})}</tr>`);
+    const content=b.lines.map(l=>{ const s=String(l); return biLine(s.startsWith('__NOTE__')||s.startsWith('__WARN__')?s.slice(8):s,{excel:true}); }).join(BR);
+    rows.push(`<tr>${cell(biHeading(b.k,{excel:true}),{shade:true,bold:true,vt:true})}${cell(content,{vt:true})}</tr>`);
   });
-  rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:2,border:false})}</tr>`);
-  signatureLines(dm.sign).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
+  rows.push(`<tr>${cell(biLine('以上のほかは、当社就業規則による。',{excel:true}),{span:2,border:false})}</tr>`);
+  signatureLines(dm.sign).forEach(l=>rows.push(`<tr>${cell(biLine(l,{excel:true}),{span:2,border:false})}</tr>`));
   return `<table style="border-collapse:collapse;table-layout:fixed;width:720px">`+
     `<colgroup><col width="105"><col width="615"></colgroup>${rows.join('')}</table>`;
 }
@@ -3417,6 +3650,7 @@ function excelSheetName(base, idx, used){
 function exportExcel(){
   render();
   if(!BULK_MODE && !confirmGaps('Excel出力'))return;
+  if(!BULK_MODE && !confirmLangGuard('Excel出力'))return;
   const table=excelTableForCurrent();
   const multi = estimatePages()>=2;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -3472,6 +3706,8 @@ function loadSample(){
 calcSetAllowRows([{}]);
 calcPopulatePrefSelect();
 calcLoadSettings();
+buildFormNav();
+buildFsHelp();
 calcRender();
 render();
 </script>
