@@ -69,12 +69,42 @@ label.field input[type="checkbox"] { display: inline-block; width: auto; margin-
 .check-yellow { background: #fff8dd; }
 .check-red { background: #fdecea; font-weight: bold; }
 footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background: #eceff4; }
+
+#welcome-guide { margin: 8px 20px 0; background: #eef4ff; border: 1px solid #c7d3ee; border-radius: 6px; padding: 4px 12px; font-size: 13px; }
+#welcome-guide summary { cursor: pointer; font-weight: bold; padding: 6px 0; }
+#welcome-guide ol { margin: 4px 0; padding-left: 20px; }
+#next-step-bar { margin: 8px 20px 0; padding: 8px 12px; background: #fffbe6; border: 1px solid #e6d98a; border-radius: 6px; font-size: 13px; font-weight: bold; }
+#next-step-bar.all-green { background: #e6f4ea; border-color: #9fd3ac; }
+.help-btn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; border: 1px solid #2b3a67; background: #fff; color: #2b3a67; font-size: 12px; font-weight: bold; cursor: pointer; vertical-align: middle; }
+.help-btn[aria-expanded="true"] { background: #2b3a67; color: #fff; }
+.help-text { margin: 6px 0; padding: 8px 10px; background: #f0f4ff; border-left: 3px solid #2b3a67; font-size: 12px; line-height: 1.6; color: #333; }
+.pattern-chooser { margin-bottom: 12px; background: #eef4ff; border: 1px solid #c7d3ee; border-radius: 6px; padding: 4px 12px; font-size: 12.5px; }
+.pattern-chooser summary { cursor: pointer; font-weight: bold; padding: 4px 0; }
+.check-item { cursor: pointer; }
+.check-item-help { padding: 6px 8px; margin: -2px 0 6px; background: #fafbfc; border: 1px solid #dfe3ec; border-top: none; border-radius: 0 0 4px 4px; font-size: 12px; line-height: 1.6; }
+.check-item-help h4 { margin: 4px 0 2px; font-size: 12px; }
+@media print { #welcome-guide, #next-step-bar { display: none !important; } }
 </style>
 </head>
 <body>
 <header class="app-header">
-  <h1>1年変形カレンダー作成ツール(試作P1)</h1>
+  <h1>1年変形カレンダー作成ツール</h1>
 </header>
+
+<details id="welcome-guide">
+  <summary>🔰 はじめての方へ — このツールの使い方(クリックで開閉)</summary>
+  <p><strong>このツールで作るもの</strong>: 1年分の勤務カレンダーです。「どの日が労働日で、どの日が休みか」「労働日は1日何時間働くか」を決めます。</p>
+  <p><strong>なぜ作るの?</strong>: 「1年単位の変形労働時間制」という制度を使う会社は、1年分のカレンダーをあらかじめ決めて、労使協定と一緒に労働基準監督署へ届け出る必要があるからです。</p>
+  <p><strong>使い方は4ステップ</strong>:</p>
+  <ol>
+    <li><strong>STEP1</strong> カレンダーを作る1年間と、1日の労働時間を決める</li>
+    <li><strong>STEP2</strong> パターンを選んで、労働日と休日をまとめて自動配置する(あとから直せます)</li>
+    <li><strong>STEP3</strong> カレンダーを見ながら1日ずつ微調整する</li>
+    <li><strong>STEP4</strong> Excelや印刷で出力する</li>
+  </ol>
+  <p><strong>右側の「法定チェック」パネル</strong>が、法律違反がないかを常に見張っています。赤い項目が出ても慌てずに、その項目をクリックすると「これは何か」「どう直すか」の説明が出ます。</p>
+  <p>入力欄のそばにある <strong>「?」ボタン</strong>を押すと、その項目の説明が表示されます。</p>
+</details>
 
 <div class="step-tabs">
   <button data-step="1" class="step-tab-btn active">STEP1 対象期間設定</button>
@@ -83,6 +113,8 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
   <button data-step="4" class="step-tab-btn">STEP4 出力</button>
 </div>
 
+<div id="next-step-bar" aria-live="polite"></div>
+
 <main class="layout">
   <div class="step-panel">
     <section id="step-1" class="step-view active">
@@ -90,23 +122,29 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
       <label class="field">会社名(任意)
         <input type="text" id="inp-companyName">
       </label>
-      <label class="field">対象期間 初日
+      <label class="field">対象期間 初日<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>カレンダーを作る1年間です。会社の年度(例: 4月1日〜翌年3月31日)に合わせるのが一般的です。1年より短い期間でも作れます。</div>
         <input type="date" id="inp-periodStart">
       </label>
       <label class="field">対象期間 末日
         <input type="date" id="inp-periodEnd">
       </label>
-      <label class="field">1日の所定労働時間(時間)
+      <label class="field">1日の所定労働時間(時間)<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>労働日に働く『定時』の時間です。休憩時間は含めません。例: 9時〜18時勤務で休憩1時間なら「8」です。15分単位(0.25刻み)で入力できます。</div>
         <input type="number" step="0.25" min="0" max="24" id="inp-defaultHours" value="8">
       </label>
-      <label class="field">週の起算日<br><small style="color:#666;">(法定チェックC4/C5の判定に使用)</small>
+      <label class="field">週の起算日<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>『1週間』を数えるときの区切りの曜日です。1週間の労働時間の上限チェック(右パネルのC4・C5)はこの区切りで計算されます。労使協定に書く起算日と必ず同じにしてください。迷ったら日曜のままでかまいません。</div>
+        <br><small style="color:#666;">(1週間の労働時間を数える区切り。詳しくは?ボタン)</small>
         <select id="inp-weekAnchor">
           <option value="sun">日曜起算(既定)</option>
           <option value="mon">月曜起算</option>
           <option value="periodStart">対象期間初日起算</option>
         </select>
       </label>
-      <label class="field">カレンダー表示の区切り日(締め日)<br><small style="color:#666;">画面表示・印刷の「月」区切りのみに影響(1〜31。給与・勤怠の締め日に合わせられます。法定チェックには影響しません)</small>
+      <label class="field">カレンダー表示の区切り日(締め日)<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>画面と印刷で『1ヶ月』をどこで区切るかの設定です。給与の締め日(例: 15日締めなら16)に合わせると、給与計算の期間とカレンダーの区切りがそろって見やすくなります。<strong>法律のチェックには影響しません。</strong></div>
+        <br><small style="color:#666;">画面表示・印刷の「月」区切りのみに影響(1〜31。給与・勤怠の締め日に合わせられます。法定チェックには影響しません)</small>
         <input type="number" min="1" max="31" step="1" id="inp-monthStartDay" value="1">
       </label>
       <button type="button" id="btn-apply-period">この内容で対象期間を確定する</button>
@@ -115,13 +153,17 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
       <hr>
       <h3>特定期間・旧協定(該当する場合のみ・任意)</h3>
       <p style="font-size:12px;color:#555;">対象期間を確定した後に設定してください。</p>
-      <label class="field">特定期間(繁忙期など、連続12日まで労働を認める期間・任意)<br><small style="color:#666;">1行に1つ「開始日,終了日」形式(例: 2027-08-01,2027-09-30)。定めない場合は空欄のまま</small>
+      <label class="field">特定期間(繁忙期など、連続12日まで労働を認める期間・任意)<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>1年の中で特に忙しい時期を『特定期間』として決めておくと、その期間だけ連続12日まで勤務させることができます(通常は連続6日まで)。決めなくてもかまいません(空欄のまま)。</div>
+        <br><small style="color:#666;">1行に1つ「開始日,終了日」形式(例: 2027-08-01,2027-09-30)。定めない場合は空欄のまま</small>
         <textarea id="inp-specialPeriods" rows="2" placeholder="2027-08-01,2027-09-30"></textarea>
       </label>
       <button type="button" id="btn-apply-specialPeriods">特定期間を保存</button>
       <div id="specialPeriods-warning" style="color:#a00;font-size:12px;white-space:pre-wrap;margin-top:4px;"></div>
 
-      <label class="field" style="margin-top:12px;"><input type="checkbox" id="inp-prevAgreement-exists"> 前回の協定期間と重複がある(旧協定からの切替時)</label>
+      <label class="field" style="margin-top:12px;"><input type="checkbox" id="inp-prevAgreement-exists"> 前回の協定期間と重複がある(旧協定からの切替時)<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>去年(前回)の協定の期間と、今回のカレンダーの期間が重なっている場合にチェックを入れます。重なっている日は法律の上限が厳しくなる(1日9時間・週48時間まで)ため、ツールが自動でチェックします(右パネルのC7)。</div>
+      </label>
       <div id="prevAgreement-fields" style="display:none;">
         <label class="field">旧協定の対象期間 初日
           <input type="date" id="inp-prevAgreement-start">
@@ -135,15 +177,28 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
 
       <hr>
       <h3>逆算アシスト</h3>
-      <label class="field">現在の年間休日数(任意)
+      <label class="field">現在の年間休日数(任意)<button type="button" class="help-btn" aria-expanded="false">?</button>
+        <div class="help-text" hidden>いまの会社の年間休日数を入れると、『この休日数で足りるか』『足りない場合は何日増やすか・1日の時間をどれだけ短くするか』の目安を計算します。</div>
         <input type="number" id="inp-currentHolidays" min="0">
       </label>
-      <div id="reverse-assist">対象期間を確定すると、必要休日数の目安が表示されます。</div>
+      <div id="reverse-assist" aria-live="polite">対象期間を確定すると、必要休日数の目安が表示されます。</div>
     </section>
 
     <section id="step-2" class="step-view">
       <h2>STEP2: パターン適用</h2>
       <p style="font-size:12px;color:#555;">労働日・休日の初期配置をまとめて生成します。適用すると現在のカレンダーは上書きされます(STEP3で個別に調整できます)。</p>
+      <details class="pattern-chooser">
+        <summary>💡 どのパターンを選べばいい?(クリックで開く)</summary>
+        <ul>
+          <li>会社の休みが「日曜+隔週土曜」のような形 → <strong>A: 隔週土曜出勤</strong></li>
+          <li>年間の休日日数だけ決まっている(例: 年間休日105日) → <strong>E: 年間休日数固定</strong></li>
+          <li>月ごとに忙しさが違うので、週あたりの休みの数を月別に変えたい → <strong>C: 繁閑型</strong></li>
+          <li>A・C・Eで作ったカレンダーに、お盆や年末年始の連休を追加したい → <strong>B: 夏冬集中休暇</strong></li>
+          <li>A・C・Eで作ったあと、季節によって1日の労働時間を変えたい → <strong>D: 所定時間可変</strong></li>
+          <li>先の予定が決められないので、最初の期間だけ決めて残りは後から決めたい → <strong>F: 区分方式</strong></li>
+        </ul>
+        <p>迷ったら: まず<strong>E(年間休日数固定)</strong>に会社の年間休日数を入れて自動配置し、STEP3で微調整するのが手軽です。</p>
+      </details>
       <label class="field">パターンを選択
         <select id="inp-pattern-type">
           <option value="">選択してください</option>
@@ -207,7 +262,7 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
       </div>
 
       <button type="button" id="btn-apply-pattern">このパターンを適用する</button>
-      <div id="pattern-warnings" style="color:#a00;font-size:12px;white-space:pre-wrap;margin-top:8px;"></div>
+      <div id="pattern-warnings" style="color:#a00;font-size:12px;white-space:pre-wrap;margin-top:8px;" aria-live="polite"></div>
     </section>
 
     <section id="step-3" class="step-view">
@@ -225,12 +280,13 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
           </select>
         </label>
       </div>
-      <p style="font-size:12px;color:#555;">セル(または行)をクリックで労働日⇔休日を切り替えます。</p>
+      <p style="font-size:12px;color:#555;">セル(または行)をクリックすると、労働日⇔休日が切り替わります。間違えたら『元に戻す』ボタン(Ctrl+Z)で戻せます。</p>
       <div id="calendar-grid"></div>
     </section>
 
     <section id="step-4" class="step-view">
       <h2>STEP4: 出力</h2>
+      <p style="font-size:12px;color:#555;">作ったカレンダーはExcel・印刷・JSON(保存用ファイル)の3つの形で出力できます。</p>
       <div class="toolbar">
         <button type="button" id="btn-export-json">JSON保存</button>
         <label style="font-size:13px;">JSON読込
@@ -256,7 +312,7 @@ footer.disclaimer { padding: 12px 20px; font-size: 12px; color: #555; background
   <div class="check-panel-wrap">
     <h3>法定チェック(常時表示)</h3>
     <p style="font-size:12px;color:#555;margin-top:0;">緑=問題なし／黄=要確認(違反ではないが確認推奨)／赤=労働基準法違反の可能性(労使協定・所定時間の見直しが必要)／灰=対象外</p>
-    <div id="check-panel">STEP1で対象期間を確定してください。</div>
+    <div id="check-panel" aria-live="polite">STEP1で対象期間を確定してください。</div>
   </div>
 </main>
 
@@ -1488,6 +1544,47 @@ const PatternEngine = (() => {
 const STORAGE_KEY = 'nenkan-henkei-calendar:v1:autosave';
 const UNDO_MAX = 20;
 
+// 法定チェック各項目の「これは何?/どうすればいい?」説明(新人向けUI改善 設計v1 §2-D)。
+// 文言は設計書からそのまま転記(法令の数値・条文解釈をここで新たに書き足さない)。
+const CHECK_HELP = {
+  C1: {
+    what: '1年間に働かせてよい労働時間の合計の上限です。法律で「週平均40時間まで」と決まっており、1年(365日)なら合計2085.7時間、うるう年を含む366日なら2091.4時間が上限です。',
+    fix: '赤のとき: 休日を増やすか、1日の所定労働時間を短くして、合計を上限以内に収めてください。STEP1の逆算アシストも参考になります。',
+  },
+  C2: {
+    what: '1年間に働かせてよい労働日数の上限です。対象期間が1年なら280日までです(期間が3ヶ月以下の場合はこのチェックは対象外)。',
+    fix: '赤のとき: 休日を増やして労働日数を上限以内にしてください。',
+  },
+  C3: {
+    what: '1日に働かせてよい所定労働時間の上限は10時間です。',
+    fix: '赤のとき: カレンダーが赤枠になっている日の時間を10時間以下に直してください。',
+  },
+  C4: {
+    what: '1週間に働かせてよい所定労働時間の上限は52時間です。「1週間」はSTEP1で決めた週の起算日で区切って数えます。',
+    fix: '赤のとき: 黄色の帯が付いた週のどこかを休日にするか、その週の労働時間を短くしてください。',
+  },
+  C5: {
+    what: '労働時間が週48時間を超える「忙しい週」には制限があります。①48時間超の週を4週以上連続させない ②3ヶ月ごとに区切った各期間で48時間超の週は3回まで、の2つです(期間が3ヶ月以下の場合は対象外)。',
+    fix: '赤のとき: 忙しい週が集中しすぎています。48時間を超える週を減らすか、時期を分散させてください。',
+  },
+  C6: {
+    what: '連続して働かせてよいのは6日までです。STEP1で「特定期間」(特に忙しい時期)を設定した場合、その期間内だけは連続12日まで認められます。',
+    fix: '赤のとき: 連続勤務が長すぎる箇所(赤枠の日)の途中に休日を入れてください。黄色は「特定期間内で7〜12日連続」の状態で、違反ではありませんが社労士への確認をおすすめします。',
+  },
+  C7: {
+    what: '前回(旧)の協定期間と今回の期間が重なっている日は、上限が厳しくなります: 1日9時間まで・週48時間までです。STEP1で旧協定の期間を入力すると自動でチェックされます。',
+    fix: '赤のとき: 重なっている期間の日の労働時間を9時間以下に、週合計を48時間以下にしてください。',
+  },
+  C8: {
+    what: 'まだ「労働日」か「休日」か決めていない日の数です。すべての日を決めるとこの項目は緑になります。',
+    fix: '黄のとき: STEP3で残りの日を設定してください。「未設定日をすべて労働日(または休日)にする」ボタンでまとめて設定もできます。',
+  },
+  C9: {
+    what: '労使協定はカレンダーの開始日より前に、労働基準監督署へ届け出る必要があります(開始日の1ヶ月前までに済ませるのがおすすめです)。区分方式を使う場合は、各区分の30日前までに労働日を確定する期限も表示されます。',
+    fix: 'これは違反チェックではなく、手続きの期限のお知らせです。日付を過ぎないよう社労士・担当者と共有してください。',
+  },
+};
+
 const App = (() => {
   let state = createInitialState();
   const undoStack = [];
@@ -1720,10 +1817,22 @@ const App = (() => {
   }
 
   // --- 描画 ---
+  // kubunMode時のC1/C2差し替え(renderCheckPanel・renderNextStepで共通利用。judgeAllを2回呼ばない)
+  function computeJudge() {
+    const judge = JudgeEngine.judgeAll(state);
+    if (state.settings.kubunMode) {
+      judge.C1 = PatternEngine.judgeC1Kubun(state);
+      judge.C2 = PatternEngine.judgeC2Kubun(state);
+    }
+    return judge;
+  }
+
   function render() {
     renderStep1();
     renderStep3();
-    renderCheckPanel();
+    const judge = state.settings.periodStart ? computeJudge() : null;
+    renderCheckPanel(judge);
+    renderNextStep(judge);
     updateUndoRedoButtons();
   }
 
@@ -1918,6 +2027,9 @@ const App = (() => {
         statusEl.textContent = statusLabel;
         cell.appendChild(statusEl);
       }
+      const wd = DateUtil.weekday(ymd);
+      const statusText = (day && day.type === 'work') ? `労働日 ${day.hours}時間` : (day && day.type === 'off') ? '休日' : '未設定';
+      cell.setAttribute('aria-label', `${dm}月${dd}日(${WEEKDAY_LABELS[wd]}) ${statusText}。クリックで切り替え`);
       cell.addEventListener('click', () => toggleDay(ymd));
       grid.appendChild(cell);
     }
@@ -1938,23 +2050,59 @@ const App = (() => {
     return wrap;
   }
 
-  function renderCheckPanel() {
+  // 法定チェック項目の「これは何?/どうすればいい?」説明ブロックを組み立てる(CHECK_HELPの文言をそのまま使用)。
+  function createCheckHelpBlock(id) {
+    const help = CHECK_HELP[id];
+    const wrap = document.createElement('div');
+    wrap.className = 'check-item-help';
+    wrap.hidden = true;
+    if (!help) return wrap;
+    const h1 = document.createElement('h4');
+    h1.textContent = 'これは何?';
+    const p1 = document.createElement('p');
+    p1.textContent = help.what;
+    const h2 = document.createElement('h4');
+    h2.textContent = 'どうすればいい?';
+    const p2 = document.createElement('p');
+    p2.textContent = help.fix;
+    wrap.appendChild(h1);
+    wrap.appendChild(p1);
+    wrap.appendChild(h2);
+    wrap.appendChild(p2);
+    return wrap;
+  }
+
+  // check-item(またはC9の情報行)をクリック/Enter/Spaceで開閉できるようにする
+  function attachCheckItemToggle(item, helpBlock) {
+    item.tabIndex = 0;
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-expanded', 'false');
+    const toggle = () => {
+      const expanded = item.getAttribute('aria-expanded') === 'true';
+      item.setAttribute('aria-expanded', String(!expanded));
+      helpBlock.hidden = expanded;
+    };
+    item.addEventListener('click', toggle);
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  }
+
+  function renderCheckPanel(judge) {
     const panel = el('check-panel');
     if (!panel) return;
     panel.textContent = '';
-    if (!state.settings.periodStart) { panel.textContent = 'STEP1で対象期間を確定してください。'; return; }
-    const judge = JudgeEngine.judgeAll(state);
-    if (state.settings.kubunMode) {
-      judge.C1 = PatternEngine.judgeC1Kubun(state);
-      judge.C2 = PatternEngine.judgeC2Kubun(state);
-    }
+    if (!state.settings.periodStart || !judge) { panel.textContent = 'STEP1で対象期間を確定してください。'; return; }
     const order = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8'];
     for (const id of order) {
       const r = judge[id];
       const item = document.createElement('div');
       item.className = 'check-item check-' + (r.severity || (r.pass ? 'ok' : 'red'));
       item.textContent = `${id}: ${describeCheck(id, r)}`;
+      const helpBlock = createCheckHelpBlock(id);
+      attachCheckItemToggle(item, helpBlock);
       panel.appendChild(item);
+      panel.appendChild(helpBlock);
     }
     const c9 = judge.C9;
     const info = document.createElement('div');
@@ -1965,7 +2113,54 @@ const App = (() => {
     }
     info.style.whiteSpace = 'pre-wrap';
     info.textContent = c9text;
+    const c9Help = createCheckHelpBlock('C9');
+    attachCheckItemToggle(info, c9Help);
     panel.appendChild(info);
+    panel.appendChild(c9Help);
+  }
+
+  // 「次にやること」ナビバー(新人向けUI改善 設計v1 §2-B)。状態は表の上から順に判定し、最初に該当したものを表示する。
+  function renderNextStep(judge) {
+    const bar = el('next-step-bar');
+    if (!bar) return;
+    bar.classList.remove('all-green');
+    bar.textContent = '';
+
+    if (!state.settings.periodStart) {
+      bar.textContent = '▶ まずSTEP1で、カレンダーを作る1年間(対象期間)を入力し、『この内容で対象期間を確定する』を押してください。';
+      return;
+    }
+    if (!judge) return;
+
+    const { periodStart, periodEnd } = state.settings;
+    const totalDays = DateUtil.diffDays(periodStart, periodEnd) + 1;
+    const c8 = judge.C8;
+
+    if (c8.count === totalDays) {
+      bar.textContent = '▶ STEP2でパターンを選ぶと、労働日と休日をまとめて自動配置できます(1日ずつ手で設定したい場合はSTEP3へ)。';
+      return;
+    }
+
+    const order = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8'];
+    const hasRed = order.some(id => judge[id] && judge[id].severity === 'red');
+    if (hasRed) {
+      bar.textContent = '▶ 法定チェックに赤(違反の可能性)があります。右のパネルの赤い項目をクリックして、直し方を確認してください。';
+      return;
+    }
+
+    if (c8.count > 0) {
+      bar.textContent = `▶ まだ労働日か休日か決めていない日が ${c8.count}日 あります。STEP3で設定するか、STEP3の『未設定日をすべて〜にする』ボタンを使ってください。`;
+      return;
+    }
+
+    const hasYellow = order.some(id => judge[id] && judge[id].severity === 'yellow');
+    if (hasYellow) {
+      bar.textContent = '▶ 黄色(要確認)の項目があります。右のパネルで内容を確認し、問題なければSTEP4から出力できます。';
+      return;
+    }
+
+    bar.textContent = '✅ 法定チェックはすべてクリアしています。STEP4からExcelを出力するか、カレンダーを印刷してください。';
+    bar.classList.add('all-green');
   }
 
   function describeCheck(id, r) {
@@ -2020,7 +2215,14 @@ const App = (() => {
   }
 
   function init() {
+    let hadAutosave = false;
+    try { hadAutosave = !!localStorage.getItem(STORAGE_KEY); } catch (e) { hadAutosave = false; }
     loadAutosave();
+    const guide = el('welcome-guide');
+    if (guide) {
+      if (hadAutosave) guide.removeAttribute('open');
+      else guide.setAttribute('open', '');
+    }
     render();
   }
 
@@ -2634,6 +2836,16 @@ if (typeof window !== 'undefined' && new URLSearchParams(window.location.search)
     App.updateSetting('prevAgreement', { exists: true, periodStart: start, periodEnd: end });
     $('prevAgreement-warning').style.color = '#0a7d2f';
     $('prevAgreement-warning').textContent = '旧協定期間を保存しました。';
+  });
+
+  // STEP1の「?」ヘルプ(help-btn)は委譲イベント1本で開閉する(新人向けUI改善 設計v1 §2-C)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.help-btn');
+    if (!btn) return;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const helpText = btn.parentElement.querySelector('.help-text');
+    if (helpText) helpText.hidden = expanded;
   });
 
   App.init();
