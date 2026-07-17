@@ -1705,21 +1705,25 @@ function signatureData(mode, cat){
 // 列＝ラベル｜値(空欄は下線)｜㊞(固定幅)｜右余白。㊞列を固定幅にすることで使用者・労働者の印が同じ横位置に揃い、氏名が長くても押し出されない。
 function signatureHTML(sg){
   if(!sg) return '';
-  const TB='style="table-layout:fixed;width:100%;border-collapse:collapse;margin-top:4px;page-break-inside:avoid"';
-  const COL='<colgroup><col style="width:22%"><col style="width:56%"><col style="width:10%"><col style="width:12%"></colgroup>';
+  // 使用者・労働者を1つのテーブルにまとめる（列を共有＝Wordでも空欄の記入欄が使用者と同じ幅になり、㊞も同一列で揃う）。
+  // 列＝ラベル15%｜記入欄60%(空欄は下線)｜㊞10%(固定)｜右余白15%。width属性も併記しWordの列幅解釈を安定させる。
+  const COL='<colgroup><col style="width:15%"><col style="width:60%"><col style="width:10%"><col style="width:15%"></colgroup>';
   let h=`<div>${esc(sg.lead)}</div><div style="margin-top:6px">${esc(sg.dateLine)}</div>`;
-  sg.parties.forEach(p=>{
-    h+=`<div style="margin-top:8px">${esc(p.head)}</div><table ${TB}>${COL}<tbody>`;
+  h+=`<table style="width:100%;border-collapse:collapse;margin-top:6px;table-layout:fixed;page-break-inside:avoid">${COL}<tbody>`;
+  sg.parties.forEach((p,pi)=>{
+    h+=`<tr><td colspan="4" width="100%" style="padding:${pi?'12px':'2px'} 4px 2px;border:none">${esc(p.head)}</td></tr>`;
     p.rows.forEach(r=>{
       const valCell = r.blank
-        ? `<td style="vertical-align:bottom;border-bottom:1px solid #000;mso-border-bottom-alt:solid windowtext .5pt;padding:2px 6px">&#12288;</td>`
-        : `<td style="vertical-align:bottom;word-break:break-all;padding:2px 6px">${esc(r.value)}</td>`;
-      h+=`<tr><td style="vertical-align:top;white-space:nowrap;padding:2px 6px">${esc(r.label)}</td>`+
+        ? `<td width="60%" style="vertical-align:bottom;border:none;border-bottom:1px solid #000;mso-border-bottom-alt:solid windowtext .5pt;padding:2px 6px">&#12288;</td>`
+        : `<td width="60%" style="vertical-align:bottom;border:none;word-break:break-all;padding:2px 6px">${esc(r.value)}</td>`;
+      h+=`<tr>`+
+        `<td width="15%" style="vertical-align:top;white-space:nowrap;border:none;padding:2px 6px">${esc(r.label)}</td>`+
         valCell+
-        `<td style="vertical-align:bottom;text-align:center;padding:2px 6px">${r.seal?'㊞':''}</td><td></td></tr>`;
+        `<td width="10%" style="vertical-align:bottom;text-align:center;border:none;padding:2px 6px">${r.seal?'㊞':''}</td>`+
+        `<td width="15%" style="border:none"></td></tr>`;
     });
-    h+=`</tbody></table>`;
   });
+  h+=`</tbody></table>`;
   return h;
 }
 function sheetHTML(title, lead, blocks, opts={}){
@@ -1790,7 +1794,7 @@ function updatePageIndicator(){
   let b=document.getElementById('pageNote');
   if(multi){
     if(!b){ b=document.createElement('div'); b.id='pageNote'; b.className='page-note'; pv.insertBefore(b, pv.firstChild); }
-    b.textContent=`※ この内容は約${pages}ページになります。Word・Excel出力では各ページのヘッダーに「全${pages}ページ中○ページ目」が入ります（ブラウザ印刷ではページ番号が付かない場合があります）。1ページに収めたい場合は項目・文言を減らしてください。`;
+    b.textContent=`※ この内容は約${pages}ページになります。Excel出力では各ページのヘッダーに「全${pages}ページ中○ページ目」が入ります（Word出力にはページ番号は付きません。ブラウザ印刷は環境により付かない場合があります）。1ページに収めたい場合は項目・文言を減らしてください。`;
   } else if(b){ b.remove(); }
 }
 
@@ -2286,13 +2290,12 @@ function bulkWordCombined(){
   const parts=[];
   ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>parts.push(s)); });
   restoreState(backup);
-  const css=wordDocCss('mso-header:h1;');
+  const css=wordDocCss('');
   const body=parts.map((s,i)=>`<div style="${i?'page-break-before:always;':''}">${s}</div>`).join('');
-  const headerDiv=`<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>`;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
     <head><meta charset="utf-8"><title>労働条件通知書_一括</title>
     <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
-    <style>${css}</style></head><body><div class="WordSection1">${body}${headerDiv}</div></body></html>`;
+    <style>${css}</style></head><body><div class="WordSection1">${body}</div></body></html>`;
   download(`労働条件通知書_一括_${ROSTER.length}名.doc`, html, 'application/msword');
 }
 function bulkExcelCombined(){
@@ -3501,15 +3504,12 @@ function printCalcSheet(){
 function exportWord(){
   render();
   if(!BULK_MODE && !confirmGaps('Word出力'))return;
-  const multi = estimatePages()>=2;   // 2ページ以上のときだけヘッダーにページ番号
-  const headerRef = multi ? 'mso-header:h1;' : '';
-  const css=wordDocCss(headerRef);
+  const css=wordDocCss('');
   const body=LAST_SHEETS.map((s,i)=>`<div style="${i? 'page-break-before:always;':''}">${s}</div>`).join('');
-  const headerDiv = multi ? `<div style='mso-element:header' id="h1"><p class=MsoHeader style='text-align:left'>全<span style='mso-field-code:" NUMPAGES "'>1</span>ページ中<span style='mso-field-code:" PAGE "'>1</span>ページ目</p></div>` : '';
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
     <head><meta charset="utf-8"><title>労働条件通知書</title>
     <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
-    <style>${css}</style></head><body><div class="WordSection1">${body}${headerDiv}</div></body></html>`;
+    <style>${css}</style></head><body><div class="WordSection1">${body}</div></body></html>`;
   download(fname('doc'), html, 'application/msword');
 }
 
