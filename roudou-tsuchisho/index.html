@@ -544,8 +544,8 @@
         <select name="ot_style"><option value="split" selected>区分別（固定残業＋固定深夜）</option><option value="unified">一体型（固定時間外勤務手当・内訳明示）</option></select>
         <div class="help-note">「一体型」は時間外・法定休日・深夜を1本の手当にまとめ、内訳（時間数・金額）を明示します。希望額を6:3:1などで自動按分できます（割増率は下の「割増賃金率」を使用）。</div>
       </div>
-      <div class="row wg wg-month"><label>月の所定労働時間（固定残業の算定用・半角数字）</label>
-        <input type="text" class="num" inputmode="numeric" name="monthly_scheduled_hours" placeholder="例：160"></div>
+      <div class="row wg wg-month"><label>月の所定労働時間（固定残業の算定用・半角数字。小数可）</label>
+        <input type="text" class="num dec" inputmode="decimal" name="monthly_scheduled_hours" placeholder="例：173.75"></div>
       <div class="row wg wg-month"><label>自動計算の端数処理（切り上げ単位）</label>
         <select name="round_unit"><option value="0">切り上げなし（円未満四捨五入）</option><option value="10">十の位で切り上げ</option><option value="100">百の位で切り上げ</option><option value="1000" selected>千の位で切り上げ</option></select></div>
       <div id="otSplit">
@@ -1114,8 +1114,8 @@ const WT_NAME = {
 const TIME_SYSTEMS=['通常','1か月単位変形','1年単位変形','1週間単位変形','交替制','シフト制'];
 
 // ===== 金額ユーティリティ =====
-function toHalf(s){ return String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); }
-function normalizeNum(inp){ if(!inp) return; const v=toHalf(inp.value).replace(/[^\d]/g,''); if(v!==inp.value) inp.value=v; }
+function toHalf(s){ return String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/．/g,'.'); }
+function normalizeNum(inp){ if(!inp) return; let v; if(inp.classList.contains('dec')){ v=toHalf(inp.value).replace(/[^\d.]/g,''); const i=v.indexOf('.'); if(i>=0) v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,''); }else{ v=toHalf(inp.value).replace(/[^\d]/g,''); } if(v!==inp.value) inp.value=v; }
 function normalizeAllNumeric(){
   document.querySelectorAll('input.num').forEach(normalizeNum);           // 賃金の金額欄
   document.querySelectorAll('#inAllowList .allow-row, #outAllowList .allow-row').forEach(r=>{  // 手当（月/日/時/回は数字のみ、その他は自由）
