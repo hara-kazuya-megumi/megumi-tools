@@ -146,6 +146,7 @@
   .empty-hint{color:#999;text-align:center;padding:40px}
   .page-note{background:#fff6e5;border:1px solid #f0d9a0;color:#7a5b00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
   .gap-note{background:#fdecec;border:1px solid #e7b3b3;color:#8a1f1f;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
+  .warn-check{background:#fff7e0;border:1px solid #e6c260;color:#7a5a00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
   /* ---- 名簿バー・一括作成 ---- */
   /* 明るい面ではゴースト白文字が見えないので上書き */
   #rosterBar .btn.ghost,#modeBatch .btn.ghost,#modeGuide .btn.ghost,#modeRefs .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
@@ -180,7 +181,7 @@
     body{background:#fff}
     .wrap{display:block}
     .preview{padding:0;overflow:visible;max-height:none}
-    .page-note,.gap-note,.form-nav{display:none !important}
+    .page-note,.gap-note,.warn-check,.form-nav{display:none !important}
     .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 12mm;
       page-break-after:always;font-size:10pt}
     .sheet:last-child{page-break-after:auto}
@@ -1444,12 +1445,12 @@ function buildBlocks(st){
   } else { if(has(val('work_days'))) term.push('就労日　'+val('work_days')); }
   push('契約期間', term);
 
+  // 試用期間（契約期間の直下に表示）
+  if(!st.isHiyatoi && radio('probation_flag')==='有' && has(val('probation_text'))) push('試用期間',[val('probation_text')]);
   // 就業の場所
   push('就業の場所', [val('workplace_now'), has(val('workplace_scope'))?('（変更の範囲）'+val('workplace_scope')):'']);
   // 業務
   push('従事すべき業務の内容', [val('job_now'), has(val('job_scope'))?('（変更の範囲）'+val('job_scope')):'']);
-  // 試用期間
-  if(!st.isHiyatoi && radio('probation_flag')==='有' && has(val('probation_text'))) push('試用期間',[val('probation_text')]);
 
   // 労働時間
   let t=[];
@@ -1775,7 +1776,8 @@ function render(){
   sheets.push(sheetHTML(dm.title, dm.lead, blocks, {sign:dm.sign, chgMeta}));
   // 無期転換別紙
   if(st.per==='有期' && radio('muki_flag')==='有'){
-    const bb = blocks.filter(b=>!['契約期間'].includes(b.k));
+    // 試用期間は雇入れ当初の定めであり、無期転換後の労働条件を示す別紙には載せない（誤読防止）
+    const bb = blocks.filter(b=>!['契約期間','試用期間'].includes(b.k));
     bb.unshift({k:'契約期間', lines:['期間の定めなし（無期労働契約に転換後）']});
     const lead2='本契約期間中に会社に対して期間の定めのない労働契約（無期労働契約）の締結の申込みをしたときに成立する無期労働契約の労働条件は、次のとおりです。';
     sheets.push(sheetHTML('労働条件通知書（別紙）　無期転換後の労働条件', lead2, bb, {sign:false, leave:true}));
@@ -1804,6 +1806,18 @@ function render(){
       gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／'); }
     else if(gb){ gb.remove(); }
     updateFormNav(gaps); }
+  // 月の所定労働時間が極端に小さいと固定残業の割増単価（基準内賃金÷所定時間）が過大になり、固定残業手当が過大算定される。
+  // 自動計算が実際に所定時間を分母に使っているときだけ、入力ミスの疑いとして画面警告（.warn-check＝印刷時非表示。書面や計算値は変えない）。
+  { const ttw=wageTotals(); const schedRaw=numH(val('monthly_scheduled_hours'));
+    const SCHED_MIN_WARN=30; // 入力ミス検知用の下限。実在するパート等の月平均所定時間より低めに置き誤検知を抑える
+    const autoUsesSched = ttw.otAuto || ttw.nightAuto || (ttw.otStyle==='unified' && ttw.uni && ttw.uni.total>0);
+    const schedLow = autoUsesSched && schedRaw>0 && schedRaw<SCHED_MIN_WARN;
+    let wb=document.getElementById('wageWarnNote');
+    if(schedLow){ if(!wb){ wb=document.createElement('div'); wb.id='wageWarnNote'; wb.className='warn-check';
+        wb.setAttribute('role','status'); wb.setAttribute('aria-live','polite');
+        const gn=document.getElementById('gapNote'); pv.insertBefore(wb, gn?gn.nextSibling:pv.firstChild); }
+      wb.textContent=`⚠【要確認】賃金欄の「月の所定労働時間」が「${schedRaw}」と極端に小さいため、固定残業の割増単価や相当時間が不自然に大きく算定されるおそれがあります（例：フルタイムなら173.75など）。入力値が正しければ修正は不要です。`; }
+    else if(wb){ wb.remove(); } }
   markEmpty();
 }
 
