@@ -140,7 +140,7 @@
   .sheet .note{font-size:8.5pt;color:#333;margin-top:1px}
   .sheet .warn{font-size:8.5pt;color:#b00;font-weight:700;margin-top:1px}
   .sheet .after{margin-top:10px;font-size:10pt}
-  .sheet .sign{margin-top:14px;font-size:10.5pt;line-height:2.0}
+  .sheet .sign{margin-top:14px;font-size:10.5pt;line-height:2.0;page-break-inside:avoid}
   .sheet .chg-meta{font-size:10pt;margin:4px 0}
   .sheet .mark{color:#b00;font-weight:700}
   .empty-hint{color:#999;text-align:center;padding:40px}
@@ -1672,12 +1672,55 @@ function officeLines(cat){
   return L;
 }
 
-function signatureLines(mode){
-  if(mode==='chg') return ['上記の労働条件の変更に同意します。','令和　　年　　月　　日','（労働者）　氏名　　　　　　　　　　　㊞'];
-  if(mode==='contract') return ['上記のとおり労働契約（雇用契約）を締結し、本書2通を作成して使用者・労働者が各1通を保有する。',
-    '令和　　年　　月　　日','（使用者）　所在地・名称　　　　　　　　　　　','　　　　　　氏名　　　　　　　　　　　　　　㊞',
-    '（労働者）　住所　　　　　　　　　　　　　　　','　　　　　　氏名　　　　　　　　　　　　　　㊞'];
-  return [];
+// 署名押印欄の構造化データ。使用者欄は基本情報の office_addr/office_name/employer を流用（未入力の行は空欄＝手書き用の下線）。
+function signatureData(mode, cat){
+  if(mode==='chg') return {
+    lead:'上記の労働条件の変更に同意します。', dateLine:'令和　　年　　月　　日',
+    parties:[{head:'（労働者）', rows:[
+      {label:'住所', value:'', seal:false, blank:true},
+      {label:'氏名', value:'', seal:true, blank:true}
+    ]}]
+  };
+  if(mode==='contract'){
+    const nameLabel=(cat==='建設'||cat==='林業')?'事業主':'使用者';   // employer は職名＋氏名を含むため「氏名」ではなく職名寄りのラベル
+    return {
+      lead:'上記のとおり労働契約（雇用契約）を締結し、本書2通を作成して使用者・労働者が各1通を保有する。',
+      dateLine:'令和　　年　　月　　日',
+      parties:[
+        {head:'（使用者）', rows:[
+          {label:'所在地', value:val('office_addr'), seal:false, blank:!has(val('office_addr'))},
+          {label:'名称',   value:val('office_name'), seal:false, blank:!has(val('office_name'))},
+          {label:nameLabel,value:val('employer'),    seal:true,  blank:!has(val('employer'))}
+        ]},
+        {head:'（労働者）', rows:[
+          {label:'住所', value:'', seal:false, blank:true},
+          {label:'氏名', value:'', seal:true, blank:true}
+        ]}
+      ]
+    };
+  }
+  return null;   // notice / false / 別紙(leave) は署名欄なし
+}
+// 署名欄HTML（プレビュー・印刷・Word共通）。Wordはflex非対応のためテーブル＋インライン指定で組む。
+// 列＝ラベル｜値(空欄は下線)｜㊞(固定幅)｜右余白。㊞列を固定幅にすることで使用者・労働者の印が同じ横位置に揃い、氏名が長くても押し出されない。
+function signatureHTML(sg){
+  if(!sg) return '';
+  const TB='style="table-layout:fixed;width:100%;border-collapse:collapse;margin-top:4px;page-break-inside:avoid"';
+  const COL='<colgroup><col style="width:22%"><col style="width:56%"><col style="width:10%"><col style="width:12%"></colgroup>';
+  let h=`<div>${esc(sg.lead)}</div><div style="margin-top:6px">${esc(sg.dateLine)}</div>`;
+  sg.parties.forEach(p=>{
+    h+=`<div style="margin-top:8px">${esc(p.head)}</div><table ${TB}>${COL}<tbody>`;
+    p.rows.forEach(r=>{
+      const valCell = r.blank
+        ? `<td style="vertical-align:bottom;border-bottom:1px solid #000;mso-border-bottom-alt:solid windowtext .5pt;padding:2px 6px">&#12288;</td>`
+        : `<td style="vertical-align:bottom;word-break:break-all;padding:2px 6px">${esc(r.value)}</td>`;
+      h+=`<tr><td style="vertical-align:top;white-space:nowrap;padding:2px 6px">${esc(r.label)}</td>`+
+        valCell+
+        `<td style="vertical-align:bottom;text-align:center;padding:2px 6px">${r.seal?'㊞':''}</td><td></td></tr>`;
+    });
+    h+=`</tbody></table>`;
+  });
+  return h;
 }
 function sheetHTML(title, lead, blocks, opts={}){
   const cat=radio('emp_category');
@@ -1703,8 +1746,8 @@ function sheetHTML(title, lead, blocks, opts={}){
   h+=`</tbody></table>`;
   if(opts.leave) return h;
   h+=`<div class="after">以上のほかは、当社就業規則による。</div>`;
-  const s=signatureLines(opts.sign);   // 'notice'は署名欄なし
-  if(s.length){ h+=`<div class="sign">${s.map(esc).join('<br>')}</div>`; }
+  const sg=signatureData(opts.sign, cat);   // 'notice'/false は署名欄なし
+  if(sg){ h+=`<div class="sign">${signatureHTML(sg)}</div>`; }
   return h;
 }
 
@@ -2231,7 +2274,7 @@ function wordDocCss(headerRef){
     table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
     table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
     td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
-    .note{font-size:8.5pt}.warn{color:#b00;font-size:8.5pt;font-weight:bold}.after{margin-top:8px}.sign{line-height:2}.mark{color:#b00}
+    .note{font-size:8.5pt}.warn{color:#b00;font-size:8.5pt;font-weight:bold}.after{margin-top:8px}.sign{line-height:2;page-break-inside:avoid}.mark{color:#b00}
     p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
     @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;${headerRef}}
     div.WordSection1{page:WordSection1;}`;
@@ -3492,21 +3535,34 @@ function excelTableForCurrent(){
     return `<td colspan="${o.span||1}" style="${s}">${txt}</td>`;
   };
   const rows=[];
-  if(has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:2,align:'right',border:false,size:'9.5pt'})}</tr>`);
-  rows.push(`<tr style="height:34px">${cell(esc(dm.title),{span:2,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
-  rows.push(`<tr>${cell(esc(fmtDate(val('issue_date'))),{span:2,align:'right',border:false})}</tr>`);
-  rows.push(`<tr>${cell(esc(val('employee_name'))+'　殿',{span:2,border:false,size:'12pt'})}</tr>`);
-  officeLines(cat).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,align:'right',border:false})}</tr>`));
-  chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
-  rows.push(`<tr>${cell(esc(dm.lead),{span:2,border:false})}</tr>`);
+  if(has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:3,align:'right',border:false,size:'9.5pt'})}</tr>`);
+  rows.push(`<tr style="height:34px">${cell(esc(dm.title),{span:3,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
+  rows.push(`<tr>${cell(esc(fmtDate(val('issue_date'))),{span:3,align:'right',border:false})}</tr>`);
+  rows.push(`<tr>${cell(esc(val('employee_name'))+'　殿',{span:3,border:false,size:'12pt'})}</tr>`);
+  officeLines(cat).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:3,align:'right',border:false})}</tr>`));
+  chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:3,border:false})}</tr>`));
+  rows.push(`<tr>${cell(esc(dm.lead),{span:3,border:false})}</tr>`);
   blocks.forEach(b=>{
     const content=b.lines.map(l=>{ const s=String(l); return esc(s.startsWith('__NOTE__')||s.startsWith('__WARN__')?s.slice(8):s); }).join(BR);
-    rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true})}</tr>`);
+    rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true,span:2})}</tr>`);
   });
-  rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:2,border:false})}</tr>`);
-  signatureLines(dm.sign).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:2,border:false})}</tr>`));
+  rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:3,border:false})}</tr>`);
+  // 署名押印欄（ラベル｜値｜㊞ の3列。㊞は専用列で使用者・労働者が同じ横位置に揃う。空欄は下線）
+  const sg=signatureData(dm.sign, cat);
+  if(sg){
+    rows.push(`<tr>${cell(esc(sg.lead),{span:3,border:false})}</tr>`);
+    rows.push(`<tr>${cell(esc(sg.dateLine),{span:3,border:false})}</tr>`);
+    sg.parties.forEach(p=>{
+      rows.push(`<tr>${cell(esc(p.head),{span:3,border:false})}</tr>`);
+      p.rows.forEach(r=>{
+        const vSt=`padding:3px 6px;font-family:${F};mso-number-format:'\\@';font-size:10.5pt;vertical-align:bottom;`+(r.blank?'border-bottom:0.7pt solid #000;mso-border-bottom-alt:solid windowtext .5pt;':'border:none;');
+        const sSt=`padding:3px 6px;font-family:${F};font-size:10.5pt;text-align:center;vertical-align:bottom;border:none;`;
+        rows.push(`<tr>${cell(esc(r.label),{border:false})}<td style="${vSt}">${r.blank?'　':esc(r.value)}</td><td style="${sSt}">${r.seal?'㊞':''}</td></tr>`);
+      });
+    });
+  }
   return `<table style="border-collapse:collapse;table-layout:fixed;width:720px">`+
-    `<colgroup><col width="105"><col width="615"></colgroup>${rows.join('')}</table>`;
+    `<colgroup><col width="105"><col width="510"><col width="105"></colgroup>${rows.join('')}</table>`;
 }
 function excelWorksheetOptionsXml(name, multi){
   const headerXml = multi ? `<x:Header x:Margin="0.3" x:Data="&amp;L全&amp;Nページ中&amp;Pページ目"/>` : `<x:Header x:Margin="0.3"/>`;
