@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<title>標準報酬決定通知書XML変換ツール（社内用）</title>
+<style>
+  :root{
+    --bg:#f5f3f8; --panel:#ffffff; --ink:#241c2c; --sub:#5c5468;
+    --line:#ded6e8; --accent:#3D1D5D; --accent2:#5a3080; --accent-soft:#efe8f5;
+    --warn-bg:#fdecea; --warn:#a5271b; --warn-line:#f3c2bd;
+    --ok:#2f7a4f;
+    --font: "Yu Gothic UI","Meiryo","Hiragino Kaku Gothic ProN",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.7}
+  header.appbar{background:var(--accent);color:#fff;padding:18px 24px}
+  header.appbar h1{margin:0 0 6px;font-size:20px}
+  header.appbar p{margin:0;font-size:13.5px;color:#e9ddf5}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+  section.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(61,29,93,.06)}
+  section.card h2{margin:0 0 12px;font-size:16px;color:var(--accent);border-left:5px solid var(--accent);padding-left:10px}
+  .step-badge{display:inline-block;background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12.5px;font-weight:700;margin-right:6px}
+
+  .dropzone{border:2px dashed var(--accent2);border-radius:10px;background:var(--accent-soft);padding:28px 16px;text-align:center;cursor:pointer;transition:background .15s}
+  .dropzone.dragover{background:#e2d3f0}
+  .dropzone p{margin:0 0 12px;color:var(--sub);font-size:14px}
+  .btn{border:0;border-radius:8px;padding:11px 20px;font-size:14.5px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
+  .btn:hover{background:var(--accent2)}
+  .btn.secondary{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+  .btn.secondary:hover{background:var(--accent-soft)}
+  .btn:disabled{background:#c9c2d3;color:#fff;cursor:not-allowed}
+  .btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .hint{font-size:12.5px;color:var(--sub);margin-top:6px}
+
+  details.paste-area{margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+  details.paste-area summary{cursor:pointer;font-weight:700;color:var(--accent2);font-size:13.5px}
+  details.paste-area textarea{width:100%;height:140px;margin-top:10px;font-family:monospace;font-size:12.5px;padding:10px;border:1px solid var(--line);border-radius:6px}
+  details.paste-area .paste-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  details.paste-area input[type=text]{padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:220px}
+
+  #summaryBar{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:10px}
+  #summaryAlert{font-size:13px;font-weight:700;color:var(--warn);margin-bottom:10px}
+  #summaryAlert a{color:var(--warn)}
+  #fileList{list-style:none;margin:0;padding:0;font-size:13px}
+  #fileList li{padding:6px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+  #fileList li.ok .status{color:var(--ok);font-weight:700}
+  #fileList li.err .status{color:var(--warn);font-weight:700}
+  #emptyState{color:var(--sub);font-size:13.5px}
+
+  .table-scroll{overflow-x:auto;max-height:480px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+  table.preview{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}
+  table.preview th{position:sticky;top:0;background:var(--accent);color:#fff;padding:8px 10px;text-align:left;z-index:2}
+  table.preview td{padding:7px 10px;border-bottom:1px solid var(--line)}
+  table.preview tr:nth-child(even) td{background:#faf8fc}
+  table.preview tr.has-note td{background:#fff4e5}
+  table.preview td.num{text-align:right;font-variant-numeric:tabular-nums}
+  td.flag{text-align:center;color:#8a5300;font-weight:700}
+  #previewEmpty{color:var(--sub);font-size:13.5px;padding:10px 2px}
+
+  #copyStatus{font-size:13px;margin-top:6px;font-weight:700}
+  #copyStatus.ok{color:var(--ok)}
+  #copyStatus.err{color:var(--warn)}
+
+  #errorBox{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;padding:12px 16px;color:var(--warn);font-size:13px}
+  #errorBox ul{margin:6px 0 0;padding-left:20px}
+  #errorBox.hidden{display:none}
+  #errorBox.ok{background:#eaf6ee;border-color:#bfe3cb;color:var(--ok)}
+
+  details.help{margin-top:4px}
+  details.help summary{cursor:pointer;font-weight:700;color:var(--accent2);font-size:14px}
+  details.help .help-body{margin-top:10px;font-size:13px;color:var(--ink)}
+  details.help h3{font-size:13.5px;color:var(--accent);margin:14px 0 4px}
+  details.help table{border-collapse:collapse;font-size:12.5px;margin:6px 0}
+  details.help table td, details.help table th{border:1px solid var(--line);padding:4px 8px}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <h1>標準報酬決定通知書XML変換ツール</h1>
+  <p>マイナポータル等で受け取った標準報酬の通知書XMLを、Excelで使える一覧表に変換します。データは外部に送られません（すべてこの画面の中だけで処理します）。</p>
+</header>
+
+<div class="wrap">
+
+  <section class="card" id="inputSection">
+    <h2><span class="step-badge">1</span>XMLファイルを読み込む</h2>
+    <div class="dropzone" id="dropzone">
+      <p>ここにXMLファイルをドラッグ＆ドロップ<br>（複数ファイルまとめてドロップできます）</p>
+      <button type="button" class="btn" id="pickFileBtn">ファイルを選ぶ</button>
+      <input type="file" id="fileInput" accept=".xml" multiple style="display:none">
+    </div>
+    <div class="hint">対応形式: 日本年金機構の標準報酬決定通知書・月額変更通知書のXML（.xml）。複数まとめて選択できます。zipファイルはそのままでは読めません。右クリック→「すべて展開」で解凍し、中の.xmlファイルを読み込んでください。</div>
+
+    <details class="paste-area">
+      <summary>XMLの中身を直接貼り付けて読み込む（テスト・代替手段用）</summary>
+      <div class="help-body">
+        <textarea id="pasteText" aria-label="XMLの中身" placeholder="ここにXMLの中身を貼り付けてください"></textarea>
+        <div class="paste-row">
+          <label for="pasteName" style="font-size:12.5px;color:var(--sub)">名前（任意）:</label>
+          <input type="text" id="pasteName" placeholder="例: 貼り付けデータ1">
+          <button type="button" class="btn secondary" id="parsePasteBtn">この内容を解析して追加</button>
+        </div>
+        <div id="pasteMsg" class="hint" style="color:var(--warn);display:none"></div>
+      </div>
+    </details>
+
+    <div class="btn-row" style="margin-top:14px">
+      <button type="button" class="btn secondary" id="clearBtn">クリア（やり直す）</button>
+    </div>
+  </section>
+
+  <section class="card" id="summarySection">
+    <h2><span class="step-badge">2</span>読込結果</h2>
+    <div id="summaryBar" role="status" aria-live="polite"></div>
+    <div id="summaryAlert" style="display:none"></div>
+    <div id="emptyState">まだXMLが読み込まれていません。上の「ファイルを選ぶ」またはドラッグ＆ドロップで読み込んでください。</div>
+    <ul id="fileList" style="display:none"></ul>
+  </section>
+
+  <section class="card" id="previewSection">
+    <h2><span class="step-badge">3</span>プレビュー</h2>
+    <div class="hint">⚠の行は下の「<a href="#errorSection">エラー・注意</a>」欄に理由が出ています。</div>
+    <div id="previewEmpty">読み込むとここに一覧が表示されます。</div>
+    <div class="table-scroll" id="previewScroll" style="display:none">
+      <table class="preview" id="previewTable">
+        <thead><tr id="previewHeaderRow"></tr></thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="outputSection">
+    <h2><span class="step-badge">4</span>出力する</h2>
+    <div class="btn-row">
+      <div>
+        <button type="button" class="btn" id="copyTsvBtn" disabled>Excel用にコピー</button>
+        <div class="hint">既にあるExcelに貼り足すならこちら。整理番号や日付形式の列は貼り付け先を「セルの書式設定→文字列」にしてから貼り付けてください（<a href="#help-excel-paste">詳しくはヘルプ</a>）。</div>
+      </div>
+      <div>
+        <button type="button" class="btn secondary" id="saveCsvBtn" disabled>CSVで保存</button>
+        <div class="hint">新しいファイルとして保存するならこちら。「標準報酬一覧_YYYYMMDD.csv」の名前で保存され、先頭0や日付化の対策は自動で行われます。</div>
+      </div>
+    </div>
+    <div id="copyStatus" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="errorSection">
+    <h2 id="errorHeading"><span class="step-badge">!</span>エラー・注意</h2>
+    <div id="errorBox" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <details class="help">
+      <summary>使い方・注意点を見る（困ったときはここを開いてください）</summary>
+      <div class="help-body">
+        <h3>元号変換の考え方</h3>
+        <p>XMLの中の年月日は「R07」のように元号記号＋和暦年で書かれています。次の表の数字に和暦年を足すと西暦になります（この足し算は法令上のルールではなく、単純な計算です）。</p>
+        <table>
+          <tr><th>元号記号</th><td>M（明治）</td><td>T（大正）</td><td>S（昭和）</td><td>H（平成）</td><td>R（令和）</td></tr>
+          <tr><th>足す数</th><td>1867</td><td>1911</td><td>1925</td><td>1988</td><td>2018</td></tr>
+        </table>
+        <p>例: 令和7年 → 2018 + 7 = 2025年。見慣れない記号が出てきた場合は変換せず原文のまま表示し、注意欄に警告を出します。</p>
+
+        <h3>「千円」表記の扱い</h3>
+        <p>標準報酬月額はXMLの中で「1390千円」のように千円単位の文字列で入っています。ツールはこれを1,390,000円のような円単位の数値に変換して別列に出します。原文（千円表記）も別列に残していますので、見比べて確認できます。</p>
+
+        <h3>区分（算定・月変）について</h3>
+        <p>算定＝定時決定（毎年1回の見直し）／月変＝随時改定（給与が大きく変わったときの見直し）です。区分の判定は、XML内の年月タグが「適用年月」なら算定、「改定年月」なら月変としています（標準報酬の金額タグは、月変でも算定と同じ「決定後の〜」が使われることがあるため、区分の根拠には使っていません）。区分が「不明」と表示された場合は、XMLの形式が想定と異なる可能性があります。原本の通知書と見比べてご確認ください。</p>
+
+        <h3 id="help-excel-paste">Excelに貼り付けるときの注意</h3>
+        <p>「Excel用にコピー」で貼り付けると、整理番号や日付のような列がExcelに数値・日付として解釈され、先頭の0が消えたり日付表示に変わったりすることがあります。気になる場合は、貼り付け先の列をあらかじめ「セルの書式設定」→「文字列」にしてから貼り付けてください。「CSVで保存」を使う場合は、この対策を自動で行っています。</p>
+
+        <h3>データの取り扱いについて</h3>
+        <p>このツールはブラウザの中だけで動作し、読み込んだXMLの内容をサーバーや外部に送信することは一切ありません。ブラウザの保存領域（localStorage等）にも保存しません。画面を閉じる、または「クリア」を押すとデータは消えます。</p>
+        <p>コピー・CSV保存したデータの取り扱いは、事務所の個人情報ルールに従ってください。コピーした内容は、他の何かをコピーすると上書きされて消えます。チャットやメールなど、意図しない送信先に誤って貼り付けないようご注意ください。</p>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- 定数 ----------
+  var ERA_OFFSET = { M:1867, T:1911, S:1925, H:1988, R:2018 };
+  var ERA_NAME   = { M:"明治", T:"大正", S:"昭和", H:"平成", R:"令和" };
+
+  var COLUMNS = [
+    { key:"office",       label:"事業所名称" },
+    { key:"noticeDate",   label:"通知年月日" },
+    { key:"category",     label:"区分" },
+    { key:"seiriNo",      label:"被保険者整理番号", forceText:true },
+    { key:"name",         label:"被保険者氏名" },
+    { key:"ymEraText",    label:"適用（改定）年月・元号表記" },
+    { key:"ymIso",        label:"適用（改定）年月・西暦表記", forceText:true },
+    { key:"kenpoYen",     label:"標準報酬月額_健保（円）", numeric:true },
+    { key:"kenpoRaw",     label:"標準報酬月額_健保（原文）" },
+    { key:"kouseiYen",    label:"標準報酬月額_厚年（円）", numeric:true },
+    { key:"kouseiRaw",    label:"標準報酬月額_厚年（原文）" },
+    { key:"birthEraText", label:"生年月日・元号表記" },
+    { key:"birthIso",     label:"生年月日・西暦表記", forceText:true },
+    { key:"type",         label:"種別" },
+    { key:"pensionOffice",label:"年金事務所名" }
+  ];
+
+  // ---------- 文字列ユーティリティ ----------
+  function fullTrim(s){
+    if(s===null || s===undefined) return "";
+    return String(s).replace(/^[\s　]+|[\s　]+$/g, "");
+  }
+  function toHalfDigits(s){
+    if(s===null || s===undefined) return "";
+    return String(s).replace(/[０-９]/g, function(ch){
+      return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0);
+    });
+  }
+  function normalizeName(s){
+    var t = fullTrim(s);
+    t = t.replace(/[\s　]+/g, "　");
+    return t;
+  }
+  function pad2(n){ return (n < 10 ? "0" + n : "" + n); }
+  // CSV/TSVを表計算ソフトで開いたときの数式インジェクション対策:
+  // セル値の先頭が = + - @ タブ 復帰文字の場合、先頭に ' を付けて文字列として扱わせる
+  function neutralizeFormula(s){
+    if(s === null || s === undefined || s === "") return s;
+    var str = String(s);
+    if(/^[=+\-@\t\r]/.test(str)) return "'" + str;
+    return str;
+  }
+
+  // ---------- XML補助 ----------
+  function hasParserError(doc){
+    if(!doc) return true;
+    if(doc.getElementsByTagName("parsererror").length > 0) return true;
+    if(doc.documentElement && doc.documentElement.nodeName === "parsererror") return true;
+    return false;
+  }
+  function getChildText(el, tagName){
+    var nodes = el.getElementsByTagName(tagName);
+    if(nodes && nodes.length > 0) return nodes[0].textContent;
+    return null;
+  }
+  function pickField(el, candidates){
+    for(var i=0;i<candidates.length;i++){
+      var t = getChildText(el, candidates[i]);
+      if(t !== null) return { tag:candidates[i], value:t };
+    }
+    return { tag:null, value:null };
+  }
+  function pickGroup(el, prefixes){
+    for(var i=0;i<prefixes.length;i++){
+      var p = prefixes[i];
+      var era = getChildText(el, p + "_元号");
+      if(era !== null){
+        return { prefix:p, era: fullTrim(era), year: getChildText(el, p + "_年"), month: getChildText(el, p + "_月") };
+      }
+    }
+    return null;
+  }
+
+  // ---------- 変換ロジック ----------
+  function formatEraYM(eraCode, yearRaw, monthRaw){
+    var name = ERA_NAME[eraCode];
+    var yearNum = parseInt(toHalfDigits(fullTrim(yearRaw)), 10);
+    var monthNum = parseInt(toHalfDigits(fullTrim(monthRaw)), 10);
+    var rangeOk = !isNaN(monthNum) && monthNum >= 1 && monthNum <= 12;
+    if(!name || isNaN(yearNum) || isNaN(monthNum) || !rangeOk){
+      return {
+        text: (eraCode || "") + fullTrim(yearRaw) + "年" + fullTrim(monthRaw) + "月",
+        iso: "",
+        unknown: true
+      };
+    }
+    var seireki = ERA_OFFSET[eraCode] + yearNum;
+    return { text: name + yearNum + "年" + monthNum + "月", iso: seireki + "-" + pad2(monthNum), unknown:false };
+  }
+  function formatEraYMD(eraCode, yearRaw, monthRaw, dayRaw){
+    var name = ERA_NAME[eraCode];
+    var yearNum = parseInt(toHalfDigits(fullTrim(yearRaw)), 10);
+    var monthNum = parseInt(toHalfDigits(fullTrim(monthRaw)), 10);
+    var dayNum = parseInt(toHalfDigits(fullTrim(dayRaw)), 10);
+    var rangeOk = !isNaN(monthNum) && monthNum >= 1 && monthNum <= 12 && !isNaN(dayNum) && dayNum >= 1 && dayNum <= 31;
+    if(!name || isNaN(yearNum) || isNaN(monthNum) || isNaN(dayNum) || !rangeOk){
+      return {
+        text: (eraCode || "") + fullTrim(yearRaw) + "年" + fullTrim(monthRaw) + "月" + fullTrim(dayRaw) + "日",
+        iso: "",
+        unknown: true
+      };
+    }
+    var seireki = ERA_OFFSET[eraCode] + yearNum;
+    return { text: name + yearNum + "年" + monthNum + "月" + dayNum + "日", iso: seireki + "-" + pad2(monthNum) + "-" + pad2(dayNum), unknown:false };
+  }
+  function parseSenYen(raw){
+    if(raw === null || raw === undefined) return { yen:null, raw:"", ok:false };
+    var t = fullTrim(raw);
+    if(t === "") return { yen:null, raw:t, ok:false };
+    var compact = toHalfDigits(t).replace(/[\s　]/g, "");
+    var m = compact.match(/^(\d+)千円$/);
+    if(m) return { yen: parseInt(m[1],10) * 1000, raw:t, ok:true };
+    return { yen:null, raw:t, ok:false };
+  }
+
+  // ---------- 1件分の行を組み立て ----------
+  function buildRow(el, fileName, idxInFile){
+    var notes = [];
+
+    var seiriNo = fullTrim(getChildText(el, "被保険者整理番号"));
+    var nameRaw = getChildText(el, "被保険者氏名");
+    var name = nameRaw !== null ? normalizeName(nameRaw) : "";
+    var office = fullTrim(getChildText(el, "事業所名称_送付先"));
+    var noticeDate = fullTrim(getChildText(el, "通知年月日"));
+    var typeRaw = getChildText(el, "種別");
+    var type = typeRaw !== null ? fullTrim(typeRaw) : "";
+    var pensionOffice = fullTrim(getChildText(el, "年金事務所名"));
+    var officeNoInternal = fullTrim(getChildText(el, "事業所番号"));
+
+    if(!seiriNo) notes.push("被保険者整理番号を読み取れませんでした");
+    if(!name) notes.push("被保険者氏名を読み取れませんでした");
+
+    // 適用（改定）年月
+    var ymEraText = "", ymIso = "";
+    var ymGroup = pickGroup(el, ["適用年月", "改定年月"]);
+    if(!ymGroup){
+      notes.push("適用（改定）年月を読み取れませんでした");
+    } else {
+      var ry = formatEraYM(ymGroup.era, ymGroup.year, ymGroup.month);
+      ymEraText = ry.text; ymIso = ry.iso;
+      if(ry.unknown) notes.push("適用（改定）年月を正しく読み取れませんでした（元号記号「" + ymGroup.era + "」が不明、または年月の値をご確認ください）");
+    }
+
+    // 生年月日
+    var birthEraText = "", birthIso = "";
+    var birthEraRaw = getChildText(el, "生年月日_元号");
+    if(birthEraRaw === null){
+      notes.push("生年月日を読み取れませんでした");
+    } else {
+      var beCode = fullTrim(birthEraRaw);
+      var rb = formatEraYMD(beCode, getChildText(el,"生年月日_年"), getChildText(el,"生年月日_月"), getChildText(el,"生年月日_日"));
+      birthEraText = rb.text; birthIso = rb.iso;
+      if(rb.unknown) notes.push("生年月日を正しく読み取れませんでした（元号記号「" + beCode + "」が不明、または年月日の値をご確認ください）");
+    }
+
+    // 標準報酬月額（健保・厚年）
+    var kenpo = pickField(el, ["決定後の標準報酬月額_健保", "改定後の標準報酬月額_健保"]);
+    var kousei = pickField(el, ["決定後の標準報酬月額_厚年", "改定後の標準報酬月額_厚年"]);
+
+    // 区分判定: 実物の月変（標準報酬改定通知書）は標準報酬タグに算定と同じ「決定後の〜」を使うため、
+    // 標準報酬タグ名ではなく年月タグのグループ（適用年月＝算定／改定年月＝月変）を第一根拠とする。
+    // 年月グループが取れない場合のみ、標準報酬タグ名（「改定後の〜」＝月変）を第二根拠として使う。
+    var category = "不明";
+    if(ymGroup && ymGroup.prefix === "適用年月"){
+      category = "算定";
+    } else if(ymGroup && ymGroup.prefix === "改定年月"){
+      category = "月変";
+    } else if((kenpo.tag && kenpo.tag.indexOf("改定後") === 0) || (kousei.tag && kousei.tag.indexOf("改定後") === 0)){
+      category = "月変";
+    }
+
+    var kenpoParsed = parseSenYen(kenpo.value);
+    var kouseiParsed = parseSenYen(kousei.value);
+    if(kenpo.tag === null && kousei.tag === null){
+      notes.push("標準報酬月額（健保・厚年とも）を読み取れませんでした");
+    } else {
+      if(kenpo.tag === null) notes.push("標準報酬月額_健保のタグが見つかりませんでした");
+      else if(!kenpoParsed.ok) notes.push("標準報酬月額_健保を数値変換できませんでした（原文: " + kenpoParsed.raw + "）");
+      if(kousei.tag === null) notes.push("標準報酬月額_厚年のタグが見つかりませんでした");
+      else if(!kouseiParsed.ok) notes.push("標準報酬月額_厚年を数値変換できませんでした（原文: " + kouseiParsed.raw + "）");
+    }
+
+    return {
+      office: office, noticeDate: noticeDate, category: category,
+      seiriNo: seiriNo, name: name,
+      ymEraText: ymEraText, ymIso: ymIso,
+      kenpoYen: (kenpo.tag !== null && kenpoParsed.ok) ? kenpoParsed.yen : "",
+      kenpoRaw: kenpo.tag !== null ? kenpoParsed.raw : "",
+      kouseiYen: (kousei.tag !== null && kouseiParsed.ok) ? kouseiParsed.yen : "",
+      kouseiRaw: kousei.tag !== null ? kouseiParsed.raw : "",
+      birthEraText: birthEraText, birthIso: birthIso,
+      type: type, pensionOffice: pensionOffice,
+      _notes: notes,
+      _fileName: fileName, _idxInFile: idxInFile,
+      _dedupKey: officeNoInternal + "|" + seiriNo
+    };
+  }
+
+  // ---------- ファイル（テキスト）単位のパース：レビュー/自動テスト用にグローバル公開 ----------
+  function parseXmlText(xmlString, fileName){
+    var result = { fileName: fileName, ok:true, fatalError:null, rows:[], counts:{ "算定":0, "月変":0, "不明":0 } };
+    var doc;
+    try{
+      var parser = new DOMParser();
+      doc = parser.parseFromString(xmlString, "application/xml");
+    }catch(e){
+      result.ok = false;
+      result.fatalError = "XMLとして読めませんでした。ファイルが壊れているか、XML以外の可能性があります";
+      return result;
+    }
+    if(hasParserError(doc)){
+      result.ok = false;
+      result.fatalError = "XMLとして読めませんでした。ファイルが壊れているか、XML以外の可能性があります";
+      return result;
+    }
+    var list = doc.getElementsByTagName("_被保険者");
+    if(!list || list.length === 0){
+      result.ok = false;
+      result.fatalError = "このファイルには被保険者データが見つかりませんでした。標準報酬の決定/改定通知書XMLか確認してください";
+      return result;
+    }
+    for(var i=0;i<list.length;i++){
+      var row = buildRow(list[i], fileName, i+1);
+      result.rows.push(row);
+      result.counts[row.category] = (result.counts[row.category] || 0) + 1;
+    }
+    return result;
+  }
+  window.parseXmlText = parseXmlText;
+
+  // ===================================================================
+  // ここから画面側（UI）
+  // ===================================================================
+  var state = { entries: [] }; // { fileName, result }
+
+  var dropzone = document.getElementById("dropzone");
+  var fileInput = document.getElementById("fileInput");
+  var pickFileBtn = document.getElementById("pickFileBtn");
+  var pasteText = document.getElementById("pasteText");
+  var pasteName = document.getElementById("pasteName");
+  var parsePasteBtn = document.getElementById("parsePasteBtn");
+  var pasteMsg = document.getElementById("pasteMsg");
+  var clearBtn = document.getElementById("clearBtn");
+  var summaryBar = document.getElementById("summaryBar");
+  var summaryAlert = document.getElementById("summaryAlert");
+  var emptyState = document.getElementById("emptyState");
+  var fileListEl = document.getElementById("fileList");
+  var previewHeaderRow = document.getElementById("previewHeaderRow");
+  var previewBody = document.getElementById("previewBody");
+  var previewEmpty = document.getElementById("previewEmpty");
+  var previewScroll = document.getElementById("previewScroll");
+  var copyTsvBtn = document.getElementById("copyTsvBtn");
+  var saveCsvBtn = document.getElementById("saveCsvBtn");
+  var copyStatus = document.getElementById("copyStatus");
+  var errorBox = document.getElementById("errorBox");
+
+  // ヘッダー行を1度だけ構築
+  COLUMNS.forEach(function(c){
+    var th = document.createElement("th");
+    th.textContent = c.label;
+    previewHeaderRow.appendChild(th);
+  });
+  var flagTh = document.createElement("th");
+  flagTh.textContent = "確認";
+  previewHeaderRow.appendChild(flagTh);
+
+  // ページ全体でのドラッグ＆ドロップは既定でファイルを開いてしまう（ページ遷移）ため、
+  // ドロップゾーン外に誤ってドロップしてもページが差し替わらないよう window レベルで無効化する
+  window.addEventListener("dragover", function(e){ e.preventDefault(); });
+  window.addEventListener("drop", function(e){ e.preventDefault(); });
+
+  pickFileBtn.addEventListener("click", function(e){
+    e.stopPropagation(); // dropzone側のclickリスナーと二重発火してファイル選択ダイアログが2回開くのを防ぐ
+    fileInput.click();
+  });
+  dropzone.addEventListener("click", function(){ fileInput.click(); });
+  fileInput.addEventListener("change", function(e){
+    handleFiles(e.target.files);
+    fileInput.value = "";
+  });
+  dropzone.addEventListener("dragover", function(e){
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+  dropzone.addEventListener("dragleave", function(){
+    dropzone.classList.remove("dragover");
+  });
+  dropzone.addEventListener("drop", function(e){
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    if(!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return; // ファイル以外のドロップは無視
+    handleFiles(e.dataTransfer.files);
+  });
+
+  parsePasteBtn.addEventListener("click", function(){
+    var text = pasteText.value;
+    if(!fullTrim(text)){
+      pasteMsg.textContent = "XMLの中身を貼り付けてから押してください";
+      pasteMsg.style.display = "block";
+      return;
+    }
+    pasteMsg.textContent = "";
+    pasteMsg.style.display = "none";
+    var name = fullTrim(pasteName.value) || ("貼り付けデータ" + (state.entries.length + 1));
+    var result = parseXmlText(text, name);
+    state.entries.push({ fileName: name, result: result });
+    pasteText.value = "";
+    pasteName.value = "";
+    render();
+  });
+
+  clearBtn.addEventListener("click", function(){
+    if(state.entries.length > 0){
+      var confirmed = window.confirm("読み込んだデータをすべて消去します。よろしいですか？");
+      if(!confirmed) return;
+    }
+    state.entries = [];
+    copyStatus.textContent = "";
+    copyStatus.className = "";
+    render();
+  });
+
+  var ZIP_MESSAGE = "zipファイルはそのままでは読めません。右クリック→「すべて展開」で解凍し、中の.xmlファイルを読み込んでください。";
+
+  function handleFiles(fileListObj){
+    var files = Array.prototype.slice.call(fileListObj);
+    var total = files.length;
+    if(total === 0) return;
+    // 非同期処理の完了順は選択順と一致しないことがあるため、選択時のindexで結果を並べ直してから追加する
+    var results = new Array(total);
+    var pending = total;
+
+    function finalizeIfDone(){
+      pending--;
+      if(pending === 0){
+        state.entries = state.entries.concat(results);
+        render();
+      }
+    }
+
+    files.forEach(function(file, idx){
+      if(/\.zip$/i.test(file.name)){
+        results[idx] = { fileName: file.name, result: { fileName:file.name, ok:false, fatalError: ZIP_MESSAGE, rows:[], counts:{} } };
+        finalizeIfDone();
+        return;
+      }
+      readFileAsText(file).then(function(res){
+        var result = parseXmlText(res.text, file.name);
+        if(res.warning){
+          if(result.ok){
+            result.rows.forEach(function(r){ r._notes.push(res.warning); });
+          } else {
+            result.fatalError = result.fatalError + "（" + res.warning + "）";
+          }
+        }
+        results[idx] = { fileName: file.name, result: result };
+        finalizeIfDone();
+      }).catch(function(){
+        results[idx] = { fileName: file.name, result: { fileName:file.name, ok:false, fatalError:"ファイルを読み込めませんでした。", rows:[], counts:{} } };
+        finalizeIfDone();
+      });
+    });
+  }
+
+  function readFileAsText(file){
+    return file.arrayBuffer().then(function(buf){
+      var bytes = new Uint8Array(buf);
+      var text = "";
+      var warning = null;
+      try{
+        text = new TextDecoder("utf-8", { fatal:false }).decode(bytes);
+      }catch(e){
+        text = "";
+      }
+      if(text.indexOf("�") !== -1){
+        var fixed = false;
+        try{
+          var sjisText = new TextDecoder("shift_jis", { fatal:false }).decode(bytes);
+          if(sjisText.indexOf("�") === -1){
+            text = sjisText;
+            warning = "文字コードをShift_JISとして自動判定して読み込みました。内容をご確認ください。";
+            fixed = true;
+          }
+        }catch(e2){ /* shift_jis未対応環境 */ }
+        if(!fixed){
+          warning = "文字化けの可能性があります（UTF-8として読み込みましたが、変換できない文字が含まれています）。ファイルの文字コードをご確認ください。";
+        }
+      }
+      return { text: text, warning: warning };
+    });
+  }
+
+  function allRows(){
+    var rows = [];
+    state.entries.forEach(function(e){
+      if(e.result.ok) rows = rows.concat(e.result.rows);
+    });
+    return rows;
+  }
+
+  function detectDuplicates(rows){
+    var map = {};
+    rows.forEach(function(r){
+      if(!r.seiriNo) return;
+      if(!map[r._dedupKey]) map[r._dedupKey] = [];
+      map[r._dedupKey].push(r);
+    });
+    var msgs = [];
+    Object.keys(map).forEach(function(k){
+      var group = map[k];
+      if(group.length > 1){
+        msgs.push("被保険者整理番号「" + group[0].seiriNo + "」（氏名例: " + (group[0].name || "不明") + "）が" + group.length + "件重複しています。同一の方が複数ファイルに含まれていないかご確認ください。");
+      }
+    });
+    return msgs;
+  }
+
+  function buildMessages(rows){
+    var messages = [];
+    state.entries.forEach(function(e){
+      if(!e.result.ok){
+        messages.push({ level:"error", text: e.fileName + ": " + e.result.fatalError });
+      }
+    });
+    rows.forEach(function(r){
+      r._notes.forEach(function(n){
+        messages.push({ level:"warn", text: r._fileName + " " + r._idxInFile + "件目（整理番号: " + (r.seiriNo || "不明") + "、氏名: " + (r.name || "不明") + "）: " + n });
+      });
+    });
+    detectDuplicates(rows).forEach(function(n){
+      messages.push({ level:"warn", text: n });
+    });
+    return messages;
+  }
+
+  function render(){
+    var rows = allRows();
+    var messages = buildMessages(rows);
+
+    // 新しいデータの読み込み・クリア時は、前回の「コピーしました」表示を残さない
+    copyStatus.textContent = "";
+    copyStatus.className = "";
+
+    // --- 読込結果バー ---
+    if(state.entries.length === 0){
+      summaryBar.textContent = "";
+      emptyState.style.display = "block";
+      fileListEl.style.display = "none";
+    } else {
+      emptyState.style.display = "none";
+      fileListEl.style.display = "block";
+      var counts = { "算定":0, "月変":0, "不明":0 };
+      rows.forEach(function(r){ counts[r.category] = (counts[r.category]||0) + 1; });
+      var breakdown = "算定 " + counts["算定"] + "名／月変 " + counts["月変"] + "名";
+      if(counts["不明"] > 0) breakdown += "／不明 " + counts["不明"] + "名";
+      var errorFileCount = state.entries.filter(function(e){ return !e.result.ok; }).length;
+      var fileCountText = "XML " + state.entries.length + "件";
+      if(errorFileCount > 0) fileCountText += "（うちエラー " + errorFileCount + "件）";
+      summaryBar.textContent = fileCountText + "・被保険者 " + rows.length + "名を読み込みました（内訳: " + breakdown + "）";
+
+      fileListEl.innerHTML = "";
+      state.entries.forEach(function(e){
+        var li = document.createElement("li");
+        var nameSpan = document.createElement("span");
+        nameSpan.textContent = e.fileName;
+        var statusSpan = document.createElement("span");
+        statusSpan.className = "status";
+        if(e.result.ok){
+          li.className = "ok";
+          statusSpan.textContent = "OK（" + e.result.rows.length + "名）";
+        } else {
+          li.className = "err";
+          statusSpan.textContent = "エラー: " + e.result.fatalError;
+        }
+        li.appendChild(nameSpan);
+        li.appendChild(statusSpan);
+        fileListEl.appendChild(li);
+      });
+    }
+
+    // --- 読込結果バー直下の注意リンク ---
+    summaryAlert.innerHTML = "";
+    if(messages.length > 0){
+      var alertLink = document.createElement("a");
+      alertLink.href = "#errorSection";
+      alertLink.textContent = "確認が必要な項目が " + messages.length + " 件あります → 下の「エラー・注意」欄を確認";
+      summaryAlert.appendChild(alertLink);
+      summaryAlert.style.display = "block";
+    } else {
+      summaryAlert.style.display = "none";
+    }
+
+    // --- プレビュー表 ---
+    previewBody.innerHTML = "";
+    rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      if(r._notes.length > 0) tr.className = "has-note";
+      COLUMNS.forEach(function(c){
+        var td = document.createElement("td");
+        var v = r[c.key];
+        if(c.numeric){
+          td.className = "num";
+          td.textContent = (v === "" || v === null || v === undefined) ? "" : Number(v).toLocaleString("ja-JP");
+        } else {
+          td.textContent = (v === null || v === undefined) ? "" : String(v);
+        }
+        tr.appendChild(td);
+      });
+      var flagTd = document.createElement("td");
+      flagTd.className = "flag";
+      if(r._notes.length > 0){
+        flagTd.textContent = "⚠";
+        flagTd.title = r._notes.join(" / ");
+      }
+      tr.appendChild(flagTd);
+      previewBody.appendChild(tr);
+    });
+
+    if(rows.length > 0){
+      previewEmpty.style.display = "none";
+      previewScroll.style.display = "block";
+    } else {
+      previewEmpty.style.display = "block";
+      previewScroll.style.display = "none";
+    }
+
+    // --- 出力ボタンの有効/無効 ---
+    var canOutput = rows.length > 0;
+    copyTsvBtn.disabled = !canOutput;
+    saveCsvBtn.disabled = !canOutput;
+
+    // --- エラー・注意欄 ---
+    errorBox.innerHTML = "";
+    if(messages.length === 0){
+      errorBox.classList.remove("hidden");
+      errorBox.classList.add("ok");
+      errorBox.textContent = "現在、確認が必要な項目はありません。";
+    } else {
+      errorBox.classList.remove("hidden");
+      errorBox.classList.remove("ok");
+      var title = document.createElement("div");
+      title.textContent = "確認が必要な項目が " + messages.length + " 件あります。";
+      errorBox.appendChild(title);
+      var ul = document.createElement("ul");
+      messages.forEach(function(m){
+        var li = document.createElement("li");
+        li.textContent = (m.level === "error" ? "【エラー】" : "【注意】") + m.text;
+        ul.appendChild(li);
+      });
+      errorBox.appendChild(ul);
+    }
+  }
+
+  // ---------- 出力：TSV（Excel用コピー） ----------
+  // S-1: 表計算ソフトでの数式インジェクション対策。数値列以外はneutralizeFormulaで先頭記号をエスケープする
+  function buildTSV(rows){
+    var header = COLUMNS.map(function(c){ return c.label; }).join("\t");
+    var lines = rows.map(function(r){
+      return COLUMNS.map(function(c){
+        var v = r[c.key];
+        var s = (v === null || v === undefined) ? "" : String(v);
+        if(!c.numeric) s = neutralizeFormula(s);
+        return s.replace(/[\r\n\t]/g, " ");
+      }).join("\t");
+    });
+    return [header].concat(lines).join("\r\n");
+  }
+
+  var COPY_SUCCESS_MSG = "コピーしました。整理番号の先頭の0や日付の自動変換を防ぐため、貼り付け先の列を「セルの書式設定→文字列」にしてから貼ってください。";
+
+  function showCopyStatus(text, isErr){
+    copyStatus.textContent = text;
+    copyStatus.className = isErr ? "err" : "ok";
+  }
+
+  copyTsvBtn.addEventListener("click", function(){
+    var tsv = buildTSV(allRows());
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(tsv).then(function(){
+        showCopyStatus(COPY_SUCCESS_MSG);
+      }).catch(function(){
+        fallbackCopy(tsv);
+      });
+    } else {
+      fallbackCopy(tsv);
+    }
+  });
+
+  function fallbackCopy(tsv){
+    var ta = document.createElement("textarea");
+    ta.value = tsv;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var success = false;
+    try{ success = document.execCommand("copy"); }catch(e){ success = false; }
+    document.body.removeChild(ta);
+    if(success) showCopyStatus(COPY_SUCCESS_MSG);
+    else showCopyStatus("コピーに失敗しました。お手数ですが表を選択して手動でコピーしてください。", true);
+  }
+
+  // ---------- 出力：CSV（保存） ----------
+  function csvEscape(s){
+    s = String(s);
+    if(/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  // S-1: forceText列（="..."で常に安全）はそのまま。それ以外の文字列列は先頭記号をneutralizeFormulaでエスケープしてから通常のCSVエスケープを行う
+  function csvCell(col, row){
+    var raw = row[col.key];
+    if(raw === null || raw === undefined) raw = "";
+    raw = String(raw);
+    if(col.forceText){
+      var content = '="' + raw.replace(/"/g, '""') + '"';
+      return '"' + content.replace(/"/g, '""') + '"';
+    }
+    if(!col.numeric) raw = neutralizeFormula(raw);
+    return csvEscape(raw);
+  }
+  function buildCSV(rows){
+    var header = COLUMNS.map(function(c){ return csvEscape(c.label); }).join(",");
+    var lines = rows.map(function(r){
+      return COLUMNS.map(function(c){ return csvCell(c, r); }).join(",");
+    });
+    return [header].concat(lines).join("\r\n");
+  }
+
+  saveCsvBtn.addEventListener("click", function(){
+    var csv = buildCSV(allRows());
+    var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var d = new Date();
+    var fname = "標準報酬一覧_" + d.getFullYear() + pad2(d.getMonth()+1) + pad2(d.getDate()) + ".csv";
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
