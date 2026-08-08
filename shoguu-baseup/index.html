@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<!-- 事務所内限定ツール: 検索エンジンにインデックスさせない -->
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +16,8 @@
   body{background:var(--ground); color:var(--ink);
     font-family:"Yu Gothic UI","Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
     font-size:14.5px; line-height:1.75; margin:0;}
-  .wrap{max-width:1100px; margin:0 auto; padding:0 20px 64px;}
+  /* ヘッダー用。本文はサイドバー型レイアウト（.layout）側で幅を決める */
+  .wrap{max-width:1440px; margin:0 auto; padding:0 26px 64px;}
 
   header.app{background:var(--accent-deep); color:#F2F6FA; padding:22px 0 18px;}
   header.app .wrap{padding-bottom:0;}
@@ -28,18 +28,63 @@
   .badge-date{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
     border-radius:999px; padding:1px 12px; font-size:12px;}
 
-  nav.tabs{background:var(--accent-deep); position:sticky; top:0; z-index:20;
-    border-bottom:3px solid var(--accent);}
-  nav.tabs .wrap{display:flex; gap:2px; padding-top:6px; padding-bottom:0; overflow-x:auto;}
-  nav.tabs button{appearance:none; border:none; background:transparent; color:#B9CBDA;
-    font:inherit; font-size:13.5px; padding:9px 15px 8px; cursor:pointer; white-space:nowrap;
-    border-radius:8px 8px 0 0; border-bottom:3px solid transparent; margin-bottom:-3px;}
-  nav.tabs button:hover{color:#fff;}
-  nav.tabs button:focus-visible{outline:2px solid #fff; outline-offset:-2px;}
-  nav.tabs button.on{background:var(--ground); color:var(--accent-deep); font-weight:700;
-    border-bottom-color:var(--ground);}
+  /* ===== レイアウト（2026-08-07 サイドバー型に変更）=====
+     旧: 横1列のタブ（12個で横スクロールが発生し、後ろのタブに気づけなかった）
+     新: 左サイドバーに用途別グループで全機能を常時表示。画面が狭いときは開閉式。 */
+  .layout{display:grid; grid-template-columns:266px minmax(0,1fr);
+    max-width:1440px; margin:0 auto; align-items:start;}
 
-  main{padding-top:26px;}
+  .sidenav{position:sticky; top:0; max-height:100vh; overflow-y:auto;
+    background:var(--accent-deep); padding:16px 10px 28px; border-right:3px solid var(--accent);}
+  .sn-group{margin-bottom:15px;}
+  .sn-title{font-size:10.5px; letter-spacing:.13em; color:#8FA8BF; font-weight:700; padding:0 10px 5px;}
+  .sidenav button{display:flex; align-items:flex-start; gap:7px; width:100%; text-align:left;
+    appearance:none; border:none; background:transparent; color:#CFDCE8; font:inherit; font-size:13.5px;
+    padding:8px 10px; cursor:pointer; border-radius:8px; line-height:1.5; margin-bottom:1px;}
+  .sidenav button:hover{background:rgba(255,255,255,.10); color:#fff;}
+  .sidenav button:focus-visible{outline:2px solid #fff; outline-offset:-2px;}
+  .sidenav button.on{background:var(--ground); color:var(--accent-deep); font-weight:700;}
+  .sn-no{flex:none; font-weight:700; opacity:.9; min-width:1.5em;}
+  .sn-ico{flex:none;}
+  .sn-new{display:inline-block; background:#E11D48; color:#fff; font-size:9.5px; font-weight:700;
+    padding:1px 5px; border-radius:9px; margin-left:5px; vertical-align:2px; letter-spacing:.04em;}
+
+  .navToggle{display:none; width:100%; appearance:none; border:none; cursor:pointer;
+    background:var(--accent); color:#fff; font:inherit; font-size:14px; font-weight:700;
+    padding:12px 16px; text-align:left; position:sticky; top:0; z-index:25;}
+
+  main{padding:26px 26px 64px; min-width:0; max-width:1120px;}
+
+  /* ホーム（できること一覧） */
+  .home-h{font-size:15.5px; margin:26px 0 10px; color:var(--accent-deep);
+    padding-left:10px; border-left:4px solid var(--accent);}
+  .home-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(288px,1fr)); gap:14px;}
+  .home-card{display:flex; flex-direction:column; gap:7px; text-align:left; appearance:none; cursor:pointer;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; font:inherit;
+    transition:border-color .15s, box-shadow .15s, transform .15s;}
+  .home-card:hover{border-color:var(--accent); box-shadow:0 4px 14px rgba(30,64,124,.10); transform:translateY(-1px);}
+  .home-card:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .home-card.hc-new{border-color:#E11D48;}
+  .hc-head{display:flex; align-items:center; gap:7px; font-size:15px; font-weight:700; color:var(--accent-deep);}
+  .hc-no{background:var(--accent-soft); color:var(--accent-deep); border-radius:7px; padding:1px 8px; font-size:13.5px;}
+  .hc-desc{font-size:13px; line-height:1.75;}
+  .hc-when{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:7px; margin-top:2px;}
+
+  /* 画面が狭いとき：サイドバーは開閉式にして、横スクロールを起こさない */
+  @media(max-width:1080px){
+    .layout{grid-template-columns:1fr;}
+    .navToggle{display:block;}
+    .sidenav{position:static; max-height:none; display:none; border-right:none;
+      border-bottom:3px solid var(--accent); padding:14px 12px 18px;}
+    .sidenav.open{display:block;}
+    .sn-group{margin-bottom:12px;}
+    main{padding:20px 16px 56px; max-width:none;}
+  }
+  @media print{
+    .sidenav,.navToggle{display:none!important;}
+    .layout{display:block;}
+    main{max-width:none; padding:0;}
+  }
   section.tabpane{display:none;}
   section.tabpane.on{display:block;}
   .card{background:var(--surface); border:1px solid var(--border); border-radius:10px;
@@ -245,6 +290,28 @@
   .btn.ghost{background:#fff; color:var(--accent);}
   .btn.danger{border-color:var(--risk); background:#fff; color:var(--risk);}
   .btn:disabled{opacity:.45; cursor:default;}
+  /* ⑩⑪タブ用（2026-08-06 追加） */
+  .chk-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:4px 14px; margin:6px 0 2px;}
+  .chk-grid label{display:flex; align-items:flex-start; gap:7px; font-size:13px; line-height:1.6; cursor:pointer;}
+  .chk-grid input{margin-top:4px; flex:none;}
+  .kitei-art{background:#fbfbfd; border:1px solid var(--border); border-left:4px solid var(--accent-deep);
+    border-radius:6px; padding:12px 14px; margin:10px 0;}
+/* 条文は折り返す。差し替え文言が入って行が伸びても横スクロールにしないため */
+.kitei-art pre{white-space:pre-wrap; word-break:break-word; margin:0;}
+/* 差し替えが必要な箇所のマーカー。背景が印刷で飛んでも下線で分かるようにしている */
+.sashikae{font-weight:700; padding:1px 5px; border-radius:4px; border-bottom:2px solid;
+    print-color-adjust:exact; -webkit-print-color-adjust:exact;}
+.sk1{background:#DBEAFE; color:#1D4ED8; border-color:#2563EB;}
+.sk2{background:#DCFCE7; color:#15803D; border-color:#16A34A;}
+.sk3{background:#FFEDD5; color:#B45309; border-color:#D97706;}
+.sk-legend{display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+    background:#F7F8FA; border:1px solid var(--border); border-radius:6px;
+    padding:9px 11px; margin:10px 0; font-size:13px;}
+  .kitei-art pre{margin:0; white-space:pre-wrap; font-family:"MS Gothic","Consolas",monospace;
+    font-size:12.5px; line-height:1.85;}
+  .kitei-copy{width:100%; min-height:118px; font-family:"MS Gothic","Consolas",monospace; font-size:12.5px;
+    border:1px solid var(--border); border-radius:6px; padding:9px 11px; line-height:1.8; resize:vertical;}
+  .kigen-hi{background:var(--risk-soft); font-weight:700;}
 
   footer.app{margin-top:36px; border-top:1px solid var(--border); padding-top:16px; font-size:12px; color:var(--muted);}
   @media(prefers-reduced-motion:no-preference){
@@ -266,24 +333,142 @@
   </div>
 </header>
 
-<nav class="tabs" aria-label="機能タブ">
-  <div class="wrap">
-    <button class="on" data-tab="hantei">① 制度判定</button>
-    <button data-tab="kasan">② 処遇改善加算 試算</button>
-    <button data-tab="bup">③ ベースアップ評価料 試算</button>
-    <button data-tab="check">④ 要件チェック</button>
-    <button data-tab="sched">⑤ 年間スケジュール</button>
-    <button data-tab="data">⑥ 料率データ・出典</button>
-    <button data-tab="shorui">⑦ 資料依頼書</button>
-    <button data-tab="jisseki">⑧ 実績報告サポート</button>
-    <button data-tab="qa">⑨ 実務Q&amp;A</button>
+<button class="navToggle" id="navToggle" aria-expanded="false" aria-controls="sidenav">☰ メニュー（全12機能）</button>
+
+<div class="layout">
+
+<nav class="sidenav" id="sidenav" aria-label="機能メニュー" role="tablist">
+  <div class="sn-group">
+    <div class="sn-title">はじめに</div>
+    <button class="on" data-tab="home" role="tab" id="tabbtn-home" aria-controls="pane-home" aria-selected="true"><span class="sn-ico">🏠</span>ホーム（できること一覧）</button>
+    <button data-tab="hantei" role="tab" id="tabbtn-hantei" aria-controls="pane-hantei" aria-selected="false"><span class="sn-no">①</span>制度判定</button>
+  </div>
+  <div class="sn-group">
+    <div class="sn-title">試算する</div>
+    <button data-tab="kasan" role="tab" id="tabbtn-kasan" aria-controls="pane-kasan" aria-selected="false"><span class="sn-no">②</span>処遇改善加算 試算</button>
+    <button data-tab="bup" role="tab" id="tabbtn-bup" aria-controls="pane-bup" aria-selected="false"><span class="sn-no">③</span>ベースアップ評価料 試算</button>
+    <button data-tab="teate" role="tab" id="tabbtn-teate" aria-controls="pane-teate" aria-selected="false"><span class="sn-no">⑫</span>手当改定シミュレーター<span class="sn-new">NEW</span></button>
+  </div>
+  <div class="sn-group">
+    <div class="sn-title">要件と期限を確かめる</div>
+    <button data-tab="check" role="tab" id="tabbtn-check" aria-controls="pane-check" aria-selected="false"><span class="sn-no">④</span>要件チェック</button>
+    <button data-tab="sched" role="tab" id="tabbtn-sched" aria-controls="pane-sched" aria-selected="false"><span class="sn-no">⑤</span>年間スケジュール</button>
+    <button data-tab="kigen" role="tab" id="tabbtn-kigen" aria-controls="pane-kigen" aria-selected="false"><span class="sn-no">⑪</span>期限と誓約</button>
+  </div>
+  <div class="sn-group">
+    <div class="sn-title">顧問先に渡す・規程を作る</div>
+    <button data-tab="shorui" role="tab" id="tabbtn-shorui" aria-controls="pane-shorui" aria-selected="false"><span class="sn-no">⑦</span>資料依頼書</button>
+    <button data-tab="kitei" role="tab" id="tabbtn-kitei" aria-controls="pane-kitei" aria-selected="false"><span class="sn-no">⑩</span>賃金規程パターン</button>
+  </div>
+  <div class="sn-group">
+    <div class="sn-title">報告する</div>
+    <button data-tab="jisseki" role="tab" id="tabbtn-jisseki" aria-controls="pane-jisseki" aria-selected="false"><span class="sn-no">⑧</span>実績報告サポート</button>
+  </div>
+  <div class="sn-group">
+    <div class="sn-title">調べる</div>
+    <button data-tab="qa" role="tab" id="tabbtn-qa" aria-controls="pane-qa" aria-selected="false"><span class="sn-no">⑨</span>実務Q&amp;A</button>
+    <button data-tab="data" role="tab" id="tabbtn-data" aria-controls="pane-data" aria-selected="false"><span class="sn-no">⑥</span>料率データ・出典</button>
   </div>
 </nav>
 
-<main class="wrap">
+<main>
+
+<!-- ================= ⓪ ホーム ================= -->
+<section class="tabpane on" id="pane-home" role="tabpanel" aria-labelledby="tabbtn-home">
+  <div class="card">
+    <h2>このツールでできること</h2>
+    <p class="lede">介護・障害福祉・医療・保育の<b>処遇改善加算／ベースアップ評価料</b>の実務を、<b>試算 → 要件確認 → 顧問先への依頼 → 規程づくり → 報告</b>の流れで支援します。使いたい作業のカードを押してください（左のメニューからも移動できます）。</p>
+    <div class="note plain"><b>はじめて使う方へ</b>　何をすればよいか分からないときは、まず <b>①制度判定</b> で顧問先の事業種別を選んでください。どの制度が対象になるか、次に何をすべきかが分かります。</div>
+  </div>
+
+  <h2 class="home-h">1. まず制度を確かめる</h2>
+  <div class="home-grid">
+    <button class="home-card" data-go="hantei">
+      <span class="hc-head"><span class="hc-no">①</span>制度判定</span>
+      <span class="hc-desc">顧問先の事業種別から、どの制度（介護／障害福祉／医療／保育）が対象になるかを判定します。両制度の違いの早見表つき。</span>
+      <span class="hc-when">こんなとき：新しい顧問先を担当することになった／訪問看護のように制度がまたがる</span>
+    </button>
+  </div>
+
+  <h2 class="home-h">2. 金額を試算する</h2>
+  <div class="home-grid">
+    <button class="home-card" data-go="kasan">
+      <span class="hc-head"><span class="hc-no">②</span>処遇改善加算 試算</span>
+      <span class="hc-desc">サービス種別と総単位数から、加算区分ごとの加算額を計算します（令和8年6月改定の6区分に対応）。</span>
+      <span class="hc-when">こんなとき：「上位区分に上げたらいくら増えるか」と聞かれた</span>
+    </button>
+    <button class="home-card" data-go="bup">
+      <span class="hc-head"><span class="hc-no">③</span>ベースアップ評価料 試算</span>
+      <span class="hc-desc">外来・在宅／入院／訪問看護／調剤の区分と算定回数から、評価料収入を試算します。</span>
+      <span class="hc-when">こんなとき：医療機関から「うちはいくらになるか」と聞かれた</span>
+    </button>
+    <button class="home-card hc-new" data-go="teate">
+      <span class="hc-head"><span class="hc-no">⑫</span>手当改定シミュレーター<span class="sn-new">NEW</span></span>
+      <span class="hc-desc"><b>加算が増えた分を、複数の職員の手当へ一括で配分</b>します。Excelから職員リストを貼り付けるだけ。法定福利費と時間外の増加を逆算して<b>原資ぴったりに収めます</b>。</span>
+      <span class="hc-when">こんなとき：「加算が増えたが、誰にいくら上げればいいか」と相談された</span>
+    </button>
+  </div>
+
+  <h2 class="home-h">3. 要件と期限を確かめる</h2>
+  <div class="home-grid">
+    <button class="home-card" data-go="check">
+      <span class="hc-head"><span class="hc-no">④</span>要件チェック</span>
+      <span class="hc-desc">キャリアパス要件・職場環境等要件・令和8年度特例要件を1つずつ確認し、取得できる区分を判定します。返還につながる落とし穴も一覧に。</span>
+      <span class="hc-when">こんなとき：どの区分まで取れるかを確かめたい</span>
+    </button>
+    <button class="home-card" data-go="sched">
+      <span class="hc-head"><span class="hc-no">⑤</span>年間スケジュール</span>
+      <span class="hc-desc">計画書・実績報告・変更届の期限を分野別に一覧化。事務所の年間ルーティンつき。</span>
+      <span class="hc-when">こんなとき：今月やるべきことを確認したい</span>
+    </button>
+    <button class="home-card" data-go="kigen">
+      <span class="hc-head"><span class="hc-no">⑪</span>期限と誓約</span>
+      <span class="hc-desc">顧問先ごとに、分野・年度・誓約項目を選ぶと<b>その顧問先専用の期限一覧</b>が出ます。印刷して顧問先ファイルへ。</span>
+      <span class="hc-when">こんなとき：誓約した要件の履行期限（令和9年3月末）を管理したい</span>
+    </button>
+  </div>
+
+  <h2 class="home-h">4. 顧問先に渡す・規程をつくる</h2>
+  <div class="home-grid">
+    <button class="home-card" data-go="shorui">
+      <span class="hc-head"><span class="hc-no">⑦</span>資料依頼書</span>
+      <span class="hc-desc">試算に必要な資料を顧問先に依頼する文書をWordで出力します。管理台帳のCSVテンプレートもここから。</span>
+      <span class="hc-when">こんなとき：顧問先に何を出してもらえばよいか整理したい</span>
+    </button>
+    <button class="home-card" data-go="kitei">
+      <span class="hc-head"><span class="hc-no">⑩</span>賃金規程パターン</span>
+      <span class="hc-desc">配り方6パターン（基本給／毎月手当／資格手当上乗せ／一時金／時給加算／医療のベースアップ手当）の<b>条文案</b>と、割増賃金・社会保険・不利益変更への影響を比較します。</span>
+      <span class="hc-when">こんなとき：規程にどう書けばよいか聞かれた</span>
+    </button>
+  </div>
+
+  <h2 class="home-h">5. 報告する・調べる</h2>
+  <div class="home-grid">
+    <button class="home-card" data-go="jisseki">
+      <span class="hc-head"><span class="hc-no">⑧</span>実績報告サポート</span>
+      <span class="hc-desc">加算額と賃金改善額を月別・職員別に積み上げ、様式への転記表を作ります。</span>
+      <span class="hc-when">こんなとき：実績報告書を作る（介護は令和9年7月31日、医療は毎年8月）</span>
+    </button>
+    <button class="home-card" data-go="qa">
+      <span class="hc-head"><span class="hc-no">⑨</span>実務Q&amp;A</span>
+      <span class="hc-desc">厚労省の疑義解釈・Q&amp;Aをもとにした実務の疑問集。制度・テーマで絞り込み、キーワード検索もできます。</span>
+      <span class="hc-when">こんなとき：顧問先の質問にすぐ答えたい</span>
+    </button>
+    <button class="home-card" data-go="data">
+      <span class="hc-head"><span class="hc-no">⑥</span>料率データ・出典</span>
+      <span class="hc-desc">加算率・点数の一覧と、その根拠になった一次資料のURL。改定時はここを更新します。<b>未確認事項もここに明示</b>。</span>
+      <span class="hc-when">こんなとき：数字の根拠を確かめたい／改定でデータを直したい</span>
+    </button>
+  </div>
+
+  <div class="card" style="margin-top:22px;">
+    <h2>あわせて使う資料</h2>
+    <p class="lede">制度の解説・相談対応・様式のダウンロードは、<b>スタッフ育成フォルダの「処遇改善加算・ベースアップ評価料 実務ハンドブック」</b>（HTML・13タブ・全文検索つき）にまとめてあります。<b>本ツールは「計算と手続」、ハンドブックは「知識と相談対応」</b>という役割分担です。</p>
+  </div>
+</section>
 
 <!-- ================= ① 制度判定 ================= -->
-<section class="tabpane on" id="pane-hantei">
+<section class="tabpane" id="pane-hantei" role="tabpanel" aria-labelledby="tabbtn-hantei">
   <div class="card">
     <h2>顧問先の事業種別から対象制度を判定</h2>
     <p class="lede">事業種別を選ぶと、対象となる制度・提出先・主な様式・業際上の整理・事務所の関与ポイントを表示します。</p>
@@ -314,14 +499,14 @@
 </section>
 
 <!-- ================= ② 処遇改善加算 試算 ================= -->
-<section class="tabpane" id="pane-kasan">
+<section class="tabpane" id="pane-kasan" role="tabpanel" aria-labelledby="tabbtn-kasan">
   <div class="card">
     <h2><span class="chip care">介護・障害福祉</span> 処遇改善加算 試算（令和8年6月改定・6区分対応）</h2>
     <p class="lede">「処遇改善加算等を除く加減算後の月間報酬額」に加算率を乗じた概算です。実際は単位数ベースで端数処理・地域単価の影響があるため、±数％の誤差が出ます。</p>
     <div class="grid3">
       <label class="fld">制度
         <span class="seg" id="segSeido">
-          <button class="on" data-v="kaigo">介護保険</button><button data-v="shougai">障害福祉</button>
+          <button class="on" data-v="kaigo" aria-pressed="true">介護保険</button><button data-v="shougai" aria-pressed="false">障害福祉</button>
         </span>
       </label>
       <label class="fld">サービス種別
@@ -334,7 +519,7 @@
     <div class="grid3">
       <label class="fld">適用時期
         <span class="seg" id="segPeriod">
-          <button class="on" data-v="r6">令和8年6月以降（新率）</button><button data-v="r45">令和8年4〜5月（旧率）</button>
+          <button class="on" data-v="r6" aria-pressed="true">令和8年6月以降（新率）</button><button data-v="r45" aria-pressed="false">令和8年4〜5月（旧率）</button>
         </span>
       </label>
       <label class="fld">月間報酬額（円） <span class="hint">処遇改善加算等を除く・加減算後</span>
@@ -342,13 +527,13 @@
       </label>
     </div>
     <div id="kubunDesc"></div>
-    <div id="kasanOut"></div>
+    <div id="kasanOut" aria-live="polite"></div>
     <div class="note">加算額には<b>法定福利費等の事業主負担増加分を含めて</b>賃金改善額を設定できます。月額賃金改善要件（加算Ⅳ相当額の1/2以上を基本給又は決まって毎月支払う手当で改善）の充足を先に確認してください。</div>
   </div>
 </section>
 
 <!-- ================= ③ ベースアップ評価料 試算 ================= -->
-<section class="tabpane" id="pane-bup">
+<section class="tabpane" id="pane-bup" role="tabpanel" aria-labelledby="tabbtn-bup">
   <div class="card">
     <h2><span class="chip med">医療</span> ベースアップ評価料 試算（令和8年6月改定・告示69号／74号）</h2>
     <p class="lede">点数×算定回数で評価料収入を概算し、賃上げ目標水準（令和8・9年度 各＋3.2％、看護補助者・事務職員は各＋5.7％）と比較します。<b>正式な区分決定は厚労省の届出様式Excel（自動計算）で行ってください</b>（区分対応表〔別表3〜5〕は本ツール未収載）。</p>
@@ -363,12 +548,12 @@
       </label>
       <label class="fld">適用期間
         <span class="seg" id="segMedPeriod">
-          <button class="on" data-v="r8">令和8年6月〜令和9年5月</button><button data-v="r9">令和9年6月以降</button>
+          <button class="on" data-v="r8" aria-pressed="true">令和8年6月〜令和9年5月</button><button data-v="r9" aria-pressed="false">令和9年6月以降</button>
         </span>
       </label>
       <label class="fld">継続賃上げ機関（注5加算点数）
         <span class="seg" id="segKeizoku">
-          <button class="on" data-v="no">通常</button><button data-v="yes">継続賃上げ機関</button>
+          <button class="on" data-v="no" aria-pressed="true">通常</button><button data-v="yes" aria-pressed="false">継続賃上げ機関</button>
         </span>
       </label>
     </div>
@@ -382,24 +567,24 @@
         <input type="number" id="wageJimu" value="1000000" min="0" step="100000">
       </label>
     </div>
-    <div id="bupOut"></div>
+    <div id="bupOut" aria-live="polite"></div>
     <div class="note">対象職員は令和8年6月から「<b>勤務する職員全体（40歳以上の医師・歯科医師と業務委託者を除く）</b>」に拡大（非常勤含む常勤換算、役員除く）。評価料収入は<b>全額</b>を対象職員の基本給等の引上げと、それに連動する賞与・時間外手当・法定福利費等の増加分に充当する必要があります。6月〜翌年5月の収入を当該年4月〜翌年3月の賃金改善に充当可。</div>
   </div>
 </section>
 
 <!-- ================= ④ 要件チェック ================= -->
-<section class="tabpane" id="pane-check">
+<section class="tabpane" id="pane-check" role="tabpanel" aria-labelledby="tabbtn-check">
   <div class="card">
     <h2><span class="chip care">介護・障害福祉</span> 取得可能区分の判定（令和8年6月以降）</h2>
     <p class="lede">満たしている要件にチェックを入れると、取得できる最上位の区分を自動判定します。制度は「② 処遇改善加算 試算」タブの選択（介護／障害）と連動します。<b>用語がわからないときは各項目の「くわしく」を開いてください</b>（意味・やること・具体例が読めます）。各項目の右のタグは「その要件がどの区分で必要か」を示します。</p>
     <div id="reqList"></div>
-    <div id="reqVerdict"></div>
+    <div id="reqVerdict" aria-live="polite"></div>
     <div class="note ok">令和8年度は<b>配慮措置</b>として、特例要件を満たす事業所はキャリアパス要件Ⅰ〜Ⅳ・職場環境等要件を「誓約」（令和9年3月末までに対応）で申請時点充足扱いにできます。<b>誓約未達成の場合は返還</b>となるため、受任時は達成計画まで確認してください。</div>
   </div>
   <div class="card">
     <h2><span class="chip med">医療</span> ベースアップ評価料 コンプライアンス確認</h2>
     <div id="medCheckList"></div>
-    <div id="medCheckOut"></div>
+    <div id="medCheckOut" aria-live="polite"></div>
   </div>
   <div class="card">
     <h2>返還・不適合につながる落とし穴</h2>
@@ -417,7 +602,7 @@
 </section>
 
 <!-- ================= ⑤ スケジュール ================= -->
-<section class="tabpane" id="pane-sched">
+<section class="tabpane" id="pane-sched" role="tabpanel" aria-labelledby="tabbtn-sched">
   <div class="card">
     <h2><span class="chip care">介護</span> 令和8年度の期限（老発0313第6号）</h2>
     <div class="tblwrap"><table class="tbl-care">
@@ -437,7 +622,7 @@
       <tr><th style="width:12em;">期限</th><th>手続</th><th>備考</th></tr>
       <tr><td class="num"><b>令和8年5月中</b></td><td>新様式での届出（様式95〜98）</td><td><b>既届出機関を含む全医療機関が対象</b>。6月1日から新点数を算定するための期限（経過済み：未了先は至急、算定開始日は所轄厚生局に確認）</td></tr>
       <tr><td class="num">毎年6月1日時点</td><td>評価区分の見直し届出</td><td>令和8・9年度は毎年6月1日時点で算定できるよう届出（点数構造の段階変更のため）</td></tr>
-      <tr><td class="num"><b>毎年8月</b></td><td>前年度分「賃金改善実績報告書」＋当年度分「中間報告書」（様式100）</td><td>地方厚生（支）局へ。未提出は翌年度施設基準不適合。根拠書類は3年間保管</td></tr>
+      <tr><td class="num"><b>毎年8月（令和8年度は<span style="color:#b91c1c">8月31日</span>）</b></td><td>前年度分「賃金改善実績報告書」＋当年度分「中間報告書」の<b>2本</b>（様式100）</td><td>地方厚生（支）局へ<b>メールで提出</b>（添付Excelのファイル名に<b>医療機関コードと報告対象年度</b>を記載。やむを得ない場合は書面可）。未提出は翌年度施設基準不適合。根拠書類は3年間保管</td></tr>
       <tr><td class="num">変動発生の月内</td><td>変更届出</td><td>対象職員数・算定回数の1割以上変動で区分が変わる場合。翌月から新区分</td></tr>
       <tr><td class="num">令和9年6月1日</td><td>第2段階の点数へ移行（(Ⅰ)は2倍点数、(Ⅱ)区分13〜24・入院区分251〜500が解禁）</td><td>再度の届出（区分見直し）に注意</td></tr>
     </table></div>
@@ -459,7 +644,7 @@
 </section>
 
 <!-- ================= ⑥ データ・出典 ================= -->
-<section class="tabpane" id="pane-data">
+<section class="tabpane" id="pane-data" role="tabpanel" aria-labelledby="tabbtn-data">
   <div class="card">
     <h2>料率データの管理</h2>
     <p class="lede">加算率は画面上で修正して保存できます（このブラウザに保存されます）。改定・訂正があった場合は一次資料で確認のうえ更新し、確認日をメモしてください。</p>
@@ -479,31 +664,54 @@
     <h3><span class="chip care">障害福祉</span> 福祉・介護職員等処遇改善加算率（令和8年6月以降・主要サービス抜粋・単位：％）</h3>
     <div class="tblwrap" id="tblShougai"></div>
     <div class="tblwrap" id="tblShougaiNew"></div>
-    <p class="src">障害福祉の全サービスの率は改定告示を参照。令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載・要確認）。</p>
+    <p class="src"><b style="color:#b91c1c">【要確認】この障害福祉の率は2026-07-03取得のもので、令和8年度の国通知（厚労省・こども家庭庁連名）の原文では未検証です（2026-08-06 再調査時点で国通知の公式URLを特定できず）。試算に使う前に指定権者のページで現行の率・区分を確認してください。</b>障害福祉の全サービスの率は改定告示を参照。令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載・要確認）。障害福祉のキャリアパス要件Ⅳは<b>年額460万円</b>（介護の440万円とは異なる／Q&amp;A第1版で確認）。</p>
     <h3><span class="chip med">医療</span> ベースアップ評価料 主要点数（告示69号・74号）</h3>
     <div class="tblwrap" id="tblMed"></div>
-    <p class="src">外来・在宅(Ⅱ)の通常点数：イ＝8点×区分番号・ロ＝1点×区分番号（令和8年度は区分1〜12、令和9年6月以降1〜24）。入院：点数＝区分番号（令和8年度は区分1〜250、令和9年6月以降1〜500）。訪問看護(Ⅱ)：30円×区分番号（令和8年度は区分1〜18）。継続賃上げ機関は別表点数（(Ⅱ)分はツール内蔵、訪看(Ⅱ)継続分は未収載）。医療の点数は告示事項のため画面編集の対象外です。</p>
+    <p class="src"><b>2026-08-07 告示原文で全点数を確認済み</b>（医科点数表 区分Ｏ００１〜Ｏ００３／歯科点数表 区分Ｐ００１・Ｐ００２／調剤点数表 区分40／訪問看護療養費 区分07）。<br>
+    ・<b>外来・在宅(Ⅰ)</b>＝初診17点・再診等4点・訪問診療イ79点／ロ19点。注5（継続賃上げ）で23点・6点・107点・26点。注6により<b>令和9年6月以降は所定点数の100分の200</b>、注7で継続賃上げは40点・10点・186点・45点。<br>
+    ・<b>外来・在宅(Ⅱ)</b>＝イ8点×区分番号・ロ1点×区分番号。<b>注4により区分13〜24は令和9年6月以降</b>（＝令和8年度は区分1〜12）。継続賃上げは注5（R8・区分1〜12）・注6（R9.6〜・区分1〜24）の<b>別表</b>で規則性がないため本ツールに全区分を収載。<br>
+    ・<b>入院</b>＝点数＝区分番号（1点〜）。<b>注2により区分251〜500は令和9年6月以降</b>（＝令和8年度は区分1〜250）。継続賃上げの別点数は告示に規定なし（区分決定側で反映）。<br>
+    ・<b>歯科外来・在宅(Ⅰ)</b>＝初診21点・再診等4点・歯科訪問診療イ66点／ロ11点。継続賃上げ31点・6点・107点・21点。令和9年6月以降は100分の200、継続は52点・10点・173点・32点。<br>
+    ・<b>訪問看護(Ⅰ)</b>＝1,050円（月1回・利用者1人につき）。継続賃上げ1,830円。令和9年6月以降は100分の200（2,100円）、継続は2,880円。<b>(Ⅱ)</b>＝30円×区分番号（<b>注6により区分19〜36は令和9年6月以降</b>＝令和8年度は区分1〜18）。<b>継続賃上げの別表（注7＝R8・18区分／注8＝R9.6〜・36区分。40〜1,580円）も2026-08-07に収載したため、継続賃上げ機関の(Ⅱ)も試算できるようになりました。</b><br>
+    ・<b>調剤</b>＝<b>4点</b>（処方箋の受付1回につき）。<b>注2により令和9年6月以降は100分の200（8点）</b>。継続賃上げ機関の別点数は告示に規定なし。<br>
+    医療の点数は告示事項のため画面編集の対象外です。</p>
   </div>
   <div class="card">
-    <h2>出典（一次資料・取得日 2026-07-03）</h2>
+    <h2>出典（一次資料）</h2>
+    <div class="note ok"><b>2026-08-06 一次資料の原文で再確認しました</b>
+      <ul class="tight" style="margin:6px 0 0;">
+        <li><b>介護</b>: 老発0313第6号（令和8年3月13日）の<b>全36頁を原文で読了</b>。本ツールの介護の加算率（令和8年6月以降・新規対象サービス）は<b>「令和8年度介護報酬改定の概要」の加算率表と完全一致</b>を確認（修正不要）。要件①〜⑧・手続期限・保管書類・返還事由も原文と一致。<b>キャリアパス要件Ⅳは令和8年度も年額440万円で据え置き</b>（引上げはされていない）。職場環境等要件は<b>28項目</b>（⑰または⑱が必須／㉔で小規模事業者は生産性向上要件を充足）。<b>令和6年3月15日付 老発0315第2号は令和8年3月31日で廃止</b></li>
+        <li><b>医療</b>: ベースアップ評価料 特設ページ・各届出の手引き（2026年4月版）を原文確認。<b>令和8年度改定で要件変更のため6月算定分から全医療機関が再届出</b>／<b>賃金改善計画書は廃止され、毎年8月に「中間報告書（当年度）＋実績報告書（前年度）」の2本</b>（令和8年度は<b>8月31日</b>）／届出様式は<b>2026-07-31修正版</b>が最新。<b>【2026-08-07 追加確認】告示第69号（医科・歯科・調剤の点数表）・第71号（特掲診療料の施設基準等）・第74号（訪問看護療養費）の原文で全点数を突合し、本ツールの既存の点数データ（外来・在宅(Ⅰ)(Ⅱ)・入院・歯科・訪問看護）が<span style="color:#166534;font-weight:700">すべて告示と一致</span>することを確認。あわせて未収載だった<b>調剤の4点</b>と<b>訪問看護(Ⅱ)の継続賃上げ別表</b>を収載しました</b></li>
+        <li><b>障害福祉</b>: キャリアパス要件Ⅳは<b>年額460万円</b>（Q&amp;A第1版で確認。<b>介護の440万円と異なる</b>）。<b>加算率は令和8年度の一次資料で未検証のため、本ツールの障害福祉の率は2026-07-03取得時のまま据え置いています</b>（下記「未確認事項」参照）</li>
+        <li><b>保育</b>（今回調査対象に追加）: 令和8年度から処遇改善等加算Ⅰ・Ⅱ・Ⅲが<b>区分1・2・3に一本化</b>／キャリアパス要件が<b>減率(▲2%)から算定要件へ</b>／<b>計画書は原則廃止→誓約書</b>／区分2＋区分3の合計額の<b>1/2以上を基本給・毎月手当</b>／<b>令和8年度中に賃金規程の改正が必要</b>。<b>加算率・単価が未確認のため本ツールには試算機能を実装していません</b></li>
+      </ul>
+      <div class="src" style="margin-top:6px;">確定事実の全文は <code>knowledge/treatment-improvement/一次資料確定事実_令和8年度_2026-08-06.md</code>、スタッフ向け解説は <code>スタッフ育成/処遇改善加算・ベースアップ評価料/</code> の実務ハンドブック（HTML・4分野対応）にあります。</div>
+    </div>
+    <p class="src">以下は2026-07-03取得時の出典一覧です（上記の再確認で内容が一致または補強されたものを含みます）。</p>
     <ul class="tight src">
       <li>【介護】令和8年厚生労働省告示第87号（改定告示）／老発0313第6号「介護職員等処遇改善加算に関する基本的考え方並びに事務処理手順及び様式例の提示について（令和8年度分）」＋別紙1（加算率・要件表）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html" target="_blank" rel="noopener">厚労省 令和8年度介護報酬改定ページ</a></li>
       <li>【障害福祉】「令和8年度障害福祉サービス等報酬改定における改定事項について」（令和8年2月18日 報酬改定検討チーム・厚労省／こども家庭庁）</li>
       <li>【医療】令和8年厚生労働省告示第69号（診療報酬）・第74号（訪問看護療養費）／保医発0305第8号（特掲診療料の施設基準等）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html" target="_blank" rel="noopener">厚労省 ベースアップ評価料ページ</a>（疑義解釈その1〜9・届出様式Excel）</li>
       <li>詳細メモ：knowledge/_updates/2026-07-03_処遇改善加算_令和8年6月改定.md（事務所ナレッジベース）</li>
     </ul>
-    <h3>未確認事項（実装済みデータの限界）</h3>
+    <h3>未確認事項（実装済みデータの限界・2026-08-06時点）</h3>
+    <div class="note risk"><b>ここに挙げた事項は顧問先への断定回答に使わないでください。</b>一次資料または指定権者・地方厚生局・市区町村に確認してから回答します。</div>
     <ul class="tight src">
-      <li>医療：別表3（賃金改善算定基礎額の係数）・別表4（【B】→(Ⅱ)区分）・別表5（【C】→入院区分）の対応表 → 区分決定は届出様式Excelで。</li>
-      <li>障害福祉：改定告示の番号・計画書／実績報告書の提出期限 → 事務処理手順通知で確認要。</li>
-      <li>介護：通所リハ・看護小規模多機能の令和8年4〜5月旧率、端数処理の細部（Q&amp;A第1版）。</li>
-      <li>調剤ベースアップ評価料の点数（未調査）。</li>
+      <li><b>障害福祉（未確認のまま維持）</b>：令和8年度の国通知本文（厚労省・こども家庭庁<b>連名</b>／令和8年3月31日付）の<b>公式URLが特定できていません</b>。厚労省の障害福祉ページは2026-08-06時点で令和7年度分の掲載が中心で、国通知は自治体経由でしか辿れませんでした。したがって<b>本ツールの障害福祉の加算率（2026-07-03取得）は令和8年度の一次資料で未検証</b>です。誤りと断定もできないため削除せず据え置いています。<b>使用前に指定権者のページで現行の率・区分・提出期限を確認してください。</b></li>
+      <li>障害福祉：計画書／実績報告書の提出期限。令和8年度は<b>4月（5月）算定分＝令和8年4月16日0時／6月算定分＝令和8年6月16日0時（いずれも特例・終了）／7月以降分＝算定開始日の前々月末日24時</b>との自治体掲載を確認しましたが、<b>国通知原文では未確認</b>です。</li>
+      <li>医療：別表3（賃金改善算定基礎額の係数）・別表4（【B】→(Ⅱ)区分）・別表5（【C】→入院区分）の対応表 → 区分決定は届出様式Excel（<b>2026-07-31修正版</b>）で行ってください。</li>
+      <li>医療：<b>対象職員の職種一覧</b>、<b>対象職員の月額賃金総額の算入範囲</b>（様式96の解説で要確認）、8月報告の<b>提出先メールアドレス</b>（管轄厚生局ごと）、手引きにある「令和8年度に届出を行った医療機関等は令和9年度の◯◯が不要」の<b>◯◯</b>。</li>
+      <li>医療：<b>訪問看護ステーションの医療保険分・介護保険分の按分方法</b>。同一事業所が訪問看護ベースアップ評価料（医療）と処遇改善加算1.8％（介護・令和8年6月〜）の<b>両方</b>に関わるため、原資と配分を分けて管理する必要があります。</li>
+      <li>介護：通所リハ・看護小規模多機能の令和8年4〜5月旧率、端数処理の細部（Q&amp;A第1版）。<b>令和8年4〜5月の率（r45）は一次資料と未突合</b>です（令和8年6月以降の率は一致を確認済み）。</li>
+      <li>保育：区分1の加算率（平均経験年数別・2〜12％）、区分2の加算率、区分3の単価（4万円／5千円）、キャリアパス要件の正確な文言と<b>1年間の経過措置の終期</b>、誓約書の様式。<b>この4点が未確定のため保育の試算機能は実装していません</b>（推測値でのツール化は事故につながるため作りません）。</li>
+      <li><s>調剤ベースアップ評価料の点数（未調査）</s> → <b>2026-08-07 解消</b>：調剤点数表 区分40で<b>4点</b>（処方箋の受付1回につき）、注2により令和9年6月以降は100分の200（8点）。継続賃上げ機関の別点数は告示に規定なし。</li>
+      <li><s>訪問看護(Ⅱ)の継続賃上げ別表が未収載</s> → <b>2026-08-07 解消</b>：告示74号 区分07の注7（令和8年6月以降・区分1〜18）・注8（令和9年6月以降・区分1〜36）の全額を収載し、継続賃上げ機関の(Ⅱ)も試算対象になりました。</li>
     </ul>
   </div>
 </section>
 
 <!-- ================= ⑦ 資料依頼書 ================= -->
-<section class="tabpane" id="pane-shorui">
+<section class="tabpane" id="pane-shorui" role="tabpanel" aria-labelledby="tabbtn-shorui">
   <div class="card">
     <h2>クライアントへの資料依頼書をつくる</h2>
     <p class="lede">②③の試算をする前に、顧問先から集める必要がある情報の「依頼書」を作成します。制度を選び、宛名などを入力して<b>「Wordで保存」</b>を押すと、そのまま送れる依頼書ファイル（提出物チェックリスト＋顧問先が数値を書き込む記入式シート付き）がダウンロードできます。</p>
@@ -533,10 +741,43 @@
     <p class="fill-note">※ Word保存は、ブラウザのダウンロード機能で Word 互換の .doc ファイルを保存します。開いた後は事務所のレターヘッド追加など自由に編集できます。</p>
   </div>
   <div id="shoruiOut"></div>
+
+  <div class="card">
+    <h2>管理台帳のテンプレート（CSV）をつくる</h2>
+    <p class="lede">実績報告は「もらった額」と「配った額」を突合する作業です。<b>年度末にまとめてやろうとすると賃金台帳から拾い直すことになり、必ず合いません。</b>顧問先に渡して<b>毎月埋めてもらう</b>ための台帳テンプレート（列見出しのみのCSV）をダウンロードできます。</p>
+    <div class="note plain">出力されるのは<b>列見出しだけ</b>です（実データ・個人情報は一切含みません）。Excelで開いて事業所名を入れ、毎月1行ずつ追記していく使い方を想定しています。文字コードはExcelでそのまま開けるUTF-8（BOM付き）です。</div>
+    <div class="tblwrap"><table>
+      <tr><th style="width:13em;">台帳</th><th>何のために使うか</th><th></th></tr>
+      <tr>
+        <td><b>① 加算収入台帳</b><br><span class="src">月別</span></td>
+        <td>「配らなければならない額」を確定するための台帳。サービス提供月ベースで、総単位数・加算率・単価・加算額を記録します（医療は評価料の区分・点数・算定回数、保育は区分1・2・3別）。</td>
+        <td><button class="btn ghost" data-csv="income">CSV</button></td>
+      </tr>
+      <tr>
+        <td><b>② 賃金改善台帳</b><br><span class="src">職員別・月別</span></td>
+        <td><b>これが本体。</b>基本給・毎月手当・賞与一時金・法定福利費の事業主負担増加分を職員別に積み上げます。最終的に「①合計が加算額以上か ②基本給等が1/2以上か ③各職員の賃金水準が下がっていないか」を出すための元データです。</td>
+        <td><button class="btn ghost" data-csv="wage">CSV</button></td>
+      </tr>
+      <tr>
+        <td><b>③ 要件充足の証拠台帳</b></td>
+        <td>規程の改訂日・<b>周知した日と方法</b>・研修の実施記録・職場環境等要件の取組（項目番号ごと）・<b>公表画面のスクリーンショット</b>・<b>誓約事項と履行期限</b>・労働保険の書類を記録します。監査で「求めがあれば速やかに提示」が義務づけられている書類の管理表です。</td>
+        <td><button class="btn ghost" data-csv="evidence">CSV</button></td>
+      </tr>
+      <tr>
+        <td><b>④ 届出履歴台帳</b></td>
+        <td>体制届・計画書（誓約書）・変更届・特別事情届・実績報告書・中間報告書の提出日と控えの保管場所。<b>計画書と実績報告書は根拠資料と併せて2年間保存</b>（医療の根拠書類は3年間）が義務です。</td>
+        <td><button class="btn ghost" data-csv="todoke">CSV</button></td>
+      </tr>
+    </table></div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+      <button class="btn" data-csv="all">4種類すべてをまとめてダウンロード</button>
+      <span class="src" id="csvMsg"></span>
+    </div>
+  </div>
 </section>
 
 <!-- ================= ⑧ 実績報告サポート ================= -->
-<section class="tabpane" id="pane-jisseki">
+<section class="tabpane" id="pane-jisseki" role="tabpanel" aria-labelledby="tabbtn-jisseki">
   <div class="card">
     <h2>実績報告の集計サポート</h2>
     <p class="lede">顧問先ごとに毎月の賃金改善額・評価料収入・職員データを入力すると、実績報告書（様式）の欄に対応した数字を自動集計し、加算額や収入に対して充足しているかを判定します。<b>このツールは1枚のHTMLでサーバーを持たないため、入力データはこのブラウザに自動保存されるほか、「ファイルに保存」でjsonファイルとして共有ドライブに置き、他のスタッフはそれを「ファイルを読み込み」で開いて引き継げます。</b></p>
@@ -573,7 +814,7 @@
       <h2><span class="chip care">介護・障害福祉</span> ①令和8年度の加算額（月別）</h2>
       <p class="lede">国民健康保険団体連合会から送付される「処遇改善加算等総額のお知らせ」の金額を月ごとに入力してください。開始月は年度開始月（通常4月）です。</p>
       <label class="fld" style="max-width:16em;">集計の開始月
-        <input type="text" id="jisKaigoStart" placeholder="2026-04" value="2026-04">
+        <input type="month" id="jisKaigoStart" placeholder="2026-04" value="2026-04">
       </label>
       <div class="ledgerwrap" id="jisKasan12"></div>
       <div class="pasteBox">
@@ -630,7 +871,7 @@
 
     <div class="card">
       <h2>判定結果（介護・障害福祉）</h2>
-      <div id="jisKaigoJudge"></div>
+      <div id="jisKaigoJudge" aria-live="polite"></div>
     </div>
 
     <div class="card">
@@ -673,7 +914,7 @@
       <h2><span class="chip med">医療</span> ③評価料収入の実績（月別）</h2>
       <p class="lede">レセプトから確定した評価料の算定額（継続的な賃上げ加算の点数分は除いた本体点数）を月ごとに入力します。</p>
       <label class="fld" style="max-width:16em;">集計の開始月
-        <input type="text" id="jisIryoStart" placeholder="2026-06" value="2026-06">
+        <input type="month" id="jisIryoStart" placeholder="2026-06" value="2026-06">
       </label>
       <div class="ledgerwrap" id="jisIncome12"></div>
       <div class="pasteBox">
@@ -691,7 +932,7 @@
 
     <div class="card">
       <h2>判定結果（医療）</h2>
-      <div id="jisIryoJudge"></div>
+      <div id="jisIryoJudge" aria-live="polite"></div>
     </div>
 
     <div class="card">
@@ -703,7 +944,7 @@
 </section>
 
 <!-- ================= ⑨ 実務Q&A ================= -->
-<section class="tabpane" id="pane-qa">
+<section class="tabpane" id="pane-qa" role="tabpanel" aria-labelledby="tabbtn-qa">
   <div class="card">
     <h2>実務Q&amp;A（令和8年度改定・厚労省 疑義解釈／Q&amp;Aベース）</h2>
     <p class="lede">運用で迷いやすいケース（6月前後の2段階改定、計画と実績のズレ、不足分の賞与調整、集計方法など）を、厚労省の疑義解釈・Q&amp;Aから整理しました。質問をクリックすると回答と出典が開きます。<b>キーワード検索</b>と<b>制度・テーマの絞り込み</b>ができます。</p>
@@ -718,10 +959,221 @@
   </div>
 </section>
 
-<footer class="app wrap">
+<!-- ================= ⑩ 賃金規程パターン ================= -->
+<section class="tabpane" id="pane-kitei" role="tabpanel" aria-labelledby="tabbtn-kitei">
+  <div class="card">
+    <h2>賃金規程パターン — 加算を「どう配るか」をどう書くか</h2>
+    <p class="lede">加算を職員に配る方法は大きく6パターンあります（Fは医療のベースアップ評価料専用）。<b>どのパターンを選ぶかで、賃金規程の書き方・毎月の給与計算・社会保険の手続・将来下げられるかが全部変わります。</b>顧問先には「どれが正解」ではなく「この事業所の事情ならこれが向いている」を提示してください。</p>
+    <div class="note plain"><b>先に押さえる大原則（4分野共通）</b>
+      <ol class="tight" style="margin:6px 0 0;">
+        <li><b>対象項目を特定する。</b>「基本給／どの手当／賞与」のどれで改善するかを規程と計画書で特定します（介護は通知で明文）。</li>
+        <li><b>特定した項目を含め、賃金水準を下げてはいけない。</b>下げるなら特別事情届出書＋労使合意（届出なき引下げは<b>返還事由</b>）。</li>
+        <li><b>1/2以上は「基本給または決まって毎月支払われる手当」で改善する</b>（介護＝加算Ⅳ相当額の1/2以上、保育＝区分2＋区分3の合計額の1/2以上）。<b>一時金だけでは要件を満たせません。</b></li>
+        <li><b>増えた加算額はベースアップ（賃金表の改訂による一律引上げ）が基本</b>（介護の令和8年度）。</li>
+        <li><b>加算原資の分がいくらか区分できる形にする。</b>特に賞与に混ぜるときは業績連動部分と明確に区分することが求められます。</li>
+      </ol>
+    </div>
+    <h3>6パターンの比較</h3>
+    <div class="tblwrap" id="tblKiteiCmp"></div>
+    <div class="note ok"><b>事務所としての推奨</b>　<b>「B（処遇改善手当・毎月定額）を主軸にして、年度末の不足分をD（一時金）で埋める」</b>のが、要件充足と実績報告のしやすさ、経営の柔軟性のバランスが最もよい組み方です。ただし介護の令和8年度は「増えた加算額はベースアップで行うことが基本」とされているため、<b>増加分についてはA（基本給）またはB（毎月の手当）を賃金表の改訂という形で</b>行い、記録に残してください。</div>
+  </div>
+
+  <div class="card">
+    <h2>パターンを選ぶ → 条文案と注意点を出す</h2>
+    <div class="grid2">
+      <label class="fld">配り方のパターン
+        <select id="kiteiSel">
+          <option value="A">A｜基本給に組み入れる（ベースアップ）</option>
+          <option value="B" selected>B｜処遇改善手当（毎月定額）— 推奨の主軸</option>
+          <option value="C">C｜資格手当・経験手当に上乗せ（国のモデル例方式）</option>
+          <option value="D">D｜一時金・賞与（年度末の不足補填）</option>
+          <option value="E">E｜時給への加算（訪問介護の登録ヘルパー等）</option>
+            <option value="F">F｜ベースアップ手当（医療のベースアップ評価料）</option>
+        </select>
+      </label>
+      <label class="fld">分野 <span class="hint">手続の案内が変わります</span>
+        <select id="kiteiBunya">
+          <option value="kaigo" selected>介護（介護保険）</option>
+          <option value="shougai">障害福祉</option>
+          <option value="iryo">医療（ベースアップ評価料）</option>
+          <option value="hoiku">保育</option>
+        </select>
+      </label>
+    </div>
+    <div id="kiteiOut"></div>
+  </div>
+</section>
+
+<!-- ================= ⑪ 期限と誓約 ================= -->
+<section class="tabpane" id="pane-kigen" role="tabpanel" aria-labelledby="tabbtn-kigen">
+  <div class="card">
+    <h2>顧問先ごとの「期限と誓約」の一覧をつくる</h2>
+    <p class="lede">分野・年度・誓約の有無を選ぶと、その顧問先で<b>いつ何を出すか</b>と<b>誓約した要件の履行期限</b>の一覧が出ます。印刷して顧問先ファイルに綴じる、または顧問先台帳に転記して使ってください。</p>
+    <div class="note risk"><b>誓約の期限管理は事務所の責任範囲です。</b>令和8年度は、誓約すれば要件充足を先送りできますが、<b>令和9年3月末までに整備し、令和8年度実績報告書（令和9年7月31日提出）でその旨を報告する義務</b>を負います。間に合わなければ<b>加算の返還</b>です。人の記憶では必ず落ちるので、顧問先台帳に載せてください。</div>
+    <div class="grid2">
+      <label class="fld">分野
+        <select id="kigenBunya">
+          <option value="kaigo" selected>介護（介護保険）</option>
+          <option value="shougai">障害福祉</option>
+          <option value="iryo">医療（ベースアップ評価料）</option>
+          <option value="hoiku">保育</option>
+        </select>
+      </label>
+      <label class="fld">対象年度 <span class="hint">現在日付では判定しません</span>
+        <select id="kigenNendo">
+          <option value="r8" selected>令和8年度（2026年度）</option>
+          <option value="r9">令和9年度（2027年度）</option>
+        </select>
+      </label>
+    </div>
+    <label class="fld">サービスの系統 <span class="hint">介護・障害福祉の体制届の期日が変わります</span>
+      <select id="kigenKei">
+        <option value="kyotaku" selected>居宅系（訪問・通所・居宅介護支援 等）</option>
+        <option value="shisetsu">施設系（特養・短期入所・特定施設・認知症GH・地域密着型特養 等）</option>
+      </select>
+    </label>
+    <h3>誓約した要件（介護・障害福祉。該当するものにチェック）</h3>
+    <div id="kigenSeiyaku" class="chk-grid">
+      <label><input type="checkbox" data-seiyaku="cp1"> キャリアパス要件Ⅰ（任用要件・賃金体系の整備）</label>
+      <label><input type="checkbox" data-seiyaku="cp2"> キャリアパス要件Ⅱ（研修の実施等）</label>
+      <label><input type="checkbox" data-seiyaku="cp3"> キャリアパス要件Ⅲ（昇給の仕組みの整備）</label>
+      <label><input type="checkbox" data-seiyaku="cp4"> キャリアパス要件Ⅳ（改善後の年額賃金要件）</label>
+      <label><input type="checkbox" data-seiyaku="env"> 職場環境等要件の取組</label>
+      <label><input type="checkbox" data-seiyaku="care"> ケアプランデータ連携システムの加入・利用</label>
+      <label><input type="checkbox" data-seiyaku="prod"> 生産性向上推進体制加算Ⅰ・Ⅱの算定</label>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+      <button class="btn" id="btnKigenPrint">印刷する</button>
+      <span class="src">※ ブラウザの印刷機能で、表示中のタブだけが印刷されます。</span>
+    </div>
+    <div id="kigenOut"></div>
+  </div>
+</section>
+
+<!-- ================= ⑫ 手当改定シミュレーター ================= -->
+<section class="tabpane" id="pane-teate" role="tabpanel" aria-labelledby="tabbtn-teate">
+  <div class="card">
+    <h2>手当改定シミュレーター — 増えた加算を複数の職員へ一括で配分する</h2>
+    <p class="lede">加算率・点数の改定で<b>加算額が増えたとき、既にいる職員の手当をいくらに改定するか</b>を一括で試算します。Excelから職員リストを貼り付けて、配分ルールを選ぶだけで、職員ごとの改定後の手当額と、<b>原資に収まるかの検算</b>が出ます。</p>
+    <div class="note plain"><b>なぜ「増加額 ÷ 人数」では足りないのか</b>　手当を上げると<b>法定福利費の事業主負担</b>と<b>時間外手当</b>が連動して増えます。法定福利費だけで概算16.5％なので、<b>手当の額面に回せるのは増加額の85％程度</b>です。本ツールはこれを逆算して「額面でいくら配れるか」から計算します。</div>
+    <div class="note risk"><b>結果は概算です。</b>実際の適用は所属社労士の確認を要します。<b>職員名の欄は空欄のままでも動きます</b>（社員番号・記号だけでも構いません）。入力した内容が外部に送信されることはありません。</div>
+  </div>
+
+  <div class="card">
+    <h2>STEP 1　原資（加算の増加額）を入れる</h2>
+    <div class="grid2">
+      <label class="fld">分野
+        <select id="tsBunya">
+          <option value="kaigo">介護（介護保険）</option>
+          <option value="shougai">障害福祉</option>
+          <option value="iryo">医療（ベースアップ評価料）</option>
+          <option value="hoiku">保育</option>
+        </select>
+      </label>
+      <label class="fld">適用月数 <span class="hint">年間の試算に使う</span>
+        <input type="number" id="tsMonths" value="12" min="1" max="12">
+      </label>
+      <label class="fld">改定<b>前</b>の加算額（月額・円）
+        <input type="number" id="tsBefore" value="0" min="0">
+      </label>
+      <label class="fld">改定<b>後</b>の加算額（月額・円）
+        <input type="number" id="tsAfter" value="0" min="0">
+      </label>
+    </div>
+    <div id="tsZougenBox" class="note ok" style="margin-top:4px;"></div>
+    <div class="grid2">
+      <label class="fld">法定福利費の概算率（％）<span class="hint">医療は上限16.5％</span>
+        <input type="number" id="tsFuri" value="16.5" min="0" max="30" step="0.1">
+      </label>
+      <label class="fld">時間外手当の増加を見込む
+        <div class="seg" id="segTsZangyo">
+          <button class="on" data-v="yes" aria-pressed="true">見込む（推奨）</button><button data-v="no" aria-pressed="false">見込まない</button>
+        </div>
+      </label>
+    </div>
+    <div class="grid2" id="tsZangyoOpts">
+      <label class="fld">平均の割増率 <span class="hint">法定外1.25／法定内1.0</span>
+        <input type="number" id="tsRate" value="1.25" min="1" max="1.75" step="0.05">
+      </label>
+      <label class="fld">月平均所定労働時間（既定値）<span class="hint">職員ごとの入力が空のとき使う</span>
+        <input type="number" id="tsShotei" value="160" min="1" max="300">
+      </label>
+    </div>
+    <p class="src" id="tsBunyaNote"></p>
+  </div>
+
+  <div class="card">
+    <h2>STEP 2　職員リストを入れる</h2>
+    <p class="lede">Excelの表をそのままコピーして下の欄に貼り付けてください。<b>列の順番</b>は次のとおりです（<b>職員名は空欄でも、社員番号でも構いません</b>）。</p>
+    <div class="tblwrap"><table>
+      <tr><th>1列目</th><th>2列目</th><th>3列目</th><th>4列目</th><th>5列目</th><th>6列目</th><th>7列目</th></tr>
+      <tr><td>職員名／社員番号<br><span class="src">空欄可</span></td><td>職種<br><span class="src">空欄可</span></td><td>雇用形態<br><span class="src">空欄可</span></td><td><b>常勤換算</b><br><span class="src">常勤=1</span></td><td><b>現在の手当</b><br><span class="src">円・月額</span></td><td>所定労働時間<br><span class="src">空欄可</span></td><td>時間外時間<br><span class="src">空欄可</span></td></tr>
+    </table></div>
+    <div class="pasteBox">
+      <span class="fill-note">タブ区切り（Excelからのコピー）または カンマ区切り に対応。1行1人。見出し行が含まれていても自動で読み飛ばします。</span>
+      <textarea id="tsPaste" placeholder="例：&#10;A001&#9;介護職員&#9;常勤&#9;1&#9;15000&#9;160&#9;10&#10;A002&#9;介護職員&#9;非常勤&#9;0.5&#9;7500&#9;80&#9;0"></textarea>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" id="tsPasteBtn">貼り付けた内容を取り込む</button>
+        <button class="btn ghost" id="tsAddRow">＋1行追加</button>
+        <button class="btn danger" id="tsClearRows">全部消す</button>
+        <button class="btn ghost" id="tsSample">サンプルを入れる</button>
+      </div>
+    </div>
+    <div class="tblwrap" id="tsTableWrap"></div>
+    <p class="fill-note">「除外」にチェックを入れた職員は配分の対象外になります（例: 40歳以上の医師・歯科医師、業務委託、役員 など<b>分野ごとの対象外の職員</b>）。</p>
+  </div>
+
+  <div class="card">
+    <h2>STEP 3　配分ルールと端数処理を決める</h2>
+    <div class="grid2">
+      <label class="fld">配分ルール
+        <select id="tsRule">
+          <option value="B" selected>B　常勤換算に比例（推奨・説明しやすい）</option>
+          <option value="A">A　全員に一律定額</option>
+          <option value="C">C　今の手当額に比例（現行バランスを維持）</option>
+        </select>
+      </label>
+      <label class="fld">端数の丸め単位
+        <select id="tsUnit">
+          <option value="100" selected>100円単位</option>
+          <option value="1000">1,000円単位</option>
+          <option value="10">10円単位</option>
+          <option value="1">1円単位</option>
+        </select>
+      </label>
+      <label class="fld">丸め方
+        <select id="tsDir">
+          <option value="floor" selected>切り捨て（余りは一時金へ）</option>
+          <option value="round">四捨五入</option>
+        </select>
+      </label>
+      <label class="fld">個別調整
+        <div class="seg" id="segTsManual">
+          <button class="on" data-v="off" aria-pressed="true">自動配分のみ</button><button data-v="on" aria-pressed="false">手入力で上書きする</button>
+        </div>
+      </label>
+    </div>
+    <p class="src">「手入力で上書きする」にすると、表の<b>増額</b>欄を直接編集できます。上書きした職員はそのままの額で計算し、<b>残りの原資を他の職員へ再配分</b>します。</p>
+  </div>
+
+  <div id="tsResult"></div>
+
+  <div class="card noprint" id="tsExportCard" style="display:none;">
+    <h2>結果を出力する</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <button class="btn" id="tsCsv">CSVで保存（給与ソフト取込・顧問先提示用）</button>
+      <button class="btn ghost" id="tsPrint">印刷する</button>
+      <span class="src" id="tsExportMsg"></span>
+    </div>
+    <p class="fill-note">CSVは Excel でそのまま開ける UTF-8（BOM付き）です。前提条件（加算額・配分ルール・端数処理・法定福利費率）もCSVの先頭に書き出します。</p>
+  </div>
+</section>
+
+<footer class="app">
   本ツールの計算はすべて概算であり、告示・通知の原文および公式届出様式（自動計算Excel）による確認を前提とします。法令の解釈・適用は事案により異なるため、<b>具体的事案への適用は所属社労士の確認を要します</b>。業際の整理（社労士・行政書士の業務範囲）は事務所内の暫定整理であり、各士業会の見解を確認してください。
 </footer>
 </main>
+</div>
 
 <script>
 "use strict";
@@ -783,7 +1235,19 @@ const DEFAULT_DATA = {
       keizokuR9: [[16,2],[24,3],[32,4],[48,6],[56,7],[64,8],[80,10],[88,11],[96,12],[112,14],[120,15],[128,16],[144,18],[152,19],[160,20],[176,22],[184,23],[192,24],[208,26],[216,27],[224,28],[240,30],[248,31],[256,32]]
     },
     nyuin: {maxR8:250, maxR9:500},
-    hk: {i:[1050,1830,2100,2880], iiPer:30, iiMaxR8:18, iiMaxR9:36},
+    hk: {i:[1050,1830,2100,2880], iiPer:30, iiMaxR8:18, iiMaxR9:36,
+      /* 訪問看護ベースアップ評価料(Ⅱ) 継続賃上げ機関の別表額（円）＝告示74号 区分07 の注7・注8
+         2026-08-07 告示原文（001665206.pdf p18-20）で全区分を確認して収載した。
+         注7＝令和8年6月以降（区分1〜18）／注8＝令和9年6月以降（区分1〜36）。
+         通常額は「30円×区分番号」の規則で計算できるが、継続賃上げ額は規則性がないため別表で持つ。 */
+      iiKeizokuR8:[40,80,120,160,200,240,280,320,360,400,480,560,640,720,800,880,960,1040],
+      iiKeizokuR9:[40,70,110,140,180,210,250,280,320,350,390,420,460,490,530,560,600,630,
+                   670,700,780,810,890,920,1000,1030,1110,1140,1220,1250,1330,1360,1440,1470,1550,1580]},
+    /* 調剤ベースアップ評価料＝調剤点数表 区分40（告示69号）
+       2026-08-07 告示原文（001665294.pdf p13-14）で確認。処方箋の受付1回につき4点。
+       注2により令和9年6月以降は所定点数の100分の200（＝8点）。
+       医科・歯科の(Ⅰ)と違い、継続賃上げ機関の別点数は告示に規定がない。 */
+    chouzai: {tensu:[4,4,8,8], note:"処方箋の受付1回につき。継続賃上げ機関の別点数は告示に規定なし"},
     bearMain:3.2, bearJimu:5.7
   }
 };
@@ -808,18 +1272,50 @@ const yen = n => Math.round(n).toLocaleString("ja-JP") + " 円";
 const man = n => (Math.round(n/1000)/10).toLocaleString("ja-JP") + " 万円";
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-/* ==================== タブ ==================== */
-document.querySelectorAll("nav.tabs button").forEach(b=>{
-  b.addEventListener("click", ()=>{
-    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on", x===b));
-    document.querySelectorAll("section.tabpane").forEach(p=>p.classList.toggle("on", p.id==="pane-"+b.dataset.tab));
+/* ==================== タブ（2026-08-07 サイドバー型へ変更） ====================
+   旧: 横1列のタブ。12個に増えて横スクロールが発生し、後ろのタブに気づけなかった。
+   新: 左サイドバーに用途別グループで常時表示＋ホーム画面のカードからも移動できる。 */
+const SIDENAV = document.getElementById("sidenav");
+const NAVTOGGLE = document.getElementById("navToggle");
+const NARROW = () => window.matchMedia("(max-width:1080px)").matches;
+
+function showPane(tab){
+  if(!tab) return;
+  SIDENAV.querySelectorAll("button[data-tab]").forEach(x=>{
+    const sel = x.dataset.tab===tab;
+    x.classList.toggle("on", sel);
+    x.setAttribute("aria-selected", sel);
   });
+  document.querySelectorAll("section.tabpane").forEach(p=>p.classList.toggle("on", p.id==="pane-"+tab));
+  /* 画面が狭いときは、選んだらメニューを閉じる（開いたままだと本文が見えないため） */
+  if(NARROW()){
+    SIDENAV.classList.remove("open");
+    NAVTOGGLE.setAttribute("aria-expanded","false");
+  }
+  window.scrollTo(0,0);
+}
+SIDENAV.addEventListener("click", e=>{
+  const b = e.target.closest("button[data-tab]");
+  if(b) showPane(b.dataset.tab);
+});
+NAVTOGGLE.addEventListener("click", ()=>{
+  const open = SIDENAV.classList.toggle("open");
+  NAVTOGGLE.setAttribute("aria-expanded", open ? "true" : "false");
+});
+/* ホーム画面のカードから各機能へ移動する */
+document.getElementById("pane-home").addEventListener("click", e=>{
+  const c = e.target.closest("[data-go]");
+  if(c) showPane(c.dataset.go);
 });
 function segInit(id, onChange){
   const seg = document.getElementById(id);
   seg.querySelectorAll("button").forEach(b=>{
     b.addEventListener("click", ()=>{
-      seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+      seg.querySelectorAll("button").forEach(x=>{
+        const sel = x===b;
+        x.classList.toggle("on", sel);
+        x.setAttribute("aria-pressed", sel);
+      });
       onChange(b.dataset.v);
     });
   });
@@ -1185,11 +1681,14 @@ function renderBup(){
     notes.push("(Ⅱ)の区分は【B】の計算により別表4で決定（届出様式Excelで自動計算）。区分13以降は令和9年6月から。");
   } else if(t==="nyuin"){
     const max = medPeriod==="r8"?M.nyuin.maxR8:M.nyuin.maxR9;
-    const kub = Math.min(num("mNyuinKubun"), max);
-    if(num("mNyuinKubun")>max) notes.push("入院の区分番号が上限（"+max+"・区分251以降は令和9年6月から）を超えるため上限で計算しています。");
-    const pts = kub * num("mNyuinPt");
-    income += pts*10;
-    html += row("入院ベースアップ評価料 区分"+kub+"（"+kub+"点/日）", "約 "+yen(pts*10)+' <small>／月</small>');
+    const kub = num("mNyuinKubun");
+    if(kub>max){
+      notes.push("入院の区分番号が上限（"+max+"・区分251以降は令和9年6月から）を超えています。区分を確認してください。");
+    } else {
+      const pts = kub * num("mNyuinPt");
+      income += pts*10;
+      html += row("入院ベースアップ評価料 区分"+kub+"（"+kub+"点/日）", "約 "+yen(pts*10)+' <small>／月</small>');
+    }
     notes.push("区分は【C】の計算により別表5で決定（届出様式Excelで確認）。看護職員処遇改善評価料（区分1〜165）は別枠で併算定可。継続賃上げ機関の別点数は入院分には設定なし（区分決定側で反映）。");
   } else {
     const one = M.hk.i[ci] * num("mHkUsers");
@@ -1199,11 +1698,16 @@ function renderBup(){
     if(kub>0){
       const max = medPeriod==="r8"?M.hk.iiMaxR8:M.hk.iiMaxR9;
       if(kub>max){ notes.push("(Ⅱ)の区分番号が上限（"+max+"）を超えています。"); }
-      else if(medKeizoku==="yes"){ notes.push("継続賃上げ機関の訪問看護(Ⅱ)別表（40〜1,580円）は本ツール未収載のため計算対象外。届出様式で確認してください。"); }
       else{
-        const two = M.hk.iiPer*kub*num("mHkUsers");
+        /* 継続賃上げ機関は告示74号の注7（令和8年6月以降・区分1〜18）／注8（令和9年6月以降・区分1〜36）の
+           別表額を使う。通常機関は「30円×区分番号」で計算する。2026-08-07 告示原文で確認して収載。 */
+        const per = (medKeizoku==="yes")
+          ? (medPeriod==="r8" ? M.hk.iiKeizokuR8 : M.hk.iiKeizokuR9)[kub-1]
+          : M.hk.iiPer*kub;
+        const two = per*num("mHkUsers");
         income += two;
-        html += row("訪問看護ベースアップ評価料(Ⅱ) 区分"+kub, "約 "+yen(two)+' <small>／月（'+(M.hk.iiPer*kub)+'円×利用者数）</small>');
+        html += row("訪問看護ベースアップ評価料(Ⅱ) 区分"+kub+(medKeizoku==="yes"?"（継続賃上げ）":""),
+          "約 "+yen(two)+' <small>／月（'+per.toLocaleString()+'円×利用者数）</small>');
       }
     }
   }
@@ -1378,10 +1882,16 @@ document.getElementById("btnEdit").addEventListener("click", ()=>{
 });
 document.getElementById("btnSave").addEventListener("click", ()=>{
   const paths = [];
+  const invalid = [];
   document.querySelectorAll("#pane-data input[data-path]").forEach(inp=>{
     const v = +inp.value;
-    if(!isNaN(v)) paths.push({path:inp.dataset.path, value:v});
+    if(isNaN(v) || v<0 || v>100){ invalid.push(inp.dataset.path+"："+inp.value); }
+    else{ paths.push({path:inp.dataset.path, value:v}); }
   });
+  if(invalid.length){
+    alert("次の項目は0〜100の範囲で入力してください。保存されませんでした。\n"+invalid.join("\n"));
+    return;
+  }
   localStorage.setItem(LS_KEY, JSON.stringify({saved:new Date().toISOString().slice(0,10), paths}));
   paths.forEach(p=>{
     const seg = p.path.split("."); let o = DATA;
@@ -1599,7 +2109,7 @@ function curClient(){ return JIS_CLIENTS[JIS_CURRENT]; }
 function lamp(cls,text){ return '<div class="lamp '+cls+'">'+esc(text)+'</div>'; }
 function tenkiRow(k,v){ return '<tr><td>'+esc(k)+'</td><td class="num"><b>'+v+'</b></td></tr>'; }
 function monthsFrom(startYm,n){
-  const m0 = /^(\d{4})-(\d{1,2})$/.exec(String(startYm||"").trim());
+  const m0 = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(String(startYm||"").trim());
   if(!m0) return Array.from({length:n}, (_,i)=>"?"+i);
   let y=+m0[1], mo=+m0[2];
   const arr=[];
@@ -1842,6 +2352,8 @@ document.getElementById("jisFileInput").addEventListener("change", function(){
     try{
       const obj = JSON.parse(reader.result);
       if(!obj || !obj.kaigo || !obj.iryo) throw new Error("形式が違います");
+      const ymRe = /^\d{4}-(0[1-9]|1[0-2])$/;
+      if(!ymRe.test(obj.kaigo.kasanStart) || !ymRe.test(obj.iryo.incomeStart)) throw new Error("開始年月の形式が不正です");
       if(!obj.id) obj.id = "c"+Date.now()+"_"+Math.floor(Math.random()*100000);
       JIS_CLIENTS[obj.id] = obj; JIS_CURRENT = obj.id;
       jisSaveToStorage(); jisRenderAll();
@@ -2142,11 +2654,11 @@ function qaThemeLabel(k){ const o=QA_THEMES.find(x=>x.k===k); return o?o.t:k; }
 function renderQaFilters(){
   const seidoBtns = [["all","すべて"],["med","医療（ベースアップ）"],["care","介護・障害（処遇改善）"]];
   document.getElementById("qaSeidoFilter").innerHTML = seidoBtns.map(([v,t])=>
-    '<button data-qseido="'+v+'"'+(qaSeido===v?' class="on"':'')+'>'+t+'</button>').join("");
+    '<button data-qseido="'+v+'"'+(qaSeido===v?' class="on" aria-pressed="true"':' aria-pressed="false"')+'>'+t+'</button>').join("");
   const themesPresent = QA_THEMES.filter(th=>QA_DATA.some(d=>d.t===th.k && (qaSeido==="all"||d.s===qaSeido)));
   document.getElementById("qaThemeFilter").innerHTML =
-    '<button data-qtheme="all"'+(qaTheme==="all"?' class="on"':'')+'>全テーマ</button>'+
-    themesPresent.map(th=>'<button data-qtheme="'+th.k+'"'+(qaTheme===th.k?' class="on"':'')+'>'+esc(th.t)+'</button>').join("");
+    '<button data-qtheme="all"'+(qaTheme==="all"?' class="on" aria-pressed="true"':' aria-pressed="false"')+'>全テーマ</button>'+
+    themesPresent.map(th=>'<button data-qtheme="'+th.k+'"'+(qaTheme===th.k?' class="on" aria-pressed="true"':' aria-pressed="false"')+'>'+esc(th.t)+'</button>').join("");
 }
 function renderQaList(){
   const term = qaTerm.trim();
@@ -2178,6 +2690,1017 @@ document.getElementById("qaThemeFilter").addEventListener("click", e=>{
 });
 document.getElementById("qaSearch").addEventListener("input", function(){ qaTerm=this.value; renderQaList(); });
 renderQa();
+
+/* ============================================================================
+   ⑩ 賃金規程パターン ／ ⑪ 期限と誓約 ／ 管理台帳CSV
+   2026-08-06 追加（設計案_処遇改善ツール拡張_2026-08-06.md の Phase 1）
+   一次資料: 老発0313第6号（令和8年3月13日・全36頁を原文確認）
+             厚労省ベースアップ評価料特設ページ・各届出の手引き（2026年4月版）
+             こども家庭庁「令和7年度以降の処遇改善等加算について」
+   ※本ブロックは金額の計算を一切行わない（参照・文字列生成のみ）。
+     既存の試算ロジック・料率データには手を触れていない。
+   ============================================================================ */
+
+/* --- 期限・金額などの「変わりうる値」はここに集約する（本文へのベタ打ち禁止） --- */
+const KITEI_CONST = {
+  nengakuKaigo: "440万円",      // 介護 キャリアパス要件Ⅳ（令和8年度・据え置き）
+  nengakuShougai: "460万円",    // 障害福祉 キャリアパス要件Ⅳ
+  seiyakuKigen: "令和9年3月末",  // 令和8年度に誓約した要件の履行期限
+  jissekiR8Kaigo: "令和9年7月31日", // 介護 令和8年度分の実績報告書の提出期限
+  iryoR8Report: "令和8年8月31日",   // 医療 R7実績報告＋R8中間報告の提出期限
+  hozonKaigo: "2年間",           // 介護 計画書・実績報告書と根拠資料の保存期間
+  hozonIryo: "3年間"             // 医療 根拠書類の保管期間
+};
+
+/* --- 6パターンのデータ（比較表と条文案の元） --- */
+const KITEI_PATTERNS = [
+  {
+    id:"A", name:"基本給に組入れ（ベースアップ）",
+    gekkaku:"◎ 満たす", warimashi:"含む", saichin:"算入",
+    shaho:"固定的賃金の変動 → 月額変更届の検討",
+    sageyasusa:"最も下げにくい（不利益変更）",
+    shomei:"賃金表の改訂履歴で証明",
+    taishoku:"大（基本給連動の退職金なら要試算）",
+    muku:"加算率が安定・経営が安定・長期の人材確保を重視",
+    art:[
+      "第●条（基本給）",
+      "1 基本給は、職員の職位、職責、職務内容、経験、資格および能力を勘案し、別表●「賃金表」に定める額を月額で支給する。",
+      "2 賃金表は、経営状況、物価の状況、介護報酬その他の公的報酬の改定状況等を勘案し、必要に応じて改訂する。",
+      "3 前項の改訂により基本給の水準を一律に引き上げる場合（以下「ベースアップ」という。）は、改訂後の賃金表を定め、",
+      "  その適用開始日を明示して職員に周知する。",
+      "",
+      "第●条（処遇改善加算等を原資とする賃金改善）",
+      "1 当法人は、●●処遇改善加算その他これに準ずる公的加算（以下「処遇改善加算等」という。）の算定額に相当する額",
+      "  以上を、職員の賃金の改善に充てる。",
+      "2 前項の賃金改善は、次条に定める処遇改善手当および前条の賃金表の改訂（ベースアップ）により行う。",
+      "3 処遇改善加算等の算定額が増加した場合は、増加額に相当する額について、原則としてベースアップにより",
+      "  新たに賃金改善を行う。",
+      "4 当法人は、処遇改善加算等による賃金改善の方法および各職員の賃金改善の内容について、書面により職員に周知する。"
+    ],
+    memo:[
+      "3項は介護の令和8年度通知（令和7年度と比べて増加した加算額は、過去の賃金改善実績に関わらず新規に賃金改善を実施し、その際はベースアップにより行うことを基本とする）に対応しています。",
+      "4項は通知の周知義務（賃金改善の方法等を計画書を用いるなどにより職員に周知する／職員から照会があった場合は書面を用いるなど分かりやすく回答する）に対応しています。",
+      "退職金が基本給連動の規程になっている場合、ベースアップは<b>将来の退職金債務を増やします</b>。実施前に必ず試算してください。"
+    ]
+  },
+  {
+    id:"B", name:"処遇改善手当（毎月定額）— 推奨の主軸",
+    gekkaku:"◎ 満たす", warimashi:"含む", saichin:"算入（毎月の通常の賃金）",
+    shaho:"固定的賃金の変動 → 月額変更届の検討",
+    sageyasusa:"下げにくい（不利益変更）",
+    shomei:"◎ 手当項目が独立し最も明快",
+    taishoku:"平均賃金に算入。退職金は算定基礎の定め方次第",
+    muku:"大半のケース（第一候補）",
+    art:[
+      "第●条（処遇改善手当）",
+      "1 処遇改善加算等を原資として、職員に処遇改善手当を支給する。",
+      "2 処遇改善手当は、毎月、次の各号に定める区分に応じた額を支給する。",
+      "  (1) ●●職（●●の資格を有し、かつ勤続●年以上の者）  月額 ●●,●●●円",
+      "  (2) ●●職（(1)以外の常勤の職員）                    月額 ●●,●●●円",
+      "  (3) その他の職員                                    月額 ●,●●●円",
+      "3 前項の額は、処遇改善加算等の算定額の見込みに応じ、毎年度当初に見直すものとし、",
+      "  変更する場合はその内容および適用開始日を職員に周知する。",
+      "4 月の途中で入社し、または退職した場合の処遇改善手当は、当該月の所定労働日数に対する",
+      "  出勤日数の割合により日割計算して支給する。",
+      "5 処遇改善手当は、時間外労働、休日労働および深夜労働に対する割増賃金の算定基礎に含める。",
+      "6 処遇改善手当は、退職手当の算定基礎には含めない。"
+    ],
+    memo:[
+      "<b>5項をあえて書く理由</b>：処遇改善手当は<b>割増賃金の算定基礎から除外できません</b>。除外できるのは家族手当・通勤手当・別居手当・子女教育手当・住宅手当・臨時に支払われた賃金・1か月を超える期間ごとに支払われる賃金の<b>7種類の限定列挙</b>（労基法37条5項・労基則21条）で、処遇改善手当は該当しません。規程に明記すると、給与計算担当者が算定基礎から外す事故を防げます。<b>「規程に書いていないから外していた」が未払い残業の温床です。</b>",
+      "<b>6項について</b>：退職手当は加算の賃金改善額に<b>含められません</b>（通知で「退職手当を除く」と明記）。退職金の算定基礎に入れると将来の負担が加算と無関係に膨らみます。ただし既存規程が「賃金総額」ベースの場合、この変更が<b>不利益変更</b>になり得るため、現行規程を必ず確認してください。",
+      "4項の日割りルールを書いていないと担当者ごとに計算が変わります。実績報告では期間按分して集計するため、入退社の履歴を月別に持っておく必要があります。"
+    ]
+  },
+  {
+    id:"C", name:"資格手当・経験手当に上乗せ（国のモデル例方式）",
+    gekkaku:"◎ 満たす", warimashi:"含む", saichin:"算入",
+    shaho:"固定的賃金の変動 → 月額変更届の検討",
+    sageyasusa:"下げにくい",
+    shomei:"△ 従来分と加算分の内訳管理が必要",
+    taishoku:"平均賃金に算入。退職金は算定基礎の定め方次第",
+    muku:"キャリアパス要件Ⅲ（昇給の仕組み）が未整備で、同時に整備したい",
+    art:[
+      "別表●（キャリアパス・賃金表）＝国のモデル例の構成をそのまま使う",
+      "",
+      "【使い方】下の5列はタブ区切りです。Wordに貼り付けて［挿入］→［表］→［文字列を表にする］で",
+      "　　　　　区切り文字に「タブ」を選ぶと表になります。Excelならそのまま貼るとセルに分かれます。",
+      "　　　　　セル内の「／」は必要に応じて改行（Excelは Alt+Enter）に置き換えてください。",
+      "",
+      "職位・役職\t職責\t任用要件\t給与（常勤・月給）\t給与（非常勤・時給）",
+      "上級（主任）\t高度な業務の遂行／他の従業員への指導\t●年以上\t基本給 ●●●,●●●円～／経験手当 ＋●,●●●円／役職手当 ＋●,●●●円\t時給 ●,●●●円／経験手当 ＋●●●円",
+      "中級\t通常の●●業務／他の従業員への助言\t●年以上\t基本給 ●●●,●●●円～／資格手当 ＋●,●●●円\t時給 ●,●●●円／資格手当 ＋●●●円",
+      "初級\t通常の●●業務\t入社時～\t基本給 ●●●,●●●円～／資格手当 ＋●,●●●円\t時給 ●,●●●円／資格手当 ＋●●●円",
+      "",
+      "注 「任用要件」欄に記載の勤続年数または研修の受講状況に応じて昇給するものとし、職位に応じた給与を支給する。",
+      "   「給与」欄に記載のない手当として、通勤手当（●●円）、研修受講手当（●●円）を支給する。",
+      "   また、処遇改善加算の加算額は、経験手当・資格手当への上乗せとして、",
+      "   1人当たり●●円～●●円の範囲内で配分する。"
+    ],
+    memo:[
+      "<b>これは国が公表しているモデル例です。</b>処遇改善計画書（別紙様式2）の「参考（キャリアパス要件概要及びキャリアパス・賃金規程例）」シートに、小規模事業所用として掲載されています。Q&amp;Aも「就業規則作成義務のない事業場は特に参考にされたい」としています。",
+      "<b>キャリアパス要件Ⅰ（任用要件・賃金体系）とⅢ（昇給の仕組み）を1枚で同時に満たせる</b>のがこの方式の強みです。「職位・職責・任用要件」の列がⅠを、「任用要件の勤続年数・研修の受講状況に応じて昇給する」という注記がⅢを満たします。",
+      "上のコピー用テキストは<b>タブ区切り</b>で出力しています（罫線を文字で描いた表は、フォントによって列幅が変わり必ずずれるため使っていません）。<b>Wordなら貼り付け後に［挿入］→［表］→［文字列を表にする］で区切り文字に「タブ」を選ぶ、Excelならそのまま貼る</b>と表になります。",
+      "<b>唯一の弱点＝内訳が消えること。</b>資格手当に上乗せすると賃金台帳上は「資格手当 15,000円」の一本になり、従来分5,000円＋加算原資分10,000円という内訳が見えなくなります。実績報告でも監査でも「加算分がいくらか」を問われるため、給与ソフトの手当項目を<b>「資格手当」「資格手当（処遇改善）」に分ける</b>設計を強く推奨します。"
+    ]
+  },
+  {
+    id:"D", name:"一時金・賞与（年度末の不足補填）",
+    gekkaku:"× 単独では不可（組合せが必須）", warimashi:"除外できる（臨時の賃金・1か月を超える期間ごとの賃金）",
+    saichin:"算入しない",
+    shaho:"年3回以下＝賞与支払届／年4回以上＝報酬（月変の検討）",
+    sageyasusa:"最も調整しやすい",
+    shomei:"△ 業績連動部分との区分が必要",
+    taishoku:"平均賃金には算入されない（臨時の賃金）",
+    muku:"年度末の不足額の補填・加算収入の変動が大きい",
+    art:[
+      "第●条（処遇改善一時金）",
+      "1 処遇改善加算等の算定額が、当該年度において第●条から第●条までにより実施した賃金改善の額を",
+      "  上回る場合は、その差額に相当する額を処遇改善一時金として支給する。",
+      "2 処遇改善一時金は、当該年度の●月●日に在籍する職員に対し、当該年度における勤務期間、勤務時間、",
+      "  職種および職責等を勘案して定めた額を、●月●日に支給する。",
+      "3 処遇改善一時金は、賞与とは別に区分して支給し、業績に応じて変動する賞与とは明確に区分して管理する。",
+      "4 処遇改善一時金は、時間外労働等に対する割増賃金の算定基礎には含めない。"
+    ],
+    memo:[
+      "<b>3項が最重要。</b>Q&amp;Aは「賞与等において経常利益等の業績に連動して支払額が変動する部分が変動することを妨げるものではないが、<b>処遇改善加算に係る賃金改善はこうした変動と明確に区分されている必要がある</b>」としています。賞与に混ぜて一本で払うと<b>加算分がいくらか証明できず要件未達を疑われます</b>。支給明細でも項目を分けてください。",
+      "<b>この形は「救済措置」として使えます。</b>Q&amp;Aでは、賃金改善額が加算額を下回った場合でも<b>不足分を賞与等の一時金として追加的に配分すれば返還を求めない取扱いとして差し支えない</b>とされています。だからこそ<b>2月に「加算額 vs 賃金改善額」を突合し、3月の一時金で埋める</b>段取りが実務の要です。",
+      "4項は労基則21条4号・5号により除外できるためですが、<b>実質的に毎月払いに近い運用（毎月支給する「一時金」）は除外できません</b>。名称ではなく実態で判断されます。",
+      "<b>単独では月額賃金改善要件（1/2以上を基本給等）を満たせません。</b>必ずA・B・Cのいずれかと組み合わせてください。"
+    ]
+  },
+  {
+    id:"E", name:"時給への加算（訪問介護の登録ヘルパー等）",
+    gekkaku:"◎ 満たす（毎月払いなら）", warimashi:"含む（割増の基礎単価が上がる）",
+    saichin:"算入",
+    shaho:"単価の変更は固定的賃金の変動 → 月額変更届の検討",
+    sageyasusa:"下げにくい",
+    shomei:"単価改定履歴で証明",
+    taishoku:"平均賃金に算入",
+    muku:"訪問介護の登録ヘルパー・パート中心の事業所",
+    art:[
+      "第●条（時間給者の処遇改善手当）",
+      "1 時間給により賃金を支給する職員に対しては、処遇改善加算等を原資として、",
+      "  次の各号に定める額を、実際に労働した時間数に応じて支給する。",
+      "  (1) ●●の資格を有する者   1時間につき ●●●円",
+      "  (2) 前号以外の者          1時間につき ●●●円",
+      "2 前項の手当は、時間外労働、休日労働および深夜労働に対する割増賃金の算定基礎に含める。",
+      "3 訪問介護等において移動時間、待機時間その他の労働時間に該当する時間についても、前項の手当を支給する。"
+    ],
+    memo:[
+      "<b>割増の基礎単価が上がることを必ず試算してください。</b>時間単価に上乗せすると残業・深夜の割増賃金も連動して増えます。加算額の枠内で収まるかを事前に確認します（事務所には <code>tools/処遇改善手当残業精算ツール/</code>＝訪問介護看護の時給者用Excelがあります）。",
+      "<b>移動時間・待機時間が労働時間に当たる場合</b>、そこにも手当を支給するのが原則です。訪問系は労働時間の把握自体が論点になりやすいので、加算の話と一緒に労働時間管理を点検してください。"
+    ]
+  },
+  {
+    id:"F", name:"ベースアップ手当（医療のベースアップ評価料）",
+    gekkaku:"— 医療にこの要件はない", warimashi:"含む", saichin:"算入（毎月の通常の賃金）",
+    shaho:"固定的賃金の変動 → 月額変更届の検討",
+    sageyasusa:"改廃条項があれば下げやすい",
+    shomei:"◎ 手当項目が独立。ただし(13)ベアと(15)時間外等の増加分を別集計",
+    taishoku:"平均賃金に算入。退職金は算定基礎の定め方次第",
+    muku:"医科・歯科診療所、病院（ベースアップ評価料を算定している医療機関）",
+    art:[
+      "第●条（ベースアップ手当）",
+      "1 ベースアップ手当は、【制度の正式名称】として支払われる収入を原資とし、",
+      "  対象職員の賃金改善を目的として支給する。",
+      "2 本手当の支給対象者は、当院に勤務する対象職員のうち、支給対象月の初日において",
+      "  勤続期間が1か月を超える者とする。雇用形態は問わない。",
+      "3 支給額は、当該年度の【制度の正式名称】の算定見込額および対象職員数に基づき、",
+      "  別表●に定める額とし、毎月支給する。別表●は毎年度当初に見直すものとし、",
+      "  変更する場合は、その内容および適用開始日を対象職員に周知する。",
+      "4 年度末において、当該年度に算定した【制度の正式名称】の総額が、第3項により支給した額および",
+      "  これに伴い増加した賞与、時間外手当、法定福利費等の額の合計を上回る場合は、",
+      "  その差額に相当する額を、当該年度の3月に一時金として支給する。",
+      "5 本手当は、月の所定労働日数のうち実際に就労しなかった日について、日割りにより減額する。",
+      "  ただし、年次有給休暇を取得した日は、就労したものとみなす。",
+      "6 本手当は、時間外労働、休日労働および深夜労働に対する割増賃金の算定基礎に含める。",
+      "7 本手当は、退職手当の算定基礎には含めない。"
+    ],
+    memo:[
+      "<b>4項を「支給することがある」と書いてはいけません。</b>ベースアップ評価料は<b>算定した額を年度内に使い切ることが要件</b>です（手引きに「使い切る必要があります」と明記）。「することがある」だと余らせたまま年度を終える運用も規程上は適法になり、実際には要件不充足＝返還のリスクを抱えます。<b>「支給する」と言い切ってください。</b>",
+      "<b>5項で「産前産後休業・育児休業の期間は支給しない」と書かないでください。</b>就労していない日に支払わないこと自体は適法ですが、「〜の期間は支給しない」と書くと<b>月の途中で育休に入った職員のその月を全額落とす</b>運用が文言上できてしまい、不利益取扱いと評価され得ます（育介法10条・16条、均等法9条3項）。また産休・育休中の職員も<b>対象職員数として原資の計算に入っています</b>。休業の種類を名指しせず「実際に就労しなかった日を日割りで減額」に統一してください。",
+      "<b>6項は「算定基礎に入れる」と「別に集計する」の両方が必要です。</b>実績報告書では<b>(13)基本給等総額に係る賃金改善実績額（ベアそのもの）</b>と<b>(15)ベア等に伴う賞与・時間外手当・法定福利費等の増加分</b>を<b>別々の欄</b>に書きます。合算して1つの数字では報告できないため、給与ソフトの項目を分けるか、増加分を試算できる台帳を持ってください。<br>※介護・障害福祉は「加算がない場合の賃金水準との比較」で算出するため、増えた時間外手当は<b>定義上自動的に含まれます</b>（別途足すと二重計上）。医療とは扱いが違います。",
+      "<b>「正社員に限る」と条文に書かないでください。</b>評価料の原資はパート職員を含む対象職員の賃金総額から算出されるため、配分を正社員限定にすると原資と配分がずれ、パート有期法8条（不合理な待遇差の禁止）の説明も別途必要になります。配分に差をつけること自体は可能なので、<b>支給対象は対象職員全員としたうえで、別表で額に差を設ける</b>構成にしてください。",
+      "<b>医師・歯科医師を雇用している場合は別途整理が必要です。</b>対象職員の範囲と賃金改善算定基礎額の計算で扱いが異なります。<b>この論点は事務所の確定事実台帳でも「要確認」として残しています</b>ので、該当する顧問先では届出内容を確認したうえで所属社労士に相談してください。"
+    ]
+  }
+];
+
+/* --- 全パターン共通で先に置く2条（原資の明示・制度の改廃） ---
+   手当の作り方（A〜F）より先に置く。この2条が無いと、制度が縮小・廃止されたときに
+   手当を下げられず、加算収入が減っても人件費だけが残る。 */
+const KITEI_KYOTSU = [
+  {
+    title:"共通条項①｜原資の明示",
+    art:[
+      "第●条（本章に定める手当の原資）",
+      "1 本章に定める手当は、【制度の正式名称】として支払われる収入を原資とし、",
+      "  対象職員の賃金改善を目的として支給する。",
+      "2 本手当は、前項の収入を原資とする変動手当であり、基本給には算入しない。",
+      "3 当法人は、本手当の支給額の算定根拠および各職員の賃金改善の内容について、",
+      "  職員から求めがあったときは書面により回答する。"
+    ],
+    memo:[
+      "<b>2項が改廃条項の効き目を支えます。</b>「これは基本給ではなく、公的な収入に連動する変動手当である」と<b>最初に宣言しておくこと</b>が、あとで金額を改定するときの合理性の土台になります。この一文がないまま数年支給し続けると、職員側に「基本的な賃金の一部」という期待が生まれ、減額のハードルが上がります。",
+      "<b>パターンA（基本給に組み入れる方式）を採る場合は、2項は置けません。</b>基本給に入れた分は原則として下げられないため、<b>加算率・点数が下がる可能性を織り込んだ額だけを基本給に入れ、残りはB（手当）で調整する</b>設計にしてください。",
+      "3項は、職員から賃金改善の内容について照会があった場合の<b>書面回答</b>（介護・障害福祉の通知§8⑴）に対応しています。規程に書いておくと、照会が来たときに担当者が慌てません。"
+    ]
+  },
+  {
+    title:"共通条項②｜制度の改廃に伴う改定（★最重要）",
+    art:[
+      "第●条（制度の改廃に伴う手当の改定）",
+      "1 本手当は、【制度の正式名称】の算定が継続している期間に限り支給する。",
+      "2 次の各号のいずれかに該当する場合、当法人は本手当を改定し、または廃止する。",
+      "  (1) 【制度の正式名称】が廃止され、または縮小されたとき",
+      "  (2) 【改定事由】により原資となる収入が増減したとき",
+      "  (3) 【算定要件】を満たさなくなったとき",
+      "  (4) 【制度の正式名称】の算定を取り下げたとき",
+      "3 前項により減額する場合、その減額の幅は、原資となる収入の減少額の範囲内とする。",
+      "4 本手当を改定し、または廃止する場合、当法人は少なくとも●か月前までに対象職員に",
+      "  その内容および適用開始日を周知し、労働者の過半数を代表する者の意見を聴取する。",
+      "5 改定の効力は、原則として原資となる収入の変動が生じた月の翌月から生じる。"
+    ],
+    memo:[
+      "<b>「廃止することがある」の一文だけでは弱いです。</b>手当の減額は<b>労働条件の不利益変更</b>であり、規程にあらかじめ書いてあっても、変更内容の合理性が別途判断されるためです（労契法9条・10条）。",
+      "<b>2項「改定または廃止する」と言い切る</b> — 「することがある」だと、原資が減っても手当だけ維持する運用が既定になり、いざ下げるときに「今まで下げなかったのに」と言われます。",
+      "<b>3項 減額幅の上限を自分で縛る</b> — 一見すると法人に不利ですが、これがあると<b>「加算の減少に便乗して賃下げしたのではない」と示せる</b>ため、かえって合理性が認められやすくなります。ここが効きます。",
+      "<b>4項 予告期間と意見聴取</b> — 不利益変更の合理性判断では<b>手続の適正さ</b>が重視されます。「何か月前に予告するか」を先に決めておくこと自体が説明材料になります。",
+      "<b>5項 効力発生の時期</b> — 「いつから下がるのか」を書いていない規程は必ずもめます。報酬改定の適用月と手当の改定月がずれる（例: 4月改定→5月支給分から）のが実務なので、そこを明示します。",
+      "<b>就業規則だけに書いても効かない場合があります。</b>労働条件通知書・雇用契約書に<b>「処遇改善手当 15,000円」と確定額を書いてしまうと</b>、その個別合意が就業規則に優先し、改廃条項が効かなくなることがあります（労契法7条ただし書・10条ただし書）。通知書には<b>「賃金規程第●条の定めによる」</b>と書き、金額は規程・別表側で管理してください。<b>通知書を作っているのは事務所側であることが多いので、ここは事務所の責任範囲です。</b>"
+    ]
+  }
+];
+
+/* --- 条文中の【…】に入る文言（分野ごとに差し替わる3か所） ---
+   条文データは【制度の正式名称】等のプレースホルダで持ち、描画時にこの表で置き換える。
+   画面では色付きで表示し「分野によって変わる箇所」だと分かるようにする。 */
+const KITEI_SASHIKAE = {
+  kaigo:{
+    name:"介護職員等処遇改善加算",
+    jiyu:"介護報酬の改定または加算区分（Ⅰ・Ⅱ・Ⅲ・Ⅳ）の変更",
+    youken:"キャリアパス要件、月額賃金改善要件、職場環境等要件その他の算定要件"
+  },
+  shougai:{
+    name:"福祉・介護職員等処遇改善加算",
+    jiyu:"障害福祉サービス等報酬の改定または加算区分の変更",
+    youken:"キャリアパス要件、月額賃金改善要件、職場環境等要件その他の算定要件"
+  },
+  iryo:{
+    name:"診療報酬「外来・在宅ベースアップ評価料」",
+    jiyu:"診療報酬の改定または評価料の区分の変更",
+    youken:"施設基準"
+  },
+  hoiku:{
+    name:"処遇改善等加算",
+    jiyu:"公定価格の改定または加算区分の変更",
+    youken:"賃金改善要件、キャリアパス要件その他の要件"
+  }
+};
+
+/* 【…】を選択中の分野の文言に差し替える。
+   colored=true … 画面表示用（色付きspanで囲む。差し替え箇所だと分かるようにするため）
+   colored=false … コピー用（文言だけ。そのままWord・Excelに貼れる）
+   ※画面表示用は必ず esc() を通した文字列に対して呼ぶこと（先に呼ぶとspanがエスケープされる）。 */
+const SASHIKAE_CLS = {"制度の正式名称":"sk1", "改定事由":"sk2", "算定要件":"sk3"};
+function applySashikae(text, bunya, colored){
+  const d = KITEI_SASHIKAE[bunya];
+  if(!d) return text;
+  const val = {"制度の正式名称":d.name, "改定事由":d.jiyu, "算定要件":d.youken};
+  return String(text).replace(/【(.+?)】/g, function(whole, key){
+    if(!(key in val)) return whole;          // 想定外のプレースホルダはそのまま残す
+    return colored ? '<span class="sashikae '+SASHIKAE_CLS[key]+'">'+esc(val[key])+"</span>" : val[key];
+  });
+}
+
+/* 差し替え箇所の凡例。いま選ばれている分野の文言を色付きで並べ、
+   「色が付いた箇所＝分野で変わる箇所」だと一目で分かるようにする。 */
+function kiteiLegend(bunya){
+  const d = KITEI_SASHIKAE[bunya], t = KITEI_TETSUZUKI[bunya];
+  if(!d || !t) return "";
+  return '<div class="sk-legend"><b>色が付いた箇所＝分野によって変わる箇所です。</b>'+
+    "いまは<b>"+esc(t.label)+"</b>の文言が入っています（上の「分野」を切り替えると自動で入れ替わります）。"+
+    '<span class="sashikae sk1">'+esc(d.name)+"</span>"+
+    '<span class="sashikae sk2">'+esc(d.jiyu)+"</span>"+
+    '<span class="sashikae sk3">'+esc(d.youken)+"</span>"+
+    '<span class="src">●は顧問先ごとに埋める箇所で、色は付けていません。</span></div>';
+}
+
+/* 分野ごとの「規程を直した後にやること」 */
+const KITEI_TETSUZUKI = {
+  kaigo: {
+    label:"介護（介護保険）",
+    items:[
+      "<b>加算の変更届を出す</b>：就業規則を改訂した場合（介護職員その他の職員の処遇に関する内容に限る）は、<b>改訂の概要を変更届出書（別紙様式4）に記載して提出</b>（通知5⑴⑥の明文の義務）。<b>この変更のみなら実績報告書の提出時に併せて</b>届出。",
+      "区分が変わる改訂なら、居宅系＝変更後の算定開始月の<b>前月15日</b>／施設系＝<b>1日</b>までに変更届。",
+      "保管：<b>就業規則等</b>（賃金・退職手当・臨時の賃金等に関する規程、キャリアパス要件Ⅰの任用要件・賃金体系の規程、キャリアパス要件Ⅲの昇給の仕組みの規程）と<b>労働保険の加入書類</b>を、求めがあれば速やかに提示できる状態に（通知6）。"
+    ]
+  },
+  shougai:{
+    label:"障害福祉",
+    items:[
+      "介護と同じ枠組みですが<b>様式・提出先・期限が別</b>です。指定権者（都道府県・市区町村）のページで令和8年度版を確認してください。",
+      "キャリアパス要件Ⅳの年額要件は<b>"+KITEI_CONST.nengakuShougai+"</b>（介護の"+KITEI_CONST.nengakuKaigo+"と異なる）。手当等を含めて判断し、<b>社会保険料等の事業主負担その他の法定福利費等は含めずに</b>判断します。",
+      "<b>令和8年度の国通知本文の公式URLが未特定です（2026-08-06時点）。</b>断定回答の前に指定権者で確認してください。"
+    ]
+  },
+  iryo:{
+    label:"医療（ベースアップ評価料）",
+    items:[
+      "医療は「就業規則を改訂したら届出」という明文はありませんが、<b>賃金改善の内容は8月の中間報告書・実績報告書で報告</b>します（"+KITEI_CONST.iryoR8Report+"が令和8年度の期限）。",
+      "賃金水準を引き下げる場合は<b>様式94（特別事情届出書）</b>。",
+      "根拠書類は<b>"+KITEI_CONST.hozonIryo+"</b>保管。",
+      "令和8年度改定で要件が変わり<b>6月算定分から全医療機関が再届出</b>になっています。規程改訂の前に、そもそも再届出が済んでいるかを確認してください。"
+    ]
+  },
+  hoiku:{
+    label:"保育",
+    items:[
+      "<b>令和8年度は一本化の移行年で、賃金規程の改正が必要な年です</b>（区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わり、1年間の経過措置があります）。",
+      "<b>計画書は原則廃止され、賃金改善を行う旨の「誓約書」</b>を提出します（新規取得等は計画書も）。<b>提出先は市区町村・期限は自治体ごと</b>です。",
+      "区分2＋区分3の合計額の<b>1/2以上を基本給・決まって毎月支払われる手当</b>で改善します。",
+      "<b>「起点賃金水準」</b>（基準年度に適用されていた算定方法に基づく賃金水準）を下回らないことが要件です。<b>施設独自に上乗せすると翌年以降その水準の維持義務が生じる</b>ため、安易な上乗せの前に相談してもらう関係を作ってください。"
+    ]
+  }
+};
+
+/* 規程改訂の共通手続（労基法） */
+const KITEI_ROUKI = [
+  "現行規程の確認（就業規則本体か別規程か・賃金表があるか・届出済みか・<b>周知しているか</b>）。「規程はあるが職員に周知していない」は<b>要件未達</b>です。",
+  "<b>不利益変更に当たらないかの判定</b>。手当の廃止・減額、賞与算定基礎からの除外、退職金算定基礎の変更は不利益変更になり得ます。当たる場合は合理的な理由＋労使の合意（できれば個別同意書）を整えます。",
+  "労働者の過半数代表者から<b>意見聴取</b>し、意見書を作成（労基法90条）。",
+  "常時10人以上の事業場は<b>労働基準監督署へ届出</b>（変更届＋意見書。労基法89条）。",
+  "<b>周知</b>（配付・掲示・データ共有等。労基法106条）。<b>周知した日・方法・対象者を記録</b>します（加算の要件が「周知していること」なので証拠が必要）。",
+  "<b>加算の届出</b>（下記「分野ごとにやること」を参照）。",
+  "職員への説明。「加算でいくら増え、あなたの賃金がどう変わるか」を<b>書面で</b>説明します。"
+];
+
+/* --- ⑩ 比較表を描画する --- */
+function renderKiteiCmp(){
+  const rows = [
+    ["比較項目"].concat(KITEI_PATTERNS.map(p=>p.id+"｜"+p.name)),
+    ["月額賃金改善要件（1/2以上を基本給等）"].concat(KITEI_PATTERNS.map(p=>p.gekkaku)),
+    ["割増賃金の算定基礎"].concat(KITEI_PATTERNS.map(p=>p.warimashi)),
+    ["最低賃金の算入"].concat(KITEI_PATTERNS.map(p=>p.saichin)),
+    ["社会保険"].concat(KITEI_PATTERNS.map(p=>p.shaho)),
+    ["下げやすさ"].concat(KITEI_PATTERNS.map(p=>p.sageyasusa)),
+    ["実績報告での証明"].concat(KITEI_PATTERNS.map(p=>p.shomei)),
+    ["退職金・平均賃金への波及"].concat(KITEI_PATTERNS.map(p=>p.taishoku)),
+    ["向く場面"].concat(KITEI_PATTERNS.map(p=>p.muku))
+  ];
+  let html = '<table><tbody>';
+  rows.forEach((r,ri)=>{
+    html += "<tr>";
+    r.forEach((c,ci)=>{
+      // ×は赤・◎は緑で目立たせる（判断を早くするため）
+      let cell = esc(String(c));
+      if(ci>0 && ri>0){
+        if(cell.indexOf("×")===0) cell = '<b style="color:var(--risk)">'+cell+"</b>";
+        else if(cell.indexOf("◎")===0) cell = '<b style="color:var(--ok)">'+cell+"</b>";
+        else if(cell==="含む"||cell.indexOf("含む（")===0) cell = '<b style="color:var(--risk)">'+cell+"</b>";
+      }
+      html += (ri===0||ci===0) ? "<th>"+cell+"</th>" : "<td>"+cell+"</td>";
+    });
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  document.getElementById("tblKiteiCmp").innerHTML = html;
+}
+
+/* --- ⑩ 選択したパターンの条文案・注意点を描画する --- */
+function renderKitei(){
+  const id = document.getElementById("kiteiSel").value;
+  const bunya = document.getElementById("kiteiBunya").value;
+  const p = KITEI_PATTERNS.find(x=>x.id===id);
+  const t = KITEI_TETSUZUKI[bunya];
+  if(!p || !t) return;
+
+  let html = "";
+  html += '<h3>パターン'+esc(p.id)+"｜"+esc(p.name)+"</h3>";
+  html += '<div class="tblwrap"><table><tbody>'+
+    "<tr><th style=\"width:14em;\">月額賃金改善要件</th><td>"+esc(p.gekkaku)+"</td></tr>"+
+    "<tr><th>割増賃金の算定基礎</th><td>"+esc(p.warimashi)+"</td></tr>"+
+    "<tr><th>最低賃金</th><td>"+esc(p.saichin)+"</td></tr>"+
+    "<tr><th>社会保険</th><td>"+esc(p.shaho)+"</td></tr>"+
+    "<tr><th>退職金・平均賃金</th><td>"+esc(p.taishoku)+"</td></tr>"+
+    "<tr><th>実績報告での証明</th><td>"+esc(p.shomei)+"</td></tr>"+
+    "</tbody></table></div>";
+
+  // ── 全パターン共通の2条（原資・改廃）を、手当の条文より先に出す ──
+  html += "<h3>まず置く2条（どのパターンでも共通）</h3>";
+  html += '<div class="note risk"><b>手当の作り方より先に、この2条を規程に入れてください。</b>'+
+    "「① 原資は何か」「② 制度が終わったらどうするか」の2条です。これが無いまま手当だけ作ると、"+
+    "<b>制度が縮小・廃止されたときに手当を下げられず、加算収入が減っても人件費だけが残ります。</b>実際に相談が集中するのはここです。</div>";
+  html += kiteiLegend(bunya);
+  KITEI_KYOTSU.forEach(function(k){
+    html += "<h4>"+esc(k.title)+"</h4>";
+    html += '<div class="kitei-art"><pre>'+applySashikae(esc(k.art.join("\n")), bunya, true)+"</pre></div>";
+    html += '<ul class="tight">';
+    k.memo.forEach(m=>{ html += "<li>"+m+"</li>"; });
+    html += "</ul>";
+  });
+
+  html += "<h3>条文案（ひな型）— パターン"+esc(p.id)+"</h3>";
+  html += '<p class="src">※顧問先の既存規程の条番号・用語（「職員」「従業員」等）・支給日・端数処理に合わせて必ず調整し、<b>所属社労士の確認を経てから</b>提示してください。<b>●は顧問先ごとに埋める箇所</b>（色なし）、<b>色付きは分野によって変わる箇所</b>です。</p>';
+  html += '<div class="kitei-art"><pre>'+applySashikae(esc(p.art.join("\n")), bunya, true)+"</pre></div>";
+  // コピー用は共通2条＋パターン条文をまとめて渡す（実務では3条セットで使うため）。
+  // 【…】は選択中の分野の文言に置換済みなので、貼ればそのまま読める。
+  const kiteiCopyText = applySashikae(
+    KITEI_KYOTSU.map(k=>k.art.join("\n")).join("\n\n") + "\n\n" + p.art.join("\n"),
+    bunya, false);
+  html += '<label class="fld">コピー用（共通2条＋パターン'+esc(p.id)+'。このままExcel・Wordに貼れます）'+
+    '<textarea class="kitei-copy" id="kiteiCopy" readonly>'+esc(kiteiCopyText)+"</textarea></label>";
+  html += '<div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:6px 0 2px;">'+
+    '<button class="btn ghost" id="btnKiteiCopy">クリップボードにコピー</button>'+
+    '<span class="src" id="kiteiCopyMsg"></span></div>';
+
+  html += "<h3>このパターン特有の注意点</h3><ul class=\"tight\">";
+  p.memo.forEach(m=>{ html += "<li>"+m+"</li>"; });
+  html += "</ul>";
+
+  html += "<h3>規程を直すときの手続（ここを飛ばすと全部無効）</h3><ol class=\"tight\">";
+  KITEI_ROUKI.forEach(s=>{ html += "<li>"+s+"</li>"; });
+  html += "</ol>";
+
+  html += "<h3>分野ごとにやること — "+esc(t.label)+"</h3><ul class=\"tight\">";
+  t.items.forEach(s=>{ html += "<li>"+s+"</li>"; });
+  html += "</ul>";
+
+  html += '<div class="note risk"><b>就業規則業務と加算業務の担当が別だと必ず落ちます。</b>'+
+    "事務所内で「就業規則の改訂」と「処遇改善加算の届出」を別の担当が持っていると、<b>変更届を誰も出さない</b>状態になります。"+
+    "顧問先台帳に「処遇改善加算あり」のフラグを立て、規程改訂の案件が立ったら加算担当に連絡が回る運用にしてください。</div>";
+
+  document.getElementById("kiteiOut").innerHTML = html;
+
+  // コピーボタン（クリップボードAPIが使えない環境ではselectでフォールバック）
+  const btn = document.getElementById("btnKiteiCopy");
+  if(btn){
+    btn.addEventListener("click", function(){
+      const ta = document.getElementById("kiteiCopy");
+      const msg = document.getElementById("kiteiCopyMsg");
+      try{
+        ta.select();
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(ta.value).then(function(){ msg.textContent = "コピーしました。"; });
+        } else {
+          document.execCommand("copy");
+          msg.textContent = "コピーしました。";
+        }
+      }catch(e){
+        msg.textContent = "コピーできませんでした。テキストを手動で選択してください。";
+      }
+    });
+  }
+}
+
+/* --- ⑪ 期限と誓約：分野×年度×系統ごとの期限表を組む --- */
+/* 令和8年度の日付は一次資料で確認済みの確定値。
+   令和9年度は原則ルール（前々月末日・翌々月末日等）から導けるものだけを示し、
+   年度当初の特例日付は「未公表・要確認」と明示する（推測日付を出さない）。 */
+function kigenRows(bunya, nendo, kei){
+  const R8 = (nendo==="r8");
+  const kyotaku = (kei==="kyotaku");
+  if(bunya==="kaigo" || bunya==="shougai"){
+    const rows = [];
+    if(bunya==="kaigo"){
+      if(R8){
+        rows.push(["令和8年4月1日","体制届出（4月から算定・区分変更する場合）","指定権者の判断で令和8年4月15日まで可。4月15日までの区分変更の受付など柔軟な取扱いとされている",false]);
+        rows.push(["令和8年4月15日","処遇改善計画書（別紙様式2-1〜2-3）","<b>4・5月分（旧4区分）と6月以降分（新6区分）を一体で提出</b>。原則は「初めて算定する月の前々月末日」だが令和8年度は特例",true]);
+        rows.push(["令和8年"+(kyotaku?"5月15日":"6月1日"),"新規対象サービス（訪問看護・訪問リハ・居宅介護支援等）の体制届出",(kyotaku?"居宅系":"施設系")+"の期日。指定権者の判断で令和8年6月15日まで可",false]);
+        rows.push(["令和8年6月15日","新規対象サービスのみの事業者の処遇改善計画書","令和8年4・5月分は算定せず6月から算定する場合",false]);
+        rows.push([KITEI_CONST.jissekiR8Kaigo,"実績報告書（別紙様式3-1・3-2）","最終の加算支払月（令和9年3月分＝令和9年5月支払）の翌々月末日。<b>誓約した要件の履行状況もここで報告</b>",true]);
+      } else {
+        rows.push(["初めて算定する月の前々月末日","処遇改善計画書","<b>令和9年度の年度当初の特例日付は未公表（要確認）。</b>令和8年度は4月15日という特例だった。指定権者の通知で確認すること",true]);
+        rows.push([(kyotaku?"算定開始月の前月15日":"算定開始月の1日"),"体制届出",(kyotaku?"居宅系":"施設系")+"の原則の期日",false]);
+        rows.push(["令和10年7月31日（見込み）","実績報告書","「最終の加算支払月の翌々月末日」の原則から算出した<b>見込み</b>。令和9年度の通知で確認すること",false]);
+      }
+      rows.push([(kyotaku?"変更後の算定開始月の前月15日":"変更後の算定開始月の1日"),"変更届出書（別紙様式4）","区分変更・新規算定・キャリアパス要件Ⅰ〜Ⅲ/Ⅴの適合状況の変更（区分が変わる場合）・合併・一括申請事業所の増減",false]);
+      rows.push(["随時（改訂後すみやかに）","<b>就業規則を改訂した場合の変更届</b>","職員の処遇に関する内容に限る。改訂の概要を変更届出書に記載。<b>この変更のみなら実績報告書の提出時に併せて</b>届出",true]);
+      rows.push(["随時（引下げ前に）","特別事情届出書（別紙様式5）","賃金水準を引き下げる場合。<b>届出なき引下げは返還事由</b>。経営悪化の状況・引下げの内容・改善見込み・<b>労使の合意の時期と方法</b>を記載。年度を超えるなら次年度も再提出",true]);
+      rows.push(["—","計画書・実績報告書と根拠資料の保存","<b>"+KITEI_CONST.hozonKaigo+"</b>保存",false]);
+    } else {
+      if(R8){
+        rows.push(["令和8年4月16日 0時","処遇改善計画書（4月・5月算定開始分）","<b>特例日付・受付終了。</b>自治体掲載の情報で、国通知原文では未確認",true]);
+        rows.push(["令和8年6月16日 0時","処遇改善計画書（6月算定開始分）","<b>特例日付・受付終了。</b>同上",true]);
+        rows.push(["算定開始日の前々月末日 24時","処遇改善計画書（令和8年7月以降に算定を開始する分）","原則の期日",false]);
+      } else {
+        rows.push(["算定開始日の前々月末日 24時","処遇改善計画書","<b>令和9年度の年度当初の特例日付は未公表（要確認）</b>",true]);
+      }
+      rows.push(["随時","変更届／特別事情届","介護と同じ枠組みだが<b>様式・提出先・期限は障害福祉のもの</b>。指定権者で確認",false]);
+      rows.push(["—","キャリアパス要件Ⅳの年額要件","<b>"+KITEI_CONST.nengakuShougai+"</b>（介護の"+KITEI_CONST.nengakuKaigo+"と異なる）。手当等を含め、法定福利費の事業主負担は含めずに判断",true]);
+      rows.push(["—","<b>本ツールの注意</b>","障害福祉の令和8年度<b>国通知本文の公式URLが未特定（2026-08-06時点）</b>。加算率も令和8年度の一次資料で未検証。<b>指定権者のページで必ず確認</b>",true]);
+    }
+    return rows;
+  }
+  if(bunya==="iryo"){
+    const rows = [];
+    rows.push([(R8?"令和8年5月中（経過済み）":"令和9年5月まで"),"ベースアップ評価料の届出（別添2＋様式95ほか）",(R8?"<b>令和8年度改定で要件が変わったため、既に算定していた機関を含む全医療機関が再届出</b>。6月1日から新点数を算定するための期限（未了先は算定開始日を所轄厚生局に確認）":"毎年5月までに届出"),R8]);
+    rows.push([(R8?KITEI_CONST.iryoR8Report:"令和9年8月"),"<b>賃金改善実績報告書（前年度分）＋賃金改善中間報告書（当年度分）の2本</b>","地方厚生（支）局へ<b>メール提出</b>（添付Excelのファイル名に<b>医療機関コードと報告対象年度</b>を記載。やむを得ない場合は書面可）。未提出は翌年度施設基準不適合",true]);
+    rows.push(["毎年6月1日時点","評価区分の見直し届出","令和8・9年度は毎年6月1日時点で算定できるよう届出（点数構造の段階変更のため）",false]);
+    rows.push(["変動発生の月内","変更届出","対象職員数・算定回数の1割以上の変動で区分が変わる場合。翌月から新区分",false]);
+    rows.push(["令和9年6月1日","第2段階の点数へ移行","(Ⅰ)は2倍点数、(Ⅱ)区分13〜24・入院区分251〜500が解禁。<b>再度の届出（区分見直し）が必要</b>",!R8]);
+    rows.push(["随時（引下げ前に）","様式94（特別事情届出書）","賃金水準を引き下げる場合",false]);
+    rows.push(["—","根拠書類の保管","<b>"+KITEI_CONST.hozonIryo+"</b>保管",false]);
+    rows.push(["—","<b>様式の版</b>","医療機関用 様式95〜100 は<b>2026-07-31修正版</b>が最新（特設ページで最新版を取得すること）",false]);
+    return rows;
+  }
+  // 保育
+  const rows = [];
+  rows.push(["自治体が定める日（例: 4月下旬）","<b>誓約書</b>（賃金改善を行う旨）","<b>令和8年度から計画書の提出は原則廃止</b>され誓約書に。新規で加算を取得する場合などは計画書の提出も求められる。<b>提出先は市区町村・期限は自治体ごと</b>",true]);
+  rows.push(["自治体が定める日","実績報告書","<b>期限は自治体ごと</b>。区分2は「新規事由あり＝賃金改善額が加算額以上」「新規事由なし＝支払った賃金が<b>起点賃金水準</b>以上」で判定（要一次確認）",true]);
+  if(R8){
+    rows.push(["令和8年度中","<b>賃金規程の改正</b>","<b>一本化の移行年。</b>区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わった（1年間の経過措置あり）。令和8年度中は猶予があるが、<b>逆に言えば令和8年度内に直さなければならない</b>",true]);
+  }
+  rows.push(["令和8年7月〜","減算の新設に注意","<b>安全計画の策定等を行っていない場合</b>・<b>経営情報等の報告を行っていない場合</b>の減算が創設された（R8.7〜）。加算とは別だが顧問先の収入に影響",false]);
+  rows.push(["随時","賃金水準を引き下げる場合","<b>特例</b>あり。労使の合意の下、起点となる賃金水準を「必要最小限な範囲」において引き下げられる（介護等と同様の仕組みを保育にも導入）",false]);
+  rows.push(["—","キャリアアップ研修の修了者の管理","区分3の算定職員数が「基礎職員数×1/3（または1/5）」と<b>研修修了者数の少ない方</b>で決まる。<b>研修を受けさせていないと加算額が減る</b>",true]);
+  rows.push(["—","<b>本ツールの注意</b>","保育の加算率（区分1の平均経験年数別2〜12%等）・区分3の単価・キャリアパス要件の文言・経過措置の終期が<b>未確認</b>のため、保育の試算機能は実装していない",true]);
+  return rows;
+}
+
+function renderKigen(){
+  const bunya = document.getElementById("kigenBunya").value;
+  const nendo = document.getElementById("kigenNendo").value;
+  const kei   = document.getElementById("kigenKei").value;
+  const nendoLabel = (nendo==="r8") ? "令和8年度（2026年度）" : "令和9年度（2027年度）";
+  const bunyaLabel = KITEI_TETSUZUKI[bunya].label;
+
+  let html = '<div class="card"><h2>'+esc(bunyaLabel)+"　"+esc(nendoLabel)+" の期限一覧</h2>";
+
+  // 誓約のチェック状況を拾う（介護・障害福祉のみ意味を持つ）
+  const seiyakuLabels = {
+    cp1:"キャリアパス要件Ⅰ（任用要件・賃金体系の整備）",
+    cp2:"キャリアパス要件Ⅱ（研修の実施等）",
+    cp3:"キャリアパス要件Ⅲ（昇給の仕組みの整備）",
+    cp4:"キャリアパス要件Ⅳ（改善後の年額賃金要件）",
+    env:"職場環境等要件の取組",
+    care:"ケアプランデータ連携システムの加入・利用",
+    prod:"生産性向上推進体制加算Ⅰ・Ⅱの算定"
+  };
+  const checked = [];
+  document.querySelectorAll("#kigenSeiyaku input[type=checkbox]").forEach(function(cb){
+    if(cb.checked) checked.push(cb.dataset.seiyaku);
+  });
+
+  if(checked.length && (bunya==="kaigo"||bunya==="shougai")){
+    html += '<div class="note risk"><b>誓約した要件の履行期限：'+esc(KITEI_CONST.seiyakuKigen)+'</b>'+
+      "<p style=\"margin:6px 0 4px;\">下の項目を「"+esc(KITEI_CONST.seiyakuKigen)+"までに整備する」と誓約しています。"+
+      "期限までに整備し、<b>実績報告書でその旨を報告</b>する義務があります。間に合わなければ<b>加算の返還</b>です。</p><ul class=\"tight\" style=\"margin:0;\">";
+    checked.forEach(function(k){
+      let extra = "";
+      if(k==="cp4") extra = "（"+ (bunya==="kaigo"?KITEI_CONST.nengakuKaigo:KITEI_CONST.nengakuShougai) +"以上。満たせない場合は合理的説明の文書を用意）";
+      if(k==="care") extra = "（"+KITEI_CONST.seiyakuKigen+"までに利用し、実績報告書で<b>利用実績</b>を報告）";
+      if(k==="prod") extra = "（実績報告書で<b>算定した旨</b>を報告）";
+      if(k==="cp1"||k==="cp3") extra = "（<b>就業規則等に書面で整備し、全職員に周知</b>したうえで報告。周知した日・方法・対象者の記録を残すこと）";
+      html += "<li><b>"+esc(seiyakuLabels[k])+"</b>"+extra+"</li>";
+    });
+    html += "</ul><p class=\"src\" style=\"margin:6px 0 0;\">四半期ごとに進捗を確認し、顧問先台帳に期限を載せてください。</p></div>";
+  } else if(bunya==="kaigo"||bunya==="shougai"){
+    html += '<div class="note plain">誓約した要件がある場合は上のチェックを入れてください。履行期限（'+esc(KITEI_CONST.seiyakuKigen)+"）と報告事項の一覧が出ます。</div>";
+  }
+
+  const rows = kigenRows(bunya, nendo, kei);
+  html += '<div class="tblwrap"><table><tbody><tr><th style="width:14em;">期限</th><th style="width:20em;">やること</th><th>注意点</th></tr>';
+  rows.forEach(function(r){
+    const cls = r[3] ? ' class="kigen-hi"' : "";
+    html += "<tr><td"+cls+">"+r[0]+"</td><td>"+r[1]+"</td><td>"+r[2]+"</td></tr>";
+  });
+  html += "</tbody></table></div>";
+
+  html += '<div class="note plain"><b>毎月・毎年の固定ルーティン</b>'+
+    "<ul class=\"tight\" style=\"margin:6px 0 0;\">"+
+    "<li><b>毎月</b>：加算収入と賃金改善額を台帳に記録（顧問先から給付費明細・レセプトの控えをもらう運用にする）。台帳のテンプレートは<b>⑦資料依頼書</b>タブでCSV出力できます。</li>"+
+    "<li><b>2月</b>：「加算額 vs 賃金改善額」を突合。不足があれば<b>3月の一時金で埋める</b>（不足分を賞与等の一時金として追加配分すれば返還を求めない取扱い）。</li>"+
+    "<li><b>四半期</b>：誓約事項の進捗確認。</li>"+
+    "<li><b>賃金を動かした3か月後</b>：月額変更届の判定（ベースアップ・手当の新設は<b>固定的賃金の変動</b>）。</li>"+
+    "<li><b>10月</b>：最低賃金改定後の下回りチェック。</li>"+
+    "</ul></div>";
+
+  html += '<p class="src">期限は一次資料（介護＝老発0313第6号、医療＝ベースアップ評価料特設ページと各手引き、保育＝こども家庭庁資料）で2026-08-06に確認したものです。'+
+    "<b>自治体裁量の部分（提出期限の延長、保育の期限等）があるため、実際の提出前に指定権者・地方厚生局・市区町村の案内で確認してください。</b></p>";
+  html += "</div>";
+
+  document.getElementById("kigenOut").innerHTML = html;
+}
+
+/* --- 管理台帳テンプレートのCSV出力（列見出しのみ・個人情報を含まない） --- */
+const DAICHO_CSV = {
+  income: {
+    file:"①加算収入台帳_月別.csv",
+    head:["対象年月（サービス提供月）","事業所名","サービス種別","加算区分","総単位数（処遇改善加算を除く加減算後）","加算率(%)","加算単位数","1単位あたり単価（地域単価）","加算額（円）","【医療】評価料の区分","【医療】点数","【医療】算定回数","【医療】評価料収入（円）","【保育】区分1の加算額","【保育】区分2の加算額","【保育】区分3の加算額","給付費明細・レセプト控えの保管場所","記入者","記入日"]
+  },
+  wage: {
+    file:"②賃金改善台帳_職員別月別.csv",
+    head:["対象年月","職員番号","職種","資格","雇用形態（常勤/非常勤/派遣/出向）","勤続年数","職位","常勤換算値","対象職員かどうか","基本給の改善額（円）","毎月手当の改善額（円）","うち従来分（円）","うち加算原資分（円）","賞与・一時金の改善額（円）","【医療】ベアに伴う時間外手当の増加分（円）","ベア前の割増単価（円）","ベア後の割増単価（円）","時間外・休日・深夜の時間数","法定福利費の事業主負担増加分（円）","賃金改善額の合計（円）","入社日","退職日","【保育】起点賃金水準（円）","備考"]
+  },
+  evidence: {
+    file:"③要件充足の証拠台帳.csv",
+    head:["要件（キャリアパスⅠ/Ⅱ/Ⅲ/Ⅳ/Ⅴ・職場環境等要件・令和8年度特例要件・誓約事項・労働保険）","職場環境等要件の項目番号","実施・整備した内容","実施日・改訂日","労基署への届出日","周知した日","周知の方法","周知の対象者","証拠書類の種類（規程/議事録/写真/名簿/購入記録/スクリーンショット等）","証拠の保管場所","公表の掲載日（介護Ⅰ・Ⅱ系）","公表URL","誓約の有無","誓約の履行期限","履行状況","確認者","確認日"]
+  },
+  todoke: {
+    file:"④届出履歴台帳.csv",
+    head:["届出の種類（体制届/計画書/誓約書/変更届/特別事情届/実績報告書/中間報告書）","対象年度","対象月（4-5月分・6月以降分等）","事業所名","提出日","提出方法（持参/郵送/電子申請/メール）","提出先（都道府県/市区町村/地方厚生局）","控えの保管場所（ファイル名・パス）","保存期限","次回の期限","担当者","備考"]
+  }
+};
+
+function downloadCsv(key){
+  const d = DAICHO_CSV[key];
+  if(!d) return;
+  // Excelでそのまま開けるようBOM付きUTF-8にする。値にカンマ・改行・引用符が入っても壊れないよう常に引用する
+  const line = d.head.map(function(h){ return '"'+String(h).replace(/"/g,'""')+'"'; }).join(",");
+  const blob = new Blob(["﻿"+line+"\r\n"], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  a.href = url; a.download = d.file;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+document.getElementById("pane-shorui").addEventListener("click", function(e){
+  const b = e.target.closest("button[data-csv]");
+  if(!b) return;
+  const key = b.dataset.csv;
+  const msg = document.getElementById("csvMsg");
+  if(key==="all"){
+    // まとめてダウンロード（ブラウザのポップアップ抑止を避けるため間隔を空ける）
+    const keys = Object.keys(DAICHO_CSV);
+    keys.forEach(function(k,i){ setTimeout(function(){ downloadCsv(k); }, i*350); });
+    if(msg) msg.textContent = keys.length+"件のCSVをダウンロードしました（列見出しのみ）。";
+  } else {
+    downloadCsv(key);
+    if(msg) msg.textContent = DAICHO_CSV[key].file+" をダウンロードしました。";
+  }
+});
+
+/* --- イベント登録と初期描画 --- */
+document.getElementById("kiteiSel").addEventListener("change", renderKitei);
+document.getElementById("kiteiBunya").addEventListener("change", renderKitei);
+document.getElementById("kigenBunya").addEventListener("change", renderKigen);
+document.getElementById("kigenNendo").addEventListener("change", renderKigen);
+document.getElementById("kigenKei").addEventListener("change", renderKigen);
+document.getElementById("kigenSeiyaku").addEventListener("change", renderKigen);
+document.getElementById("btnKigenPrint").addEventListener("click", function(){ window.print(); });
+renderKiteiCmp();
+renderKitei();
+renderKigen();
+
+/* ============================================================================
+   ⑫ 手当改定シミュレーター（2026-08-07 追加）
+   設計: tools/_設計/設計案_手当改定シミュレーター_2026-08-07.md（原さん承認済み）
+   目的: 加算額の増加分を、複数の職員の手当へ一括で配分する試算。
+   ポイント: 手当を上げると「時間外手当」と「法定福利費の事業主負担」が連動して
+             増えるため、額面をそのまま配ると原資を超える。ここでは
+             「配れる額面の総額」を逆算してから各人へ按分する。
+   ※職員名の欄は自由入力（氏名でも社員番号でも空欄でもエラーにしない）。
+   ============================================================================ */
+
+let tsStaff = [];              /* {name,shokushu,koyou,kansan,genkou,shotei,zangyo,jogai,manual} */
+let tsZangyoOn = true;         /* 時間外の増加を見込むか（既定ON：原さん指示 2026-08-07） */
+let tsManualOn = false;        /* 増額欄の手入力を許すか */
+
+/* 分野ごとの注意書き（法定福利費・時間外の扱いが分野で違うため必ず出す） */
+const TS_BUNYA_NOTE = {
+  kaigo:"【介護】賃金改善額の算出は「実際の賃金水準と、加算を算定しない場合の賃金水準との比較」が原則（Q&A問1-1）。<b>比較方式なら増えた時間外手当は自動的に差に含まれる</b>ため、ここで見込んだ時間外増加分を実績報告で<b>別途足すと二重計上</b>になります。法定福利費は「合理的な方法に基づく概算」（率の明示なし）。<b>研修費やICT導入費は賃金改善額に含められません</b>（問1-5）。",
+  shougai:"【障害福祉】枠組みは介護と同じ。<b>キャリアパス要件Ⅳは年額460万円</b>（介護の440万円と違う）。法定福利費の範囲は健保・介護・厚年・児童手当拠出金・雇用・労災の事業主負担増加分＋法人事業税の外形標準課税分（概算可・任意加入分は除く）。",
+  iryo:"【医療】ベースアップ評価料の収入は<b>全額を対象職員の賃上げに充当</b>する必要があり、<b>ベアに伴う賞与・時間外手当・法定福利費の増加分も実績報告書(15)欄に計上</b>します（＝ここで見込む時間外増加分は報告対象）。法定福利費の概算は<b>上限16.5％</b>（疑義解釈その3 問1）。<b>対象職員から40歳以上の医師・歯科医師、業務委託、事業主・役員は除く</b>。",
+  hoiku:"【保育】区分2＋区分3の合計額の<b>1/2以上を基本給・決まって毎月支払われる手当</b>で改善する必要があります。<b>加算率・単価は本ツール未収載</b>のため、加算額は手入力してください。<b>人事院勧告に伴う区分2の単価増額分は「改善額」に含めません</b>（FAQ No.10）。"
+};
+
+function tsRound(v, unit, dir){
+  if(!isFinite(v) || v<=0) return 0;
+  if(unit<=1) return Math.round(v);
+  return dir==="round" ? Math.round(v/unit)*unit : Math.floor(v/unit)*unit;
+}
+function tsNum(v, def){ const n = parseFloat(String(v).replace(/[,，\s円]/g,"")); return isFinite(n)? n : (def||0); }
+
+/* ---- 職員テーブルの描画 ---- */
+function tsRenderTable(){
+  const el = document.getElementById("tsTableWrap");
+  if(!tsStaff.length){
+    el.innerHTML = '<p class="fill-note">まだ職員が入力されていません。上の貼り付け欄か「＋1行追加」「サンプルを入れる」から始めてください。</p>';
+    return;
+  }
+  let h = '<table><tbody><tr>'+
+    '<th style="width:3em;">除外</th><th>職員名／社員番号</th><th>職種</th><th>雇用形態</th>'+
+    '<th style="width:6em;">常勤換算</th><th style="width:8em;">現在の手当</th>'+
+    '<th style="width:7em;">所定時間</th><th style="width:7em;">時間外時間</th>'+
+    (tsManualOn?'<th style="width:8em;">増額（手入力）</th>':'')+
+    '<th style="width:3em;"></th></tr>';
+  tsStaff.forEach((s,i)=>{
+    h += '<tr>'+
+      '<td><input type="checkbox" data-ts="jogai" data-i="'+i+'"'+(s.jogai?' checked':'')+'></td>'+
+      '<td><input type="text" data-ts="name" data-i="'+i+'" value="'+esc(s.name||"")+'" placeholder="空欄可"></td>'+
+      '<td><input type="text" data-ts="shokushu" data-i="'+i+'" value="'+esc(s.shokushu||"")+'"></td>'+
+      '<td><input type="text" data-ts="koyou" data-i="'+i+'" value="'+esc(s.koyou||"")+'"></td>'+
+      '<td><input type="number" step="0.1" min="0" data-ts="kansan" data-i="'+i+'" value="'+(s.kansan||0)+'"></td>'+
+      '<td><input type="number" min="0" data-ts="genkou" data-i="'+i+'" value="'+(s.genkou||0)+'"></td>'+
+      '<td><input type="number" min="0" data-ts="shotei" data-i="'+i+'" value="'+(s.shotei||"")+'" placeholder="既定"></td>'+
+      '<td><input type="number" min="0" step="0.5" data-ts="zangyo" data-i="'+i+'" value="'+(s.zangyo||0)+'"></td>'+
+      (tsManualOn?'<td><input type="number" min="0" data-ts="manual" data-i="'+i+'" value="'+(s.manual!=null?s.manual:"")+'" placeholder="自動"></td>':'')+
+      '<td><button class="btn ghost" data-tsdel="'+i+'" style="padding:2px 8px;">×</button></td></tr>';
+  });
+  h += '</tbody></table>';
+  el.innerHTML = h;
+}
+
+/* ---- 貼り付け取り込み（タブ／カンマ区切り・見出し行は自動で読み飛ばす） ---- */
+function tsImport(text){
+  const lines = String(text).split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  let added = 0, skipped = 0;
+  lines.forEach(line=>{
+    const c = line.split(/\t|,/).map(x=>x.trim());
+    /* 見出し行の判定：4列目(常勤換算)と5列目(現在の手当)がどちらも数値でなければ見出しとみなす */
+    const k = parseFloat(c[3]), g = parseFloat(c[4]);
+    if(!isFinite(k) && !isFinite(g)){ skipped++; return; }
+    tsStaff.push({
+      name: c[0]||"", shokushu: c[1]||"", koyou: c[2]||"",
+      kansan: isFinite(k)? k : 1,
+      genkou: tsNum(c[4],0),
+      shotei: c[5]!==undefined && c[5]!=="" ? tsNum(c[5],0) : "",
+      zangyo: c[6]!==undefined && c[6]!=="" ? tsNum(c[6],0) : 0,
+      jogai:false, manual:null
+    });
+    added++;
+  });
+  return {added:added, skipped:skipped};
+}
+
+/* ---- 計算の本体 ---- */
+function tsCalc(){
+  const zouka = num("tsAfter") - num("tsBefore");
+  const f = Math.max(0, tsNum(document.getElementById("tsFuri").value,0))/100;
+  const rate = tsZangyoOn ? Math.max(1, tsNum(document.getElementById("tsRate").value,1.25)) : 0;
+  const defShotei = num("tsShotei") || 160;
+  const unit = +document.getElementById("tsUnit").value || 100;
+  const dir = document.getElementById("tsDir").value;
+  const rule = document.getElementById("tsRule").value;
+  const months = Math.max(1, num("tsMonths") || 12);
+
+  const target = tsStaff.filter(s=>!s.jogai);
+  /* 時間外係数 z：手当を1円上げたとき時間外手当が何円増えるか */
+  target.forEach(s=>{
+    const sh = (s.shotei && s.shotei>0) ? s.shotei : defShotei;
+    s._z = (tsZangyoOn && s.zangyo>0 && sh>0) ? (rate * s.zangyo / sh) : 0;
+  });
+
+  const manual = tsManualOn ? target.filter(s=>s.manual!==null && s.manual!=="") : [];
+  const auto   = target.filter(s=>!(tsManualOn && s.manual!==null && s.manual!==""));
+  let usedByManual = 0;
+  manual.forEach(s=>{ s._x = Math.max(0, tsNum(s.manual,0)); usedByManual += s._x*(1+s._z)*(1+f); });
+  const rest = zouka - usedByManual;
+
+  /* 配分比率 */
+  let w = [];
+  if(rule==="A")      w = auto.map(()=>1);
+  else if(rule==="B") w = auto.map(s=>Math.max(0, s.kansan||0));
+  else                w = auto.map(s=>Math.max(0, s.genkou||0));
+  let wsum = w.reduce((a,b)=>a+b,0);
+  let fellBack = false;
+  if(wsum<=0){ w = auto.map(()=>1); wsum = auto.length; fellBack = true; }
+
+  /* 「額面でいくら配れるか」を逆算する
+     必要原資 = Σ Xi(1+zi)(1+f) = T × Σ(wi/wsum)(1+zi) × (1+f)  → T = rest ÷ その係数 */
+  let denom = 0;
+  auto.forEach((s,i)=>{ denom += (w[i]/wsum)*(1+s._z); });
+  denom *= (1+f);
+  const T = (denom>0 && rest>0 && auto.length>0) ? rest/denom : 0;
+
+  auto.forEach((s,i)=>{ s._x = tsRound(T*(w[i]/wsum), unit, dir); });
+
+  /* 集計 */
+  let sumX=0, sumZ=0, sumF=0, low=0, mx=null, mn=null;
+  target.forEach(s=>{
+    s._zangyoAdd = s._x * s._z;
+    s._furiAdd   = (s._x + s._zangyoAdd) * f;
+    s._cost      = s._x + s._zangyoAdd + s._furiAdd;
+    s._after     = (s.genkou||0) + s._x;
+    sumX += s._x; sumZ += s._zangyoAdd; sumF += s._furiAdd;
+    if(s._after < (s.genkou||0)) low++;
+    if(mx===null || s._x>mx) mx=s._x;
+    if(mn===null || s._x<mn) mn=s._x;
+  });
+  const totalCost = sumX + sumZ + sumF;
+  const diff = zouka - totalCost;
+
+  return {zouka:zouka, months:months, f:f, rate:rate, unit:unit, dir:dir, rule:rule,
+          target:target, auto:auto, manual:manual, fellBack:fellBack,
+          sumX:sumX, sumZ:sumZ, sumF:sumF, totalCost:totalCost, diff:diff,
+          low:low, mx:mx, mn:mn};
+}
+
+/* ---- 結果の描画 ---- */
+function tsRender(){
+  const out = document.getElementById("tsResult");
+  const card = document.getElementById("tsExportCard");
+  const zouka = num("tsAfter") - num("tsBefore");
+
+  /* 増加額の表示 */
+  const zb = document.getElementById("tsZougenBox");
+  if(zouka>0) zb.innerHTML = '<b>加算の増加額：'+yen(zouka)+' ／月</b>　（年間 '+yen(zouka*Math.max(1,num("tsMonths")||12))+'）　この額を配分します。';
+  else if(zouka<0) zb.innerHTML = '<b style="color:var(--risk)">改定後の加算額が改定前を下回っています（'+yen(zouka)+'）。</b>減額の配分はこのツールでは扱いません。減額する場合は<b>特別事情届出書</b>と労使合意が必要です（⑩⑪タブ参照）。';
+  else zb.innerHTML = '改定前と改定後の加算額を入れてください。増加額を直接入れたい場合は「改定前＝0／改定後＝増加額」でも構いません。';
+
+  const tgt = tsStaff.filter(s=>!s.jogai);
+  if(zouka<=0 || !tgt.length){
+    out.innerHTML = tsStaff.length && zouka<=0 ? '' :
+      (tsStaff.length? '<div class="card"><p class="fill-note">配分の対象になる職員がいません（全員が「除外」になっています）。</p></div>' : '');
+    card.style.display="none";
+    return;
+  }
+
+  const r = tsCalc();
+  window.__tsLast = r;
+
+  let h = '<div class="card"><h2>配分の結果（職員別）</h2>';
+  h += '<div class="tblwrap"><table><tbody><tr>'+
+       '<th>職員名／社員番号</th><th>職種</th><th class="num">常勤換算</th><th class="num">現在の手当</th>'+
+       '<th class="num">増額</th><th class="num">改定後の手当</th><th class="num">時間外の増</th><th class="num">法定福利費の増</th><th class="num">会社の負担計</th></tr>';
+  r.target.forEach(s=>{
+    h += '<tr><td>'+esc(s.name||"（未記入）")+'</td><td>'+esc(s.shokushu||"")+'</td>'+
+      '<td class="num">'+(s.kansan||0)+'</td>'+
+      '<td class="num">'+yen(s.genkou||0)+'</td>'+
+      '<td class="num"><b>'+yen(s._x)+'</b></td>'+
+      '<td class="num"><b>'+yen(s._after)+'</b></td>'+
+      '<td class="num">'+yen(s._zangyoAdd)+'</td>'+
+      '<td class="num">'+yen(s._furiAdd)+'</td>'+
+      '<td class="num">'+yen(s._cost)+'</td></tr>';
+  });
+  h += '<tr class="sumrow"><td colspan="4"><b>合計（'+r.target.length+'人）</b></td>'+
+       '<td class="num"><b>'+yen(r.sumX)+'</b></td><td class="num">—</td>'+
+       '<td class="num"><b>'+yen(r.sumZ)+'</b></td><td class="num"><b>'+yen(r.sumF)+'</b></td>'+
+       '<td class="num"><b>'+yen(r.totalCost)+'</b></td></tr>';
+  h += '</tbody></table></div></div>';
+
+  /* 検算パネル */
+  h += '<div class="card"><h2>検算</h2><div class="result">';
+  h += row("加算の増加額（原資）", yen(r.zouka)+' <small>／月　年間 '+yen(r.zouka*r.months)+'</small>');
+  h += row("手当の増額（額面）の合計", yen(r.sumX));
+  h += row("＋ 時間外手当の増加分", yen(r.sumZ)+(tsZangyoOn?'':' <small>（見込まない設定）</small>'));
+  h += row("＋ 法定福利費の事業主負担増加分", yen(r.sumF)+' <small>（'+(r.f*100).toFixed(1)+'％）</small>');
+  h += row("＝ 会社が負担する合計", yen(r.totalCost), true);
+  if(r.diff >= 0){
+    h += row("原資との差", '<span style="color:var(--ok);font-weight:700;">余り '+yen(r.diff)+'</span> <small>／月（年間 '+yen(r.diff*r.months)+'）</small>');
+  } else {
+    h += row("原資との差", '<span style="color:var(--risk);font-weight:700;">'+yen(-r.diff)+' の超過</span> <small>／月　このままでは持ち出しになります</small>');
+  }
+  h += '</div>';
+
+  /* 判定 */
+  if(r.diff >= 0){
+    h += '<div class="note ok"><b>🟢 原資に収まっています。</b>余り '+yen(r.diff)+'／月（年間 '+yen(r.diff*r.months)+'）は、<b>年度末に一時金として配る</b>のが実務の定石です。'+
+         'Q&amp;Aでも「賃金改善額が加算額を下回った場合でも、<b>不足する部分を賞与等の一時金として追加的に配分すれば返還を求めない</b>」とされています（介護Q&amp;A問1-9）。'+
+         '<b>1円まで配り切る必要はありませんが、余らせたまま年度を終えると「加算額に相当する賃金改善が行われていない」ことになります。</b></div>';
+  } else {
+    h += '<div class="note risk"><b>🔴 原資を超えています（'+yen(-r.diff)+'／月）。</b>このまま実施すると<b>超過分は法人の持ち出し</b>になります。'+
+         '丸め単位を小さくする、時間外の見込みを見直す、対象者を確認する、のいずれかで調整してください。'+
+         '<b>持ち出し自体は禁止されていません</b>（加算額を超える改善は問題ありません）が、経営判断として顧問先に必ず伝えてください。</div>';
+  }
+
+  /* 1/2要件（このツールは「毎月の手当」で配る前提なので、余りを一時金に回した場合の割合を見る） */
+  const ichiji = Math.max(0, r.diff);
+  const kihonRatio = (r.sumX + ichiji) > 0 ? r.sumX/(r.sumX+ichiji) : 1;
+  if(kihonRatio >= 0.5){
+    h += '<div class="note ok"><b>🟢 月額賃金改善要件の目安：OK</b>　増加分のうち<b>'+(kihonRatio*100).toFixed(1)+'％を毎月の手当（＝基本給等）</b>で配る計算です（残りを一時金にした場合）。'+
+         '<b>ただし要件の正式な判定は「加算Ⅳ相当額の1/2以上」</b>であり、増加分だけでなく<b>加算額の全体で判定</b>します。②タブの試算と併せて確認してください。</div>';
+  } else {
+    h += '<div class="note risk"><b>🔴 一時金に寄りすぎています</b>　毎月の手当で配るのが<b>'+(kihonRatio*100).toFixed(1)+'％</b>しかありません。'+
+         '<b>月額賃金改善要件（加算Ⅳ相当額の1/2以上を基本給等）</b>を満たせない可能性があります。丸め単位を小さくして、余りを減らしてください。</div>';
+  }
+
+  if(r.low>0){
+    h += '<div class="note risk"><b>🔴 現在の手当を下回る職員が '+r.low+' 人います。</b>賃金水準の引下げは<b>不利益変更</b>に当たり、'+
+         '<b>合理的な理由に基づく労使の合意</b>が必要です。加算の側でも、事業所全体の賃金水準が下がる場合は<b>特別事情届出書</b>の提出が必要になります（出さずに引き下げると返還事由）。</div>';
+  }
+  if(r.mx!==null && r.mn!==null && r.mn>0 && (r.mx/r.mn)>=3){
+    h += '<div class="note"><b>配分の偏りにご注意ください。</b>最も多い人と少ない人で <b>'+(r.mx/r.mn).toFixed(1)+'倍</b> の差があります。'+
+         '通知は「一部の職員に加算を原資とする賃金改善を集中させることなど、<b>職務の内容や勤務の実態に見合わない著しく偏った配分は行わないこと</b>」としています。'+
+         '差をつけること自体は認められていますが、<b>説明できる根拠（職責・資格・経験・勤務実態）</b>を用意してください。</div>';
+  }
+  if(r.fellBack){
+    h += '<div class="note"><b>配分の基準になる数値が全員0だったため、一律配分に切り替えました。</b>常勤換算（または現在の手当）を入力すると、比例配分になります。</div>';
+  }
+  if(tsZangyoOn && document.getElementById("tsBunya").value!=="iryo"){
+    h += '<div class="note"><b>二重計上にご注意（介護・障害福祉・保育）。</b>賃金改善額を「実際の賃金水準と加算がない場合の賃金水準の比較」で算出する場合、'+
+         '<b>増えた時間外手当は自動的にその差に含まれます</b>。ここで見込んだ時間外増加分を実績報告で別途足さないでください。'+
+         '（医療は実績報告書(15)欄に別途計上するのが正しい扱いです）</div>';
+  }
+  h += '</div>';
+
+  out.innerHTML = h;
+  card.style.display = "";
+}
+
+/* ---- CSV出力 ---- */
+function tsCsvDownload(){
+  const r = window.__tsLast;
+  if(!r){ return; }
+  const bunyaName = document.getElementById("tsBunya").selectedOptions[0].textContent;
+  const ruleName  = document.getElementById("tsRule").selectedOptions[0].textContent;
+  const q = v => '"'+String(v).replace(/"/g,'""')+'"';
+  const L = [];
+  L.push([q("手当改定シミュレーター 試算結果（概算）")]);
+  L.push([q("※実際の適用は所属社労士の確認を要します。加算率・点数は改定のたびに変わるため一次資料で現行版を確認してください。")]);
+  L.push([]);
+  L.push([q("分野"),q(bunyaName)]);
+  L.push([q("加算の増加額（月額）"),q(Math.round(r.zouka))]);
+  L.push([q("適用月数"),q(r.months)]);
+  L.push([q("配分ルール"),q(ruleName)]);
+  L.push([q("端数の丸め"),q(r.unit+"円単位・"+(r.dir==="round"?"四捨五入":"切り捨て"))]);
+  L.push([q("法定福利費の概算率"),q((r.f*100).toFixed(1)+"%")]);
+  L.push([q("時間外の見込み"),q(tsZangyoOn? ("見込む（割増率"+r.rate+"）") : "見込まない")]);
+  L.push([]);
+  L.push([q("職員名／社員番号"),q("職種"),q("雇用形態"),q("常勤換算"),q("現在の手当"),q("増額"),q("改定後の手当"),q("時間外の増"),q("法定福利費の増"),q("会社の負担計")]);
+  r.target.forEach(s=>{
+    L.push([q(s.name||""),q(s.shokushu||""),q(s.koyou||""),q(s.kansan||0),
+            q(Math.round(s.genkou||0)),q(Math.round(s._x)),q(Math.round(s._after)),
+            q(Math.round(s._zangyoAdd)),q(Math.round(s._furiAdd)),q(Math.round(s._cost))]);
+  });
+  L.push([]);
+  L.push([q("合計"),q(""),q(""),q(""),q(""),q(Math.round(r.sumX)),q(""),q(Math.round(r.sumZ)),q(Math.round(r.sumF)),q(Math.round(r.totalCost))]);
+  L.push([q("原資との差（＋は余り）"),q(Math.round(r.diff))]);
+  const csv = L.map(a=>a.join(",")).join("\r\n");
+  const blob = new Blob(["﻿"+csv], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement("a"); const url = URL.createObjectURL(blob);
+  a.href=url; a.download="手当改定シミュレーション.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  document.getElementById("tsExportMsg").textContent = "CSVをダウンロードしました。";
+}
+
+/* ---- イベント ---- */
+document.getElementById("tsBunya").addEventListener("change", function(){
+  document.getElementById("tsBunyaNote").innerHTML = TS_BUNYA_NOTE[this.value] || "";
+  tsRender();
+});
+["tsBefore","tsAfter","tsMonths","tsFuri","tsRate","tsShotei","tsUnit","tsDir","tsRule"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("input", tsRender);
+  if(el && el.tagName==="SELECT") el.addEventListener("change", tsRender);
+});
+document.getElementById("segTsZangyo").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  tsZangyoOn = b.dataset.v==="yes";
+  [...e.currentTarget.children].forEach(x=>{ x.classList.toggle("on", x===b); x.setAttribute("aria-pressed", x===b); });
+  document.getElementById("tsZangyoOpts").style.display = tsZangyoOn ? "" : "none";
+  tsRender();
+});
+document.getElementById("segTsManual").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  tsManualOn = b.dataset.v==="on";
+  [...e.currentTarget.children].forEach(x=>{ x.classList.toggle("on", x===b); x.setAttribute("aria-pressed", x===b); });
+  tsRenderTable(); tsRender();
+});
+document.getElementById("tsPasteBtn").addEventListener("click", ()=>{
+  const ta=document.getElementById("tsPaste");
+  const res = tsImport(ta.value);
+  ta.value="";
+  tsRenderTable(); tsRender();
+  document.getElementById("tsTableWrap").insertAdjacentHTML("afterbegin",
+    '<p class="fill-note">'+res.added+'人を取り込みました。'+(res.skipped?'（'+res.skipped+'行は見出し等として読み飛ばしました）':'')+'</p>');
+});
+document.getElementById("tsAddRow").addEventListener("click", ()=>{
+  tsStaff.push({name:"",shokushu:"",koyou:"",kansan:1,genkou:0,shotei:"",zangyo:0,jogai:false,manual:null});
+  tsRenderTable(); tsRender();
+});
+document.getElementById("tsClearRows").addEventListener("click", ()=>{
+  if(tsStaff.length && !confirm("入力した職員をすべて消します。よろしいですか。")) return;
+  tsStaff=[]; tsRenderTable(); tsRender();
+});
+document.getElementById("tsSample").addEventListener("click", ()=>{
+  tsStaff = [
+    {name:"A001",shokushu:"介護職員",koyou:"常勤",kansan:1,genkou:15000,shotei:160,zangyo:10,jogai:false,manual:null},
+    {name:"A002",shokushu:"介護職員",koyou:"常勤",kansan:1,genkou:15000,shotei:160,zangyo:5,jogai:false,manual:null},
+    {name:"A003",shokushu:"介護職員",koyou:"非常勤",kansan:0.5,genkou:7500,shotei:80,zangyo:0,jogai:false,manual:null},
+    {name:"B001",shokushu:"看護職員",koyou:"常勤",kansan:1,genkou:12000,shotei:160,zangyo:8,jogai:false,manual:null},
+    {name:"C001",shokushu:"事務職員",koyou:"常勤",kansan:1,genkou:8000,shotei:160,zangyo:2,jogai:false,manual:null}
+  ];
+  document.getElementById("tsBefore").value=300000;
+  document.getElementById("tsAfter").value=350000;
+  tsRenderTable(); tsRender();
+});
+document.getElementById("tsTableWrap").addEventListener("input", e=>{
+  const el=e.target, k=el.dataset.ts, i=+el.dataset.i;
+  if(k===undefined || !tsStaff[i]) return;
+  if(k==="jogai") tsStaff[i].jogai = el.checked;
+  else if(k==="name"||k==="shokushu"||k==="koyou") tsStaff[i][k] = el.value;   /* 自由入力（社員番号でも氏名でも可） */
+  else if(k==="manual") tsStaff[i].manual = el.value==="" ? null : el.value;
+  else if(k==="shotei") tsStaff[i].shotei = el.value==="" ? "" : tsNum(el.value,0);
+  else tsStaff[i][k] = tsNum(el.value,0);
+  tsRender();
+});
+document.getElementById("tsTableWrap").addEventListener("change", e=>{
+  if(e.target.dataset.ts==="jogai"){ tsStaff[+e.target.dataset.i].jogai = e.target.checked; tsRender(); }
+});
+document.getElementById("tsTableWrap").addEventListener("click", e=>{
+  const b=e.target.closest("[data-tsdel]"); if(!b) return;
+  tsStaff.splice(+b.dataset.tsdel,1); tsRenderTable(); tsRender();
+});
+document.getElementById("tsCsv").addEventListener("click", tsCsvDownload);
+document.getElementById("tsPrint").addEventListener("click", ()=>window.print());
+
+document.getElementById("tsBunyaNote").innerHTML = TS_BUNYA_NOTE.kaigo;
+tsRenderTable();
+tsRender();
 </script>
 </body>
 </html>
