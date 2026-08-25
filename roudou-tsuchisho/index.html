@@ -653,6 +653,7 @@
         <div class="help-note">解雇の事由を<b>1項目ずつ「＋ 解雇事由を追加」で追加</b>します（「×」で削除）。下のチェックが<b>ON＝入力した全事由を箇条書き</b>で記載、<b>OFF＝先頭1件＋「等（詳細は就業規則による）」</b>と簡潔に記載します。用紙を1枚に収めたいときはOFFが便利です。</div>
       </div>
       <div class="row"><label><input type="checkbox" name="dismissal_full"> 解雇事由を全て列挙する（オフのときは先頭1件＋「等（詳細は就業規則による）」）</label></div>
+      <div class="note-law hidden" id="warnNoRulesDismissal">「その他」欄で就業規則が無い設定になっています。このままだと解雇の事由が「等（詳細は就業規則による）」と、存在しない規則を参照する表記になります。上の「解雇事由を全て列挙する」にチェックを入れるか、事由を全項目記載してください。</div>
     </fieldset>
 
     <fieldset id="fsOther">
@@ -714,7 +715,9 @@
           <input type="text" name="kikyo" placeholder="明示条件と事実が相違する場合、解除し14日以内に帰郷するときは旅費を支給"></div>
         <div class="note-law">帰郷旅費は労基法15条2項・3項が根拠です。</div>
       </div>
-      <div class="row"><label>就業規則を確認できる場所</label><input type="text" name="rules_place" placeholder="社内に設置"></div>
+      <div class="row"><label><input type="checkbox" name="has_work_rules" checked> 就業規則がある（末尾に「以上のほかは、当社就業規則による。」を記載する）</label></div>
+      <div class="help-note">その事業場に、<b>作成され、労働者に周知されている</b>就業規則が実際にあるかどうかで選びます（作成・届出義務は常時<b>10人以上</b>の事業場にありますが〔労基法89条〕、10人未満でも任意に作成している会社は少なくありません。人数ではなく<b>周知済みの実在</b>で判断してください。作成していても金庫や本社にしまってあるだけで従業員が確認できない場合は、法的には「無い」場合と同様の扱いになり得ます〔労契法7条・周知を効力発生要件とした最高裁判例（フジ興産事件）〕）。<b>就業規則が無い場合はチェックを外すと、この一文と下の「確認できる場所」欄を書面に記載しません</b>（存在しない規則を参照させないため）。外した場合は、解雇の事由など就業規則を前提にしていた項目を「その他の記載事項」欄等で個別に書き足してください。逆に就業規則があるのに外すと、労働契約法7条により本来は契約内容になっている就業規則の記載事項について、書面上の手掛かりが失われるため注意してください。</div>
+      <div id="grpWorkRules"><div class="row"><label>就業規則を確認できる場所</label><input type="text" name="rules_place" placeholder="社内に設置"></div></div>
       <div class="row"><label>その他の記載事項（自由に追加）</label>
         <div id="otherList">
           <div class="other-row"><input type="text" class="o-name" placeholder="項目名（例:貸与品）"><input type="text" class="o-val" placeholder="内容（例:業務用チェーンソーを貸与）"><button type="button" class="mini" onclick="delOther(this)" title="削除">×</button></div>
@@ -1059,6 +1062,8 @@
       <dd>ブラウザが複数ファイルの連続ダウンロードをブロックしています。アドレスバー付近の許可表示から「許可」を選んでください。</dd>
       <dt>Q. 法改正には対応していますか？</dt>
       <dd>年2回（4月・10月）、法令・様式の変更を定期点検して更新しています。根拠となる法令・資料は「法令資料」タブにまとまっています。</dd>
+      <dt>Q. 就業規則が無い会社の通知書・契約書はどう作る？</dt>
+      <dd>「その他」欄の「就業規則がある」のチェックを外すと、末尾の「以上のほかは、当社就業規則による。」と「就業規則を確認できる場所」欄を書面に記載しません（存在しない規則を参照させないため）。外した場合は、解雇の事由など就業規則を前提にしていた項目を「その他の記載事項」欄等で個別に書き足してください（「退職に関する事項」に赤い注意が出ます）。なお「就業規則がある」の判定は、作成の有無だけでなく<b>労働者に周知されているか</b>も基準に含めてください（作成済みでも周知されていなければ、労働契約上は「無い」場合と同様の扱いになることがあります）。</dd>
     </dl>
   </div>
 </div>
@@ -1417,6 +1422,11 @@ function updateVisibility(){
   const note = WT_LAW[wt]||'';
   $('#wtNote').textContent = note?('※ '+note):'';
   $('#wtNote').classList.toggle('hidden', !note);
+  // 就業規則の定めの有無（無いときは「確認できる場所」欄を隠し、解雇事由の簡略表記との矛盾を警告）
+  const hasRules = form.elements['has_work_rules'].checked;
+  $('#grpWorkRules').classList.toggle('hidden', !hasRules);
+  const dismissalMismatch = !hasRules && !form.elements['dismissal_full'].checked && getDismissals().length>0;
+  $('#warnNoRulesDismissal').classList.toggle('hidden', !dismissalMismatch);
   return {cat,per,wt,wg,doc,bad,isShort,isHiyatoi};
 }
 function show(sel){ if(sel) document.querySelectorAll(sel).forEach(e=>e.classList.remove('hidden')); }
@@ -1609,7 +1619,7 @@ function buildBlocks(st){
     if(has(val('haken_kujo'))) o.push('・苦情の処理に関する事項　'+val('haken_kujo'));
     if(has(val('haken_moto'))||has(val('haken_saki')))o.push('・就業条件の詳細は別途交付する就業条件明示書による'); }
   if(cat==='建設' && has(val('kikyo'))) o.push('・帰郷旅費　'+val('kikyo'));
-  if(has(val('rules_place'))) o.push('・就業規則を確認できる場所　'+val('rules_place'));
+  if(form.elements['has_work_rules'].checked && has(val('rules_place'))) o.push('・就業規則を確認できる場所　'+val('rules_place'));
   getOthers().forEach(x=>{ const t=x.name?`${x.name}　${x.val}`:x.val; if(t.trim()) o.push('・'+t); });
   if(has(val('remarks'))) o.push('・'+val('remarks'));
   push('その他', o);
@@ -1751,7 +1761,8 @@ function sheetHTML(title, lead, blocks, opts={}){
   });
   h+=`</tbody></table>`;
   if(opts.leave) return h;
-  h+=`<div class="after">以上のほかは、当社就業規則による。</div>`;
+  const wrEl=form.elements['has_work_rules'];
+  if(!wrEl || wrEl.checked){ h+=`<div class="after">以上のほかは、当社就業規則による。</div>`; }
   const sg=signatureData(opts.sign, cat);   // 'notice'/false は署名欄なし
   if(sg){ h+=`<div class="sign">${signatureHTML(sg)}</div>`; }
   return h;
@@ -2280,7 +2291,7 @@ function wordDocCss(headerRef){
     table.doc{border-collapse:collapse;width:100%;table-layout:fixed}
     table.doc td{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:10pt;word-break:break-all}
     td.k{width:18%;background:#f2f2f2;font-weight:bold;text-align:center}
-    .note{font-size:8.5pt}.warn{color:#b00;font-size:8.5pt;font-weight:bold}.after{margin-top:8px}.sign{line-height:2;page-break-inside:avoid}.mark{color:#b00}
+    .note{font-size:8.5pt}.warn{color:#b00;font-size:8.5pt;font-weight:bold}.after{margin-top:8px}.sign{margin-top:14px;line-height:2;page-break-inside:avoid}.mark{color:#b00}
     p.MsoHeader{margin:0;font-family:'ＭＳ Ｐ明朝',serif;font-size:9pt}
     @page WordSection1{size:210.0mm 297.0mm;margin:15.0mm 15.0mm 15.0mm 15.0mm;mso-header-margin:10.0mm;mso-footer-margin:10.0mm;mso-paper-source:0;${headerRef}}
     div.WordSection1{page:WordSection1;}`;
@@ -3548,7 +3559,8 @@ function excelTableForCurrent(){
     const content=b.lines.map(l=>{ const s=String(l); return esc(s.startsWith('__NOTE__')||s.startsWith('__WARN__')?s.slice(8):s); }).join(BR);
     rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true,span:2})}</tr>`);
   });
-  rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:3,border:false})}</tr>`);
+  const wrEl=form.elements['has_work_rules'];
+  if(!wrEl || wrEl.checked){ rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:3,border:false})}</tr>`); }
   // 署名押印欄（ラベル｜値｜㊞ の3列。㊞は専用列で使用者・労働者が同じ横位置に揃う。空欄は下線）
   const sg=signatureData(dm.sign, cat);
   if(sg){
