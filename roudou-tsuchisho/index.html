@@ -379,7 +379,7 @@
             <label><input type="radio" name="muki_flag" value="無" checked> 無</label>
             <label><input type="radio" name="muki_flag" value="有"> 有（別紙を添付）</label>
           </div>
-          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の条件を引き継ぎますが、<b>契約期間は「期間の定めなし」に置き換わり、試用期間・特記事項は載りません</b>（雇入れ当初の定めや有期契約固有の内容を転換後の別紙に誤って残さないため）。転換後も適用する内容がある場合は、出力後に別紙へ追記してください。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合も、出力後に別紙の該当箇所を手修正してください。</b></div>
+          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の条件を引き継ぎますが、<b>契約期間は「期間の定めなし」に置き換わり、試用期間・特記事項は載りません</b>（雇入れ当初の定めや有期契約固有の内容を転換後の別紙に誤って残さないため）。転換後も適用する内容がある場合は、出力後に別紙へ追記してください。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合も、出力後に別紙の該当箇所を手修正してください。</b><b>Excel出力では2ページ目ではなく、同じシート内の本紙の下（区切り行「以下、別紙」の後）に続けて出力されます</b>（印刷して2枚に分けたい場合は、印刷プレビューで区切り行の位置に手動で改ページを入れてください）。</div>
         </div>
       </div>
       <div id="grpHiyatoi" class="hidden">
@@ -1651,6 +1651,17 @@ function buildBlocks(st){
   return B;
 }
 
+// 無期転換後の労働条件（別紙）が必要な場合、そのタイトル・リード文・ブロック配列を返す（不要ならnull）。
+// render()（画面/印刷/Word）とexcelTableForCurrent()（Excel）の双方から呼び、判定条件・除外ブロック・リード文言を1箇所に統一する。
+function mukiTenkanAppendix(st, blocks){
+  if(!(st.per==='有期' && radio('muki_flag')==='有')) return null;
+  // 試用期間は雇入れ当初の定めであり、特記事項は有期契約固有の内容を含みうるため、無期転換後の労働条件を示す別紙には載せない（誤読防止）
+  const bb = blocks.filter(b=>!['契約期間','試用期間','特記事項'].includes(b.k));
+  bb.unshift({k:'契約期間', lines:['期間の定めなし（無期労働契約に転換後）']});
+  const lead='本契約期間中に会社に対して期間の定めのない労働契約（無期労働契約）の締結の申込みをしたときに成立する無期労働契約の労働条件は、次のとおりです。';
+  return {title:'労働条件通知書（別紙）　無期転換後の労働条件', lead, blocks:bb};
+}
+
 // 法定明示事項（労基則5条1項1〜4号等）の未入力を列挙（画面警告・出力前確認用）
 function requiredGaps(st){
   const g=[]; const need=(cond,label)=>{ if(cond) g.push(label); };
@@ -1859,13 +1870,8 @@ function render(){
   const sheets=[];
   sheets.push(sheetHTML(dm.title, dm.lead, blocks, {sign:dm.sign, chgMeta}));
   // 無期転換別紙
-  if(st.per==='有期' && radio('muki_flag')==='有'){
-    // 試用期間は雇入れ当初の定めであり、特記事項は有期契約固有の内容を含みうるため、無期転換後の労働条件を示す別紙には載せない（誤読防止）
-    const bb = blocks.filter(b=>!['契約期間','試用期間','特記事項'].includes(b.k));
-    bb.unshift({k:'契約期間', lines:['期間の定めなし（無期労働契約に転換後）']});
-    const lead2='本契約期間中に会社に対して期間の定めのない労働契約（無期労働契約）の締結の申込みをしたときに成立する無期労働契約の労働条件は、次のとおりです。';
-    sheets.push(sheetHTML('労働条件通知書（別紙）　無期転換後の労働条件', lead2, bb, {sign:false, leave:true}));
-  }
+  const appendix = mukiTenkanAppendix(st, blocks);
+  if(appendix) sheets.push(sheetHTML(appendix.title, appendix.lead, appendix.blocks, {sign:false, leave:true}));
   const tt=wageTotals();
   const otInp=form.elements['fixed_ot_amount'];
   if(otInp){ if(tt.otAuto){ otInp.disabled=true; otInp.value=tt.otAmt; otInp.dataset.auto='1'; }
@@ -3551,15 +3557,10 @@ function exportWord(){
 }
 
 // 現在のフォーム状態から Excel 用の1名分テーブルHTMLを返す（単票・一括で共用）
-function excelTableForCurrent(){
+// 1枚分（本紙・別紙共通）のExcel用<tr>配列を生成する。opts.leave=trueで別紙扱い（表示区分・就業規則文言・署名欄を省略、sheetHTML()のopts.leaveと同じ考え方）。
+function excelBodyRows(title, lead, chgMeta, blocks, opts){
+  opts=opts||{};
   const cat=radio('emp_category');
-  const st=updateVisibility(); const dm=docMeta(st.doc);
-  const blocks=buildBlocks(st);
-  const chgMeta=dm.chg?[
-    has(val('change_date'))?'変更日　'+fmtDate(val('change_date')):'',
-    has(val('change_reason'))?'変更理由　'+val('change_reason'):'',
-    has(val('change_basis'))?'変更根拠　'+val('change_basis'):''
-  ].filter(has):[];
   const F="'ＭＳ Ｐ明朝',serif";
   const BR='<br style="mso-data-placement:same-cell">';
   const cell=(txt,o)=>{ o=o||{};
@@ -3572,21 +3573,22 @@ function excelTableForCurrent(){
     return `<td colspan="${o.span||1}" style="${s}">${txt}</td>`;
   };
   const rows=[];
-  if(has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:3,align:'right',border:false,size:'9.5pt'})}</tr>`);
-  rows.push(`<tr style="height:34px">${cell(esc(dm.title),{span:3,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
+  if(!opts.leave && has(val('display_category'))) rows.push(`<tr>${cell(esc(val('display_category')),{span:3,align:'right',border:false,size:'9.5pt'})}</tr>`);
+  rows.push(`<tr style="height:34px">${cell(esc(title),{span:3,align:'center',bold:true,size:'16pt',border:false})}</tr>`);
   rows.push(`<tr>${cell(esc(fmtDate(val('issue_date'))),{span:3,align:'right',border:false})}</tr>`);
   rows.push(`<tr>${cell(esc(val('employee_name'))+'　殿',{span:3,border:false,size:'12pt'})}</tr>`);
   officeLines(cat).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:3,align:'right',border:false})}</tr>`));
-  chgMeta.forEach(l=>rows.push(`<tr>${cell(esc(l),{span:3,border:false})}</tr>`));
-  rows.push(`<tr>${cell(esc(dm.lead),{span:3,border:false})}</tr>`);
+  (chgMeta||[]).forEach(l=>rows.push(`<tr>${cell(esc(l),{span:3,border:false})}</tr>`));
+  rows.push(`<tr>${cell(esc(lead),{span:3,border:false})}</tr>`);
   blocks.forEach(b=>{
     const content=b.lines.map(l=>{ const s=String(l); return esc(s.startsWith('__NOTE__')||s.startsWith('__WARN__')?s.slice(8):s); }).join(BR);
     rows.push(`<tr>${cell(esc(b.k),{shade:true,bold:true,vt:true})}${cell(content,{vt:true,span:2})}</tr>`);
   });
+  if(opts.leave) return rows;
   const wrEl=form.elements['has_work_rules'];
   if(!wrEl || wrEl.checked){ rows.push(`<tr>${cell('以上のほかは、当社就業規則による。',{span:3,border:false})}</tr>`); }
   // 署名押印欄（ラベル｜値｜㊞ の3列。㊞は専用列で使用者・労働者が同じ横位置に揃う。空欄は下線）
-  const sg=signatureData(dm.sign, cat);
+  const sg=signatureData(opts.sign, cat);
   if(sg){
     rows.push(`<tr>${cell(esc(sg.lead),{span:3,border:false})}</tr>`);
     rows.push(`<tr>${cell(esc(sg.dateLine),{span:3,border:false})}</tr>`);
@@ -3598,6 +3600,23 @@ function excelTableForCurrent(){
         rows.push(`<tr>${cell(esc(r.label),{border:false})}<td style="${vSt}">${r.blank?'　':esc(r.value)}</td><td style="${sSt}">${r.seal?'㊞':''}</td></tr>`);
       });
     });
+  }
+  return rows;
+}
+function excelTableForCurrent(){
+  const st=updateVisibility(); const dm=docMeta(st.doc);
+  const blocks=buildBlocks(st);
+  const chgMeta=dm.chg?[
+    has(val('change_date'))?'変更日　'+fmtDate(val('change_date')):'',
+    has(val('change_reason'))?'変更理由　'+val('change_reason'):'',
+    has(val('change_basis'))?'変更根拠　'+val('change_basis'):''
+  ].filter(has):[];
+  let rows=excelBodyRows(dm.title, dm.lead, chgMeta, blocks, {sign:dm.sign});
+  // 無期転換別紙（本紙と同じシート内に、区切り行を挟んで縦へ連結する。Excel偽装HTMLではpage-break-before等の区切りがワークシート分離に解釈される可能性があり、一括出力の「1人=1シート」対応が崩れるリスクを避けるため、シートは分けず視覚的な区切り行のみ入れる）
+  const appendix = mukiTenkanAppendix(st, blocks);
+  if(appendix){
+    rows.push(`<tr><td colspan="3" style="border:none;height:28px;text-align:center;font-family:'ＭＳ Ｐ明朝',serif;font-size:9.5pt;color:#555">－－－ 以下、別紙（無期転換後の労働条件） －－－</td></tr>`);
+    rows=rows.concat(excelBodyRows(appendix.title, appendix.lead, [], appendix.blocks, {leave:true}));
   }
   return `<table style="border-collapse:collapse;table-layout:fixed;width:720px">`+
     `<colgroup><col width="105"><col width="510"><col width="105"></colgroup>${rows.join('')}</table>`;
