@@ -258,7 +258,7 @@
 <div id="rosterBar">
   <span class="rb-label">👥 名簿 <b id="rosterCount">0</b> 人</span>
   <button class="btn mini" id="rosterCommitBtn" onclick="rosterCommit()" title="今フォームに入力している内容を、1名分として名簿に登録します">➕ この内容を名簿に追加</button>
-  <button class="btn mini ghost" onclick="rosterAddNext()" title="今の内容を名簿に追加し、氏名・賃金額・手当（支給項目）だけをクリアします。会社情報・労働時間・休日などの条件は残るので、続けて次の方を素早く入力できます">➡ 追加して次の人へ</button>
+  <button class="btn mini ghost" onclick="rosterAddNext()" title="今の内容を名簿に追加し、氏名・賃金額・手当（支給項目）・社会保険の被保険者区分だけをクリアします。会社情報・労働時間・休日などの条件は残るので、続けて次の方を素早く入力できます">➡ 追加して次の人へ</button>
   <button class="btn mini ghost" onclick="switchMode('batch')" title="名簿の一覧・並べ替え・一括出力の画面へ移動します">👥 一括作成タブ</button>
   <span id="rosterStatus" class="rb-status"></span>
 </div>
@@ -379,7 +379,7 @@
             <label><input type="radio" name="muki_flag" value="無" checked> 無</label>
             <label><input type="radio" name="muki_flag" value="有"> 有（別紙を添付）</label>
           </div>
-          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の労働条件をそのまま複製します。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合は、出力後に別紙の該当箇所を手修正してください。</b></div>
+          <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の条件を引き継ぎますが、<b>契約期間は「期間の定めなし」に置き換わり、試用期間・特記事項は載りません</b>（雇入れ当初の定めや有期契約固有の内容を転換後の別紙に誤って残さないため）。転換後も適用する内容がある場合は、出力後に別紙へ追記してください。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合も、出力後に別紙の該当箇所を手修正してください。</b></div>
         </div>
       </div>
       <div id="grpHiyatoi" class="hidden">
@@ -469,6 +469,12 @@
         </div>
         <div><button type="button" class="btn-add" onclick="addTime()">＋ 始業・終業を追加</button></div>
         <div class="help-note">始業・終業は<b>時計から選択</b>します。曜日や勤務区分（早番・遅番等）で時間帯が異なる場合は「＋ 始業・終業を追加」で行を増やし、左の欄に区分名（例：月〜金／土／早番）を入れます。1つだけなら区分名は空でOKです。</div>
+      </div>
+      <div class="row"><label><input type="checkbox" name="weekly_hours_flag"> 週所定労働時間の目安を記載する</label></div>
+      <div id="grpWeeklyHours" class="hidden">
+        <div class="row"><label>週所定労働時間の目安</label>
+          <input type="text" name="weekly_hours_note" placeholder="例：週22時間から27.5時間／週20時間以上／週20時間未満"></div>
+        <div class="help-note">週の労働時間が固定できない場合（シフト制、繁忙期による増減等）に、目安となる範囲や上限・下限を書きます（例：「週22時間から27.5時間」「週20時間以上」「週20時間未満」）。</div>
       </div>
       <div class="row"><label>始業・終業に関する備考</label>
         <textarea name="worktime_note" placeholder="例）土曜日は隔週出勤／夜勤は翌日まで／曜日により所定労働時間が異なる 等"></textarea></div>
@@ -662,6 +668,11 @@
         <div><label>厚生年金</label><select name="kounen"><option value="有">有</option><option value="無">無</option></select></div>
         <div><label>健康保険</label><select name="kenpo"><option value="有">有</option><option value="無">無</option></select></div>
       </div>
+      <div id="grpShahoKubun">
+        <div class="row"><label>社会保険（厚生年金・健康保険）の被保険者区分（任意・見込み）</label>
+          <select name="shaho_kubun"><option value="">（選択・通常は空欄でよい）</option><option value="一般">一般の被保険者（短時間労働者以外）</option><option value="短時間労働者">短時間労働者（特定適用事業所等）</option></select></div>
+        <div class="help-note"><b>通常は空欄のままで構いません</b>。上の「雇用形態」欄の「短時間（パート）」とは<b>別の概念</b>です（雇用形態がパートでも、週の所定労働時間が通常の労働者の4分の3以上なら「一般の被保険者」になります）。「短時間労働者」は、週20時間以上・月額賃金8.8万円以上・学生でない・特定適用事業所等（被保険者数51人超の企業等）に使用される、という要件を満たす場合の区分です〔健康保険法3条・厚生年金保険法12条〕。<b>要件は2026年8月時点のもの</b>で、賃金要件（8.8万円）は2026年10月撤廃の方向ですが<b>施行期日を定める政令は本ツール確認時点で未公布</b>です（最新の施行状況は所属社労士にご確認ください）。企業規模要件（51人超）は2027年10月以降段階的に引き下げられ2035年10月に撤廃予定です〔令和7年法律第74号〕。本欄は<b>契約締結時点の見込み</b>であり、実際の資格取得は所定労働時間・所定労働日数の実態や事業所の該当状況により確定します。一括作成の「➡ 追加して次の人へ」では賃金額と合わせて自動的にクリアされますが、「➕ この内容を名簿に追加」だけで複製・編集する場合は前の人の選択が残るため、人ごとに見直してください。</div>
+      </div>
       <div class="row two">
         <div><label>雇用保険</label><select name="emp_ins"><option value="有">有</option><option value="無">無</option></select></div>
         <div><label>労災保険</label><select name="rousai"><option value="有">有</option><option value="無">無</option></select></div>
@@ -726,6 +737,9 @@
         <div class="help-note">上の欄にない任意の記載を自由に追加できます（例：貸与品＝業務用PCを貸与／車両＝借上げ車両の経費精算 など）。「＋ 記載事項を追加」で何件でも増やせ、「×」で削除。項目名は空でも内容だけで記載できます。</div>
       </div>
       <div class="row"><label>備考</label><input type="text" name="remarks" placeholder=""></div>
+      <div class="row"><label>特記事項（自由記入）</label>
+        <textarea name="tokki_jiko" placeholder="上の各項目に当てはまらない、企業独自の就業条件や特別な合意事項などを自由に記載できます（複数行可）。"></textarea></div>
+      <div class="help-note">既存の項目に収まらない独自の就業条件（例：在宅勤務の運用ルール、特別な手当の支給条件等）を自由に記載する欄です。「備考」「その他の記載事項」はどちらも「その他」欄の中の1行（後者は項目名付き）として載りますが、この「特記事項」だけは<b>独立した見出し付きの項目</b>として書面に載ります。長文・複数行を書きたいときはこの欄が向きます。<b>1行ずつ書面に転記されます（空行は詰められます）</b>。<b>無期転換申込権が「有」の場合、無期転換後の労働条件（別紙）にはこの欄の内容は転記されません</b>（有期契約固有の内容を誤って残さないため）。転換後も適用したい内容は出力後に別紙へ追記してください。一括作成の「➡ 追加して次の人へ」でもこの内容は引き継がれるため、人ごとに見直してください。病歴・障害・信条等の<b>要配慮個人情報は記載しないでください</b>。</div>
     </fieldset>
 
     <p class="hint" style="color:var(--warn)">
@@ -743,7 +757,7 @@
     <div class="batch-guide">
       <b>👥 複数人をまとめて作成する</b><br>
       ① 「作成」タブで一人目を作り込む → 名簿バーの<b>「➕ この内容を名簿に追加」</b>で登録。<br>
-      ② <b>「➡ 追加して次の人へ」</b>を押すと、氏名・手当（金額・支給項目）だけをクリアし、他の条件（会社情報・労働時間・休日・賃金体系など）は残したまま次の方の入力に移れます。<br>
+      ② <b>「➡ 追加して次の人へ」</b>を押すと、氏名・手当（金額・支給項目）・社会保険の被保険者区分だけをクリアし、他の条件（会社情報・労働時間・休日・賃金体系など）は残したまま次の方の入力に移れます。<br>
       ③ 下の名簿で各人を<b>編集・複製・並べ替え・削除</b>できます。<b>「💾 名簿を保存」</b>でまとめてダウンロード、<b>「📂 名簿を読込」</b>で後日続きから作業できます。<br>
       ④ 全員そろったら下の<b>一括出力</b>で、まとめて1ファイル（PDF/Word/Excel）または一人ずつ個別ファイルに出力します。
     </div>
@@ -1000,7 +1014,7 @@
     <h2>4. 一括作成（名簿）</h2>
     <ol>
       <li>「作成」タブで1人目を作り込み、名簿バーの「➕ この内容を名簿に追加」で登録します。</li>
-      <li>2人目以降は「➡ 追加して次の人へ」を使うと、氏名・賃金だけクリアされ他の条件は引き継がれます（同条件の大量作成向け）。</li>
+      <li>2人目以降は「➡ 追加して次の人へ」を使うと、氏名・賃金・社会保険の被保険者区分だけクリアされ他の条件は引き継がれます（同条件の大量作成向け）。</li>
       <li>「一括作成」タブで一覧の編集・複製・並べ替え・削除ができます。名簿はJSONで保存・読込できます。</li>
       <li>出力は「まとめて1ファイル」（全員印刷／Word連結／Excelは1人1シート）と「1人ずつ個別ファイル」が選べます。</li>
     </ol>
@@ -1422,6 +1436,10 @@ function updateVisibility(){
   const note = WT_LAW[wt]||'';
   $('#wtNote').textContent = note?('※ '+note):'';
   $('#wtNote').classList.toggle('hidden', !note);
+  // 週所定労働時間の目安（チェックを入れたときだけ入力欄を表示）
+  $('#grpWeeklyHours').classList.toggle('hidden', !form.elements['weekly_hours_flag'].checked);
+  // 社会保険の被保険者区分（厚生年金・健康保険のいずれかが「有」のときだけ表示）
+  $('#grpShahoKubun').classList.toggle('hidden', !(val('kounen')==='有' || val('kenpo')==='有'));
   // 就業規則の定めの有無（無いときは「確認できる場所」欄を隠し、解雇事由の簡略表記との矛盾を警告）
   const hasRules = form.elements['has_work_rules'].checked;
   $('#grpWorkRules').classList.toggle('hidden', !hasRules);
@@ -1492,6 +1510,7 @@ function buildBlocks(st){
   if(TIME_SYSTEMS.includes(wt)){
     getTimes().forEach(x=>{ const core=`始業 ${x.start}　終業 ${x.end}`; t.push(x.label?`${x.label}　${core}`:core); });
   }
+  if(form.elements['weekly_hours_flag'].checked && has(val('weekly_hours_note'))) t.push('週所定労働時間の目安　'+val('weekly_hours_note'));
   if(has(val('worktime_note'))) t.push('（備考）'+val('worktime_note'));
   const bmode=(form.elements['break_mode']&&form.elements['break_mode'].value)||'time';
   if(bmode==='total'){
@@ -1602,6 +1621,10 @@ function buildBlocks(st){
   let si=`・社会保険の加入　厚生年金（${kounen}）　健康保険（${kenpo}${has(val('kenpo_name'))?'：'+val('kenpo_name'):''}）`;
   if(has(val('shakai_riyuu')) && (kounen==='無'||kenpo==='無')) si+=`　※${val('shakai_riyuu')}`;
   o.push(si);
+  if((kounen==='有'||kenpo==='有') && has(val('shaho_kubun'))){
+    const kubunLabel = val('shaho_kubun')==='短時間労働者' ? '短時間労働者（特定適用事業所等・見込み）' : '一般の被保険者（見込み）';
+    o.push('・社会保険の被保険者区分　'+kubunLabel);
+  }
   if(val('kigyou_nenkin')==='有') o.push('・企業年金等　有'+(has(val('kigyou_nenkin_name'))?`（${val('kigyou_nenkin_name')}）`:''));
   o.push(`・雇用保険の適用　${val('emp_ins')||'無'}　労災保険　${val('rousai')||'有'}`);
   if(radio('worker_kind')==='other' || cat==='短時間' || per==='有期' || cat==='派遣'){
@@ -1623,6 +1646,7 @@ function buildBlocks(st){
   getOthers().forEach(x=>{ const t=x.name?`${x.name}　${x.val}`:x.val; if(t.trim()) o.push('・'+t); });
   if(has(val('remarks'))) o.push('・'+val('remarks'));
   push('その他', o);
+  if(has(val('tokki_jiko'))) push('特記事項', val('tokki_jiko').split('\n'));
 
   return B;
 }
@@ -1836,8 +1860,8 @@ function render(){
   sheets.push(sheetHTML(dm.title, dm.lead, blocks, {sign:dm.sign, chgMeta}));
   // 無期転換別紙
   if(st.per==='有期' && radio('muki_flag')==='有'){
-    // 試用期間は雇入れ当初の定めであり、無期転換後の労働条件を示す別紙には載せない（誤読防止）
-    const bb = blocks.filter(b=>!['契約期間','試用期間'].includes(b.k));
+    // 試用期間は雇入れ当初の定めであり、特記事項は有期契約固有の内容を含みうるため、無期転換後の労働条件を示す別紙には載せない（誤読防止）
+    const bb = blocks.filter(b=>!['契約期間','試用期間','特記事項'].includes(b.k));
     bb.unshift({k:'契約期間', lines:['期間の定めなし（無期労働契約に転換後）']});
     const lead2='本契約期間中に会社に対して期間の定めのない労働契約（無期労働契約）の締結の申込みをしたときに成立する無期労働契約の労働条件は、次のとおりです。';
     sheets.push(sheetHTML('労働条件通知書（別紙）　無期転換後の労働条件', lead2, bb, {sign:false, leave:true}));
@@ -2149,14 +2173,14 @@ function rosterCommit(){
 function rosterAddNext(){
   ROSTER.push({id:++ROSTER_SEQ, state:serializeState()});
   EDIT_ID=null;
-  // 次の人用に「氏名」「賃金額」「手当（支給項目）」だけをクリア（他条件は維持）
+  // 次の人用に「氏名」「賃金額」「手当（支給項目）」「社保被保険者区分（賃金額に連動するため）」だけをクリア（他条件は維持）
   ['employee_name','monthly_wage','daily_wage','hourly_wage','annual_wage',
    'unit_price','guaranteed_wage','uni_target','uni_h_ot','uni_h_hol','uni_h_night',
-   'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount']
+   'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount','shaho_kubun']
     .forEach(n=>{ const el=form.elements[n]; if(el){ el.disabled=false; el.value=''; } });
   setAllows('in',[{}]); setAllows('out',[{}]);
   render(); renderRoster(); updateRosterBar();
-  rosterStatus('名簿に追加し、氏名・手当をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
+  rosterStatus('名簿に追加し、氏名・手当・社会保険の被保険者区分をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
   const nm=form.elements['employee_name']; if(nm){ try{nm.focus();nm.scrollIntoView({block:'center'});}catch(e){} }
 }
 function rosterEdit(id){
