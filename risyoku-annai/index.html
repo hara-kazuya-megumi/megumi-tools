@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>離職案内ジェネレータ</title>
+<!--
+  離職案内ジェネレータ（スタッフ用画面）
+
+  このファイルは build_risyoku.py が templates/案内文書ジェネレータ.template.html
+  から自動生成する。直接編集しても次回のビルドで上書きされるため、
+  直すのはテンプレートか masters/ 配下の設定・台帳のほう。
+
+  外部のスクリプト・フォント・画像は読み込まない。QR生成ライブラリ
+  （qrcode-generator / MIT）はビルド時にこのファイルへ埋め込まれる。
+  ライセンス全文は lib/qrcode-generator.LICENSE.txt にある。
+
+  作成者: 原 和也 ／ 作成日: 2026-09-02 ／ 最終改修日: 2026-09-02
+-->
+<script>
+var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(l=4*u+17),e(0,0),e(l-7,0),e(0,l-7),i(),o(),v(t,r),7<=u&&h(t),null==n&&(n=w(u,f,c)),d(n,r)}var u=t,f=y[r],g=null,l=0,n=null,c=[],s={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||l<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||l<=r+n||(g[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<l-8;t+=1)null==g[t][6]&&(g[t][6]=t%2==0);for(var r=8;r<l-8;r+=1)null==g[6][r]&&(g[6][r]=r%2==0)},i=function(){for(var t=B.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==g[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)g[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},h=function(t){for(var r=B.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);g[Math.floor(e/3)][e%3+l-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);g[e%3+l-8-3][Math.floor(e/3)]=n}},v=function(t,r){for(var e=f<<3|r,n=B.getBCHTypeInfo(e),o=0;o<15;o+=1){var i=!t&&1==(n>>o&1);o<6?g[o][8]=i:o<8?g[o+1][8]=i:g[l-15+o][8]=i}for(o=0;o<15;o+=1){i=!t&&1==(n>>o&1);o<8?g[8][l-o-1]=i:o<9?g[8][15-o-1+1]=i:g[8][15-o-1]=i}g[l-8][8]=!t},d=function(t,r){for(var e=-1,n=l-1,o=7,i=0,a=B.getMaskFunction(r),u=l-1;0<u;u-=2)for(6==u&&(u-=1);;){for(var f=0;f<2;f+=1)if(null==g[n][u-f]){var c=!1;i<t.length&&(c=1==(t[i]>>>o&1)),a(n,u-f)&&(c=!c),g[n][u-f]=c,-1==(o-=1)&&(i+=1,o=7)}if((n+=e)<0||l<=n){n-=e,e=-e;break}}},w=function(t,r,e){for(var n=b.getRSBlocks(t,r),o=M(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=C(i[u],l.getLength()-1).mod(l);a[u]=new Array(l.getLength()-1);for(g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=0<=s?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};s.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=x(t);break;case"Alphanumeric":e=m(t);break;case"Byte":e=L(t);break;case"Kanji":e=D(t);break;default:throw"mode:"+r}c.push(e),n=null},s.isDark=function(t,r){if(t<0||l<=t||r<0||l<=r)throw t+","+r;return g[t][r]},s.getModuleCount=function(){return l},s.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=b.getRSBlocks(t,f),e=M(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),B.getLengthInBits(o.getMode(),t)),o.write(e)}var i=0;for(n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=B.getLostPoint(s);(0==e||n<t)&&(t=n,r=e)}return r}())},s.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<s.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<s.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=s.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},s.createSvgTag=function(t,r,e,n){var o={};"object"==typeof t&&(t=(o=t).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,f,c=s.getModuleCount()*t+2*r,g="";for(f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",g+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',g+=o.scalable?"":' width="'+c+'px" height="'+c+'px"',g+=' viewBox="0 0 '+c+" "+c+'" ',g+=' preserveAspectRatio="xMinYMin meet"',g+=n.text||e.text?' role="img" aria-labelledby="'+p([n.id,e.id].join(" ").trim())+'"':"",g+=">",g+=n.text?'<title id="'+p(n.id)+'">'+p(n.text)+"</title>":"",g+=e.text?'<description id="'+p(e.id)+'">'+p(e.text)+"</description>":"",g+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',g+='<path d="',a=0;a<s.getModuleCount();a+=1)for(u=a*t+r,i=0;i<s.getModuleCount();i+=1)s.isDark(a,i)&&(g+="M"+(i*t+r)+","+u+f);return g+='" stroke="transparent" fill="black"/>',g+="</svg>"},s.createDataURL=function(o,t){o=o||2,t=void 0===t?4*o:t;var r=s.getModuleCount()*o+2*t,i=t,a=r-t;return I(r,r,function(t,r){if(i<=t&&t<a&&i<=r&&r<a){var e=Math.floor((t-i)/o),n=Math.floor((r-i)/o);return s.isDark(n,e)?0:1}return 1})},s.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=s.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=s.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=p(e),o+='"'),o+="/>"};var p=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return s.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*s.getModuleCount()+2*t,u=t,f=a-t,c={"██":"█","█ ":"▀"," █":"▄","  ":" "},g={"██":"▀","█ ":"▀"," █":" ","  ":" "},l="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<f&&u<=r&&r<f&&s.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<f&&u<=r+1&&r+1<f&&s.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",l+=t<1&&f<=r+1?g[i]:c[i];l+="\n"}return a%2&&0<t?l.substring(0,l.length-a-1)+Array(1+a).join("▀"):l.substring(0,l.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=s.getModuleCount()*t+2*r,u=r,f=a-r,c=Array(t+1).join("██"),g=Array(t+1).join("  "),l="",h="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),h="",n=0;n<a;n+=1)i=1,u<=n&&n<f&&u<=e&&e<f&&s.isDark(o,Math.floor((n-u)/t))&&(i=0),h+=i?c:g;for(o=0;o<t;o+=1)l+=h+"\n"}return l.substring(0,l.length-1)},s.renderTo2dContext=function(t,r){r=r||2;for(var e=s.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=s.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},s}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(u,f){var i=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=S(u),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t()<<8|t();n[String.fromCharCode(o<<8|i)]=a,e+=1}if(e!=f)throw e+" != "+f;return n}(),a="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);if(n<128)r.push(n);else{var o=i[t.charAt(e)];"number"==typeof o?(255&o)==o?r.push(o):(r.push(o>>>8),r.push(255&o)):r.push(a)}}return r}};var r,t,a=1,u=2,o=4,f=8,y={L:1,M:0,Q:3,H:2},e=0,n=1,c=2,g=3,l=4,h=5,s=6,v=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=d(r)-d(1335);)r^=1335<<d(r)-d(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=d(r)-d(7973);)r^=7973<<d(r)-d(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case e:return function(t,r){return(t+r)%2==0};case n:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case v:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=C([1],0),e=0;e<t;e+=1)r=r.multiply(C([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case o:case f:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case o:return 16;case f:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case o:return 16;case f:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},t);function d(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function C(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return C(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return C(e,0).mod(t)}};return i}function p(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o}var k,A,b=(k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(A={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case y.L:return k[4*(t-1)+0];case y.M:return k[4*(t-1)+1];case y.Q:return k[4*(t-1)+2];case y.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,o=void 0,(o={}).totalCount=c,o.dataCount=n,o));return a},A),M=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},x=function(t){var r=a,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return e},m=function(t){var r=u,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return e},L=function(t){var r=o,e=i.stringToBytes(t),n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return n},D=function(t){var r=f,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";!function(){var t=e("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},S=function(t){var e=t,n=0,o=0,i=0,r={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return r},I=function(t,r,e){for(var n=function(t,r){var n=t,o=r,l=new Array(t*r),e={setPixel:function(t,r,e){l[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);var r=i(2);t.writeByte(2);for(var e=0;255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}},i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=h(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a=p(),u=function(t){var e=t,n=0,o=0,r={write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=n+r;)e.writeByte(255&(t<<n|o)),r-=8-n,t>>>=8-n,n=o=0;o|=t<<n,n+=r},flush:function(){0<n&&e.writeByte(o)}};return r}(a);u.write(r,n);var f=0,c=String.fromCharCode(l[f]);for(f+=1;f<l.length;){var g=String.fromCharCode(l[f]);f+=1,o.contains(c+g)?c+=g:(u.write(o.indexOf(c),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(c+g)),c=g)}return u.write(o.indexOf(c),n),u.write(e,n),u.flush(),a.toByteArray()},h=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return e}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=p();n.write(a);for(var u=function(){function e(t){a+=String.fromCharCode(r(63&t))}var n=0,o=0,i=0,a="",t={},r=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return t.writeByte=function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},t.flush=function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},t.toString=function(){return a},t}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||57344<=n?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+</script>
+<style>
+:root{
+  --ground:#FBFAF8;
+  --surface:#FFFFFF;
+  --surface-2:#F5F2F7;
+  --ink:#221B2B;
+  --ink-2:#4A4256;
+  --muted:#77708A;
+  --accent:#3D1D5D;
+  --accent-soft:#EDE7F3;
+  --accent-line:#C9B8D8;
+  --warn:#A34B1E;
+  --warn-soft:#F8EDE6;
+  --ok:#3D6B4E;
+  --rule:#DED9E4;
+  --paper:#FFFFFF;
+  --paper-ink:#1A1520;
+  --shadow:0 1px 2px rgba(34,27,43,.06),0 8px 24px rgba(34,27,43,.07);
+  --step--1:.8125rem;
+  --step-0:.9375rem;
+  --step-1:1.0625rem;
+  --step-2:1.375rem;
+  --step-3:1.875rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#171320;
+    --surface:#1F1929;
+    --surface-2:#272033;
+    --ink:#EDE9F2;
+    --ink-2:#C4BCD1;
+    --muted:#948CA6;
+    --accent:#C4A5E0;
+    --accent-soft:#2C2338;
+    --accent-line:#4A3A60;
+    --warn:#E09A6B;
+    --warn-soft:#33241C;
+    --ok:#7FB08F;
+    --rule:#342B44;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#171320;
+  --surface:#1F1929;
+  --surface-2:#272033;
+  --ink:#EDE9F2;
+  --ink-2:#C4BCD1;
+  --muted:#948CA6;
+  --accent:#C4A5E0;
+  --accent-soft:#2C2338;
+  --accent-line:#4A3A60;
+  --warn:#E09A6B;
+  --warn-soft:#33241C;
+  --ok:#7FB08F;
+  --rule:#342B44;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic UI",sans-serif;
+  font-size:var(--step-0);
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",serif;font-weight:700;text-wrap:balance;margin:0}
+
+/* ---- 帯 ---- */
+.banner{
+  background:var(--warn-soft);
+  border-bottom:1px solid var(--warn);
+  color:var(--warn);
+  padding:.55rem 1.5rem;
+  font-size:var(--step--1);
+  display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap;
+}
+.banner b{font-weight:700}
+
+header{
+  padding:1.5rem 1.5rem .25rem;
+  max-width:1240px;margin:0 auto;
+}
+.eyebrow{
+  font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;
+}
+h1{font-size:var(--step-3);letter-spacing:-.01em;margin:.3rem 0 .35rem}
+.lede{color:var(--ink-2);max-width:62ch;font-size:var(--step-0)}
+
+/* ---- タブ ---- */
+.tabs{
+  max-width:1240px;margin:1.25rem auto 0;padding:0 1.5rem;
+  display:flex;gap:.15rem;border-bottom:1px solid var(--rule);
+}
+.tab{
+  appearance:none;background:none;border:0;cursor:pointer;
+  font:inherit;font-size:var(--step-0);font-weight:500;
+  color:var(--muted);padding:.6rem 1rem;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+main{max-width:1240px;margin:0 auto;padding:1.5rem}
+[hidden]{display:none!important}
+
+/* ---- 作成タブ ---- */
+.workbench{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:1.75rem;align-items:start}
+@media (max-width:880px){.workbench{grid-template-columns:1fr}}
+
+.panel{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem;box-shadow:var(--shadow);
+}
+.panel + .panel{margin-top:1rem}
+.panel h2{font-size:var(--step-1);margin-bottom:.85rem}
+.field{display:block;margin-bottom:1.1rem}
+.field:last-child{margin-bottom:0}
+.field > .label{
+  display:block;font-size:var(--step--1);font-weight:700;
+  color:var(--ink-2);margin-bottom:.4rem;
+}
+select{
+  width:100%;font:inherit;font-size:var(--step-0);
+  padding:.55rem .7rem;border:1px solid var(--rule);border-radius:5px;
+  background:var(--surface);color:var(--ink);
+}
+select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+.opt{
+  display:flex;gap:.65rem;align-items:flex-start;
+  padding:.7rem .75rem;border:1px solid var(--rule);border-radius:6px;
+  margin-bottom:.5rem;cursor:pointer;background:var(--surface);
+  transition:border-color .15s,background .15s;
+}
+.opt:hover{border-color:var(--accent-line)}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt.fixed{cursor:default;background:var(--accent-soft);border-color:var(--accent)}
+.opt input{margin:.42rem 0 0;accent-color:var(--accent);width:15px;height:15px;flex:none}
+.opt .t{font-weight:700;font-size:var(--step-0);line-height:1.5}
+.opt .d{font-size:var(--step--1);color:var(--muted);line-height:1.55}
+.pin{
+  font-size:.625rem;letter-spacing:.08em;font-weight:700;
+  color:var(--accent);border:1px solid var(--accent-line);
+  border-radius:3px;padding:.05rem .3rem;margin-left:.4rem;
+  vertical-align:.1em;white-space:nowrap;
+}
+
+.btn{
+  appearance:none;font:inherit;font-weight:700;cursor:pointer;
+  background:var(--accent);color:var(--ground);
+  border:1px solid var(--accent);border-radius:5px;
+  padding:.6rem 1.1rem;width:100%;font-size:var(--step-0);
+  transition:opacity .15s;
+}
+.btn:hover{opacity:.87}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.ghost{background:none;color:var(--accent);margin-top:.5rem}
+
+.note{
+  font-size:var(--step--1);color:var(--muted);line-height:1.6;
+  margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--rule);
+}
+/* 確認用のリンク先表示。紙には印字せず、操作パネル側にだけ出す */
+.linkout{margin-top:.7rem}
+.linkout .lk{
+  display:block;font-size:.6875rem;letter-spacing:.06em;
+  color:var(--muted);margin-bottom:.2rem;
+}
+.linkout code{
+  display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.6875rem;color:var(--accent);word-break:break-all;line-height:1.6;
+}
+
+/* 県の状態（データの鮮度を選択時に確認するための表示。紙には出さない） */
+.state{
+  margin-top:.75rem;padding:.7rem .8rem;border-radius:6px;
+  background:var(--surface-2);border:1px solid var(--rule);
+  font-size:var(--step--1);line-height:1.65;
+}
+.state.warn{background:var(--warn-soft);border-color:var(--warn)}
+.state .row1{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.3rem}
+.state .when{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:500}
+.state .meta{color:var(--muted);font-size:.75rem}
+.state .meta a{color:var(--accent)}
+.state .alert{color:var(--warn);font-weight:700}
+.chip{
+  font-size:.6875rem;font-weight:700;letter-spacing:.04em;
+  border-radius:3px;padding:.1rem .45rem;white-space:nowrap;
+}
+.chip.ok{background:var(--accent-soft);color:var(--accent)}
+.chip.warn{background:var(--warn);color:var(--ground);border:1px solid var(--warn)}
+.chip.stale{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
+
+/* ---- 紙のプレビュー ---- */
+.paperwrap{display:flex;flex-direction:column;gap:.75rem;min-width:0}
+/* 実寸A4の紙を、画面の幅に収まるよう縮小して見せる。
+   印刷時は縮小を解除して等倍で出す（@media print） */
+.paperscale{
+  width:100%;overflow:hidden;
+  display:flex;justify-content:center;
+}
+.paperscale .paper{transform:scale(var(--paper-scale,.62))}
+.paperscale{height:calc(297mm * var(--paper-scale,.62))}
+.paperbar{
+  display:flex;justify-content:space-between;align-items:baseline;
+  gap:1rem;flex-wrap:wrap;font-size:var(--step--1);color:var(--muted);
+}
+/* ================================================================
+   案内文書の紙面（A-1・白黒印刷前提）
+
+   白黒で刷ることを前提に、色をいっさい使わず黒と白の2値だけで作る。
+   中間のグレーは白黒印刷で網掛けになり、顧問先が原本をコピーすると
+   さらに崩れるため使わない。階層は罫線の太さと余白でつける。
+   ================================================================ */
+/* ----------------------------------------------------------------
+   紙面の寸法はすべて mm と pt で指定する。
+   画面の見た目に合わせて rem で組むと、A4に印刷したときの
+   実寸が決まらず間延びする（実際に本文8.8pt・QR32mmになっていた）。
+   ここでの pt はそのまま印刷される文字の大きさになる。
+   ---------------------------------------------------------------- */
+.paper{
+  background:#FFFFFF;color:#000000;
+  /* A4の実寸で固定する。親がflexでも縮まないよう flex:none を付ける
+     （これが無いと幅が圧縮され、印刷時のレイアウトが崩れる） */
+  width:210mm;height:297mm;flex:none;
+  margin:0 auto;padding:15mm 16mm;
+  border:1px solid var(--rule);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;
+  /* 画面では縮小して表示する。印刷時は等倍に戻す（下の @media print） */
+  transform-origin:top center;
+}
+/* 対象者のラベル。黒地に白文字で、遠目にも区分が分かるようにする。
+   3区分を配り分けるとき、渡す側が取り違えに気づける効果をねらう。 */
+/* 高齢の方が読むことを前提に、本文14pt以上を基準にする。
+   印刷物で読みやすいとされる大きさ（JIS S 0032の考え方）に合わせた。 */
+.paper .who{
+  display:inline-block;background:#000;color:#fff;font-weight:700;
+  font-size:18pt;padding:2.5mm 6mm;letter-spacing:.04em;line-height:1.4;
+}
+.paper .head{border-bottom:1.5mm solid #000;padding-bottom:7mm}
+.paper .ttl{
+  font-size:33pt;font-weight:900;line-height:1.32;
+  margin:6mm 0 0;letter-spacing:-.015em;color:#000;
+}
+.paper .lead{font-size:14pt;color:#000;margin:5mm 0 0;line-height:1.75}
+.paper .pref{font-size:12.5pt;margin-top:4.5mm;color:#000;letter-spacing:.02em}
+
+/* QRと手順は紙の主役。枠で囲んで「手続きの入口」として一体に見せる。
+   flex:1 で中央寄せすると余った高さが上下の空白の帯になるため、
+   間隔は mm で決め打ちし、余りは下端に寄せる。 */
+/* 中段を伸縮させ、余った高さを枠の中の余白に回す。
+   こうすると上下に空白の帯が残らず、紙を使い切れる。 */
+.blocks{display:flex;flex-direction:column;justify-content:center;flex:1;margin-top:8mm}
+.qrblock{
+  display:flex;gap:11mm;align-items:center;width:100%;
+  border:.6mm solid #000;padding:7mm 9mm;
+}
+.qrblock .qwrap{flex:none;text-align:center}
+/* ★QRは印刷時 60mm 角。離れていても、手が震えても読み取りやすい大きさ */
+.qrblock .qi{
+  width:60mm;height:60mm;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;
+}
+.qrblock .qi img,.qrblock .qi canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+.qrblock .qi.ph{font-size:9pt;color:#000;line-height:1.4;padding:3mm;border:1px dashed #000}
+/* QRのまわりの線は外側の囲みが担う。
+   QRの白い余白（規格上4モジュール必要）を線が侵さないようにする。 */
+.qrblock .qframe{display:inline-block}
+.qrblock .qcap{font-size:12pt;margin-top:3.5mm;color:#000}
+.qrblock .qt{flex:1;min-width:0}
+/* 読み取り手順。カメラを向けるだけで読めることを知らない方がいるため入れる */
+.qrblock .qt .sh{
+  font-size:15pt;font-weight:700;margin:0 0 5mm;color:#000;letter-spacing:.02em;
+}
+.steps{counter-reset:st;margin:0;padding:0}
+.steps li{
+  list-style:none;position:relative;padding-left:12mm;
+  margin-bottom:5.5mm;font-size:16pt;line-height:1.5;color:#000;
+}
+.steps li:last-child{margin-bottom:0}
+.steps li::before{
+  content:counter(st);counter-increment:st;position:absolute;left:0;top:0.8mm;
+  width:8.5mm;height:8.5mm;border-radius:50%;background:#000;color:#fff;
+  font-size:12pt;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+/* 中身の予告。具体語（認定日・持ち物）があると読む理由が生まれる */
+.paper .box{
+  padding:0;font-size:14pt;line-height:1.85;margin-top:8mm;color:#000;
+}
+.paper .box .bh{
+  font-size:15pt;font-weight:700;margin-bottom:3mm;
+  padding-bottom:2mm;border-bottom:.4mm solid #000;
+}
+.paper .foot{
+  margin-top:auto;padding-top:5mm;border-top:.4mm solid #000;
+  font-size:13pt;color:#000;line-height:1.7;
+}
+.paper .foot p{margin:0}
+
+/* ---- 台帳タブ ---- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:var(--step--1);min-width:1000px}
+th,td{padding:.5rem .7rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+th{
+  background:var(--surface-2);font-weight:700;color:var(--ink-2);
+  position:sticky;top:0;font-size:.75rem;letter-spacing:.03em;white-space:nowrap;
+}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr.flag{background:var(--warn-soft)}
+tbody tr.flag:hover{background:var(--warn-soft)}
+td.num{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+td.pn{font-weight:700;white-space:nowrap}
+td.sl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;color:var(--muted)}
+td.u a{color:var(--accent);font-size:.6875rem;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+td.rm{font-size:.6875rem;color:var(--muted);max-width:320px;line-height:1.55}
+.stats{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat{border-left:3px solid var(--accent);padding-left:.85rem}
+.stat .v{font-size:var(--step-2);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.stat .k{font-size:var(--step--1);color:var(--muted)}
+.stat.w{border-left-color:var(--warn)}
+.stat.w .v{color:var(--warn)}
+
+/* ---- 仕組みタブ ---- */
+.prose{max-width:72ch}
+.prose h2{font-size:var(--step-2);margin:2rem 0 .6rem}
+.prose h2:first-child{margin-top:0}
+.prose h3{font-size:var(--step-1);margin:1.4rem 0 .4rem}
+.prose p{margin:0 0 .9rem;color:var(--ink-2)}
+.prose ul{margin:0 0 .9rem;padding-left:1.2rem;color:var(--ink-2)}
+.prose li{margin-bottom:.3rem}
+.prose strong{color:var(--ink);font-weight:700}
+.flow{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem;margin:1rem 0;overflow-x:auto;
+}
+.flow svg{display:block;min-width:520px;width:100%;height:auto}
+.compare{width:100%;min-width:0;font-size:var(--step--1);border-collapse:collapse;margin:1rem 0}
+.compare th,.compare td{border:1px solid var(--rule);padding:.55rem .7rem;vertical-align:top}
+.compare th{background:var(--surface-2)}
+
+/* ---- 印刷 ---- */
+@media print{
+  .banner,header,.tabs,.panel,.paperbar,.note{display:none!important}
+  body{background:#fff}
+  main{padding:0;max-width:none}
+  .workbench{display:block}
+  /* 画面用の縮小を解除し、A4の等倍で出す */
+  .paperscale{height:auto;overflow:visible;display:block}
+  .paperscale .paper{transform:none}
+  .paper{
+    box-shadow:none;border:0;
+    width:210mm;height:297mm;padding:15mm 16mm;
+    page-break-after:always;
+  }
+}
+@page{size:A4;margin:0}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="banner" id="banner" hidden>
+  <b>ドメイン未確定</b>
+  <span id="bannertext"></span>
+</div>
+
+<header>
+  <div class="eyebrow">めぐみ事務所 — 離職票同封用</div>
+  <h1>離職案内ジェネレータ</h1>
+  <p class="lede">都道府県を選ぶと、「離職されたみなさまへ」パンフレットへ誘導する案内文書を作ります。QRコードは事務所の中継ページを指すため、労働局がPDFを差し替えても、配布済みの紙がそのまま最新につながります。</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" aria-controls="p-make" id="t-make">案内文書を作る</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="p-data" id="t-data">台帳データ（47県）</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="p-how" id="t-how">仕組み</button>
+</div>
+
+<main>
+  <!-- ============ 作成 ============ -->
+  <section id="p-make" role="tabpanel" aria-labelledby="t-make">
+    <div class="workbench">
+      <div>
+        <div class="panel">
+          <h2>1. 都道府県を選ぶ</h2>
+          <label class="field">
+            <span class="label">離職された方が住んでいる都道府県</span>
+            <select id="pref"></select>
+          </label>
+          <div class="state" id="prefstate"></div>
+        </div>
+
+        <div class="panel">
+          <h2>2. 離職された方の区分</h2>
+          <label class="opt on" id="opt-ippan">
+            <input type="radio" name="shubetsu" value="ippan" checked>
+            <span class="qt">
+              <span class="t">64歳までで離職された方</span>
+              <span class="d">基本手当のご案内。都道府県版のパンフレットを使います。</span>
+            </span>
+          </label>
+          <label class="opt" id="opt-konenrei">
+            <input type="radio" name="shubetsu" value="konenrei">
+            <span class="qt">
+              <span class="t">65歳以上で離職された方</span>
+              <span class="d">高年齢求職者給付金のご案内。認定は1回で、一時金として支給されます。</span>
+            </span>
+          </label>
+          <label class="opt" id="opt-tokurei">
+            <input type="radio" name="shubetsu" value="tokurei">
+            <span class="qt">
+              <span class="t">季節的なお仕事で離職された方</span>
+              <span class="d">特例一時金のご案内。短期雇用特例被保険者が対象です。</span>
+            </span>
+          </label>
+          <p class="note">区分は離職日時点の年齢と契約の形で決まります。3つは制度そのものが別のため、いずれか1つを選びます。</p>
+          <div class="linkout" id="linkout"></div>
+        </div>
+
+        <div class="panel">
+          <h2>3. 出力する</h2>
+          <button class="btn" id="btn-print">印刷する / PDFで保存</button>
+          <button class="btn ghost" id="btn-url">QRのリンク先URLをコピー</button>
+          <p class="note">本番ではWord（.docx）のダウンロードも用意します。試作版では印刷とPDF保存のみです。</p>
+        </div>
+      </div>
+
+      <div class="paperwrap">
+        <div class="paperbar">
+          <span>できあがりイメージ（A4・1枚）</span>
+          <span id="qrcount"></span>
+        </div>
+        <div class="paperscale" id="paperscale">
+        <div class="paper" id="paper">
+          <div class="head">
+            <span class="who" id="p-who">—</span>
+            <h2 class="ttl">失業給付の手続きに<br>ついてのご案内</h2>
+            <p class="lead">ハローワークのパンフレット「離職されたみなさまへ」を、スマートフォンでご覧いただけます。</p>
+            <p class="pref" id="p-prefname">—</p>
+          </div>
+          <div class="blocks" id="blocks"></div>
+          <div class="box">
+            <div class="bh">パンフレットに書かれていること</div>
+            受給の手続き／認定日／給付を受けられる日数／必要な持ち物　など<br>
+            <b>お手続きの前に、必ずお読みください。</b>
+          </div>
+          <div class="foot">
+            <p>ご不明な点は、お住まいを管轄するハローワークへお問い合わせください。</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 台帳 ============ -->
+  <section id="p-data" role="tabpanel" aria-labelledby="t-data" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>コード</th><th>都道府県</th><th>slug</th><th>労働局</th>
+            <th>状態</th><th>最終確認日</th><th>版表記</th>
+            <th>掲載ページ（追跡の起点）</th><th>PDF（現在）</th><th>備考</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="note" style="max-width:72ch">
+      掲載ページのURLは労働局が改訂しても変わりません。PDFのURLは改訂のたびに変わるため、月次でこの掲載ページを巡回し、リンクされているPDFが台帳と一致するかを機械的に突き合わせます。
+    </p>
+  </section>
+
+  <!-- ============ 仕組み ============ -->
+  <section id="p-how" role="tabpanel" aria-labelledby="t-how" hidden>
+    <div class="prose">
+      <h2>なぜ古くなってしまうのか</h2>
+      <p>労働局のパンフレットPDFは <code>content/contents/002638150.pdf</code> のように、内部で自動採番された番号がファイル名になっています。改訂すると<strong>新しい番号が振られ、古いURLはそのまま残ります</strong>。404にならないため、古い版を配り続けていても気づけません。</p>
+      <p>実際、事務所がkintoneに記録していた11県のうち、宮城と東京はすでに番号が変わっていました。調査中の静岡では、検索結果が示す番号と実際のページの番号が食い違い、まさに差し替えが進行している最中でした。</p>
+
+      <h2>だから、QRの向き先を事務所側に置く</h2>
+      <p>QRコードには労働局のURLではなく、<strong>事務所が管理する中継ページのURL</strong>を焼きます。労働局がPDFを差し替えたら、中継ページの1行を直すだけで済みます。</p>
+      <div class="flow" id="flowbox"></div>
+      <p><strong>これが、配布済みの紙を救う唯一の方法です。</strong> PDFの直リンクをQRにしている限り、どれだけ作成を自動化しても、一度渡した紙は古いままになります。</p>
+
+      <h2>更新は自動で検知する</h2>
+      <p>月に1回、47県の掲載ページを巡回し、次の4つに分類して報告します。データの自動書き換えはせず、<strong>人が確認してから台帳を直します</strong>。</p>
+      <table class="compare">
+        <tr><th>判定</th><th>条件</th><th>対応</th></tr>
+        <tr><td><strong>OK</strong></td><td>URLも中身も一致</td><td>確認日を更新</td></tr>
+        <tr><td><strong>URL変更の疑い</strong></td><td>台帳のPDFが掲載ページから消え、該当しそうなPDFが1本だけある</td><td>新URL候補として報告</td></tr>
+        <tr><td><strong>中身の差し替え</strong></td><td>URLは同じだがファイルの中身が変わった</td><td>報告。<strong>青森はこの経路でしか検知できない</strong></td></tr>
+        <tr><td><strong>要人手</strong></td><td>候補が複数ある／ゼロ／ページ構造が変わった</td><td>人が見て判断</td></tr>
+      </table>
+      <p>青森だけはPDFのファイル名が <code>risyoku_ippan.pdf</code> と固定されているため、改訂してもURLが変わりません。URLの比較だけでは永久に検知できないので、ファイルの中身のハッシュも突き合わせます。福岡は新旧2版が同じページに並んでいるため、自動で選ばず人の確認に回します。</p>
+
+      <h2>いまの状態</h2>
+      <ul>
+        <li><strong>46県</strong>：掲載ページとPDFを実際に開いて確認済み</li>
+        <li><strong>長野県</strong>：固有のパンフレットが見つからず。ファイル名が平成30年相当のまま7年以上更新されていない疑いがあり、労働局への確認が必要です</li>
+        <li>大分・宮崎・鹿児島など多くの県で、給付種別ごとに3種のパンフレットが並んで掲載されていました</li>
+      </ul>
+
+      <h2>これから決めること</h2>
+      <ul>
+        <li><strong>公開ドメイン</strong>：QRに焼くURLは一度配ると変えられません。専用ドメインを取るか、事務所ドメインのサブドメインを使うかを先に決める必要があります</li>
+        <li><strong>Word出力</strong>：既存のWordを雛形にして47本を事前生成する方式を想定しています</li>
+        <li><strong>長野県の扱い</strong>：全国共通版で代替するか、労働局に確認するか</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script>
+const 台帳 = [
+ {
+  "都道府県コード": "01",
+  "都道府県": "北海道",
+  "slug": "hokkaido",
+  "労働局名": "北海道労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/hokkaido-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/denshi_shinsei_youshiki/risyokusaretaminasamahe.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/hokkaido-roudoukyoku/content/contents/002593282.pdf",
+  "リンク文言": "離職されたみなさまへ（一般被保険者用）(4,695KB)",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。同ページに高年齢被保険者用(002417684.pdf)・短期特例被保険者用(002417705.pdf)も別掲載。ドメイン例外なし。",
+  "PDF_バイト数": "4793502",
+  "PDF_更新日時": "Sun, 22 Mar 2026 23:31:26 GMT",
+  "PDF_候補数": "3"
+ },
+ {
+  "都道府県コード": "02",
+  "都道府県": "青森県",
+  "slug": "aomori",
+  "労働局名": "青森労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/aomori-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/aomori-roudoukyoku/content/contents/risyoku_ippan.pdf",
+  "リンク文言": "離職されたみなさまへ（一般被保険者用）",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。PDFファイル名が数字IDでなく意味のある名称(risyoku_ippan.pdf)で他局と異なる命名規則。高年齢用(risyoku_konenrei.pdf)・短期特例用(risyoku_tokurei.pdf)も同ページ掲載。ドメイン例外なし。",
+  "PDF_バイト数": "1795953",
+  "PDF_更新日時": "Tue, 30 Sep 2025 15:05:26 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "03",
+  "都道府県": "岩手県",
+  "slug": "iwate",
+  "労働局名": "岩手労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/iwate-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki_00002.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/iwate-roudoukyoku/content/contents/002466515.pdf",
+  "リンク文言": "離職されたみなさまへ〔PDF形式〕",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。「離職票交付時の添付資料」セクション内・一般被保険者用。ドメイン例外なし。",
+  "PDF_バイト数": "1233736",
+  "PDF_更新日時": "Thu, 20 Nov 2025 06:57:16 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "04",
+  "都道府県": "宮城県",
+  "slug": "miyagi",
+  "労働局名": "宮城労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/miyagi-roudoukyoku/3/330.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/miyagi-roudoukyoku/content/contents/002638150.pdf",
+  "リンク文言": "離職されたみなさまへ（パンフレット）",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。背景事実どおりPDF番号が旧002217048から002638150へ改訂済みであることを実機で再確認。掲載ページURLは数字ディレクトリ構造(/3/330.html)で他局のhourei_seido_tetsuzuki配下パターンと異なる点に注意。ドメイン自体の-hellowork等の例外はなし。",
+  "PDF_バイト数": "8668786",
+  "PDF_更新日時": "Mon, 27 Apr 2026 00:48:06 GMT",
+  "PDF_候補数": "4"
+ },
+ {
+  "都道府県コード": "05",
+  "都道府県": "秋田県",
+  "slug": "akita",
+  "労働局名": "秋田労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/akita-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/_120388.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/akita-roudoukyoku/content/contents/002578244.pdf",
+  "リンク文言": "離職されたみなさまへ（一般用）",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。高年齢求職者給付金用(002578245.pdf)・特例一時金用(002578247.pdf)も同ページ掲載。ドメイン例外なし。",
+  "PDF_バイト数": "2274287",
+  "PDF_更新日時": "Fri, 27 Feb 2026 08:01:18 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "06",
+  "都道府県": "山形県",
+  "slug": "yamagata",
+  "労働局名": "山形労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/yamagata-roudoukyoku/riyousha_mokuteki_menu/mokuteki_naiyou/kakushu_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/yamagata-roudoukyoku/content/contents/002608905.pdf",
+  "リンク文言": "パンフレット「離職されたみなさまへ」",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。外国人向け英語版(001958223.pdf)も同ページに別掲載。検索で得た旧URL候補(hourei_seido_tetsuzuki/koyouhokennituite.html)は404で実在せず、実際のページは異なるパス配下だった（記憶からの組立てリスクの実例）。別ドメインyamagata-helloworkはハローワーク専用サイトで本パンフレット掲載なし。",
+  "PDF_バイト数": "8248525",
+  "PDF_更新日時": "Fri, 27 Mar 2026 05:05:26 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "07",
+  "都道府県": "福島県",
+  "slug": "fukushima",
+  "労働局名": "福島労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/fukushima-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/fukushima-roudoukyoku/content/contents/002271583.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。「雇用保険手続きリーフレット」の一般被保険者用カテゴリに掲載。ドメイン例外なし。",
+  "PDF_バイト数": "1993431",
+  "PDF_更新日時": "Mon, 09 Jun 2025 07:31:14 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "08",
+  "都道府県": "茨城県",
+  "slug": "ibaraki",
+  "労働局名": "茨城労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/ibaraki-roudoukyoku/jirei_toukei/pamphlet_leaflet/koyouhoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/ibaraki-roudoukyoku/content/contents/002533294.pdf",
+  "リンク文言": "離職されたみなさまへ（茨城版）",
+  "版表記": "表記なし（PDF12ページ:1.05MBの容量表示のみ）",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度中。別ページ(hourei_seido_tetsuzuki/koyou_hoken.html)にも同名リンクがあるが、そちらはPL071030-01.pdfという旧式ファイル名(PDF1.7形式・2007年頃作成と推測)を指す旧版。pamphlet_leafletページの方を正本として採用。",
+  "PDF_バイト数": "1071874",
+  "PDF_更新日時": "Tue, 20 Jan 2026 07:36:47 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "09",
+  "都道府県": "栃木県",
+  "slug": "tochigi",
+  "労働局名": "栃木労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/tochigi-roudoukyoku/jirei_toukei/_119788/_00718.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/tochigi-roudoukyoku/content/contents/002549240.pdf",
+  "リンク文言": "離職されたみなさまへ（070401版）［PDF形式：802KB］",
+  "版表記": "070401版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。事務所旧記録URL(_119795.html)は入口ページで生存確認済みだが、PDFへの直接リンクは1階層下の_00718.htmlに掲載。QR追跡起点は_00718.htmlを推奨。",
+  "PDF_バイト数": "820769",
+  "PDF_更新日時": "Fri, 20 Feb 2026 08:15:40 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "10",
+  "都道府県": "群馬県",
+  "slug": "gunma",
+  "労働局名": "群馬労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/gunma-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/gunma-roudoukyoku/content/contents/002358235.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "R7.11月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。事務所旧記録URLと同一で生存確認済み。",
+  "PDF_バイト数": "1513407",
+  "PDF_更新日時": "Fri, 22 Aug 2025 10:19:13 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "11",
+  "都道府県": "埼玉県",
+  "slug": "saitama",
+  "労働局名": "埼玉労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/saitama-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/saitama-roudoukyoku/content/contents/002453748.pdf",
+  "リンク文言": "離職されたみなさまへ（R8.3月版）",
+  "版表記": "R8.3月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。事務所旧記録URLと同一。PDFは大容量のためWebFetchでの内容解析は途中で打ち切られたが、ダウンロード自体は正常に開始されリンク生存を確認。",
+  "PDF_バイト数": "12085257",
+  "PDF_更新日時": "Thu, 02 Apr 2026 23:36:29 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "12",
+  "都道府県": "千葉県",
+  "slug": "chiba",
+  "労働局名": "千葉労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/chiba-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki/antei/antei08_00001.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/chiba-roudoukyoku/content/contents/002623271.pdf",
+  "リンク文言": "離職されたみなさまへ　令和8年4月・千葉県版",
+  "版表記": "令和8年4月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。事務所旧記録URLと同一。同ページに旧版(令和7年4月・千葉県版)も併存。PDFは大容量のためWebFetch内容解析は不可だがダウンロード開始を確認しリンク生存を確認。",
+  "PDF_バイト数": "10975687",
+  "PDF_更新日時": "Wed, 15 Apr 2026 05:17:52 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "13",
+  "都道府県": "東京都",
+  "slug": "tokyo",
+  "労働局名": "東京労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/tokyo-hellowork/kakushu_jouhou/koyouhoken/_120951_00002.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/tokyo-hellowork/content/contents/002776490.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。ドメイン例外あり：パス直下が他県の\"-roudoukyoku\"ではなく\"tokyo-hellowork\"（ホストはjsite.mhlw.go.jp、サブドメイン分割ではない）。背景情報の旧ID(001955821)は現行002776490に変更済みであることを再確認。同ページに期間等証明書交付者向け別版(002776492.pdf)も掲載。",
+  "PDF_バイト数": "4279518",
+  "PDF_更新日時": "Mon, 17 Aug 2026 01:50:12 GMT",
+  "PDF_候補数": "2"
+ },
+ {
+  "都道府県コード": "14",
+  "都道府県": "神奈川県",
+  "slug": "kanagawa",
+  "労働局名": "神奈川労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kanagawa-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kanagawa-roudoukyoku/content/contents/002194885.pdf",
+  "リンク文言": "離職されたみなさまへ（令和8年8月版）",
+  "版表記": "令和8年8月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。事務所旧記録URLと同一で生存確認済み。",
+  "PDF_バイト数": "4408786",
+  "PDF_更新日時": "Fri, 31 Jul 2026 23:32:36 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "15",
+  "都道府県": "新潟県",
+  "slug": "niigata",
+  "労働局名": "新潟労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/niigata-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/niigata-roudoukyoku/content/contents/R704_2_common_1.pdf",
+  "リンク文言": "離職されたみなさまへ【R7.4月版】",
+  "版表記": "R7.4月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高。ドメイン例外は確認できず（新潟労働局は\"niigata-roudoukyoku\"で正常運用）。ただし\"niigata-hellowork\"という別ドメイン系統も存在し個別ハローワークページに使われている模様（今回は未使用・要継続監視）。",
+  "PDF_バイト数": "3239937",
+  "PDF_更新日時": "Tue, 01 Apr 2025 06:34:10 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "16",
+  "都道府県": "富山県",
+  "slug": "toyama",
+  "労働局名": "富山労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/toyama-roudoukyoku/riyousha_mokuteki_menu/mokuteki_naiyou/kakushu_hoken/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/toyama-roudoukyoku/content/contents/001187297.pdf",
+  "リンク文言": "離職されたみなさまへ（R7.8月版）",
+  "版表記": "R7.8月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "ドメインは通常どおりtoyama-roudoukyoku。同ページに高年齢求職者給付版・特例一時金版も併記。確信度高",
+  "PDF_バイト数": "5803046",
+  "PDF_更新日時": "Mon, 27 Oct 2025 06:41:36 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "17",
+  "都道府県": "石川県",
+  "slug": "ishikawa",
+  "労働局名": "石川労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/ishikawa-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/ishikawa-roudoukyoku/content/contents/002611394.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに高年齢求職者給付金版・特例一時金版も併記。確信度高",
+  "PDF_バイト数": "13585635",
+  "PDF_更新日時": "Mon, 30 Mar 2026 07:17:48 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "18",
+  "都道府県": "福井県",
+  "slug": "fukui",
+  "労働局名": "福井労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/fukui-roudoukyoku/riyousha_mokuteki_menu/mokuteki_naiyou/kakushu_hoken/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/fukui-roudoukyoku/content/contents/002225731.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高",
+  "PDF_バイト数": "1716602",
+  "PDF_更新日時": "Mon, 18 Aug 2025 01:57:31 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "19",
+  "都道府県": "山梨県",
+  "slug": "yamanashi",
+  "労働局名": "山梨労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/yamanashi-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki/newpage_00063.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/yamanashi-roudoukyoku/content/contents/001245308.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし（PDF-815KBの容量表示のみ）",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度中。版表記がなく更新時期が不明。「離職票交付を受けた離職者のみなさまにお渡しいただきたいもの」という見出しの下に掲載。",
+  "PDF_バイト数": "1302913",
+  "PDF_更新日時": "Wed, 30 Jul 2025 06:49:48 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "20",
+  "都道府県": "長野県",
+  "slug": "nagano",
+  "労働局名": "長野労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/nagano-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/denshi-shinsei.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/nagano-roudoukyoku/content/contents/ippan_hihokensyayou301018.pdf",
+  "リンク文言": "一般被保険者用",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:高。掲載ページは「電子申請関係」ページ内の(参考)離職者向けリーフレット等。ファイル名は ippan_hihokensyayou301018.pdf（平成30年10月18日相当）だが、実際の最終更新は2026-01-04でありファイル名を変えずに中身を差し替える運用。青森型のためURL比較では改訂を検知できず、サイズ・更新日時の比較が必須。リンク文言に「離職」を含まないため、文言の完全一致でのみ候補を特定できる。",
+  "PDF_バイト数": "",
+  "PDF_更新日時": "",
+  "PDF_候補数": ""
+ },
+ {
+  "都道府県コード": "21",
+  "都道府県": "岐阜県",
+  "slug": "gifu",
+  "労働局名": "岐阜労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/gifu-roudoukyoku/hourei_seido_tetsuzuki/hourei_youshikishu/yousikisyu.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/gifu-roudoukyoku/content/contents/002193766.pdf",
+  "リンク文言": "離職されたみなさまへ（様式集内「安16」表記）",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "他県と異なり「雇用保険法関係様式集」ページ内に掲載されている（独立したパンフレット専用ページではない）。確信度中：ページの性質が特殊で今後改訂時に場所が変わる可能性あり",
+  "PDF_バイト数": "2251816",
+  "PDF_更新日時": "Tue, 22 Jul 2025 05:06:08 GMT",
+  "PDF_候補数": "49"
+ },
+ {
+  "都道府県コード": "22",
+  "都道府県": "静岡県",
+  "slug": "shizuoka",
+  "労働局名": "静岡労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/shizuoka-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/201308.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/shizuoka-roudoukyoku/content/contents/002764963.pdf",
+  "リンク文言": "離職されたみなさまへ（令和8年8月版）",
+  "版表記": "令和8年8月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "検索初期段階では旧PDF（002333770.pdf）がヒットしたが実ページ確認で現行版（002764963.pdf）に更新済みと判明。CMS採番変化の実例。確信度高",
+  "PDF_バイト数": "1399005",
+  "PDF_更新日時": "Thu, 06 Aug 2026 01:09:07 GMT",
+  "PDF_候補数": "2"
+ },
+ {
+  "都道府県コード": "23",
+  "都道府県": "愛知県",
+  "slug": "aichi",
+  "労働局名": "愛知労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/aichi-roudoukyoku/pamphlet_form/_121786/_122012_00002.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/aichi-roudoukyoku/content/contents/002339274.pdf",
+  "リンク文言": "離職されたみなさまへ～求職者給付受給手続きのためのリーフレット",
+  "版表記": "令和7年8月",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "依頼時に生存確認済みと提示されたURLをそのまま転記（再確認不要の指示のため今回は未再取得）。確信度高",
+  "PDF_バイト数": "1289501",
+  "PDF_更新日時": "Thu, 07 Aug 2025 00:04:00 GMT",
+  "PDF_候補数": "3"
+ },
+ {
+  "都道府県コード": "24",
+  "都道府県": "三重県",
+  "slug": "mie",
+  "労働局名": "三重労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/mie-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tekiyou_syoumeisyo.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/mie-roudoukyoku/content/contents/002268510.pdf",
+  "リンク文言": "リーフレット「離職されたみなさまへ」",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに65歳以上向け（002268515.pdf）・短期特例被保険者向け（002268517.pdf）も併記。確信度高",
+  "PDF_バイト数": "1838150",
+  "PDF_更新日時": "Fri, 06 Jun 2025 01:55:21 GMT",
+  "PDF_候補数": "3"
+ },
+ {
+  "都道府県コード": "25",
+  "都道府県": "滋賀県",
+  "slug": "shiga",
+  "労働局名": "滋賀労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/shiga-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/shiga-roudoukyoku/content/contents/002291595.pdf",
+  "リンク文言": "リーフレット「離職されたみなさまへ」",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "ページ内「離職票の交付の手続きをされたみなさまへ」という電子申請関連セクションに掲載されており、他県の独立パンフレットページと配置が異なる。確信度中：セクションの性質上、将来的にURL構成が変わる可能性あり",
+  "PDF_バイト数": "1568292",
+  "PDF_更新日時": "Thu, 26 Jun 2025 02:56:31 GMT",
+  "PDF_候補数": "5"
+ },
+ {
+  "都道府県コード": "26",
+  "都道府県": "京都府",
+  "slug": "kyoto",
+  "労働局名": "京都労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kyoto-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kyoto-roudoukyoku/content/contents/002651661.pdf",
+  "リンク文言": "離職されたみなさまへ（R080401_京都版）",
+  "版表記": "R080401_京都版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "リンク文言に「京都版」と明記あり。確信度高",
+  "PDF_バイト数": "781039",
+  "PDF_更新日時": "Wed, 13 May 2026 00:49:51 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "27",
+  "都道府県": "大阪府",
+  "slug": "osaka",
+  "労働局名": "大阪労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/osaka-roudoukyoku/densisinnsei0603.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/osaka-roudoukyoku/content/contents/001941224.pdf",
+  "リンク文言": "①（R0809）離職されたみなさまへ",
+  "版表記": "(R0809)",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "URLスラッグは「電子申請」だが実ページは「雇用保険関係　リーフレット集」という8区分の一般パンフレット一覧であることを確認。別候補「各種リーフレット等」（/osaka-roudoukyoku/hourei_seido_tetsuzuki/_121761/_310108_00003.html）は働き方改革関連専用でパンフレット非掲載。現時点でdensisinnsei0603.htmlより適切な掲載ページは見つからず。確信度高",
+  "PDF_バイト数": "13380030",
+  "PDF_更新日時": "Wed, 02 Sep 2026 00:34:01 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "28",
+  "都道府県": "兵庫県",
+  "slug": "hyogo",
+  "労働局名": "兵庫労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/hyogo-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/_122424/_121532_00001.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/hyogo-roudoukyoku/content/contents/002692499.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "令和8年6月",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "依頼時に生存確認済みと提示されたURLをそのまま転記（再確認不要の指示のため今回は未再取得）。確信度高",
+  "PDF_バイト数": "1657857",
+  "PDF_更新日時": "Thu, 11 Jun 2026 08:24:15 GMT",
+  "PDF_候補数": "3"
+ },
+ {
+  "都道府県コード": "29",
+  "都道府県": "奈良県",
+  "slug": "nara",
+  "労働局名": "奈良労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/nara-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki/_119594.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/nara-roudoukyoku/content/contents/002403895.pdf",
+  "リンク文言": "離職されたみなさまへ（pdf）（R07.9版）",
+  "版表記": "R07.9版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高",
+  "PDF_バイト数": "1479580",
+  "PDF_更新日時": "Wed, 01 Oct 2025 06:31:07 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "30",
+  "都道府県": "和歌山県",
+  "slug": "wakayama",
+  "労働局名": "和歌山労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/wakayama-roudoukyoku/newpage_00363.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/wakayama-roudoukyoku/content/contents/001454351.pdf",
+  "リンク文言": "離職されたみなさまへ（令和8年4月版）",
+  "版表記": "令和8年4月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度高",
+  "PDF_バイト数": "8570073",
+  "PDF_更新日時": "Wed, 08 Apr 2026 03:02:57 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "31",
+  "都道府県": "鳥取県",
+  "slug": "tottori",
+  "労働局名": "鳥取労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/tottori-roudoukyoku/newpage_01546.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/tottori-roudoukyoku/content/contents/002209647.pdf",
+  "リンク文言": "64歳までで離職されたみなさまへ",
+  "版表記": "令和7年4月",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "再調査(2026-09-02)で発見。正式タイトル:雇用保険被保険者喪失届(離職票交付あり)のお手続をされた事業主の皆様へ(求職者給付の受給手続きのためのリーフレット)。パンくず:鳥取労働局＞各種法令・制度・手続き＞雇用保険関係＞同タイトル。同ページに高年齢被保険者用(65歳以上で離職されたみなさまへ・002334746.pdf・令和7年8月)と短期特例被保険者用(離職されたみなさまへ〔特例一時金のご案内〕・002334748.pdf・令和7年8月)も併存。一般被保険者用PDF実在確認済(1.7MB・200応答)。前回調査で巡回した「雇用保険関係」トップページ(koyou_hoken.html)・パンフレット一覧ページ・様式申請書ページ・ハローワーク鳥取サイト等には当該リンクは無く、事業主向け電子申請の導線ページ(newpage_01546.html)を辿って発見した。確信度:高",
+  "PDF_バイト数": "1730877",
+  "PDF_更新日時": "Tue, 15 Apr 2025 02:02:17 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "32",
+  "都道府県": "島根県",
+  "slug": "shimane",
+  "労働局名": "島根労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/shimane-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/shimane-roudoukyoku/content/contents/002603909.pdf",
+  "リンク文言": "【R8年度版】離職されたみなさまへ（離職票添付書類）",
+  "版表記": "R8年度版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに離職票添付書類/高年齢求職者給付金のご案内/特例一時金のご案内の3種類がそれぞれR8年度版・R7年度版(旧版)で併存して掲載されている(新旧2版が同一ページに残存)。QR案内には離職票添付書類版を代表として採用。他2種のURL: 002603911.pdf(高年齢求職者給付金)、002603912.pdf(特例一時金)。PDF実在確認済(1.8MB)。確信度:高(3種のうちどれを代表とするかは運用判断であり要確認)",
+  "PDF_バイト数": "1835903",
+  "PDF_更新日時": "Tue, 31 Mar 2026 23:34:19 GMT",
+  "PDF_候補数": "8"
+ },
+ {
+  "都道府県コード": "33",
+  "都道府県": "岡山県",
+  "slug": "okayama",
+  "労働局名": "岡山労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/okayama-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/okayama-roudoukyoku/content/contents/002780160.pdf",
+  "リンク文言": "離職されたみなさまへ　070801版［PDF形式：3MB］",
+  "版表記": "070801版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "再調査(2026-09-02)で発見。「雇用保険関係」ページ(koyou_hoken.html)内の見出し「労働者（離職者）のみなさまへ」（リンク先:koyou_hoken_00004.html）の直下に、そのサブページ名ではなく親ページ自体に直接PDFリンクが掲載されている構成。PDF実在確認済(3.1MB≒表記の3MBと一致・200応答)。前回調査ではkoyou_hoken_00004.html本体や求職者給付00006等の個別サブページを巡回したがリンクが見当たらず、親ページ(koyou_hoken.html)の当該見出し直下という構成を見落としていたため未発見だった。確信度:高",
+  "PDF_バイト数": "3241640",
+  "PDF_更新日時": "Tue, 01 Sep 2026 01:35:14 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "34",
+  "都道府県": "広島県",
+  "slug": "hiroshima",
+  "労働局名": "広島労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/hiroshima-roudoukyoku/riyousha_mokuteki_menu/mokuteki_naiyou/rishoku_leaf.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/hiroshima-roudoukyoku/content/contents/002741306.pdf",
+  "リンク文言": "① 離職されたみなさまへ (失業給付リーフレット)",
+  "版表記": "表記なし（ページ注記「2026年8月に情報を更新しています」）",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "掲載ページの正式タイトルは「離職票を受けとった方へ（失業給付リーフレット）」。パンくず: 広島労働局＞各種法令・制度・手続き＞雇用保険関係＞離職票を受けとった方へ。PDF実在確認済(1.5MB)。確信度:高",
+  "PDF_バイト数": "1604084",
+  "PDF_更新日時": "Fri, 14 Aug 2026 23:30:04 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "35",
+  "都道府県": "山口県",
+  "slug": "yamaguchi",
+  "労働局名": "山口労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/yamaguchi-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/koyouhokentetsusduki_top.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/yamaguchi-roudoukyoku/content/contents/002608414.pdf",
+  "リンク文言": "離職されたみなさまへ（R080201版）［PDF形式：762KB］",
+  "版表記": "R080201版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "一般被保険者用(64歳以下)を代表として採用。同ページに高年齢被保険者用(65歳以上、002608417.pdf)・短期雇用特例被保険者用(季節的雇用等、002608420.pdf)も併存。PDF実在確認済(739KB≒762KB表記と概ね一致)。確信度:高",
+  "PDF_バイト数": "756745",
+  "PDF_更新日時": "Fri, 27 Mar 2026 04:52:54 GMT",
+  "PDF_候補数": "3"
+ },
+ {
+  "都道府県コード": "36",
+  "都道府県": "徳島県",
+  "slug": "tokushima",
+  "労働局名": "徳島労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/tokushima-roudoukyoku/newpage_01028.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/tokushima-roudoukyoku/content/contents/002659146.pdf",
+  "リンク文言": "離職されたみなさまへ（PDF：1MB）",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "パンくず: 徳島労働局＞利用者別・目的別メニュー＞求職中の方へ＞求職者の皆様へ(仕事をお探しの皆様へ)＞離職されたみなさまへ。PDF実在確認済(1.6MB)。確信度:高",
+  "PDF_バイト数": "1570431",
+  "PDF_更新日時": "Tue, 19 May 2026 04:25:18 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "37",
+  "都道府県": "香川県",
+  "slug": "kagawa",
+  "労働局名": "香川労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kagawa-roudoukyoku/news_topics/topics/_119452/_119590.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kagawa-roudoukyoku/content/contents/001907770.pdf",
+  "リンク文言": "受給手続 パンフレット",
+  "版表記": "A4版8ページ",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "確信度:中。掲載ページが2015年度のニュース記事(雇用保険に関するマイナンバーの取扱について)であり、他県のような「雇用保険関係」トップからの現行導線が確認できなかった。より新しい掲載ページが別途存在する可能性が高く継続調査が望ましい。PDF自体は実在確認済(810KB)。ドメイン例外について: kagawa-helloworkという分離ドメインのサイトが実在する(香川ハローワーク)が、雇用保険を受ける方向けページ(1539_main.html等)を確認した限りでは受給パンフレットPDFはkagawa-roudoukyoku側に掲載されており、東京都のような主担当ドメインの例外は今回確認されなかった。ただし将来的にhellowork側へ移設される可能性は否定できない",
+  "PDF_バイト数": "829611",
+  "PDF_更新日時": "Mon, 05 Aug 2024 05:24:11 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "38",
+  "都道府県": "愛媛県",
+  "slug": "ehime",
+  "労働局名": "愛媛労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/ehime-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki/20161212-001.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/ehime-roudoukyoku/content/contents/002202229.pdf",
+  "リンク文言": "離職されたみなさまへ＜愛媛版＞",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに高年齢求職者給付金のご案内(002202233.pdf)・特例一時金のご案内(000766685.pdf)も併存。掲載ページのURLに2016年の日付(20161212)が含まれるが、パンくずは「愛媛労働局＞各種法令・制度・手続き＞労働保険関係＞雇用保険関係＞手続き＞雇用保険関係の電子申請手続き」で現行ページとして生存確認済み。PDF実在確認済(1.5MB)。確信度:中(ページURLの命名が古いため掲載の継続性に注意)",
+  "PDF_バイト数": "1707951",
+  "PDF_更新日時": "Tue, 08 Apr 2025 06:18:51 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "39",
+  "都道府県": "高知県",
+  "slug": "kochi",
+  "労働局名": "高知労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kochi-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kochi-roudoukyoku/content/contents/002225134.pdf",
+  "リンク文言": "求職者給付の受給手続き",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "ページ内の見出し「離職された方へ」の配下にあるリンク。直後に「高年齢求職者給付金のご案内」等の関連リンクが続く(他PDFのURL・版表記は今回未取得)。PDF実在確認済(1.9MB)。確信度:中(リンク文言が「離職されたみなさまへ」という統一名称ではなく「求職者給付の受給手続き」である点に注意。パンフレットの正式名称は要再確認)",
+  "PDF_バイト数": "1970931",
+  "PDF_更新日時": "Thu, 01 May 2025 06:34:51 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "40",
+  "都道府県": "福岡県",
+  "slug": "fukuoka",
+  "労働局名": "福岡労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/fukuoka-roudoukyoku/jirei_toukei/pamphlet_leaflet/antei_00001.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/fukuoka-roudoukyoku/content/contents/002459249.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "07.9版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "別調査(2026-09-02付)で生存確認済みのため本件は再確認していない。同ページに旧版(06.9版)PDF https://jsite.mhlw.go.jp/fukuoka-roudoukyoku/content/contents/002016291.pdf も併存。新版のみ採用。ドメインは標準(fukuoka-roudoukyoku)で例外なし。確信度:高",
+  "PDF_バイト数": "11728619",
+  "PDF_更新日時": "Fri, 28 Nov 2025 00:08:04 GMT",
+  "PDF_候補数": "12"
+ },
+ {
+  "都道府県コード": "41",
+  "都道府県": "佐賀県",
+  "slug": "saga",
+  "労働局名": "佐賀労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/saga-roudoukyoku/newpage_02113.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/saga-roudoukyoku/content/contents/001846924.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "PDF実在確認(1.2MB・WebFetchで取得成功)。同ページ内のもう1つのPDF(var/rev0/0112/7692/201752614210.pdf)は「求人票と違う」苦情申出フォームで無関係と判明。ドメインは標準で例外なし。確信度:高",
+  "PDF_バイト数": "1268033",
+  "PDF_更新日時": "Tue, 11 Jun 2024 06:05:43 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "42",
+  "都道府県": "長崎県",
+  "slug": "nagasaki",
+  "労働局名": "長崎労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/nagasaki-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/nagasaki-roudoukyoku/content/contents/leaflet-25040109.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし(ファイル名\"leaflet-25040109\"から令和7年頃の版と推測)",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "PDF実在確認(1.2MB)。ファイル名が他県と異なる命名規則(数字IDでなく\\leaflet-\\\"接頭辞)。ページ上に明示的な版表記なし。確信度:中(版表記がファイル名推測のため)\"",
+  "PDF_バイト数": "1239546",
+  "PDF_更新日時": "Wed, 01 Apr 2026 00:05:28 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "43",
+  "都道府県": "熊本県",
+  "slug": "kumamoto",
+  "労働局名": "熊本労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/riyousha_mokuteki_menu/kyushokuchu_00014.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kumamoto-roudoukyoku/content/contents/001423249.pdf",
+  "リンク文言": "離職されたみなさまへ（一般被保険者用）",
+  "版表記": "表記なし（PDF内の版表記は未確認・ファイル名001423249は数字IDのため日付推定不可）",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "再調査(2026-09-02)で発見。正式タイトル:離職されたみなさまへ。パンくず:熊本労働局＞利用者別・目的別メニュー＞求職中の方へ＞離職されたみなさまへ。同ページに高年齢被保険者用(001423251.pdf)・短期特例被保険者用(001423252.pdf)も併存。一般被保険者用PDF実在確認済(3.2MB・200応答)。前回調査時に到達していたriyousha_mokuteki_menu/kyushokuchu_00009.html等は別ページで、正しいサブページはkyushokuchu_00014.html(親ページkyushokuchu.htmlの「離職されたみなさまへ」見出しから到達)。前回代替として記載していた雇用保険受給手続き案内ページ(kyushokuchu_00009.html・hwkjyukyuu.pdf)は不要となったため差し替え。確信度:高(PDF内の版表記のみ未確認のため要継続確認)",
+  "PDF_バイト数": "3335159",
+  "PDF_更新日時": "Mon, 18 May 2026 06:47:43 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "44",
+  "都道府県": "大分県",
+  "slug": "oita",
+  "労働局名": "大分労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/oita-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken/tetsuzuki.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/oita-roudoukyoku/content/contents/001051401.pdf",
+  "リンク文言": "離職されたみなさまへ【2025年8月版】",
+  "版表記": "2025年8月版",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに高年齢求職者給付金版(001051200.pdf)・特例一時金版(001051203.pdf)も同時期(2025年8月版)で併存。いずれも別給付制度向けの派生版であり新旧の重複ではない。ドメインは標準で例外なし。確信度:高",
+  "PDF_バイト数": "2560508",
+  "PDF_更新日時": "Tue, 09 Sep 2025 05:46:26 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "45",
+  "都道府県": "宮崎県",
+  "slug": "miyazaki",
+  "労働局名": "宮崎労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/miyazaki-roudoukyoku/jirei_toukei/_120768/_120759.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/miyazaki-roudoukyoku/content/contents/002174328.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "同ページに高年齢求職者給付金版(001817595.pdf)・特例一時金版(001817597.pdf)も併存。いずれも別給付制度向けの派生版で新旧重複ではない。ドメインは標準で例外なし。確信度:高",
+  "PDF_バイト数": "1466241",
+  "PDF_更新日時": "Wed, 05 Nov 2025 04:03:15 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "46",
+  "都道府県": "鹿児島県",
+  "slug": "kagoshima",
+  "労働局名": "鹿児島労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/kagoshima-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/kagoshima-roudoukyoku/content/contents/2026-0410-2_202604.pdf",
+  "リンク文言": "離職されたみなさまへ（令和8年4月1日以降）",
+  "版表記": "令和8年4月1日以降",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "PDF実在確認(3.9MB)。同ページに高年齢求職者給付金版(2025-1023-4_01.pdf)・特例一時金版(2025-1023-4_02.pdf、いずれも令和7年8月1日以降版)も併存。別給付制度向けの派生版で新旧重複ではない。ファイル名が日付ベースの命名規則(他県の数字IDと異なる)。ドメインは標準で例外なし。確信度:高",
+  "PDF_バイト数": "4119422",
+  "PDF_更新日時": "Fri, 10 Apr 2026 06:41:14 GMT",
+  "PDF_候補数": "1"
+ },
+ {
+  "都道府県コード": "47",
+  "都道府県": "沖縄県",
+  "slug": "okinawa",
+  "労働局名": "沖縄労働局",
+  "掲載ページURL": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/hourei_seido_tetsuzuki/koyou_hoken.html",
+  "PDF_URL": "https://jsite.mhlw.go.jp/okinawa-roudoukyoku/content/contents/002505364.pdf",
+  "リンク文言": "離職されたみなさまへ",
+  "版表記": "表記なし",
+  "確認日": "2026-09-02",
+  "状態": "確認済",
+  "備考": "PDF実在確認(6.7MB)。同ページに別名称の資料「雇用保険の失業等給付受給資格者のしおり」(002275679.pdf)も掲載(内容がより詳細な別文書の可能性・要実物確認)。ドメインは標準で例外なし。確信度:高",
+  "PDF_バイト数": "7026572",
+  "PDF_更新日時": "Tue, 23 Dec 2025 00:11:00 GMT",
+  "PDF_候補数": "1"
+ }
+];
+
+// 設定はすべて masters/設定.json が正本。この画面に値を直接書かないこと。
+const 設定 = {
+ "公開": {
+  "ベースURL": "https://tools.megumi-office.biz",
+  "パス": "/risyoku",
+  "ドメイン確定済み": true
+ },
+ "QRコード": {
+  "誤り訂正レベル": "M",
+  "セルサイズpx": 4,
+  "クワイエットゾーン倍率": 4,
+  "印刷サイズmm": 40
+ },
+ "鮮度": {
+  "警告しきい値_日": 90
+ },
+ "巡回": {
+  "リクエスト間隔_秒": 1.0,
+  "タイムアウト_秒": 30,
+  "UserAgent": "megumi-jimusho-risyoku-patrol/1.0 (pamphlet update check)",
+  "縮小中止しきい値": 0.7
+ },
+ "給付区分": [
+  {
+   "キー": "ippan",
+   "パス": "",
+   "区分名": "64歳までで離職された方",
+   "見出し": "64歳までで離職された方へ",
+   "説明": "基本手当（失業給付）のご案内です。受給の手続き、認定日、給付の日数などが記載されています。"
+  },
+  {
+   "キー": "konenrei",
+   "パス": "konenrei/",
+   "区分名": "65歳以上で離職された方",
+   "見出し": "65歳以上で離職された方へ",
+   "説明": "高年齢求職者給付金のご案内です。失業の認定は1回で、一時金としてまとめて支給されます。",
+   "全国共通版PDF": "https://www.mhlw.go.jp/content/11600000/000695108.pdf"
+  },
+  {
+   "キー": "tokurei",
+   "パス": "tokurei/",
+   "区分名": "季節的なお仕事で離職された方",
+   "見出し": "季節的なお仕事で離職された方へ",
+   "説明": "特例一時金のご案内です。季節的に雇用されていた方（短期雇用特例被保険者）が対象です。",
+   "全国共通版PDF": "https://www.mhlw.go.jp/content/11600000/000695033.pdf"
+  }
+ ],
+ "フォールバック": {
+  "一般被保険者用": "https://www.mhlw.go.jp/content/11600000/000951119.pdf",
+  "掲載ページ": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000139508.html"
+ },
+ "管理": {
+  "作成者": "原 和也",
+  "作成日": "2026-09-02",
+  "最終改修日": "2026-09-02",
+  "最終改修内容": "公開開始（tools.megumi-office.biz へ141枚を配置・全件検証済み）"
+ }
+};
+
+// QRコードに焼かれるURLの土台。★配布後は二度と変えられない★
+const ベースURL = 設定.公開.ベースURL.replace(/\/$/, "") + 設定.公開.パス.replace(/\/$/, "");
+
+// 最終確認日からこの日数を超えたら、画面上で注意表示に切り替える
+const 鮮度しきい値_日 = 設定.鮮度.警告しきい値_日;
+
+// ドメインが未確定のうちは、画面上部に警告帯を出して誤配布を防ぐ
+if (!設定.公開.ドメイン確定済み) {
+  document.getElementById("banner").hidden = false;
+  document.getElementById("bannertext").textContent =
+    "QRコードは仮のURL（" + 設定.公開.ベースURL + "）で生成されています。"
+    + "公開ドメインが確定するまで、印刷したQRコードを配布しないでください。読み取っても正しい先に飛びません。";
+}
+
+// 給付区分は設定ファイルから読む。3つは制度そのものが別のため、いずれか1つを選ぶ。
+const 種別 = 設定.給付区分.map(x => ({
+  key: x.キー, path: x.パス, 区分名: x.区分名, 見出し: x.見出し, 説明: x.説明
+}));
+
+// 台帳の値を innerHTML へ入れる前に、記号を実体参照へ置き換える。
+// 台帳は人が手で編集するファイルで、備考欄などに < " & が入りうるため。
+function 安全(値){
+  return String(値 == null ? "" : 値)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const $ = s => document.querySelector(s);
+const prefSel = $("#pref");
+
+// ---- 最終確認日からの経過日数を求める ----
+// 台帳の確認日は "2026-09-02" 形式。時差の影響を受けないよう日付だけで比較する。
+function 経過日数(確認日文字列){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((確認日文字列 || "").trim());
+  if (!m) return null;
+  const 確認 = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const 今日 = new Date();
+  const 本日 = Date.UTC(今日.getFullYear(), 今日.getMonth(), 今日.getDate());
+  return Math.floor((本日 - 確認) / 86400000);
+}
+
+// ---- 経過日数を読みやすい日本語にする ----
+function 経過の表現(日数){
+  if (日数 === null) return "確認日の記録なし";
+  if (日数 <= 0) return "本日";
+  if (日数 === 1) return "昨日";
+  if (日数 < 31) return 日数 + "日前";
+  const 月数 = Math.floor(日数 / 30);
+  return "約" + 月数 + "か月前";
+}
+
+// ---- 都道府県プルダウンを台帳から作る ----
+// 選ぶ前に気づけるよう、未確定の県には選択肢の時点で印を付ける
+台帳.forEach((r,i) => {
+  const o = document.createElement("option");
+  o.value = String(i);
+  const 日数 = 経過日数(r.確認日);
+  let 印 = "";
+  if (r.状態 !== "確認済") {
+    印 = "　⚠ 要確認";
+  } else if (日数 !== null && 日数 > 鮮度しきい値_日) {
+    印 = "　△ 確認から" + 経過の表現(日数);
+  }
+  o.textContent = r.都道府県 + 印;
+  prefSel.appendChild(o);
+});
+prefSel.value = "3"; // 初期表示は宮城県（事務所の主たる商圏）
+
+// ---- QRコードを描く。ライブラリが読めなかった場合は代替表示にする ----
+function QRを作る(親, url){
+  親.innerHTML = "";
+  if (typeof qrcode !== "function") {
+    親.classList.add("ph");
+    親.textContent = "QR生成ライブラリを読み込めませんでした";
+    return;
+  }
+  親.classList.remove("ph");
+  try {
+    // 誤り訂正レベル M（15%）。印刷汚れへの耐性と情報量のつり合いが取れる水準。
+    // 第1引数 0 は型番の自動選択（URLの長さに応じて必要な大きさが選ばれる）。
+    const q = qrcode(0, "M");
+    q.addData(url);
+    q.make();
+    // 第2引数はクワイエットゾーン（白い余白）。4モジュール分は規格上の必須で、
+    // ここを削るとスマートフォンで読み取れなくなる。セルサイズの4倍を指定する。
+    const セルサイズ = 4;
+    親.innerHTML = q.createImgTag(セルサイズ, セルサイズ * 4);
+    const img = 親.querySelector("img");
+    if (img) { img.style.width = "100%"; img.style.height = "100%"; }
+  } catch (e) {
+    親.classList.add("ph");
+    親.textContent = "QRを生成できませんでした";
+  }
+}
+
+// ---- いま選ばれている給付区分を返す ----
+function 選択中の種別(){
+  const v = document.querySelector('input[name="shubetsu"]:checked').value;
+  return 種別.find(t => t.key === v);
+}
+
+// ---- 選択中の県と区分から、紙のプレビューを組み立てる ----
+function 描画(){
+  const r = 台帳[Number(prefSel.value)];
+  const t = 選択中の種別();
+  const url = ベースURL + "/" + r.slug + "/" + t.path;
+
+  // 対象者のラベルは黒地に白文字で先頭に出す（区分の取り違えを防ぐ）
+  $("#p-who").textContent = t.見出し;
+  // パンフレットの発行元。全国共通版を案内しているときは厚生労働省になる
+  const 発行元 = (t.key !== "ippan" || r.状態 !== "確認済") ? "厚生労働省" : r.労働局名;
+  $("#p-prefname").textContent = "発行：" + 発行元 + "　／　" + r.都道府県 + "にお住まいの方向け";
+
+  // ---- 状態表示（いま案内しているPDFについて、確認済みか・いつ確認したかを示す）----
+  // 台帳が記録しているのは「一般被保険者用の都道府県版」だけ。
+  // 65歳以上・季節的の区分と、都道府県版が未確定の県は厚労省の全国共通版を案内するため、
+  // 台帳の確認日をそのまま出すと「確認していないものを確認済み」と誤解させる。
+  const 全国共通版を案内中 = (t.key !== "ippan") || (r.状態 !== "確認済");
+  const 確認済 = r.状態 === "確認済";
+  const 日数 = 経過日数(r.確認日);
+  const 古い = 確認済 && 日数 !== null && 日数 > 鮮度しきい値_日;
+  const 状態箱 = $("#prefstate");
+  状態箱.className = "state" + ((!確認済 || 古い) ? " warn" : "");
+
+  let チップ, 見出し行;
+  if (全国共通版を案内中) {
+    // 厚生労働省の全国共通版へ案内している状態。台帳の確認日は対象外なので出さない。
+    チップ = '<span class="chip stale">全国共通版</span>';
+    見出し行 = '<span class="when">厚生労働省の全国共通版を案内します</span>';
+  } else if (古い) {
+    チップ = '<span class="chip stale">確認から日数が経過</span>';
+    見出し行 = '<span class="when">最終確認 ' + 安全(r.確認日) + "（" + 経過の表現(日数) + "）</span>";
+  } else {
+    チップ = '<span class="chip ok">確認済</span>';
+    見出し行 = '<span class="when">最終確認 ' + 安全(r.確認日) + "（" + 経過の表現(日数) + "）</span>";
+  }
+
+  // 迷ったときに現物を見に行くための入口。いま案内している先の掲載元へ飛ばす。
+  const 掲載元URL = 全国共通版を案内中 ? 設定.フォールバック.掲載ページ : r.掲載ページURL;
+  const 掲載元名 = 全国共通版を案内中 ? "厚生労働省のページ" : "労働局の掲載ページ";
+  const 掲載リンク = 掲載元URL
+    ? '<a href="' + 安全(掲載元URL) + '" target="_blank" rel="noopener noreferrer">'
+      + 安全(掲載元名) + 'で現物を確認</a>'
+    : "掲載ページは未登録";
+
+  let 詳細;
+  if (t.key !== "ippan") {
+    詳細 = "この区分は都道府県版を収録していないため、全国共通版を案内します。";
+  } else if (!確認済) {
+    詳細 = r.都道府県 + "版が労働局サイトで見つからないため、全国共通版を案内します。"
+         + "配布前に労働局へご確認ください。";
+  } else {
+    詳細 = "版表記：" + (r.版表記 && r.版表記 !== "表記なし"
+                      ? 安全(r.版表記) : "なし（PDFの中身で更新を判定します）");
+  }
+
+  状態箱.innerHTML =
+    '<div class="row1">' + チップ + 見出し行 + "</div>" +
+    '<div class="meta">' + 詳細 + "<br>" + 掲載リンク + "</div>";
+
+  // 紙に載せるのはQRと読み取り手順だけ。URLの文字列は印字しない。
+  const 箱 = $("#blocks");
+  箱.innerHTML = "";
+  const el = document.createElement("div");
+  el.className = "qrblock";
+  el.innerHTML =
+    '<div class="qwrap">' +
+      '<div class="qframe"><div class="qi"></div></div>' +
+      '<div class="qcap">' + 安全(発行元) + "</div>" +
+    "</div>" +
+    '<div class="qt">' +
+      '<p class="sh">スマートフォンでの見かた</p>' +
+      '<ol class="steps">' +
+        "<li><b>カメラ</b>を起動します</li>" +
+        "<li>左のQRコードに<b>かざします</b></li>" +
+        "<li>リンクを<b>タップ</b>します</li>" +
+      "</ol>" +
+    "</div>";
+  箱.appendChild(el);
+  QRを作る(el.querySelector(".qi"), url);
+
+  $("#qrcount").textContent = t.区分名;
+
+  // 操作パネル側にだけ、確認用としてリンク先を表示する（紙には出さない）
+  $("#linkout").innerHTML =
+    '<span class="lk">QRのリンク先</span><code>' + 安全(url) + "</code>";
+
+  // 選択中の区分を枠線で示す
+  種別.forEach(x => {
+    $("#opt-" + x.key).classList.toggle("on", x.key === t.key);
+  });
+}
+
+prefSel.addEventListener("change", 描画);
+document.querySelectorAll('input[name="shubetsu"]').forEach(rb => {
+  rb.addEventListener("change", 描画);
+});
+$("#btn-print").addEventListener("click", () => window.print());
+$("#btn-url").addEventListener("click", async e => {
+  const r = 台帳[Number(prefSel.value)];
+  const t = 選択中の種別();
+  const url = ベースURL + "/" + r.slug + "/" + t.path;
+  try {
+    await navigator.clipboard.writeText(url);
+    e.target.textContent = "コピーしました";
+    setTimeout(() => { e.target.textContent = "QRのリンク先URLをコピー"; }, 1600);
+  } catch (err) {
+    e.target.textContent = "コピーできませんでした";
+    setTimeout(() => { e.target.textContent = "QRのリンク先URLをコピー"; }, 1600);
+  }
+});
+
+// ---- 台帳タブ ----
+(function 台帳を描く(){
+  const 確認済数 = 台帳.filter(r => r.状態 === "確認済").length;
+  const 版あり = 台帳.filter(r => r.版表記 && r.版表記 !== "表記なし").length;
+  $("#stats").innerHTML =
+    '<div class="stat"><div class="v">' + 台帳.length + '</div><div class="k">登録県数</div></div>' +
+    '<div class="stat"><div class="v">' + 確認済数 + '</div><div class="k">実際に開いて確認済み</div></div>' +
+    '<div class="stat w"><div class="v">' + (台帳.length - 確認済数) + '</div><div class="k">要確認</div></div>' +
+    '<div class="stat"><div class="v">' + 版あり + '</div><div class="k">版表記あり（更新検知が容易）</div></div>';
+
+  const tb = $("#tbody");
+  台帳.forEach(r => {
+    const tr = document.createElement("tr");
+    if (r.状態 !== "確認済") tr.className = "flag";
+    const リンク = (u) => u
+      ? '<a href="' + 安全(u) + '" target="_blank" rel="noopener noreferrer">' + 安全(u.replace(/^https:\/\//, "")) + "</a>"
+      : '<span style="color:var(--muted)">—</span>';
+    tr.innerHTML =
+      '<td class="num">' + 安全(r.都道府県コード) + "</td>" +
+      '<td class="pn">' + 安全(r.都道府県) + "</td>" +
+      '<td class="sl">' + 安全(r.slug) + "</td>" +
+      "<td>" + 安全(r.労働局名) + "</td>" +
+      '<td><span class="chip ' + (r.状態 === "確認済" ? "ok" : "warn") + '">' + 安全(r.状態) + "</span></td>" +
+      '<td class="num">' + 安全(r.確認日) + "<br><span style=\"color:var(--muted);font-size:.6875rem\">" +
+        経過の表現(経過日数(r.確認日)) + "</span></td>" +
+      "<td>" + (r.版表記 ? 安全(r.版表記) : "—") + "</td>" +
+      '<td class="u">' + リンク(r.掲載ページURL) + "</td>" +
+      '<td class="u">' + リンク(r.PDF_URL) + "</td>" +
+      '<td class="rm">' + 安全(r.備考 || "") + "</td>";
+    tb.appendChild(tr);
+  });
+})();
+
+// ---- 仕組みタブの図 ----
+$("#flowbox").innerHTML = [
+'<svg viewBox="0 0 640 210" role="img" aria-label="QRから中継ページを経て労働局のPDFへ至る流れ。中継ページだけを更新すれば配布済みの紙が最新につながる。">',
+'<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">',
+'<path d="M0,0 L6,3 L0,6 z" fill="currentColor"/></marker></defs>',
+'<g fill="none" stroke="currentColor" stroke-width="1.4" color="var(--muted)" marker-end="url(#ar)">',
+'<path d="M132,58 L196,58"/><path d="M330,58 L394,58"/><path d="M264,96 L264,142"/>',
+'</g>',
+'<g font-family="Noto Sans JP, sans-serif" font-size="12">',
+'<rect x="12" y="30" width="120" height="56" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/>',
+'<text x="72" y="53" text-anchor="middle" fill="var(--ink)" font-weight="700">紙のQR</text>',
+'<text x="72" y="70" text-anchor="middle" fill="var(--muted)" font-size="10.5">配布済み・変更不可</text>',
+'<rect x="198" y="30" width="132" height="56" rx="5" fill="var(--accent-soft)" stroke="var(--accent)"/>',
+'<text x="264" y="53" text-anchor="middle" fill="var(--accent)" font-weight="700">中継ページ</text>',
+'<text x="264" y="70" text-anchor="middle" fill="var(--accent)" font-size="10.5">事務所が管理</text>',
+'<rect x="396" y="30" width="132" height="56" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/>',
+'<text x="462" y="53" text-anchor="middle" fill="var(--ink)" font-weight="700">労働局のPDF</text>',
+'<text x="462" y="70" text-anchor="middle" fill="var(--muted)" font-size="10.5">改訂でURLが変わる</text>',
+'<rect x="176" y="144" width="176" height="50" rx="5" fill="var(--surface-2)" stroke="var(--rule)" stroke-dasharray="3 3"/>',
+'<text x="264" y="165" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="11.5">台帳の1行を直すだけ</text>',
+'<text x="264" y="181" text-anchor="middle" fill="var(--muted)" font-size="10.5">月次巡回が変更を検知</text>',
+'<text x="540" y="112" text-anchor="end" fill="var(--muted)" font-size="10.5">QRは一度も変えない</text>',
+'</g></svg>'
+].join("");
+
+// ---- タブ切り替え ----
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(b => {
+      const 選択中 = b === btn;
+      b.setAttribute("aria-selected", String(選択中));
+      document.getElementById(b.getAttribute("aria-controls")).hidden = !選択中;
+    });
+  });
+});
+
+描画();
+</script>
+</body>
+</html>
