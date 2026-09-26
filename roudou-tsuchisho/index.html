@@ -149,6 +149,53 @@
   .page-note{background:#fff6e5;border:1px solid #f0d9a0;color:#7a5b00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
   .gap-note{background:#fdecec;border:1px solid #e7b3b3;color:#8a1f1f;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
   .warn-check{background:#fff7e0;border:1px solid #e6c260;color:#7a5a00;border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6}
+  /* ---- §F 法令チェックの画面表示（MF-03〜06）。印刷では必ず非表示にする（書面へ出さない） ---- */
+  .law-note{border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.6;border:1px solid}
+  .law-note .lw-item{margin:3px 0}
+  .law-block{background:#fdecec;border-color:#c96a6a;color:#7a1414}
+  .law-red{background:#fdecec;border-color:#e7b3b3;color:#8a1f1f}
+  .law-yellow{background:#fff7e0;border-color:#e6c260;color:#7a5a00}
+  .law-ok{background:#eef6ef;border-color:#bcd8bf;color:#245a2b}
+  /* ---- §H 画面のみのお知らせ枠（版表示 MF-14／様式の注記 MF-15／免責 MF-17／DL注意 MF-18） ----
+     いずれも「画面だけに出す」もの。印刷・Word・Excelの書面へは絶対に出さないため、
+     @media print で .tool-note と #appFooter を非表示にしている（下の print 節）。 */
+  .tool-note{border:1px solid #cfe0f5;background:#f5f9ff;border-radius:8px;padding:10px 12px;margin:12px 0;font-size:12.5px;line-height:1.75;color:var(--ink)}
+  .tool-note h3{margin:0 0 6px;font-size:13.5px;color:var(--accent2)}
+  .tool-note ul{margin:4px 0 0;padding-left:1.3em}
+  .tool-note li{margin:3px 0}
+  .tool-note .tn-lead{margin:0 0 6px}
+  .tool-note .tn-foot{margin:8px 0 0;color:var(--sub);font-size:11.5px}
+  .tool-note table.tn-table{border-collapse:collapse;margin:6px 0 0;font-size:12px;width:100%}
+  .tool-note table.tn-table th,.tool-note table.tn-table td{border:1px solid #cfd8e3;padding:4px 7px;text-align:left;vertical-align:top;background:#fff}
+  .tool-note table.tn-table th{background:#eef4ff;white-space:nowrap}
+  .tool-note.tn-privacy{border-color:#e6c260;background:#fff7e0;color:#6b4e00}
+  .tool-note.tn-privacy h3{color:#7a5a00}
+  .tool-note.tn-disclaimer{border-color:#c9d3de;background:#f6f8fa}
+  .tool-note.tn-disclaimer .tn-office{margin:8px 0 0;font-weight:700;color:var(--accent2)}
+  /* ダウンロードボタンのすぐ近くに置く小型版 */
+  .tool-note.tn-compact{margin:8px 0 0;padding:8px 10px;font-size:12px}
+  #appFooter{max-width:1040px;margin:18px auto 28px;padding:0 16px}
+  /* ---- §H MF-13 交付前チェックリスト（通知書とは別の用紙。印刷のときだけ現れる） ---- */
+  #modeChecklist .cl-sheet{background:#fff;color:#000;font-family:var(--mincho);font-size:10.5pt;line-height:1.55}
+  #modeChecklist h2{font-size:15pt;text-align:center;margin:0 0 6px;border:0;padding:0}
+  #modeChecklist .cl-lead{font-size:9.5pt;margin:0 0 8px}
+  #modeChecklist table{width:100%;border-collapse:collapse;margin:0 0 10px;font-size:9.5pt}
+  #modeChecklist table td,#modeChecklist table th{border:1px solid #000;padding:4px 6px;vertical-align:top}
+  #modeChecklist .cl-g{font-weight:700;background:#f2f2f2}
+  #modeChecklist .cl-box{width:34px;text-align:center}
+  #modeChecklist .cl-basis{display:block;font-size:8.5pt;color:#333;margin-top:2px}
+  #modeChecklist .cl-foot{font-size:9pt;margin-top:10px}
+  /* ---- §G セルフテスト（?selftest=1）の結果パネル。画面のみ ---- */
+  #selftestPanel{background:#fff;border:2px solid #305496;border-radius:8px;margin:12px 16px;padding:12px 14px;font-size:12px}
+  #selftestPanel h2{font-size:15px;margin:0 0 6px}
+  #selftestPanel h3{font-size:13px;margin:12px 0 4px}
+  #selftestPanel .st-lead{color:#555;margin:0 0 6px}
+  #selftestPanel table.st-table{border-collapse:collapse;width:100%;font-size:11.5px;table-layout:fixed}
+  #selftestPanel table.st-table th,#selftestPanel table.st-table td{border:1px solid #cfd8e3;padding:4px 6px;vertical-align:top;word-break:break-all}
+  #selftestPanel table.st-table th:nth-child(1),#selftestPanel table.st-table td:nth-child(1){width:44px}
+  #selftestPanel table.st-table th:nth-child(2),#selftestPanel table.st-table td:nth-child(2){width:52px;text-align:center;font-weight:700}
+  #selftestPanel tr.st-ok td:nth-child(2){background:#eef6ef;color:#245a2b}
+  #selftestPanel tr.st-ng td:nth-child(2){background:#fdecec;color:#8a1f1f}
   /* ---- 名簿バー・一括作成 ---- */
   /* 明るい面ではゴースト白文字が見えないので上書き */
   #rosterBar .btn.ghost,#modeBatch .btn.ghost,#modeGuide .btn.ghost,#modeRefs .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
@@ -183,7 +230,16 @@
     body{background:#fff}
     .wrap{display:block}
     .preview{padding:0;overflow:visible;max-height:none}
-    .page-note,.gap-note,.warn-check,.form-nav{display:none !important}
+    /* 画面のみのお知らせ（版表示・免責・ダウンロード注意）は、どの印刷経路でも必ず消す。
+       ここを外すと顧問先が労働者へ交付する法定書面に第三者の免責文が混入する（MF-17）。 */
+    .page-note,.gap-note,.warn-check,.form-nav,.law-note,#lawCheckNote,#selftestPanel,
+    .tool-note,#appFooter{display:none !important}
+    /* MF-13 交付前チェックリストの単独印刷。通知書（#modeCreate/#preview）を含め他をすべて消す */
+    body.print-checklist header.appbar,body.print-checklist .tabbar,body.print-checklist #rosterBar,
+    body.print-checklist #modeCreate,body.print-checklist #preview,body.print-checklist #modeBatch,
+    body.print-checklist #modeCalc,body.print-checklist #modeGuide,body.print-checklist #modeRefs,
+    body.print-checklist #appFooter{display:none !important}
+    body.print-checklist #modeChecklist{display:block !important;padding:12mm}
     .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;padding:12mm 12mm;
       page-break-after:always;font-size:10pt}
     .sheet:last-child{page-break-after:auto}
@@ -237,6 +293,7 @@
     <button class="btn print" onclick="doPrint()">🖨 印刷 / PDF</button>
     <button class="btn" onclick="exportWord()">📄 Word</button>
     <button class="btn" onclick="exportExcel()">📊 Excel</button>
+    <button class="btn ghost" onclick="printChecklist()" title="交付前に人の目で確認する項目を、通知書とは別の用紙として印刷します（この用紙は労働者へ渡すものではありません）">📋 交付前チェック</button>
     <button class="btn ghost" onclick="saveData()">💾 保存</button>
     <button class="btn ghost" onclick="document.getElementById('loadFile').click()">📂 読込</button>
     <input type="file" id="loadFile" accept=".json,application/json" style="display:none" onchange="loadData(this)">
@@ -276,8 +333,13 @@
       <b>🔰 使い方</b><br>
       ① 上から順に入力します。まず「書類の種類」→「雇用区分」を選ぶと、<b>その人に必要な入力欄だけが自動で表示</b>されます（不要な欄は自動で隠れます）。<br>
       ② 各欄の下の<b>緑のヒント</b>が「ここを選ぶと何の欄が出るか／どう入力するか」を説明します。慣れたら右上の<b>「❓ ヘルプ」</b>で非表示にできます。<br>
-      ③ 入力し終えたら右上の「印刷/PDF・Word・Excel」で出力。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。
+      ③ 入力し終えたら右上の「印刷/PDF・Word・Excel」で出力。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。<br>
+      ④ 交付する前に右上の<b>「📋 交付前チェック」</b>で確認用紙を印刷し、機械では確認できない項目を人の目で確認してください（この用紙は労働者へ渡すものではありません）。
     </div>
+
+    <!-- MF-18 ダウンロード物の取扱い（画面のみ。印刷では .tool-note を非表示にしている）。
+         入力画面が注意書きで埋まらないよう、ここは短い版（tn-compact）。全文は「使い方」タブ。 -->
+    <div class="tool-note tn-privacy tn-compact" data-download-notice></div>
 
     <fieldset id="fsDisplay">
       <legend>表示設定</legend>
@@ -332,6 +394,14 @@
         </div>
         <div class="help-note">この選択で様式が切り替わります。<b>派遣</b>→「その他」に派遣元/派遣先欄、<b>建設</b>→帰郷旅費欄＋使用者欄が「事業主の氏名又は名称」、<b>短時間</b>→賃金の昇給・賞与・退職金の有無明示が付きます。</div>
       </div>
+      <!-- MF-11 「短時間労働者」該当性の判定支援（パート有期法2条1項）。画面のみ・書面には印字しない -->
+      <div class="row two" id="grpShortJudge">
+        <div><label>通常の労働者（正社員等）の週の所定労働時間</label>
+          <input type="text" name="normal_weekly_hours" inputmode="decimal" placeholder="例：40"></div>
+        <div><label>この方の週の所定労働時間</label>
+          <input type="text" name="worker_weekly_hours" inputmode="decimal" placeholder="例：30"></div>
+      </div>
+      <div class="help-note"><b>「短時間労働者」かどうかの確認（パート有期法2条1項）</b>：1週間の所定労働時間が、<b>同一の事業主に雇用される通常の労働者（正社員等）に比べて短い</b>労働者が「短時間労働者」です。<b>呼称は問いません</b>——「パート」「アルバイト」「準社員」「嘱託」などと呼んでいても、通常の労働者より<b>わずかでも短ければ該当</b>します。逆に「パート」と呼んでいても<b>通常の労働者と同じ所定労働時間なら短時間労働者ではありません</b>（ただし期間の定めがある場合は<b>有期雇用労働者</b>として同じ明示事項の対象になります）。上の2つの欄に時間数を入れると、選んだ雇用形態と食い違う場合に画面で注意します。<b>この2欄は書面には印字されません。</b></div>
       <div class="row"><label>期間区分</label>
         <div class="seg">
           <label><input type="radio" name="period_type" value="無期" checked> 無期</label>
@@ -374,12 +444,18 @@
           <label style="margin-top:6px">更新上限</label>
           <input type="text" name="renewal_cap" placeholder="通算5年まで／更新3回まで 等">
         </div>
+        <div class="row" id="grpTsusan">
+          <label>通算契約期間の起算日（この方と結んだ最初の有期労働契約の開始日）</label>
+          <input type="date" name="tsusan_start">
+          <div class="hint">今回が最初の契約なら、上の「契約始期」と同じ日を入れてください。更新を重ねている方は、<b>いま続いている有期契約の一番最初の開始日</b>を入れます（労働者名簿・雇用保険の資格取得日・前回までの契約書などで確認できます）。<b>この欄は書面には印字されません</b>（無期転換の申込権が発生していないかを画面で確認するためだけに使います）。</div>
+        </div>
         <div class="row"><label>無期転換申込権（通算5年超見込み）</label>
           <div class="seg">
             <label><input type="radio" name="muki_flag" value="無" checked> 無</label>
             <label><input type="radio" name="muki_flag" value="有"> 有（別紙を添付）</label>
           </div>
           <div class="help-note">通算5年を超えて契約更新が見込まれる場合は「有」を選びます。<b>「有」にすると2ページ目に「無期転換後の労働条件（別紙）」が自動作成</b>され、本紙にも無期転換の申込みができる旨が記載されます（労働契約法18条・労基則5条）。別紙は本紙の条件を引き継ぎますが、<b>契約期間は「期間の定めなし」に置き換わり、試用期間・特記事項は載りません</b>（雇入れ当初の定めや有期契約固有の内容を転換後の別紙に誤って残さないため）。転換後も適用する内容がある場合は、出力後に別紙へ追記してください。<b>転換後に定年適用や賃金体系変更など労働条件を変える場合も、出力後に別紙の該当箇所を手修正してください。</b><b>Excel出力では2ページ目ではなく、同じシート内の本紙の下（区切り行「以下、別紙」の後）に続けて出力されます</b>（印刷して2枚に分けたい場合は、印刷プレビューで区切り行の位置に手動で改ページを入れてください）。</div>
+          <div class="help-note" id="mukiTenkanHelp"></div>
         </div>
       </div>
       <div id="grpHiyatoi" class="hidden">
@@ -508,6 +584,22 @@
 
     <fieldset id="fsWage">
       <legend>賃金</legend>
+      <!-- MF-02／MF-03: 最低賃金の確認（画面のみ・通知書には印字しません）。MF-02の明示欄とMF-03の判定で
+           都道府県の選択を共有し、同じUIを二重に作らない。name属性を付けているので既存の保存／復元がそのまま拾う。 -->
+      <div id="grpMinWage">
+        <div class="row three">
+          <div><label>最低賃金の都道府県</label>
+            <select name="minwage_pref" id="minwagePref"><option value="">（選択してください）</option></select></div>
+          <div><label>最低賃金の種類</label>
+            <select name="minwage_kind"><option value="地域別">地域別最低賃金</option><option value="特定">特定（産業別）最低賃金</option></select></div>
+          <div><label>特定（産業別）の時間額（円）</label>
+            <input type="text" class="num" inputmode="numeric" name="minwage_special_amount" placeholder="該当する場合のみ"></div>
+        </div>
+        <div class="row hidden" id="grpMinWageSpecialName"><label>特定（産業別）最低賃金の名称</label>
+          <input type="text" name="minwage_special_name" placeholder="例：宮城県自動車小売業最低賃金"></div>
+        <div class="hint" id="minWageApplied">都道府県を選ぶと、適用される最低賃金額と発効日を表示します。</div>
+        <div class="help-note">ここで選んだ都道府県の最低賃金と、下で入力する賃金額・月の所定労働時間から<b>時間額</b>を計算し、最低賃金を下回っていないかを画面で確認します（<b>確認結果は通知書には印字されません</b>）。初期値は「事業場所在地」「就業の場所」から自動で推測します。<b>派遣</b>の場合は<b>派遣先</b>の事業場所在地の最低賃金が適用されます（最低賃金法13条・18条）。特定（産業別）最低賃金がある業種では、地域別と特定のうち<b>高い方</b>が適用されます（額は手入力してください）。</div>
+      </div>
       <div class="row"><label>基本賃金の種類</label>
         <select name="wage_type">
           <option value="月給">月給</option><option value="日給">日給</option>
@@ -553,7 +645,7 @@
         <select name="ot_style"><option value="split" selected>区分別（固定残業＋固定深夜）</option><option value="unified">一体型（固定時間外勤務手当・内訳明示）</option></select>
         <div class="help-note">「一体型」は時間外・法定休日・深夜を1本の手当にまとめ、内訳（時間数・金額）を明示します。希望額を6:3:1などで自動按分できます（割増率は下の「割増賃金率」を使用）。</div>
       </div>
-      <div class="row wg wg-month"><label>月の所定労働時間（固定残業の算定用・半角数字。小数可）</label>
+      <div class="row wg wg-month wg-year wg-deki"><label>月の所定労働時間（固定残業の算定用・最低賃金の確認用・半角数字。小数可）</label>
         <input type="text" class="num dec" inputmode="decimal" name="monthly_scheduled_hours" placeholder="例：173.75"></div>
       <div class="row wg wg-month"><label>自動計算の端数処理（切り上げ単位）</label>
         <select name="round_unit"><option value="0">切り上げなし（円未満四捨五入）</option><option value="10">十の位で切り上げ</option><option value="100">百の位で切り上げ</option><option value="1000" selected>千の位で切り上げ</option></select></div>
@@ -631,13 +723,13 @@
       <div class="help-note">賃金の<b>支払方法</b>（口座振込・現金等）は労基則5条1項3号の書面明示事項です。口座振込には本人の同意が必要（労基則7条の2）。<b>労使協定に基づく控除</b>（社宅費・親睦会費など法定控除以外の天引き）がある場合は「有」を選び備考に控除項目を記載します。</div>
       <div class="row three">
         <div><label>昇給</label>
-          <select name="raise_flag"><option value="有">有</option><option value="無">無</option></select></div>
+          <select name="raise_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
         <div><label>賞与</label>
           <select name="bonus_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
         <div><label id="lblRetireAllow">退職金</label>
           <select name="retire_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
       </div>
-      <div class="help-note">昇給・賞与・退職金は「有／無」を選び、「有」のときは下の<b>内容（備考）</b>欄に時期・金額・条件などを記載します（記載すると通知書に反映）。昇給は必ず記載します。賞与・退職金は「無」でも短時間・有期の方は有無明示が必要です。</div>
+      <div class="help-note">昇給・賞与・退職金は「有／無」を選び、「有」のときは下の<b>内容（備考）</b>欄に時期・金額・条件などを記載します（記載すると通知書に反映）。<b>「無」と書面に印字されるのは、あなたが「無」を選んだときだけです</b>（未選択のまま出力して自動的に「無」と印字されることはありません）。短時間・有期・派遣の方は昇給・賞与・退職金の<b>有無の明示が必要</b>なため（パート有期則2条1項1〜3号・派遣法31条の2第2項）、<b>未選択のままでは出力できません</b>。事実と異なる明示は禁じられています（パート有期則2条2項）。</div>
       <div class="row"><label>昇給の内容（備考）</label><input type="text" name="raise_note" placeholder="例：毎年4月、会社業績による（有のとき記載）"></div>
       <div class="row"><label>賞与の内容（備考）</label><input type="text" name="bonus_note" placeholder="例：年2回（7月・12月）、業績連動（有のとき記載）"></div>
       <div class="row"><label>退職金の内容（備考）</label><input type="text" name="retire_note" placeholder="例：勤続3年以上、就業規則第40条による（有のとき記載）"></div>
@@ -656,10 +748,17 @@
           <div class="other-row"><input type="text" class="d-item" placeholder="例：身体又は精神の障害により業務に耐えられないとき"><button type="button" class="mini" onclick="delDismissal(this)" title="削除">×</button></div>
         </div>
         <div><button type="button" class="btn-add" onclick="addDismissal()">＋ 解雇事由を追加</button></div>
-        <div class="help-note">解雇の事由を<b>1項目ずつ「＋ 解雇事由を追加」で追加</b>します（「×」で削除）。下のチェックが<b>ON＝入力した全事由を箇条書き</b>で記載、<b>OFF＝先頭1件＋「等（詳細は就業規則による）」</b>と簡潔に記載します。用紙を1枚に収めたいときはOFFが便利です。</div>
+        <div class="help-note">解雇の事由を<b>1項目ずつ「＋ 解雇事由を追加」で追加</b>します（「×」で削除）。<b>入力した事由はすべて書面に箇条書きで記載されます</b>（解雇の事由は労働条件通知書の法定明示事項です〔労働基準法施行規則5条1項4号〕。一部だけを書いて「等」で省略する書き方はしません）。</div>
       </div>
-      <div class="row"><label><input type="checkbox" name="dismissal_full"> 解雇事由を全て列挙する（オフのときは先頭1件＋「等（詳細は就業規則による）」）</label></div>
-      <div class="note-law hidden" id="warnNoRulesDismissal">「その他」欄で就業規則が無い設定になっています。このままだと解雇の事由が「等（詳細は就業規則による）」と、存在しない規則を参照する表記になります。上の「解雇事由を全て列挙する」にチェックを入れるか、事由を全項目記載してください。</div>
+      <div class="row"><label>解雇の事由を定めた就業規則の条項（1項目ずつ追加）</label>
+        <div id="dismissalClauseList">
+          <div class="other-row"><input type="text" class="dc-item" placeholder="例：第44条"><button type="button" class="mini" onclick="delDismissalClause(this)" title="削除">×</button></div>
+        </div>
+        <div><button type="button" class="btn-add" onclick="addDismissalClause()">＋ 条項を追加</button></div>
+        <div class="help-note">解雇の事由を定めている<b>就業規則の条項を、適用されるものすべて</b>入力します（例：「第44条」「第45条第2項」「第46条」）。入力した条項は書面に<b>「解雇の事由の詳細は、就業規則第44条、第45条第2項による。」</b>のようにまとめて記載されます。<br>明示すべき内容が膨大になる場合、<b>適用される就業規則の関係条項名を網羅的に示すことで足りる</b>とされています〔平成11年1月29日 基発第45号〕。<b>「網羅的に」が条件</b>ですので、<b>一部だけを示して残りを省く書き方はこの取扱いに当たりません</b>。漏れがないようご確認ください（就業規則そのものを、適用する部分を明確にして労働契約の締結時に交付する取扱いも認められています）。<br>「その他」欄で<b>就業規則が無い設定</b>のときは、存在しない規則を参照させないため、この条項の記載は書面に出ません。その場合は解雇の事由を上の欄にすべて列挙してください。</div>
+      </div>
+      <div class="note-law hidden" id="warnNoRulesDismissal">「その他」欄で就業規則が無い設定になっています。このため、入力された就業規則の条項は書面に記載されません。解雇の事由は、実際に適用するものを上の「解雇の事由」欄に<b>すべて</b>列挙してください〔労働基準法施行規則5条1項4号〕。</div>
+      <div class="note-law hidden" id="warnDismissalClause">就業規則がある設定ですが、<b>解雇の事由を定めた就業規則の条項が未入力</b>です。解雇の事由の明示は、適用される就業規則の関係条項名を網羅的に示す方法でも足ります〔平成11年1月29日 基発第45号〕。上の「解雇の事由」欄にすべての事由を列挙しているか、または条項をすべて入力しているかをご確認ください。</div>
     </fieldset>
 
     <fieldset id="fsOther">
@@ -671,7 +770,7 @@
       <div id="grpShahoKubun">
         <div class="row"><label>社会保険（厚生年金・健康保険）の被保険者区分（任意・見込み）</label>
           <select name="shaho_kubun"><option value="">（選択・通常は空欄でよい）</option><option value="一般">一般の被保険者（短時間労働者以外）</option><option value="短時間労働者">短時間労働者（特定適用事業所等）</option></select></div>
-        <div class="help-note"><b>通常は空欄のままで構いません</b>。上の「雇用形態」欄の「短時間（パート）」とは<b>別の概念</b>です（雇用形態がパートでも、週の所定労働時間が通常の労働者の4分の3以上なら「一般の被保険者」になります）。「短時間労働者」は、週20時間以上・月額賃金8.8万円以上・学生でない・特定適用事業所等（被保険者数51人超の企業等）に使用される、という要件を満たす場合の区分です〔健康保険法3条・厚生年金保険法12条〕。<b>要件は2026年8月時点のもの</b>で、賃金要件（8.8万円）は2026年10月撤廃の方向ですが<b>施行期日を定める政令は本ツール確認時点で未公布</b>です（最新の施行状況は所属社労士にご確認ください）。企業規模要件（51人超）は2027年10月以降段階的に引き下げられ2035年10月に撤廃予定です〔令和7年法律第74号〕。本欄は<b>契約締結時点の見込み</b>であり、実際の資格取得は所定労働時間・所定労働日数の実態や事業所の該当状況により確定します。一括作成の「➡ 追加して次の人へ」では賃金額と合わせて自動的にクリアされますが、「➕ この内容を名簿に追加」だけで複製・編集する場合は前の人の選択が残るため、人ごとに見直してください。</div>
+        <div class="help-note"><b>通常は空欄のままで構いません</b>。上の「雇用形態」欄の「短時間（パート）」とは<b>別の概念</b>です（雇用形態がパートでも、週の所定労働時間が通常の労働者の4分の3以上なら「一般の被保険者」になります）。<span id="shahoKubunNote"></span>本欄は<b>契約締結時点の見込み</b>であり、実際の資格取得は所定労働時間・所定労働日数の実態や事業所の該当状況により確定します。一括作成の「➡ 追加して次の人へ」では賃金額と合わせて自動的にクリアされますが、「➕ この内容を名簿に追加」だけで複製・編集する場合は前の人の選択が残るため、人ごとに見直してください。</div>
       </div>
       <div class="row two">
         <div><label>雇用保険</label><select name="emp_ins"><option value="有">有</option><option value="無">無</option></select></div>
@@ -693,7 +792,9 @@
       </div>
       <div id="grpSetsumei" class="hidden">
         <label style="display:block;font-weight:600;margin:4px 0"><input type="checkbox" name="show_setsumei" checked> ①「待遇の相違の説明を求めることができる旨」を書面に明示する（令和8年10月1日以降の雇入れ・契約更新から明示義務）</label>
-        <div class="help-note"><b>チェックあり</b>＝下の①窓口（部署・担当者・連絡先）を通知書に記載します。令和8年4月28日公布の改正パート有期則2条1項4号により、<b>令和8年10月1日以降の雇入れ・契約更新からは短時間・有期雇用労働者への書面明示が義務</b>になります（それまでは任意）。交付日が令和8年10月1日以降の短時間・有期の書類では自動的にチェックが固定されます。②の雇用管理改善の相談窓口はチェックに関係なく常に記載されます（施行後は同項5号）。</div>
+        <div class="help-note"><b>チェックあり</b>＝「説明を求めることができる旨」を通知書に記載します。令和8年4月28日公布の改正パート有期則2条1項4号により、<b>令和8年10月1日以降の雇入れ・契約更新からは短時間・有期雇用労働者への書面明示が義務</b>になります（それまでは任意）。②の雇用管理改善の相談窓口はチェックに関係なく常に記載されます（施行後は同項5号）。</div>
+        <div class="help-note"><b>義務が生じるのは「雇い入れたとき」です（交付日ではありません）。</b>本ツールは<b>入社日（無期）・契約始期（有期）</b>が令和8年10月1日以降かどうかで自動判定し、義務に当たる場合はチェックを固定します（2026-06-29付 改正施行通達 第3の1(14)）。<b>有期労働契約は更新のたびに「雇い入れ」に当たるため、更新の都度この明示（法6条1項）が必要です</b>（同(15)）。更新時は「契約始期」に<b>更新後の契約の始期</b>を入れてください。入社日・契約始期が空欄だと施行日の判定ができないため、画面で【要確認】を出します。</div>
+        <div class="help-note"><b>下の①窓口（部署・担当者・連絡先）の記入は任意です。</b>申出先を明示することは<b>義務ではなく「望ましい」もの</b>とされており、「説明を求めることができる旨」を表示することで<b>法6条1項の明示義務は履行されます</b>（2026-06-29付 改正施行通達 第3の1(6)）。窓口を1つも入力しなかった場合、書面には<b>「旨」だけが印字され、空欄の括弧は出ません</b>。窓口を書いておくと労働者が申し出やすくなるため、可能な範囲で記入することをおすすめします。</div>
         <div class="row"><label>① 待遇の相違（内容・理由）等の説明を求める窓口</label></div>
         <div class="row three">
           <div><label>部署名</label><input type="text" name="setsumei_dept" placeholder="総務部"></div>
@@ -769,6 +870,8 @@
         <input type="file" id="rosterFile" accept=".json,application/json" style="display:none" onchange="loadRoster(this)">
         <button class="btn ghost" onclick="rosterClearAll()">🗑 名簿を全消去</button>
       </div>
+      <!-- MF-18 名簿JSONは登録した全員分の個人情報が1ファイルに入る（画面のみの注意書き） -->
+      <div class="tool-note tn-privacy tn-compact" style="margin-bottom:10px" data-download-notice></div>
       <div id="rosterListWrap"></div>
     </div>
 
@@ -949,6 +1052,8 @@
           <button type="button" class="btn-add" onclick="document.getElementById('calcLoadFile').click()">📂 試算を読込</button>
           <input type="file" id="calcLoadFile" accept=".json,application/json" style="display:none" onchange="loadCalc(this)">
         </div>
+        <!-- MF-18 試算ファイルにも宛名・対象（氏名）が入りうるため同じ注意を出す（画面のみ） -->
+        <div class="tool-note tn-privacy tn-compact" data-download-notice></div>
       </fieldset>
 
       <details>
@@ -980,9 +1085,17 @@
       <button class="guide-btn" onclick="printGuide()">🖨 このマニュアルを印刷</button>
     </div>
 
+    <!-- MF-14 版表示の一元化。この枠の中だけを見れば「いつ時点の法令・データに基づく版か」が分かる（画面のみ） -->
+    <div class="tool-note" data-tool-version></div>
+
     <h2>1. このツールでできること</h2>
-    <p>労働条件通知書 兼 雇用契約書と、労働条件変更通知書を作成できます。雇用形態（一般・短時間・派遣・建設・林業など）×契約期間（無期・有期）×労働時間制度×賃金体系の組み合わせに応じて、必要な入力欄と書面の文言が自動で切り替わります。有期契約の無期転換ルールの別紙にも対応しています。書式は厚生労働省のモデル様式（令和8年10月版）に準拠しています。</p>
+    <p>労働条件通知書 兼 雇用契約書と、労働条件変更通知書を作成できます。雇用形態（一般・短時間・派遣・建設・林業など）×契約期間（無期・有期）×労働時間制度×賃金体系の組み合わせに応じて、必要な入力欄と書面の文言が自動で切り替わります。有期契約の無期転換ルールの別紙にも対応しています。</p>
+    <!-- MF-15 「モデル様式に準拠しています」という断定表示を是正した枠（画面のみ） -->
+    <div class="tool-note" data-model-form-notice></div>
     <p>入力した内容はすべてお使いのパソコンのブラウザ内だけで処理され、<b>外部には一切送信されません</b>。</p>
+
+    <!-- MF-18 ダウンロード物の取扱い（画面のみ） -->
+    <div class="tool-note tn-privacy" data-download-notice></div>
 
     <h2>2. 基本の流れ</h2>
     <ol>
@@ -1037,7 +1150,16 @@
       <li><b>書面の中の赤字の注意書き</b> — 固定残業代の時間数未入力、出来高払の保障給未入力など、このまま交付すると法令上問題になり得る箇所です。下書きを完成品と取り違えないよう、印刷にもあえて赤字が印字されます。入力を補うと消えます。</li>
     </ul>
 
-    <h2>8. 賃金試算タブの使い方</h2>
+    <h2>8. 交付前チェックリスト（印刷して使います）</h2>
+    <p>このツールの警告は入力された内容からしか判断できません。<b>入力が正しいかどうか、実態と合っているかどうかは機械では確認できません。</b>そこで、交付する前に人の目で確認する項目を1枚の用紙にまとめて印刷できるようにしています。</p>
+    <ul>
+      <li>画面右上の<b>「📋 交付前チェック」</b>を押すと、<b>通知書とは別の用紙</b>として印刷されます（通知書には1文字も足されません）。</li>
+      <li>この用紙は<b>労働者へ渡すものではありません</b>。会社の控えとして保管してください。</li>
+      <li>先頭の「A. このツールでは判定できない事項」は、<b>画面に警告が出ていなくても必ず確認が必要な4点</b>です（有期3年超の例外該当性／無期転換申込権の発生／短時間労働者への該当性／最低賃金換算のもとになる所定労働時間）。</li>
+    </ul>
+    <p class="guide-nav"><button class="guide-btn secondary" onclick="printChecklist()">🖨 交付前チェックリストを印刷する</button></p>
+
+    <h2>9. 賃金試算タブの使い方</h2>
     <p>通知書には反映されない独立の試算専用タブです。固定残業代を含む賃金の組み立てを、通知書を作らずに確認・検討できます。</p>
     <p><b>①このタブでできること（4モード）</b></p>
     <table class="roster"><thead><tr><th>モード</th><th>使う場面</th></tr></thead><tbody>
@@ -1064,7 +1186,7 @@
     <p><b>試算タブの独立性について</b>：このタブは通知書に自動反映されません。反映されるのは「➡ この内容を作成タブの賃金欄に反映」（モードDでは「➡ 変更後を作成タブへ転記」）ボタンを押したときだけです。試算タブの入力内容は「💾 保存」（作成タブ側）には含まれません。試算専用の保存・読込は「💾 試算を保存」「📂 試算を読込」（モードD使用時に表示）を使います。</p>
     <p class="guide-nav"><button class="guide-btn secondary" onclick="switchMode('calc')">▶ 賃金試算タブを開く</button></p>
 
-    <h2>9. よくある質問</h2>
+    <h2>10. よくある質問</h2>
     <dl class="qa">
       <dt>Q. 緑のヒントを消したい／出したい</dt>
       <dd>右上の「❓ ヘルプ」ボタンで切り替えられます。</dd>
@@ -1075,7 +1197,7 @@
       <dt>Q. 一括出力で2件目以降がダウンロードされない</dt>
       <dd>ブラウザが複数ファイルの連続ダウンロードをブロックしています。アドレスバー付近の許可表示から「許可」を選んでください。</dd>
       <dt>Q. 法改正には対応していますか？</dt>
-      <dd>年2回（4月・10月）、法令・様式の変更を定期点検して更新しています。根拠となる法令・資料は「法令資料」タブにまとまっています。</dd>
+      <dd>年2回（4月・10月）、法令・様式の変更を定期点検して更新しています。<b>いつ時点の法令・データに基づく版かは、このページのいちばん上の「このツールの版」でご確認ください。</b>根拠となる法令・資料は「法令資料」タブにまとまっています。</dd>
       <dt>Q. 就業規則が無い会社の通知書・契約書はどう作る？</dt>
       <dd>「その他」欄の「就業規則がある」のチェックを外すと、末尾の「以上のほかは、当社就業規則による。」と「就業規則を確認できる場所」欄を書面に記載しません（存在しない規則を参照させないため）。外した場合は、解雇の事由など就業規則を前提にしていた項目を「その他の記載事項」欄等で個別に書き足してください（「退職に関する事項」に赤い注意が出ます）。なお「就業規則がある」の判定は、作成の有無だけでなく<b>労働者に周知されているか</b>も基準に含めてください（作成済みでも周知されていなければ、労働契約上は「無い」場合と同様の扱いになることがあります）。</dd>
     </dl>
@@ -1084,11 +1206,22 @@
 
 <div id="modeRefs" class="hidden">
   <div class="batch-wrap">
-    <div class="batch-guide">労働条件の明示および賃金試算の根拠について、現行有効な明示事項の一覧と、根拠となる法令・公的資料へのリンク集です。リンクはインターネット接続時のみ開けます（このツール自体はオフラインでも動作します）。掲載内容は年2回（4月・10月）の定期点検で確認し、新しい情報を追記しています。<b>最終点検日: <span id="refsChecked"></span></b></div>
+    <div class="batch-guide">労働条件の明示および賃金試算の根拠について、現行有効な明示事項の一覧と、根拠となる法令・公的資料へのリンク集です。リンクはインターネット接続時のみ開けます（このツール自体はオフラインでも動作します）。掲載内容は年2回（4月・10月）の定期点検で確認し、新しい情報を追記しています。<b>参照資料の最終点検日: <span id="refsChecked"></span></b>（このツールの版の内訳）</div>
+    <!-- MF-14 版表示の一元化。使い方タブと同じ内容を同じ関数で描く（食い違いが起きない） -->
+    <div class="tool-note" data-tool-version></div>
     <div id="meijiList"></div>
     <div id="refsList"></div>
   </div>
 </div>
+
+<!-- MF-13 交付前チェックリストの用紙。画面には出さず、printChecklist() から単独で印刷する。
+     中身は buildChecklistHTML() が入れる（通知書の書面とは完全に別の入れ物）。 -->
+<div id="modeChecklist" class="hidden" aria-hidden="true"></div>
+
+<!-- MF-17 免責・利用上の注意・事務所名義。画面のみ（@media print で #appFooter を非表示） -->
+<footer id="appFooter">
+  <div class="tool-note tn-disclaimer" data-disclaimer></div>
+</footer>
 
 <script>
 "use strict";
@@ -1228,6 +1361,38 @@ function setDismissals(arr){
   (arr&&arr.length?arr:['']).forEach(v=>{
     const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_dismissalRowHTML();
     row.querySelector('.d-item').value=v||''; list.appendChild(row);
+  });
+}
+
+/* ===== MF-12（2026-09-16 ロット4）解雇の事由を定めた就業規則の条項（1項目ずつ追加）=====
+   解雇の事由は労基則5条1項4号の法定明示事項。平成11年1月29日 基発第45号は、明示すべき事項の
+   内容が膨大になる場合について「当該労働者に適用される就業規則上の関係条項名を網羅的に示すことで
+   足りる」「就業規則を労働契約の締結の際に交付することとしても差し支えない」としている。
+   ＝「網羅的」であることが水準であり、一部だけを示して残りを省く書き方は認められていない。
+   そこで条項を1項目ずつ入力できる構造にし、入力されたものをすべて書面へ摘示する。
+   （行追加式の上下操作・保存復元の作り方は、既存の解雇事由リストと同じ作法に揃えている） */
+function _dismissalClauseRowHTML(){ return '<input type="text" class="dc-item" placeholder="例：第44条"><button type="button" class="mini" onclick="delDismissalClause(this)" title="削除">×</button>'; }
+// 入力済みの条項だけを配列で返す（空行は落とす）
+function getDismissalClauses(){ return [...document.querySelectorAll('#dismissalClauseList .dc-item')].map(x=>x.value.trim()).filter(Boolean); }
+// 条項の入力行を1行増やす（vを与えるとその値を入れる）
+function addDismissalClause(v){
+  const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_dismissalClauseRowHTML();
+  document.getElementById('dismissalClauseList').appendChild(row);
+  if(v) row.querySelector('.dc-item').value=v; render();
+}
+// 条項の入力行を削除する（最後の1行だけは残して中身を空にする＝入力欄が消えないようにする）
+function delDismissalClause(btn){
+  const list=document.getElementById('dismissalClauseList');
+  if(list.querySelectorAll('.other-row').length<=1){ btn.closest('.other-row').querySelector('input').value=''; }
+  else { btn.closest('.other-row').remove(); }
+  render();
+}
+// 保存データ・名簿から条項の入力行を組み立て直す
+function setDismissalClauses(arr){
+  const list=document.getElementById('dismissalClauseList'); list.innerHTML='';
+  (arr&&arr.length?arr:['']).forEach(v=>{
+    const row=document.createElement('div'); row.className='other-row'; row.innerHTML=_dismissalClauseRowHTML();
+    row.querySelector('.dc-item').value=v||''; list.appendChild(row);
   });
 }
 
@@ -1417,9 +1582,11 @@ function updateVisibility(){
   const needsPart = cat==='短時間' || per==='有期' || cat==='派遣';   // パート有期法・派遣法の明示対象
   if(needsPart && radio('worker_kind')!=='other'){ [...form.elements['worker_kind']].forEach(r=>{ r.checked=(r.value==='other'); }); }
   $('#grpSetsumei').classList.toggle('hidden', !(radio('worker_kind')==='other' || needsPart));
-  // R8.10.1施行: 短時間・有期は①説明を求めることができる旨の明示が義務（改正パート有期則2条1項4号）
+  // R8.10.1施行: 短時間・有期は①説明を求めることができる旨の明示が義務（改正パート有期則2条1項4号）。
+  // MF-10: 義務の履行時点は「雇い入れたとき」であり有期は更新のたびに「雇い入れ」に当たるため
+  //        （改正施行通達 第3の1(14)(15)）、交付日ではなく入社日／契約始期を基準日にする。
   const ssEl=form.elements['show_setsumei'];
-  if(ssEl){ const must=(cat==='短時間'||per==='有期') && val('issue_date')>='2026-10-01';
+  if(ssEl){ const must=partActSetsumeiMust(cat, per, partActBaseDate(per).date);
     if(must && !ssEl.checked) ssEl.checked=true;
     ssEl.disabled=must; }
   $('.ex-haken').classList.toggle('hidden', cat!=='派遣');
@@ -1428,7 +1595,7 @@ function updateVisibility(){
   $('#lblEmployer').textContent = (cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名';
   $('#lblHoliday').textContent = (cat==='短時間'||cat==='派遣')?'休日及び勤務日':'休日';
   $('#lblRetireAllow').textContent = '退職金';
-  $('#hintShort').textContent = (isShort||per==='有期'||cat==='派遣')?'短時間・有期・派遣は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条・派遣法31条の2）。空欄なら「無」と印字します。':'';
+  $('#hintShort').textContent = (isShort||per==='有期'||cat==='派遣')?'短時間・有期・派遣は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条・派遣法31条の2）。未選択のままでは出力できません（「有」「無」のいずれかを選んでください）。':'';
   // 無効な組合せ
   const bad = (per==='日雇' && (cat==='短時間'||cat==='林業'));
   $('#warnCombo').classList.toggle('hidden', !bad);
@@ -1440,11 +1607,15 @@ function updateVisibility(){
   $('#grpWeeklyHours').classList.toggle('hidden', !form.elements['weekly_hours_flag'].checked);
   // 社会保険の被保険者区分（厚生年金・健康保険のいずれかが「有」のときだけ表示）
   $('#grpShahoKubun').classList.toggle('hidden', !(val('kounen')==='有' || val('kenpo')==='有'));
-  // 就業規則の定めの有無（無いときは「確認できる場所」欄を隠し、解雇事由の簡略表記との矛盾を警告）
+  // 就業規則の定めの有無（無いときは「確認できる場所」欄を隠す）
   const hasRules = form.elements['has_work_rules'].checked;
   $('#grpWorkRules').classList.toggle('hidden', !hasRules);
-  const dismissalMismatch = !hasRules && !form.elements['dismissal_full'].checked && getDismissals().length>0;
-  $('#warnNoRulesDismissal').classList.toggle('hidden', !dismissalMismatch);
+  /* MF-12（ロット4）就業規則の条項の摘示に関する画面警告（いずれも画面のみ・印刷では出ない）。
+     ・就業規則が無い設定なのに条項が入力されている → 書面に出ないことを知らせる（存在しない規則を参照させない）
+     ・就業規則がある設定なのに条項が1件も無い → 網羅摘示ができない状態であることを知らせる（基発45号の水準） */
+  const dismissalClauses = getDismissalClauses();
+  $('#warnNoRulesDismissal').classList.toggle('hidden', !(!hasRules && dismissalClauses.length>0));
+  $('#warnDismissalClause').classList.toggle('hidden', !(hasRules && dismissalClauses.length===0 && getDismissals().length>0));
   return {cat,per,wt,wg,doc,bad,isShort,isHiyatoi};
 }
 function show(sel){ if(sel) document.querySelectorAll(sel).forEach(e=>e.classList.remove('hidden')); }
@@ -1586,17 +1757,17 @@ function buildBlocks(st){
     w.push(pm);
     if(has(val('pay_method_note'))) w.push(`　　（${val('pay_method_note')}）`);
   }
-  const short = st.isShort || st.per==='有期' || st.cat==='派遣';   // パート有期法6条・派遣法31条の2（有無明示の対象）
-  // 昇給（絶対的明示・常に記載）
-  { const f=val('raise_flag')||'無'; const note=(f==='有'&&has(val('raise_note')))?`（${val('raise_note')}）`:''; n++; w.push(`${n}　昇給　${f}${note}`); }
-  // 賞与（定めがあれば記載／短時間・有期は有無明示）
-  { const f=val('bonus_flag');
-    if(f==='有'){ n++; w.push(`${n}　賞与　有${has(val('bonus_note'))?`（${val('bonus_note')}）`:''}`); }
-    else if(f==='無'||short){ n++; w.push(`${n}　賞与　無`); } }
-  // 退職手当（定めがあれば記載／短時間・有期は有無明示）
-  { const f=val('retire_flag');
-    if(f==='有'){ n++; w.push(`${n}　退職金　有${has(val('retire_note'))?`（${val('retire_note')}）`:''}`); }
-    else if(f==='無'||short){ n++; w.push(`${n}　退職金　無`); } }
+  /* MF-07（2026-09-16 ロット2）: 昇給・賞与・退職金は yumuLine() で1本化した。
+     改修前は「未選択」を自動的に「無」として印字していた（昇給は既定値「有」、賞与・退職金は
+     短時間・有期・派遣のとき自動「無」）。事実と異なる明示になりうるため（パート有期則2条2項）、
+     「無」と印字するのは利用者が明示的に「無」を選んだときだけにし、未選択なら行自体を出さない。
+     未選択のまま出力すること自体は legalChecks() の出力ブロックで止めている。 */
+  // 昇給（労基則5条1項3号／短時間・有期・派遣はパート有期則2条1項1号）
+  { const t=yumuLine(val('raise_flag'),'昇給',val('raise_note')); if(t){ n++; w.push(`${n}　${t}`); } }
+  // 賞与（定めがあれば記載／短時間・有期・派遣は有無明示＝パート有期則2条1項3号）
+  { const t=yumuLine(val('bonus_flag'),'賞与',val('bonus_note')); if(t){ n++; w.push(`${n}　${t}`); } }
+  // 退職手当（定めがあれば記載／短時間・有期・派遣は有無明示＝パート有期則2条1項2号）
+  { const t=yumuLine(val('retire_flag'),'退職金',val('retire_note')); if(t){ n++; w.push(`${n}　${t}`); } }
   const wgLaw=WAGE_LAW[wg]; if(wgLaw) w.push('__NOTE__※ '+wgLaw);
   push('賃金', w);
 
@@ -1606,11 +1777,16 @@ function buildBlocks(st){
     if(has(val('mandatory_age'))){m++;r.push(`${m}　定年制　${val('mandatory_age')}`);}
     if(has(val('reemployment'))){m++;r.push(`${m}　継続雇用制度　${val('reemployment')}`);}
     if(has(val('self_retire'))){m++;r.push(`${m}　自己都合退職の手続　${val('self_retire')}`);}
+    /* MF-12（2026-09-16 ロット4）: 解雇の事由は入力されたものをすべて列挙し、
+       就業規則がある場合は関係条項をすべて摘示する（平11.1.29 基発45号の「網羅的に示す」水準）。
+       改修前は既定が「先頭1件＋等（詳細は就業規則による）」で、条項番号すら示していなかった。
+       就業規則が無い設定のときは条項の摘示を出さない（存在しない規則を参照させない）。
+       行の組み立ては dismissalLines() が持つ。 */
     const items=getDismissals();
-    if(items.length){
+    const dLines=dismissalLines(items, getDismissalClauses(), form.elements['has_work_rules'].checked);
+    if(dLines.length){
       m++;r.push(`${m}　解雇の事由及び手続`);
-      if(form.elements['dismissal_full'].checked){ items.forEach(x=>r.push('　　・'+x)); }
-      else { r.push('　　・'+items[0]+' 等（詳細は就業規則による）'); }
+      dLines.forEach(l=>r.push(l));
     }
     push('退職に関する事項', r);
   }
@@ -1628,14 +1804,27 @@ function buildBlocks(st){
   if(val('kigyou_nenkin')==='有') o.push('・企業年金等　有'+(has(val('kigyou_nenkin_name'))?`（${val('kigyou_nenkin_name')}）`:''));
   o.push(`・雇用保険の適用　${val('emp_ins')||'無'}　労災保険　${val('rousai')||'有'}`);
   if(radio('worker_kind')==='other' || cat==='短時間' || per==='有期' || cat==='派遣'){
-    // 待遇の相違の説明窓口：チェックした時のみ表示
+    /* MF-09（2026-09-16 ロット2）: 待遇の相違の説明窓口はチェックした時のみ表示。
+       改修前は部署・担当者・連絡先が空でも空の括弧つきの行を書面へ印字していた。
+       申出先の明示は義務ではなく「望ましい」ものであり、「説明を求めることができる旨」の
+       表示で法6条1項の義務は履行される（改正施行通達 第3の1(6)）ため、
+       窓口が1つも入力されていないときは旨だけを印字する（分岐は setsumeiLines() が持つ）。 */
     if(form.elements['show_setsumei'] && form.elements['show_setsumei'].checked){
-      o.push('・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。');
-      o.push(`　　部署名 ${val('setsumei_dept')}　担当者職氏名 ${val('setsumei_person')}（連絡先 ${val('setsumei_contact')}）`);
+      setsumeiLines(val('setsumei_dept'), val('setsumei_person'), val('setsumei_contact')).forEach(l=>o.push(l));
     }
-    // 雇用管理の改善等に関する相談窓口：常に表示
-    o.push('・雇用管理の改善等に関する事項に係る相談窓口');
-    o.push(`　　部署名 ${val('consult_dept')}　担当者職氏名 ${val('consult_person')}（連絡先 ${val('consult_contact')}）`);
+    /* MF-19（2026-09-16 ロット4）: ②雇用管理の改善等に関する事項に係る相談窓口。
+       改修前は部署・担当者・連絡先が空でも「部署名 　担当者職氏名 （連絡先 ）」と
+       空の括弧つきの行を書面へ印字していた。②はパート有期則2条1項5号（施行前は4号）の
+       必須明示事項のため、①説明窓口のように「旨だけ」へ落とすことはできない。
+       そこで見出しの行は必ず残し、入力のない項目だけを印字しない（分岐は soudanLines() が持つ）。
+       法定の明示対象者で3項目とも空のときは legalChecks() の出力ブロックで出力自体を止める。
+       法定対象でない方（一般・無期で「それ以外」を手動選択した場合）は任意の記載なので、
+       1つも入力が無ければ見出しごと出さない（中身の無い見出しを書面に残さないため）。 */
+    const soudanTarget = (cat==='短時間' || per==='有期' || cat==='派遣');
+    const soudanFilled = has(val('consult_dept')) || has(val('consult_person')) || has(val('consult_contact'));
+    if(soudanTarget || soudanFilled){
+      soudanLines(val('consult_dept'), val('consult_person'), val('consult_contact')).forEach(l=>o.push(l));
+    }
   }
   if(cat==='派遣'){ if(has(val('haken_moto')))o.push('・派遣元事業主　'+val('haken_moto')); if(has(val('haken_saki')))o.push('・派遣先　'+val('haken_saki'));
     if(has(val('haken_kyotei'))){ let hk='・'+val('haken_kyotei'); if(val('haken_kyotei')==='協定対象派遣労働者である'&&has(val('haken_kyotei_end'))) hk+=`（労使協定の有効期間の終期　${fmtDate(val('haken_kyotei_end'))}）`; o.push(hk); }
@@ -1647,6 +1836,15 @@ function buildBlocks(st){
   if(has(val('remarks'))) o.push('・'+val('remarks'));
   push('その他', o);
   if(has(val('tokki_jiko'))) push('特記事項', val('tokki_jiko').split('\n'));
+
+  /* ★負検証N13専用★（MF-17）
+     免責文を書面生成の経路へ流すとどうなるかを機械で確かめるための改変口。
+     本番では SELFTEST_ACTIVE が false のため一切実行されない。
+     ここを通ると、印刷・Word・Excel・一括出力のすべての書面に免責文が混入し、
+     セルフテストP22（書面に免責文が無いことの文字列一致検査）が必ず失敗する。 */
+  if(SELFTEST_ACTIVE && L3_HOOKS.leakDisclaimerToSheet){
+    push('ご利用にあたって', [DISCLAIMER.items[0].replace(/<[^>]+>/g,''), DISCLAIMER.officeLine]);
+  }
 
   return B;
 }
@@ -1693,7 +1891,19 @@ function requiredGaps(st){
   need(!has(val('wage_payday')),'賃金支払日');
   need(!has(val('pay_method')),'賃金の支払方法');
   if(st.isShort || st.per==='有期' || st.cat==='派遣'){
-    need(!has(val('consult_dept'))&&!has(val('consult_person')),'②雇用管理改善の相談窓口（部署名・担当者）');
+    /* MF-19（ロット4）: 3項目とも空のときは legalChecks() の出力ブロックで止めるようにしたため、
+       ここでは「連絡先だけ入力されている（部署名・担当者職氏名が空）」場合だけを未入力として拾う。
+       同じことを画面の2か所（⚠未入力の一覧とブロックの警告）へ二重に出さないための切り分け。 */
+    need(!has(val('consult_dept'))&&!has(val('consult_person'))&&has(val('consult_contact')),'②雇用管理改善の相談窓口（部署名・担当者）');
+    // MF-10 短時間・無期は入社日で施行日を判定する（有期は上の「契約期間（始期・終期）」で担保済み）
+    if(st.isShort && st.per==='無期'){
+      need(!has(val('muki_start')),'入社日（待遇の相違の説明を求めることができる旨の施行日判定に必要）');
+    }
+  } else {
+    // MF-07 昇給の有無（労基則5条1項3号の明示事項）。
+    // 短時間・有期・派遣は legalChecks() の出力ブロックで昇給・賞与・退職金をまとめて止めるため、
+    // ここで二重に列挙しない（同じことを2か所に出すと利用者が読み飛ばす）。
+    need(!has(val('raise_flag')),'昇給の有無');
   }
   if(st.cat==='派遣'){
     need(!has(val('haken_kyotei')),'協定対象派遣労働者か否か');
@@ -1706,10 +1916,24 @@ function requiredGaps(st){
   }
   return g;
 }
+/* 出力前の確認（印刷／PDF／Word／Excel／一括のすべてがここを通る。呼び出し側のシグネチャは変えない）。
+   ・出力ブロック（明らかな法令違反）… 押し切れない。false を返して出力を止める
+   ・赤警告（最賃割れ・有期3年超）＋未入力の法定明示事項 … 具体値を示したうえで押し切れる
+   原さん決定⑨（警告の強度を種類で分ける）に対応。 */
 function confirmGaps(action){
-  const g=requiredGaps(updateVisibility());
-  if(!g.length) return true;
-  return confirm('未入力の法定明示事項があります：\n・'+g.join('\n・')+'\n\nこのまま'+action+'しますか？（下書きとしては出力できます）');
+  const st=updateVisibility();
+  const lc=legalChecks(st);
+  if(lc.blocks.length){
+    alert('次の内容は法令に反するおそれが強いため、'+action+'できません。修正してから出力してください。\n\n・'
+      +lc.blocks.join('\n・')+'\n\nご不明な点はめぐみ事務所へご相談ください。');
+    return false;
+  }
+  const g=requiredGaps(st);
+  if(!g.length && !lc.reds.length) return true;
+  let msg='';
+  if(g.length) msg+='未入力の法定明示事項があります：\n・'+g.join('\n・')+'\n\n';
+  if(lc.reds.length) msg+='法令違反のおそれがあります：\n・'+lc.reds.join('\n・')+'\n\n判断に迷う場合はめぐみ事務所へご相談ください。\n\n';
+  return confirm(msg+'このまま'+action+'しますか？（下書きとしては出力できます）');
 }
 function officeLines(cat){
   const L=[]; if(has(val('office_addr')))L.push('事業場所在地　'+val('office_addr'));
@@ -1896,18 +2120,12 @@ function render(){
       gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／'); }
     else if(gb){ gb.remove(); }
     updateFormNav(gaps); }
-  // 月の所定労働時間が極端に小さいと固定残業の割増単価（基準内賃金÷所定時間）が過大になり、固定残業手当が過大算定される。
-  // 自動計算が実際に所定時間を分母に使っているときだけ、入力ミスの疑いとして画面警告（.warn-check＝印刷時非表示。書面や計算値は変えない）。
-  { const ttw=wageTotals(); const schedRaw=numH(val('monthly_scheduled_hours'));
-    const SCHED_MIN_WARN=30; // 入力ミス検知用の下限。実在するパート等の月平均所定時間より低めに置き誤検知を抑える
-    const autoUsesSched = ttw.otAuto || ttw.nightAuto || (ttw.otStyle==='unified' && ttw.uni && ttw.uni.total>0);
-    const schedLow = autoUsesSched && schedRaw>0 && schedRaw<SCHED_MIN_WARN;
-    let wb=document.getElementById('wageWarnNote');
-    if(schedLow){ if(!wb){ wb=document.createElement('div'); wb.id='wageWarnNote'; wb.className='warn-check';
-        wb.setAttribute('role','status'); wb.setAttribute('aria-live','polite');
-        const gn=document.getElementById('gapNote'); pv.insertBefore(wb, gn?gn.nextSibling:pv.firstChild); }
-      wb.textContent=`⚠【要確認】賃金欄の「月の所定労働時間」が「${schedRaw}」と極端に小さいため、固定残業の割増単価や相当時間が不自然に大きく算定されるおそれがあります（例：フルタイムなら173.75など）。入力値が正しければ修正は不要です。`; }
-    else if(wb){ wb.remove(); } }
+  // §F 法令チェック（MF-03最低賃金／MF-04割増率／MF-05有期3年超／MF-06始業終業・休憩）をまとめて描画。
+  // 旧「月の所定労働時間が極端に小さい」警告も legalChecks() へ移設して1本化した（文言・条件・値は不変）。
+  // 表示はすべて画面のみ（#lawCheckNote は @media print で非表示）。書面生成には一切流さない。
+  minWageAutoSuggestPref();   // 住所を入力した時点で都道府県を推測（未選択のときだけ働く）
+  renderMinWageApplied();
+  renderLawChecks(st);
   markEmpty();
 }
 
@@ -2003,6 +2221,9 @@ function serializeState(){
   s.allowIn=getAllows('in'); s.allowOut=getAllows('out');
   s.times=getTimes(); s.breaks=getBreaksRaw(); s.others=getOthers();
   s.dismissals=getDismissals();
+  // MF-12（ロット4）で追加した「解雇の事由を定めた就業規則の条項」。
+  // 既存の保存データ（このキーが無いJSON）を読み込んでも restoreState 側で空扱いになるため、後方互換を壊さない。
+  s.dismissalClauses=getDismissalClauses();
   return s;
 }
 function restoreState(s){
@@ -2014,6 +2235,7 @@ function restoreState(s){
   setAllows('in', s.allowIn||[{}]); setAllows('out', s.allowOut||[{}]);
   setTimes(s.times||[{}]); setBreaks(s.breaks||[{}]); setOthers(s.others||[{}]);
   setDismissals(s.dismissals||['']);
+  setDismissalClauses(s.dismissalClauses||['']);   // MF-12（ロット4）。キーが無い旧データは空行1つで復元する
   render();
 }
 function saveData(){
@@ -2064,7 +2286,7 @@ const MEIJI=[
  ]},
  {group:'D. 短時間・有期雇用労働者への特定事項（文書交付・違反は10万円以下の過料）', note:'パート有期法6条・同施行規則2条。', items:[
   {item:'昇給の有無／退職手当の有無／賞与の有無／相談窓口', target:'短時間・有期', basis:'パート有期法6条・則2条', since:'', memo:''},
-  {item:'待遇の相違の内容・理由等の説明を求めることができる旨', target:'短時間・有期', basis:'パート有期則2条1項4号（令和8年厚労省令87号・2026-4-28公布）', since:'2026-10-1施行', memo:'交付日がR8.10.1以降なら必要（本ツールは交付日で自動判定）。新設により現行4号（相談窓口）は5号に繰下げ'},
+  {item:'待遇の相違の内容・理由等の説明を求めることができる旨', target:'短時間・有期', basis:'パート有期則2条1項4号（令和8年厚労省令87号・2026-4-28公布）', since:'2026-10-1施行', memo:'義務の履行時点は「雇い入れたとき」（有期は更新のたびに「雇い入れ」＝改正施行通達 第3の1(14)(15)）。本ツールは入社日（無期）・契約始期（有期）がR8.10.1以降かで自動判定。申出先の明示は義務ではなく「望ましい」（同(6)）。新設により現行4号（相談窓口）は5号に繰下げ'},
  ]},
  {group:'E. 派遣労働者（派遣元での雇入れ時）', note:'派遣の際の就業条件明示（派遣法34条）とは別立ての義務。', items:[
   {item:'昇給・退職手当・賞与の有無／協定対象派遣労働者か否か（対象の場合は労使協定の有効期間の終期）／苦情の処理に関する事項', target:'派遣', basis:'派遣法31条の2第2項・則25条の16（明示方法は則25条の15）', since:'', memo:''},
@@ -2076,7 +2298,10 @@ const MEIJI=[
 ];
 function renderMeiji(){
   const wrap=document.getElementById('meijiList'); if(!wrap) return;
-  wrap.innerHTML='<h2>現行有効な明示事項の一覧（最終確認日: '+MEIJI_CHECKED+'）</h2>'+MEIJI.map(g=>{
+  // MF-14: 確認日は「このツールの版」の内訳であることが分かる書き方に統一する（画面に出る日付が食い違って見えないようにするため）
+  wrap.innerHTML='<h2>現行有効な明示事項の一覧</h2>'
+    +'<p class="hint">明示事項の最終確認日: '+MEIJI_CHECKED+'（このツールの版 '+TOOL_VERSION.label+' の内訳。版の全体は上の「このツールの版」をご覧ください）</p>'
+    +MEIJI.map(g=>{
     const rows=g.items.map(it=>`<tr><td>${esc(it.item)}</td><td>${esc(it.target)}</td><td>${esc(it.basis)}</td><td>${esc(it.since||'')}</td><td>${esc(it.memo||'')}</td></tr>`).join('');
     return `<h3 style="margin:16px 0 4px;font-size:14px">${esc(g.group)}</h3>${g.note?`<p class="hint">${esc(g.note)}</p>`:''}<table class="roster"><thead><tr><th>明示する事項</th><th>対象</th><th>根拠</th><th>施行・追加</th><th>備考</th></tr></thead><tbody>${rows}</tbody></table>`;
   }).join('')+'<p class="hint">※ この一覧は事務所内の参考用の要約です。具体的事案への適用は条文原文と所属社労士の確認を要します。新しい明示義務は年2回（4月・10月）の定期点検で検知し、確認のうえこの一覧に追記されます。</p>';
@@ -2102,6 +2327,7 @@ const REFS=[
  {cat:'改正情報（公布済み・施行前）', items:[
   {name:'令和8年厚生労働省令第87号（パート有期則・派遣則改正）改正省令本文', basis:'2026-4-28公布・R8.10.1施行', url:'https://www.mhlw.go.jp/content/001695908.pdf', note:'2026-07-05 WebFetchで本文確認済み（施行日を定める附則を含む）'},
   {name:'改正リーフレット（No.11・令和8年4月作成）', basis:'厚労省・全6ページ', url:'https://www.mhlw.go.jp/content/001698010.pdf', note:'2026-07-05 全6ページ確認済み'},
+  {name:'令和8年政令第275号（施行期日を定める政令）', basis:'2026-9-11公布・R8.10.1施行。短時間労働者の社会保険の賃金要件（月額8.8万円以上）撤廃を含む改正規定の施行期日', url:'https://www.mhlw.go.jp/hourei/doc/hourei/H260911T0020.pdf', note:'2026-09-16 政令原文PDFで確認済み（MF-16 社会保険の区分ヘルプの根拠）。企業規模要件の段階的撤廃（令和9年10月〜令和17年10月）は厚労省の法律案概要PDF https://www.mhlw.go.jp/content/001497095.pdf に記載。撤廃後に残る要件（週20時間・学生除外等）は政令原文に記載がなく、確信度は中'},
  ]},
  {cat:'厚生労働省の解説・モデル様式', items:[
   {name:'改正後モデル労働条件通知書（R8.10対応版・一般労働者用）', basis:'厚労省・同一労働同一賃金特集ページ経由', url:'https://www.mhlw.go.jp/content/001696984.pdf', note:'2026-07-05内容確認済み（待遇差説明窓口の新設項目を反映）。同一内容が主要様式ダウンロードコーナー掲載の001697542.pdfにも掲載'},
@@ -2293,12 +2519,28 @@ function loadRoster(input){
 }
 
 /* ===== 一括出力 ===== */
+/* 一括出力の確認。単票の confirmGaps と同じ考え方（ブロックは押し切れない／赤は押し切れる）を名簿全員に当てる。
+   一括出力の3経路（bulkPrint・bulkWordCombined・bulkExcelCombined・bulkExportEach）はすべてここを通る。 */
 function bulkGapReport(){
-  const backup=serializeState(); const lines=[];
-  ROSTER.forEach(e=>{ restoreState(e.state); const g=requiredGaps(updateVisibility()); if(g.length) lines.push((sf(e.state,'employee_name')||'無題')+'：'+g.join('、')); });
+  const backup=serializeState(); const lines=[]; const blockLines=[];
+  ROSTER.forEach(e=>{
+    restoreState(e.state);
+    const st=updateVisibility();
+    const who=(sf(e.state,'employee_name')||'無題');
+    const lc=legalChecks(st);
+    if(lc.blocks.length) blockLines.push(who+'：'+lc.blocks.join('、'));
+    const items=requiredGaps(st).concat(lc.reds);
+    if(items.length) lines.push(who+'：'+items.join('、'));
+  });
   restoreState(backup);
+  if(blockLines.length){
+    alert('次の方は法令に反するおそれが強いため出力できません。修正してから出力してください。\n\n'
+      +blockLines.join('\n')+'\n\nご不明な点はめぐみ事務所へご相談ください。');
+    return false;
+  }
   if(!lines.length) return true;
-  return confirm('未入力の法定明示事項がある人がいます：\n'+lines.join('\n')+'\n\nこのまま出力しますか？');
+  return confirm('未入力の法定明示事項または法令違反のおそれがある人がいます：\n'+lines.join('\n')
+    +'\n\n判断に迷う場合はめぐみ事務所へご相談ください。\n\nこのまま出力しますか？');
 }
 function bulkPrint(){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
@@ -2375,19 +2617,40 @@ function bulkExportEach(kind){
     i++; setTimeout(next, 500);
   })();
 }
-/* ===== 賃金試算タブ：手当プリセット（種類→区分・最賃算入の既定。§B1） ===== */
-const CALC_ALLOW_PRESETS=[
- {label:'役職手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
- {label:'資格手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
- {label:'職務手当', cat:'in', minwage:true, help:'割増賃金の算定基礎に算入'},
- {label:'精皆勤手当', cat:'in', minwage:false, help:'割増基礎には算入（労基則21条の除外列挙に無い）。ただし最低賃金の比較では除外（最賃法4条3項各号・地域別最低賃金の定めによる）'},
- {label:'家族手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
- {label:'通勤手当', cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
- {label:'住宅手当', cat:'out', minwage:true, help:'除外は「住宅に要する費用に応じて支給する場合」のみ。一律定額支給なら基準内（最低賃金の比較には含めます）'},
- {label:'別居手当', cat:'out', minwage:true, help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
- {label:'子女教育手当', cat:'out', minwage:true, help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
- {label:'その他（手動選択）', cat:'in', minwage:true, help:'迷ったら基準内（労働者有利側）に入れてください'}
-];
+/* ===== 手当の法的分類マスタ（唯一の正本。設計書_MF-03 §3） =====
+   cat     … 割増賃金の算定基礎の区分（in=基準内／out=基準外）
+   minwage … 最低賃金の比較の分子に算入してよいか（true=算入／false=除外）
+   pseudo  … 実在の手当名ではなくUI上の選択肢。作成タブの手当名照合では「不明」として扱う
+   ★手当の法的分類を直すときはこの1か所だけを直す。賃金試算タブのプリセットも作成タブの
+     最低賃金判定も、すべてここを参照している（値を2か所に持たない）。 */
+const MINWAGE_ALLOW_RULE={
+ '役職手当':      {cat:'in',  minwage:true,  help:'割増賃金の算定基礎に算入'},
+ '資格手当':      {cat:'in',  minwage:true,  help:'割増賃金の算定基礎に算入'},
+ '職務手当':      {cat:'in',  minwage:true,  help:'割増賃金の算定基礎に算入'},
+ '精皆勤手当':    {cat:'in',  minwage:false, help:'割増基礎には算入（労基則21条の除外列挙に無い）。ただし最低賃金の比較では除外（最賃法4条3項各号・地域別最低賃金の定めによる）'},
+ '家族手当':      {cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
+ '通勤手当':      {cat:'out', minwage:false, help:'労基法37条5項・労基則21条の除外手当（最低賃金の比較からも除外）'},
+ '住宅手当':      {cat:'out', minwage:true,  help:'除外は「住宅に要する費用に応じて支給する場合」のみ。一律定額支給なら基準内（最低賃金の比較には含めます）'},
+ '別居手当':      {cat:'out', minwage:true,  help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
+ '子女教育手当':  {cat:'out', minwage:true,  help:'労基法37条5項の除外手当（最低賃金の比較には含めます）'},
+ 'その他（手動選択）':{cat:'in', minwage:true, pseudo:true, help:'迷ったら基準内（労働者有利側）に入れてください'}
+};
+/* ===== 賃金試算タブ：手当プリセット（種類→区分・最賃算入の既定。§B1） =====
+   法的分類は上の MINWAGE_ALLOW_RULE が正本。ここは表示順を持つだけで、値は一切変えていない。 */
+const CALC_ALLOW_PRESETS=Object.keys(MINWAGE_ALLOW_RULE).map(label=>({
+  label, cat:MINWAGE_ALLOW_RULE[label].cat, minwage:MINWAGE_ALLOW_RULE[label].minwage, help:MINWAGE_ALLOW_RULE[label].help
+}));
+/* 作成タブ用：手当名から「最低賃金に算入してよいか」を引く。true=算入／false=除外／null=不明。
+   【意図的な非対称】賃金試算タブの calcImportAllows は未知の手当を minwage:true 既定にしている
+   （所内スタッフが画面で直す前提のため）。作成タブは顧問先が交付する書面に直結するので、
+   未知は null（＝下限推定に入れない安全側）にする。両方にこの理由をコメントしている。 */
+function minWageIncluded(name){
+  const key=String(name==null?'':name).trim();
+  if(!key) return null;
+  const rule=MINWAGE_ALLOW_RULE[key];
+  if(!rule || rule.pseudo) return null;
+  return rule.minwage===true;
+}
 function calcAllowRowHTML(){
   const opts='<option value="">（種類を選択）</option>'+CALC_ALLOW_PRESETS.map(p=>`<option value="${esc(p.label)}">${esc(p.label)}</option>`).join('');
   return `<select class="ca-kind" onchange="calcAllowKindChange(this.closest('.allow-row'))">${opts}</select>`+
@@ -2464,6 +2727,8 @@ function calcImportAllows(){
   const skipped=(inAll.length-inRows.length)+(outAll.length-outRows.length);
   const mapped=[...inRows.map(a=>({...a,cat:'in'})), ...outRows.map(a=>({...a,cat:'out'}))].map(a=>{
     const preset=CALC_ALLOW_PRESETS.find(p=>p.label===a.name);
+    // 【意図的な非対称】試算タブは未知の手当を minwage:true 既定にする（所内スタッフが画面で確認・修正する前提）。
+    // 作成タブの minWageIncluded は逆に null（不明＝算入しない安全側）にしている。顧問先が交付する書面に直結するため。
     return {kind:preset?preset.label:'', name:a.name, amount:a.amount, cat:a.cat, minwage: preset? preset.minwage!==false : true};
   });
   if(!mapped.length){ alert('作成タブに月額の手当がありません（取り込めるのは単位が「月額」の行だけです）。'); return; }
@@ -2479,69 +2744,2091 @@ function calcImportAllows(){
    年度セレクトが「自動」のとき、本日の日付と各年度の発効日を比較し、発効済みのうち最新の額を採用する
    （新年度改定が公布・答申されても発効日前は前年度額を使い、発効日を過ぎると自動で新額に切替）。手動で年度を選ぶこともできる。
    出典:
+   - 令和8年度: 厚生労働省「令和8年度 地域別最低賃金 答申状況」https://www.mhlw.go.jp/content/11302000/001745621.pdf （legal-research確認 2026-09-16）
+     ★この年度は provisional:true ＝【答申段階】の数値。最終決定（各労働局の公示）が出た県から順に差し替え、
+       差し替え済みの県は provisional を false にし、MIN_WAGE_CHECKED を確認日で更新すること。
+     ★発効日は県ごとに 2026-10-01〜2026-12-02 までばらつく。「10月に一斉に切り替わる」前提で書き換えないこと。
    - 令和7年度: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf ／発効日は同一覧（legal-research確認 2026-07-05）
    - 令和6年度: 厚生労働省・兵庫労働局「地域別最低賃金全国一覧（令和6年）」ほか2ソースで相互照合（legal-research確認 2026-07-05）
    来年度改定時は、各県配列の先頭に {year,amount,eff} を1件足すだけで自動判定・年度選択がそのまま働く。 ===== */
-const MIN_WAGE_CHECKED='2026-07-05';
+const MIN_WAGE_CHECKED='2026-09-16';   // 最低賃金テーブルを一次資料で確認した日（デッドマン表示の基準日）
 const MIN_WAGE_SOURCE='厚生労働省「地域別最低賃金の全国一覧」https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/';
 const MIN_WAGE_DATA={
- "北海道":[{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
- "青森県":[{year:"令和7年度",amount:1029,eff:"2025-11-21"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
- "岩手県":[{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-27"}],
- "宮城県":[{year:"令和7年度",amount:1038,eff:"2025-10-04"},{year:"令和6年度",amount:973,eff:"2024-10-01"}],
- "秋田県":[{year:"令和7年度",amount:1031,eff:"2026-03-31"},{year:"令和6年度",amount:951,eff:"2024-10-01"}],
- "山形県":[{year:"令和7年度",amount:1032,eff:"2025-12-23"},{year:"令和6年度",amount:955,eff:"2024-10-19"}],
- "福島県":[{year:"令和7年度",amount:1033,eff:"2026-01-01"},{year:"令和6年度",amount:955,eff:"2024-10-05"}],
- "茨城県":[{year:"令和7年度",amount:1074,eff:"2025-10-12"},{year:"令和6年度",amount:1005,eff:"2024-10-01"}],
- "栃木県":[{year:"令和7年度",amount:1068,eff:"2025-10-01"},{year:"令和6年度",amount:1004,eff:"2024-10-01"}],
- "群馬県":[{year:"令和7年度",amount:1063,eff:"2026-03-01"},{year:"令和6年度",amount:985,eff:"2024-10-04"}],
- "埼玉県":[{year:"令和7年度",amount:1141,eff:"2025-11-01"},{year:"令和6年度",amount:1078,eff:"2024-10-01"}],
- "千葉県":[{year:"令和7年度",amount:1140,eff:"2025-10-03"},{year:"令和6年度",amount:1076,eff:"2024-10-01"}],
- "東京都":[{year:"令和7年度",amount:1226,eff:"2025-10-03"},{year:"令和6年度",amount:1163,eff:"2024-10-01"}],
- "神奈川県":[{year:"令和7年度",amount:1225,eff:"2025-10-04"},{year:"令和6年度",amount:1162,eff:"2024-10-01"}],
- "新潟県":[{year:"令和7年度",amount:1050,eff:"2025-10-02"},{year:"令和6年度",amount:985,eff:"2024-10-01"}],
- "富山県":[{year:"令和7年度",amount:1062,eff:"2025-10-12"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
- "石川県":[{year:"令和7年度",amount:1054,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
- "福井県":[{year:"令和7年度",amount:1053,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
- "山梨県":[{year:"令和7年度",amount:1052,eff:"2025-12-01"},{year:"令和6年度",amount:988,eff:"2024-10-01"}],
- "長野県":[{year:"令和7年度",amount:1061,eff:"2025-10-03"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
- "岐阜県":[{year:"令和7年度",amount:1065,eff:"2025-10-18"},{year:"令和6年度",amount:1001,eff:"2024-10-01"}],
- "静岡県":[{year:"令和7年度",amount:1097,eff:"2025-11-01"},{year:"令和6年度",amount:1034,eff:"2024-10-01"}],
- "愛知県":[{year:"令和7年度",amount:1140,eff:"2025-10-18"},{year:"令和6年度",amount:1077,eff:"2024-10-01"}],
- "三重県":[{year:"令和7年度",amount:1087,eff:"2025-11-21"},{year:"令和6年度",amount:1023,eff:"2024-10-01"}],
- "滋賀県":[{year:"令和7年度",amount:1080,eff:"2025-10-05"},{year:"令和6年度",amount:1017,eff:"2024-10-01"}],
- "京都府":[{year:"令和7年度",amount:1122,eff:"2025-11-21"},{year:"令和6年度",amount:1058,eff:"2024-10-01"}],
- "大阪府":[{year:"令和7年度",amount:1177,eff:"2025-10-16"},{year:"令和6年度",amount:1114,eff:"2024-10-01"}],
- "兵庫県":[{year:"令和7年度",amount:1116,eff:"2025-10-04"},{year:"令和6年度",amount:1052,eff:"2024-10-01"}],
- "奈良県":[{year:"令和7年度",amount:1051,eff:"2025-11-16"},{year:"令和6年度",amount:986,eff:"2024-10-01"}],
- "和歌山県":[{year:"令和7年度",amount:1045,eff:"2025-11-01"},{year:"令和6年度",amount:980,eff:"2024-10-01"}],
- "鳥取県":[{year:"令和7年度",amount:1030,eff:"2025-10-04"},{year:"令和6年度",amount:957,eff:"2024-10-05"}],
- "島根県":[{year:"令和7年度",amount:1033,eff:"2025-11-17"},{year:"令和6年度",amount:962,eff:"2024-10-12"}],
- "岡山県":[{year:"令和7年度",amount:1047,eff:"2025-12-01"},{year:"令和6年度",amount:982,eff:"2024-10-02"}],
- "広島県":[{year:"令和7年度",amount:1085,eff:"2025-11-01"},{year:"令和6年度",amount:1020,eff:"2024-10-01"}],
- "山口県":[{year:"令和7年度",amount:1043,eff:"2025-10-16"},{year:"令和6年度",amount:979,eff:"2024-10-01"}],
- "徳島県":[{year:"令和7年度",amount:1046,eff:"2026-01-01"},{year:"令和6年度",amount:980,eff:"2024-11-01"}],
- "香川県":[{year:"令和7年度",amount:1036,eff:"2025-10-18"},{year:"令和6年度",amount:970,eff:"2024-10-02"}],
- "愛媛県":[{year:"令和7年度",amount:1033,eff:"2025-12-01"},{year:"令和6年度",amount:956,eff:"2024-10-13"}],
- "高知県":[{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}],
- "福岡県":[{year:"令和7年度",amount:1057,eff:"2025-11-16"},{year:"令和6年度",amount:992,eff:"2024-10-05"}],
- "佐賀県":[{year:"令和7年度",amount:1030,eff:"2025-11-21"},{year:"令和6年度",amount:956,eff:"2024-10-17"}],
- "長崎県":[{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:953,eff:"2024-10-12"}],
- "熊本県":[{year:"令和7年度",amount:1034,eff:"2026-01-01"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
- "大分県":[{year:"令和7年度",amount:1035,eff:"2026-01-01"},{year:"令和6年度",amount:954,eff:"2024-10-05"}],
- "宮崎県":[{year:"令和7年度",amount:1023,eff:"2025-11-16"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
- "鹿児島県":[{year:"令和7年度",amount:1026,eff:"2025-11-01"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
- "沖縄県":[{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}]
+ "北海道":[{year:"令和8年度",amount:1131,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
+ "青森県":[{year:"令和8年度",amount:1090,eff:"2026-10-29",provisional:true},{year:"令和7年度",amount:1029,eff:"2025-11-21"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
+ "岩手県":[{year:"令和8年度",amount:1090,eff:"2026-12-01",provisional:true},{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-27"}],
+ "宮城県":[{year:"令和8年度",amount:1098,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1038,eff:"2025-10-04"},{year:"令和6年度",amount:973,eff:"2024-10-01"}],
+ "秋田県":[{year:"令和8年度",amount:1090,eff:"2026-10-14",provisional:true},{year:"令和7年度",amount:1031,eff:"2026-03-31"},{year:"令和6年度",amount:951,eff:"2024-10-01"}],
+ "山形県":[{year:"令和8年度",amount:1092,eff:"2026-10-30",provisional:true},{year:"令和7年度",amount:1032,eff:"2025-12-23"},{year:"令和6年度",amount:955,eff:"2024-10-19"}],
+ "福島県":[{year:"令和8年度",amount:1094,eff:"2026-10-16",provisional:true},{year:"令和7年度",amount:1033,eff:"2026-01-01"},{year:"令和6年度",amount:955,eff:"2024-10-05"}],
+ "茨城県":[{year:"令和8年度",amount:1136,eff:"2026-10-18",provisional:true},{year:"令和7年度",amount:1074,eff:"2025-10-12"},{year:"令和6年度",amount:1005,eff:"2024-10-01"}],
+ "栃木県":[{year:"令和8年度",amount:1125,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1068,eff:"2025-10-01"},{year:"令和6年度",amount:1004,eff:"2024-10-01"}],
+ "群馬県":[{year:"令和8年度",amount:1120,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1063,eff:"2026-03-01"},{year:"令和6年度",amount:985,eff:"2024-10-04"}],
+ "埼玉県":[{year:"令和8年度",amount:1196,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1141,eff:"2025-11-01"},{year:"令和6年度",amount:1078,eff:"2024-10-01"}],
+ "千葉県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1140,eff:"2025-10-03"},{year:"令和6年度",amount:1076,eff:"2024-10-01"}],
+ "東京都":[{year:"令和8年度",amount:1280,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1226,eff:"2025-10-03"},{year:"令和6年度",amount:1163,eff:"2024-10-01"}],
+ "神奈川県":[{year:"令和8年度",amount:1279,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1225,eff:"2025-10-04"},{year:"令和6年度",amount:1162,eff:"2024-10-01"}],
+ "新潟県":[{year:"令和8年度",amount:1108,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1050,eff:"2025-10-02"},{year:"令和6年度",amount:985,eff:"2024-10-01"}],
+ "富山県":[{year:"令和8年度",amount:1119,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1062,eff:"2025-10-12"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "石川県":[{year:"令和8年度",amount:1113,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1054,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "福井県":[{year:"令和8年度",amount:1112,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1053,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "山梨県":[{year:"令和8年度",amount:1113,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1052,eff:"2025-12-01"},{year:"令和6年度",amount:988,eff:"2024-10-01"}],
+ "長野県":[{year:"令和8年度",amount:1117,eff:"2026-10-02",provisional:true},{year:"令和7年度",amount:1061,eff:"2025-10-03"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "岐阜県":[{year:"令和8年度",amount:1121,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1065,eff:"2025-10-18"},{year:"令和6年度",amount:1001,eff:"2024-10-01"}],
+ "静岡県":[{year:"令和8年度",amount:1154,eff:"2026-10-15",provisional:true},{year:"令和7年度",amount:1097,eff:"2025-11-01"},{year:"令和6年度",amount:1034,eff:"2024-10-01"}],
+ "愛知県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1140,eff:"2025-10-18"},{year:"令和6年度",amount:1077,eff:"2024-10-01"}],
+ "三重県":[{year:"令和8年度",amount:1143,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1087,eff:"2025-11-21"},{year:"令和6年度",amount:1023,eff:"2024-10-01"}],
+ "滋賀県":[{year:"令和8年度",amount:1136,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1080,eff:"2025-10-05"},{year:"令和6年度",amount:1017,eff:"2024-10-01"}],
+ "京都府":[{year:"令和8年度",amount:1180,eff:"2026-11-16",provisional:true},{year:"令和7年度",amount:1122,eff:"2025-11-21"},{year:"令和6年度",amount:1058,eff:"2024-10-01"}],
+ "大阪府":[{year:"令和8年度",amount:1231,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1177,eff:"2025-10-16"},{year:"令和6年度",amount:1114,eff:"2024-10-01"}],
+ "兵庫県":[{year:"令和8年度",amount:1172,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1116,eff:"2025-10-04"},{year:"令和6年度",amount:1052,eff:"2024-10-01"}],
+ "奈良県":[{year:"令和8年度",amount:1107,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1051,eff:"2025-11-16"},{year:"令和6年度",amount:986,eff:"2024-10-01"}],
+ "和歌山県":[{year:"令和8年度",amount:1101,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1045,eff:"2025-11-01"},{year:"令和6年度",amount:980,eff:"2024-10-01"}],
+ "鳥取県":[{year:"令和8年度",amount:1090,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1030,eff:"2025-10-04"},{year:"令和6年度",amount:957,eff:"2024-10-05"}],
+ "島根県":[{year:"令和8年度",amount:1092,eff:"2026-10-10",provisional:true},{year:"令和7年度",amount:1033,eff:"2025-11-17"},{year:"令和6年度",amount:962,eff:"2024-10-12"}],
+ "岡山県":[{year:"令和8年度",amount:1104,eff:"2026-10-02",provisional:true},{year:"令和7年度",amount:1047,eff:"2025-12-01"},{year:"令和6年度",amount:982,eff:"2024-10-02"}],
+ "広島県":[{year:"令和8年度",amount:1141,eff:"2026-10-11",provisional:true},{year:"令和7年度",amount:1085,eff:"2025-11-01"},{year:"令和6年度",amount:1020,eff:"2024-10-01"}],
+ "山口県":[{year:"令和8年度",amount:1101,eff:"2026-10-08",provisional:true},{year:"令和7年度",amount:1043,eff:"2025-10-16"},{year:"令和6年度",amount:979,eff:"2024-10-01"}],
+ "徳島県":[{year:"令和8年度",amount:1103,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1046,eff:"2026-01-01"},{year:"令和6年度",amount:980,eff:"2024-11-01"}],
+ "香川県":[{year:"令和8年度",amount:1092,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1036,eff:"2025-10-18"},{year:"令和6年度",amount:970,eff:"2024-10-02"}],
+ "愛媛県":[{year:"令和8年度",amount:1093,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1033,eff:"2025-12-01"},{year:"令和6年度",amount:956,eff:"2024-10-13"}],
+ "高知県":[{year:"令和8年度",amount:1086,eff:"2026-10-29",provisional:true},{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}],
+ "福岡県":[{year:"令和8年度",amount:1114,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1057,eff:"2025-11-16"},{year:"令和6年度",amount:992,eff:"2024-10-05"}],
+ "佐賀県":[{year:"令和8年度",amount:1095,eff:"2026-11-15",provisional:true},{year:"令和7年度",amount:1030,eff:"2025-11-21"},{year:"令和6年度",amount:956,eff:"2024-10-17"}],
+ "長崎県":[{year:"令和8年度",amount:1087,eff:"2026-11-02",provisional:true},{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:953,eff:"2024-10-12"}],
+ "熊本県":[{year:"令和8年度",amount:1092,eff:"2026-12-01",provisional:true},{year:"令和7年度",amount:1034,eff:"2026-01-01"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
+ "大分県":[{year:"令和8年度",amount:1096,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1035,eff:"2026-01-01"},{year:"令和6年度",amount:954,eff:"2024-10-05"}],
+ "宮崎県":[{year:"令和8年度",amount:1085,eff:"2026-10-24",provisional:true},{year:"令和7年度",amount:1023,eff:"2025-11-16"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
+ "鹿児島県":[{year:"令和8年度",amount:1090,eff:"2026-10-25",provisional:true},{year:"令和7年度",amount:1026,eff:"2025-11-01"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
+ "沖縄県":[{year:"令和8年度",amount:1086,eff:"2026-12-02",provisional:true},{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}]
 };
 let CALC_MW_META=null;   // 現在採用している最低賃金の出所 {pref, year, eff}。手動で額を直接入力したときはnull
 function calcTodayISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 // 本日時点で発効済みのうち最新の年度を返す（配列は新しい年度が先頭）
-function calcResolveMinWage(pref){
+function calcResolveMinWage(pref, baseISO){
   const arr=MIN_WAGE_DATA[pref]; if(!arr||!arr.length) return null;
-  const t=calcTodayISO();
+  // baseISO＝判定の基準日（省略時は本日）。発効日をまたぐ契約の確認とセルフテストのために外から与えられる。
+  const t=baseISO||calcTodayISO();
   for(const e of arr){ if(e.eff<=t) return e; }
   return arr[arr.length-1];   // すべて未発効（通常あり得ない）なら最古を返す
 }
+
+/* ==========================================================================
+   §F 法令チェック基盤（MF-01〜MF-06 ロット1／2026-09-16 実装）
+   --------------------------------------------------------------------------
+   この節が持つもの
+     1. 最低賃金割れの判定（MF-03）… 純関数 minWageCheck()
+     2. 割増率の法定下限（MF-04）・有期3年超（MF-05）・始業終業/休憩（MF-06）
+     3. それらをまとめる共通基盤 legalChecks() と画面描画 renderLawChecks()
+     4. ?selftest=1 で走る画面内テストランナー（ロット1・2をまとめて実行）
+
+   ★ 絶対の約束（設計書 設計書_MF-03_最賃割れ警告_v0.9.md §3・§4）★
+     (a) 判定経路では丸め関数（roundUp / round_unit / calcApplyStep /
+         calcRoundStep3 / calcOtAmount）を一切呼ばない。
+         割増賃金用に丸めた時間単価を最低賃金の判定へ流用した事故
+         （教訓 L-20260728-03）の再発防止。判定は整数比較で行う。
+     (b) wageTotals().inBase（割増算定基礎＝精皆勤手当を含む）も
+         wageTotals().total（固定残業手当を含む）も分子に使わない。
+     (c) ここで作る警告文は「画面専用」。buildBlocks / sheetHTML（書面生成）
+         へは絶対に渡さない。印刷時は CSS の .law-note で非表示にする。
+   ========================================================================== */
+
+/* ---- 顧問先版（外部公開版）の判定。表示面のみを分岐し、計算ロジックは分岐させない ---- */
+// 顧問先へ公開するホスト名。ここに載っているホストで開かれたときだけ「顧問先版」になる。
+const PUBLIC_HOSTS = ['tools.megumi-office.biz'];
+// ?public=1 は所内での表示確認用（計算には一切影響しない）
+const PUBLIC_MODE = PUBLIC_HOSTS.indexOf(location.hostname) >= 0 || /[?&]public=1(&|$)/.test(location.search);
+
+/* ---- セルフテスト（?selftest=1）の実行中だけ true。負検証の差し替え口はこのフラグで封じる ---- */
+let SELFTEST_ACTIVE = false;
+
+/* ---- 負検証（N1〜N7）専用の差し替え口 ------------------------------------
+   本番の既定値は「正しい実装」。SELFTEST_ACTIVE が true のときだけ効く。
+   故意に壊したときにテストが必ず失敗することを機械で確かめるために置いている。 */
+const MW_HOOKS = {
+  allowMode: 'minwage',  // 分子の積み方。'inBase'(N2)/'total'(N3) は禁止された流用の再現
+  roundHourly: null,     // 判定前に時間額へ丸めを挟む（N1）。本番は null＝丸めを挟まない
+  noHoursLevel: 'yellow',// 分母（所定労働時間）が取れないときの判定。本番は常に黄（N4で改変）
+  floatCompare: false,   // true で浮動小数の直接比較へ戻す（N7）。本番は整数比較
+  resolver: null         // 最低賃金の発効日解決を差し替える（N6）。本番は calcResolveMinWage
+};
+
+/* ---- 閾値・法定率のマスタ（コード内へのベタ打ちを禁止。直すのはここだけ） ---- */
+
+// 休憩の法定下限（労働基準法34条1項）。overMinutes を「超える」労働時間で requiredMinutes 以上の休憩が必要。
+// 上から順に判定するため、長い方（8時間超）を先に置く。
+const BREAK_MIN_RULE = [
+  { overMinutes: 480, requiredMinutes: 60, label: '8時間', basis: '労働基準法34条1項' },
+  { overMinutes: 360, requiredMinutes: 45, label: '6時間', basis: '労働基準法34条1項' }
+];
+
+// 割増賃金率の法定下限（％）。画面の入力欄は「総率」と「追加率」が混在するため kind で区別する。
+const OVERTIME_RATE_RULE = [
+  { field: 'ot_60under', label: '時間外（法定超・月60時間以内）', min: 125, kind: '総率',
+    basis: '労働基準法37条1項／平成6年政令第5号（時間外は2割5分以上＝総率125％以上）' },
+  { field: 'hol_legal', label: '法定休日', min: 135, kind: '総率',
+    basis: '労働基準法37条1項／平成6年政令第5号（休日は3割5分以上＝総率135％以上）' },
+  { field: 'night_pct', label: '深夜（追加分）', min: 25, kind: '追加率',
+    basis: '労働基準法37条4項（深夜は2割5分以上）' }
+];
+// 月60時間超だけは根拠条文が違う（政令ではなく労基法37条1項ただし書）ため別マスタにして警告文を書き分ける。
+// 画面の「時間外 法定超（総率）」＋「月60h超（追加）」の合計が総率150％以上でなければならない。
+const OVERTIME_60OVER_RULE = {
+  fields: ['ot_60under', 'ot_60over'], label: '時間外（月60時間超）', min: 150,
+  basis: '労働基準法37条1項ただし書（月60時間を超える時間外は5割以上＝総率150％以上。中小企業の猶予は令和5年4月1日に廃止済み）'
+};
+
+// 有期労働契約の1回あたりの期間の上限（年）。労働基準法14条1項。
+const CONTRACT_MAX_YEARS = 3;
+
+// 最低賃金の改定期（毎年10月1日）。デッドマン表示（原さん決定B-2）の基準日に使う。
+const MIN_WAGE_REVISION_MONTH = 10;
+const MIN_WAGE_REVISION_DAY = 1;
+
+// 「月の所定労働時間」の入力ミス検知用の下限（既存警告からの移設。値・条件は変更しない）
+const SCHED_MIN_WARN = 30;
+
+/* ---- 小さな道具（すべて純関数。丸め関数は呼ばない） ---- */
+
+// 金額（円）を「銭」の整数へ。判定を整数比較にするための正規化。
+function mwYenToSen(yen) { return Math.round(Number(yen || 0) * 100); }
+// 時間（時）を「1/100時間」の整数へ。同上。
+function mwHoursToCenti(h) { return Math.round(Number(h || 0) * 100); }
+// 時間額（円/時）の表示用整形。小数第3位以下は切り捨てて第2位まで出す
+// （第1位までだと 1,097.6円 と 1,098.0円 の差が画面から消えるため。教訓 L-20260728-03 の実務手順4）。
+// ★判定と同じ整数（銭・1/100時間）から計算する★ 浮動小数の除算結果を切り捨てると
+//   190,708円÷173.75h が 1,097.5999… となり 1,097.59 と表示されてしまう（判定は正しくても画面の数字が1銭ずれる）。
+//   「表示と判定の丸め方を食い違わせない」ため、除算そのものを整数で行う。
+function mwFmtHourly(numeratorYen, hours) {
+  const sen = mwYenToSen(numeratorYen), centi = mwHoursToCenti(hours);
+  if (!(centi > 0)) return '0.00';
+  const hourlyCenti = Math.floor(sen * 100 / centi);   // 円の1/100単位（切り捨て）
+  return (hourlyCenti / 100).toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// 「分子（円）が 最低賃金（円/時）× 所定労働時間（時）以上か」を判定する。
+// 本番は円→銭・時間→1/100時間の整数比較のみ。丸めは一切しない。
+function mwMeets(numeratorYen, mwAmount, hours) {
+  if (!(hours > 0)) return false;
+  if (SELFTEST_ACTIVE && MW_HOOKS.roundHourly) {
+    // ★負検証N1専用★ 時間額に丸めを挟むと最賃割れを見逃すことを示すための改変口
+    return MW_HOOKS.roundHourly(Number(numeratorYen) / Number(hours)) >= Number(mwAmount);
+  }
+  if (SELFTEST_ACTIVE && MW_HOOKS.floatCompare) {
+    // ★負検証N7専用★ 浮動小数の直接比較に戻すと境界で誤判定することを示すための改変口
+    return (Number(numeratorYen) / Number(hours)) >= Number(mwAmount);
+  }
+  return mwYenToSen(numeratorYen) >= Math.round(Number(mwAmount)) * mwHoursToCenti(hours);
+}
+
+// 最低賃金の発効日ベース解決。負検証N6ではここが差し替えられる。
+function mwResolve(pref, baseISO) {
+  if (SELFTEST_ACTIVE && MW_HOOKS.resolver) return MW_HOOKS.resolver(pref, baseISO);
+  return calcResolveMinWage(pref, baseISO);
+}
+
+// 最低賃金表が古い可能性があるか（デッドマン表示・原さん決定B-2）。
+// 表の確認日（checkedISO）より後に改定期（毎年10月1日）が到来していれば true。
+// 顧問先完結で事務所が交付前に見ないため、表の陳腐化は機械が自己申告する必要がある。
+function minWageTableStale(checkedISO, todayISO) {
+  if (!checkedISO || !todayISO) return false;
+  const pad = n => String(n).padStart(2, '0');
+  const y = Number(String(todayISO).slice(0, 4));
+  const thisYearRevision = `${y}-${pad(MIN_WAGE_REVISION_MONTH)}-${pad(MIN_WAGE_REVISION_DAY)}`;
+  // 本日以前に到来した「直近の改定期」を求める
+  const lastRevision = (String(todayISO) >= thisYearRevision)
+    ? thisYearRevision
+    : `${y - 1}-${pad(MIN_WAGE_REVISION_MONTH)}-${pad(MIN_WAGE_REVISION_DAY)}`;
+  return lastRevision > String(checkedISO);
+}
+
+// 休憩の合計時間の自由記述（「60分」「1時間30分」「1.5時間」「なし」等）を分に直す。読み取れなければ null。
+function parseBreakTotalText(s) {
+  const t = toHalf(String(s == null ? '' : s)).replace(/\s/g, '');
+  if (!t) return null;
+  if (/^(なし|無し|無|0分|0時間)$/.test(t)) return 0;
+  let m = t.match(/^(\d+(?:\.\d+)?)時間(?:(\d+(?:\.\d+)?)分)?$/);
+  if (m) return Math.round(Number(m[1]) * 60 + (m[2] ? Number(m[2]) : 0));
+  m = t.match(/^(\d+(?:\.\d+)?)分$/);
+  if (m) return Math.round(Number(m[1]));
+  m = t.match(/^(\d+(?:\.\d+)?)$/);
+  if (m) return Math.round(Number(m[1]));   // 単位が無い数値は「分」とみなす
+  return null;
+}
+
+// その労働時間（分）に法律上必要な休憩（分）を返す（労働基準法34条1項）。
+function breakRequiredMinutes(workMinutes) {
+  const hit = BREAK_MIN_RULE.find(r => Number(workMinutes) > r.overMinutes);
+  return hit ? hit.requiredMinutes : 0;
+}
+
+// ISO日付にn年を足す。月末日は繰り上げず、その月の末日へ丸める（うるう年2/29対策）。
+function addYearsISO(iso, years) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return null;
+  const y = Number(m[1]) + Number(years), mo = Number(m[2]), d = Number(m[3]);
+  const lastDayOfMonth = new Date(y, mo, 0).getDate();
+  const dd = Math.min(d, lastDayOfMonth);
+  return `${y}-${String(mo).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+}
+
+/* ---- MF-03 本体：最低賃金割れの判定（純関数・フォーム非依存＝テスト可能） ----
+   入力 input:
+     wageType     … '月給'|'日給'|'時給'|'出来高'|'年俸'
+     base         … 基本給の額（月給=月額／日給=日額／時給=時間額）
+     guaranteed   … 出来高払の保障給（労基法27条）
+     annual       … 年俸の年額
+     allowances   … [{name, unit, amount, cat}] 作成タブの手当（基準内・基準外を通しで）
+     monthlyHours … 月の所定労働時間（月給・年俸・出来高の分母）
+     dayHoursList … 各シフトの1日の所定労働時間（時・日給の分母）
+     minWage      … {amount, year, eff, pref, provisional, kind} 適用される最低賃金
+     fixedOtAmount… 固定残業手当＋固定深夜手当の合計。★判定には使わない★
+                     （負検証N3で「使うと最賃割れを見逃す」ことを示すためだけに保持する）
+   戻り値:
+     {level:'green'|'yellow'|'red', hourlyLow, hourlyHigh, numeratorLow, numeratorHigh,
+      hoursLow, hoursHigh, reasons:[], minWage}
+   判定の考え方（3値＋レンジ）:
+     mwLow  = 最低賃金に確実に算入される賃金だけを積んだ下限推定
+     mwHigh = 算入されるかもしれないものまで積んだ上限推定
+     下限で足りれば緑／上限でも足りなければ赤／その間は黄（要確認）
+     → 「計算できないから黙って通す」が構造的に起きない。
+*/
+function minWageCheck(input) {
+  const src = input || {};
+  const reasons = [];
+  const wageType = src.wageType || '月給';
+  const minWage = src.minWage || null;
+
+  let numeratorLow = 0;   // 分子の下限推定（円）
+  let numeratorHigh = 0;  // 分子の上限推定（円）
+  let hoursLow = 0;       // 分母の下限推定（時）＝最も有利な見積り
+  let hoursHigh = 0;      // 分母の上限推定（時）＝最も不利な見積り
+  let usesAllowances = false;   // 手当を分子に積む賃金体系かどうか
+
+  if (wageType === '時給') {
+    // 時給は入力された時間額そのものが時間額。手当は加算しない（安全側・設計書§2）。
+    const hourlyWage = Number(src.base || 0);
+    numeratorLow = hourlyWage; numeratorHigh = hourlyWage;
+    hoursLow = 1; hoursHigh = 1;
+    if (!(hourlyWage > 0)) reasons.push('時間額（基本給）が未入力です');
+  } else if (wageType === '日給') {
+    // 日給は「日額 ÷ その日の所定労働時間」。手当は1日あたりに割り付けられないため加算しない（安全側）。
+    const dailyWage = Number(src.base || 0);
+    numeratorLow = dailyWage; numeratorHigh = dailyWage;
+    const list = (src.dayHoursList || []).filter(h => Number(h) > 0).map(Number);
+    if (list.length) { hoursHigh = Math.max.apply(null, list); hoursLow = Math.min.apply(null, list); }
+    if (!(dailyWage > 0)) reasons.push('日額（基本給）が未入力です');
+    if (!list.length) reasons.push('始業・終業の時刻または休憩時間が未入力のため、1日の所定労働時間を計算できません');
+    else if (hoursHigh !== hoursLow) reasons.push(`日によって所定労働時間が異なります（最長${hoursHigh}時間／最短${hoursLow}時間）。時間額が最も低くなる「最長の日」で判定しています`);
+  } else {
+    // 月給・年俸・出来高は「月額 ÷ 月の所定労働時間」
+    usesAllowances = true;
+    if (wageType === '月給') {
+      const monthlyWage = Number(src.base || 0);
+      numeratorLow = monthlyWage; numeratorHigh = monthlyWage;
+      if (!(monthlyWage > 0)) reasons.push('月額（基本給）が未入力です');
+    } else if (wageType === '出来高') {
+      // 出来高払は保障給（労基法27条）を下限推定に置く。実際の出来高額はツールでは分からない。
+      const guaranteed = Number(src.guaranteed || 0);
+      numeratorLow = guaranteed; numeratorHigh = guaranteed;
+      if (!(guaranteed > 0)) reasons.push('保障給（労基法27条）が未入力です');
+      else reasons.push('出来高払は保障給を分子として判定しています。実際の出来高が保障給を下回る月がないかは別途ご確認ください');
+    } else if (wageType === '年俸') {
+      // 年俸は賞与として支払う部分が最低賃金に算入されない（最賃法4条3項2号「1か月を超える期間ごとに
+      // 支払われる賃金」）ため、年額÷12 は上限推定（mwHigh）にのみ置く。
+      const annual = Number(src.annual || 0);
+      if (annual > 0) {
+        numeratorHigh += annual / 12;
+        reasons.push('年俸は賞与として支払う部分が最低賃金に算入されません（最賃法4条3項2号）。毎月確実に支払われる額が分からないため「要確認」としています。毎月支払う額が確定している場合は月給で入力してください');
+      } else {
+        reasons.push('年額（基本給）が未入力です');
+      }
+    }
+    hoursLow = Number(src.monthlyHours || 0);
+    hoursHigh = hoursLow;
+    if (!(hoursLow > 0)) reasons.push('賃金欄の「月の所定労働時間」が未入力のため、時間額に換算できません');
+  }
+
+  // ---- 手当の仕分け（設計書§3）----
+  if (usesAllowances) {
+    (src.allowances || []).forEach(a => {
+      const amount = Number(a.amount || 0);
+      if (!(amount > 0)) return;
+      const unit = a.unit || 'month';
+      if (SELFTEST_ACTIVE && MW_HOOKS.allowMode === 'inBase') {
+        // ★負検証N2専用★ 割増賃金の算定基礎（基準内賃金）を分子に流用した場合の再現
+        if (a.cat !== 'out') { numeratorLow += amount; numeratorHigh += amount; }
+        return;
+      }
+      if (SELFTEST_ACTIVE && MW_HOOKS.allowMode === 'total') {
+        // ★負検証N3専用★ 総支給額を分子に流用した場合の再現
+        numeratorLow += amount; numeratorHigh += amount;
+        return;
+      }
+      if (unit !== 'month') {
+        // 日額・時間額・回数・その他は月額換算できないため両方から除外し、理由に必ず出す
+        reasons.push(`「${a.name || '手当'}」は日額・時間額等のため月額に換算できず、最低賃金の確認から除外しました`);
+        return;
+      }
+      const included = minWageIncluded(a.name);
+      if (included === true) {
+        numeratorLow += amount; numeratorHigh += amount;
+      } else if (included === false) {
+        reasons.push(`「${a.name}」は最低賃金の比較から除外される賃金です（最賃法4条3項・同則1条）`);
+      } else {
+        // 名称から算入可否を判断できない手当は下限推定に入れない（不明な手当で緑になる事故を防ぐ安全側）。
+        // 賃金試算タブ（calcImportAllows）が未知の手当を minwage:true 既定にしているのと逆方向の既定。
+        // 作成タブは顧問先が交付する書面に直結するため、意図的に非対称にしている。
+        numeratorHigh += amount;
+        reasons.push(`「${a.name || '手当'}」は最低賃金に算入してよいか名称から判断できないため、算入しない前提（安全側）で判定しました`);
+      }
+    });
+    if (SELFTEST_ACTIVE && MW_HOOKS.allowMode === 'total') {
+      // ★負検証N3専用★ 固定残業手当・固定深夜手当まで分子に入れた場合の再現
+      const fixedOt = Number(src.fixedOtAmount || 0);
+      numeratorLow += fixedOt; numeratorHigh += fixedOt;
+    }
+  }
+
+  // 上限推定が下限推定を下回ることはない（念のための整合）
+  if (numeratorHigh < numeratorLow) numeratorHigh = numeratorLow;
+
+  // ---- 判定（設計書§2）----
+  let level;
+  if (!minWage) {
+    reasons.unshift('都道府県が未選択のため、適用される最低賃金額を特定できません');
+    level = 'yellow';
+  } else if (!(hoursHigh > 0)) {
+    // 分母が取れないときは黙って通さない（必ず黄）。本番は常に 'yellow'。
+    level = SELFTEST_ACTIVE ? MW_HOOKS.noHoursLevel : 'yellow';
+  } else if (mwMeets(numeratorLow, minWage.amount, hoursHigh)) {
+    level = 'green';
+  } else if (hoursLow > 0 && !mwMeets(numeratorHigh, minWage.amount, hoursLow)) {
+    level = 'red';
+  } else {
+    level = 'yellow';
+  }
+
+  // 表示用の時間額。minWageCheck が返した値を画面側がそのまま整形するだけにし、表示用の再計算を禁止する。
+  const hourlyLow = hoursHigh > 0 ? numeratorLow / hoursHigh : 0;
+  const hourlyHigh = hoursLow > 0 ? numeratorHigh / hoursLow : 0;
+
+  return { level, hourlyLow, hourlyHigh, numeratorLow, numeratorHigh, hoursLow, hoursHigh, reasons, minWage };
+}
+
+/* ---- フォームから minWageCheck の入力を集める薄いアダプタ ---- */
+
+// 休憩の合計時間（分）と、そもそも入力されているか。時刻指定モードと合計モードの両方に対応。
+function breakMinutesForCheck() {
+  const mode = radio('break_mode') || 'time';
+  if (mode === 'time') {
+    const rows = getBreaksRaw();
+    return { minutes: breakTotalMinutes(), entered: rows.length > 0, readable: rows.length > 0 };
+  }
+  const text = val('break_total');
+  const parsed = parseBreakTotalText(text);
+  return { minutes: parsed == null ? 0 : parsed, entered: has(text), readable: parsed != null };
+}
+
+// 各シフト行の「1日の所定労働時間（時）」。（終業−始業）−休憩合計。日跨ぎは+24時間で補正。
+function dailyWorkHoursList() {
+  const bk = breakMinutesForCheck();
+  if (!bk.readable) return [];
+  return getTimes().map(t => {
+    const s = parseHM(t.start), e = parseHM(t.end);
+    if (s == null || e == null) return null;
+    let span = e - s; if (span < 0) span += 1440;   // 日跨ぎ
+    const work = span - bk.minutes;
+    return work > 0 ? work / 60 : null;
+  }).filter(v => v != null);
+}
+
+// 画面で選んだ都道府県・種類から、適用される最低賃金を1つに決める。
+// 地域別は MIN_WAGE_DATA（唯一のマスタ）を発効日ベースで解決する。
+// 特定（産業別）最低賃金はツールに内蔵していないため、入力された額と地域別の高い方を採る。
+function resolveAppliedMinWage() {
+  const pref = val('minwage_pref');
+  if (!pref) return null;
+  const base = mwResolve(pref);
+  if (!base) return null;
+  const kind = val('minwage_kind') || '地域別';
+  const special = parseYen(val('minwage_special_amount'));
+  if (kind === '特定' && special != null && special > 0) {
+    // 地域別と特定のうち高い方が適用される
+    if (special > base.amount) {
+      return { amount: special, year: base.year, eff: base.eff, pref,
+        provisional: false, kind: '特定（産業別・入力額）', name: val('minwage_special_name') };
+    }
+    return { amount: base.amount, year: base.year, eff: base.eff, pref,
+      provisional: !!base.provisional, kind: '地域別（入力された特定最低賃金より高いため地域別を適用）' };
+  }
+  return { amount: base.amount, year: base.year, eff: base.eff, pref,
+    provisional: !!base.provisional, kind: kind === '特定' ? '特定を選択（額が未入力のため地域別で判定）' : '地域別' };
+}
+
+function collectMinWageInput() {
+  const wageType = val('wage_type') || '月給';
+  const baseFieldMap = { '月給': 'monthly_wage', '日給': 'daily_wage', '時給': 'hourly_wage' };
+  const allowances = []
+    .concat(getAllows('in').map(a => ({ name: a.name, unit: a.unit || 'month', amount: parseYen(a.amount) || 0, cat: 'in' })))
+    .concat(getAllows('out').map(a => ({ name: a.name, unit: a.unit || 'month', amount: parseYen(a.amount) || 0, cat: 'out' })));
+  return {
+    wageType,
+    base: parseYen(val(baseFieldMap[wageType] || 'monthly_wage')) || 0,
+    guaranteed: parseYen(val('guaranteed_wage')) || 0,
+    annual: parseYen(val('annual_wage')) || 0,
+    allowances,
+    monthlyHours: numH(val('monthly_scheduled_hours')),
+    dayHoursList: dailyWorkHoursList(),
+    minWage: resolveAppliedMinWage(),
+    // ★判定には使わない★ 負検証N3で「固定残業手当を分子に入れると最賃割れを見逃す」ことを示すためだけに保持
+    fixedOtAmount: (parseYen(val('fixed_ot_amount')) || 0) + (parseYen(val('fixed_night_amount')) || 0)
+  };
+}
+
+/* ---- 共通基盤：法令チェック（MF-03〜MF-06＋既存の所定時間過小警告） ----
+   戻り値 {blocks, reds, yellows, oks, mw}
+     blocks … 明らかな法令違反。出力をブロックする（原さん決定⑨）
+     reds   … 赤警告。画面に常時表示し、出力前の確認ダイアログで押し切れる
+     yellows… 要確認。出力は可
+     oks    … 確認できた内容（緑）。画面表示のみ
+   ※すべて画面専用の文言。書面生成（buildBlocks/sheetHTML）へは渡さない。 */
+/* ==========================================================================
+   §F-2 パート有期法まわりの判定（MF-07・MF-09・MF-10・MF-11 ロット2／2026-09-16 実装）
+   --------------------------------------------------------------------------
+   この節が持つもの
+     1. MF-07 昇給・賞与・退職金の「有無」未選択の検出と、書面行の組み立て
+     2. MF-09 ①説明窓口の書面行の組み立て（空欄のときは旨だけを印字する）
+     3. MF-10 パート有期則2条1項4号の施行日判定に使う基準日（雇入れ日／契約始期／更新日）
+     4. MF-11 「短時間労働者」該当性の判定支援（週の所定労働時間の比較）
+
+   根拠: パート有期法2条1項・6条1項、同施行規則2条1項1〜4号・2項、
+         派遣法31条の2第2項、
+         2026-06-29付 改正施行通達（基発0629第2号・職発0629第1号・雇均発0629第2号・
+         開発0629第3号）第1の4(2)(4)・第3の1(4)(5)(6)(14)(15)
+
+   ★ロット1と同じ約束★
+     (a) ここで作る警告文は「画面専用」。buildBlocks / sheetHTML へは渡さない
+         （印刷時は CSS の .law-note / #lawCheckNote で非表示）。
+     (b) 判定は純関数に閉じ、フォームからの値集めは薄いアダプタに分ける（テスト可能にする）。
+     (c) 閾値・文言はこの節のマスタ1か所に置き、コード内へ散らさない。
+     ※ setsumeiLines() と yumuLine() は例外的に「書面の行そのもの」を作る。
+       MF-07・MF-09 は書面の記載自体を是正する項目のため（依頼で明示的に許可された2項目）。
+   ========================================================================== */
+
+/* ---- 負検証（N8〜N11）専用の差し替え口。SELFTEST_ACTIVE が true のときだけ効く ---- */
+const L2_HOOKS = {
+  yumuRequired: true,        // false で MF-07 の必須化・未選択ガードを外す（N8）
+  setsumeiBlankGuard: true,  // false で MF-09 の空欄ガードを外し改修前の挙動へ戻す（N9）
+  actBaseDate: 'hire',       // 'issue' で MF-10 の基準日を交付日へ戻す（N10）
+  shortByLabelOnly: false    // true で MF-11 を呼称（雇用形態の選択）だけの判断へ戻す（N11）
+};
+
+/* ---- 負検証（N14〜N15）専用の差し替え口。ロット4（MF-12・MF-19）分 ---- */
+const L4_HOOKS = {
+  dismissalFullList: true,  // false で MF-12 を「先頭1件＋等（詳細は就業規則による）」の改修前の挙動へ戻す（N14）
+  soudanBlankGuard: true    // false で MF-19 の空欄ガードを外し、空の括弧つきで印字する改修前の挙動へ戻す（N15）
+};
+
+/* ---- MF-12 解雇の事由の摘示文言のマスタ（直すのはこの表だけ・コード内へ散らさない） ----
+   根拠: 労働基準法施行規則5条1項4号（退職に関する事項＝解雇の事由を含む／法定明示事項）
+         平成11年1月29日 基発第45号
+         「当該明示すべき事項の内容が膨大なものとなる場合においては、労働者の利便性をも考慮し、
+           当該労働者に適用される就業規則上の関係条項名を網羅的に示すことで足りるものであること。」
+         「上記に掲げた事項については、当該労働者に適用する部分を明確にして就業規則を労働契約の
+           締結の際に交付することとしても差し支えないこと。」
+         ＝水準は「関係条項名の網羅的な摘示」または「就業規則の交付」。
+           一部だけを示して残りを「等」で省く書き方はこの水準を満たさない。
+   （事務所が2026-09-05に本文を回収済み。所在＝knowledge/labor-standards-conditions/通達原文メモ_労働条件明示関連.md §3・
+     参照URL台帳 R-0097。本実装の水準はこの本文の逐語引用で確認した） */
+const DISMISSAL_CLAUSE_TEXT = {
+  bullet: '　　・',                        // 箇条書きの行頭（既存の解雇事由の行と同じ体裁）
+  lead:   '解雇の事由の詳細は、就業規則',   // 条項摘示の書き出し
+  joiner: '、',                            // 条項どうしの区切り
+  tail:   'による。'                       // 条項摘示の結び
+};
+
+/* MF-12: 「解雇の事由及び手続」の書面行（見出しを除く本文行）を組み立てる純関数。
+   items   … 利用者が入力した解雇事由（すべて列挙する。「先頭1件＋等」の省略はしない）
+   clauses … 解雇の事由を定めた就業規則の条項（網羅摘示。基発45号の水準）
+   hasRules… その事業場に周知された就業規則があるか（無いなら存在しない規則を参照させない）
+   フォームに依存しない純関数にしてあるため、セルフテストから直接呼べる。 */
+function dismissalLines(items, clauses, hasRules) {
+  // 負検証N14: 「先頭1件＋等（詳細は就業規則による）」だけを書いていた改修前の挙動へ戻す差し替え口
+  if (SELFTEST_ACTIVE && !L4_HOOKS.dismissalFullList) {
+    return items.length ? [DISMISSAL_CLAUSE_TEXT.bullet + items[0] + ' 等（詳細は就業規則による）'] : [];
+  }
+  const out = [];
+  // 入力された解雇事由はすべて箇条書きにする（省略しない）
+  items.forEach(x => out.push(DISMISSAL_CLAUSE_TEXT.bullet + x));
+  // 就業規則がある場合に限り、入力された条項をすべて1行にまとめて摘示する
+  if (hasRules && clauses.length) {
+    out.push(DISMISSAL_CLAUSE_TEXT.bullet + DISMISSAL_CLAUSE_TEXT.lead
+      + clauses.join(DISMISSAL_CLAUSE_TEXT.joiner) + DISMISSAL_CLAUSE_TEXT.tail);
+  }
+  return out;
+}
+
+/* MF-19（2026-09-16 ロット4）: ②雇用管理の改善等に関する事項に係る相談窓口の書面行を組み立てる純関数。
+   この窓口の明示はパート有期則2条1項5号（令和8年10月1日以後。それ以前は同項4号）の必須明示事項であり、
+   ①説明窓口（明示は「望ましい」もの）と違って「旨だけ」に落とすことはできない。
+   したがって見出しの行自体は必ず出し、部署名・担当者職氏名・連絡先のうち
+   入力がないものだけを印字しない（空の括弧を書面へ出さない）。
+   窓口が1つも入力されていない場合は legalChecks() の出力ブロックで出力そのものを止める。 */
+// ②相談窓口の見出し行（書面の文言。1か所に置く）
+const SOUDAN_HEAD_LINE = '・雇用管理の改善等に関する事項に係る相談窓口';
+function soudanLines(dept, person, contact) {
+  // 負検証N15: 空欄でも括弧つきで印字していた改修前の挙動へ戻す差し替え口
+  if (SELFTEST_ACTIVE && !L4_HOOKS.soudanBlankGuard) {
+    return [SOUDAN_HEAD_LINE, `　　部署名 ${dept}　担当者職氏名 ${person}（連絡先 ${contact}）`];
+  }
+  const parts = [];
+  if (has(dept)) parts.push('部署名 ' + dept);
+  if (has(person)) parts.push('担当者職氏名 ' + person);
+  // 3項目とも空 → 見出しだけを残す（必須明示のため行は消さない。中身は出力ブロックで担保する）
+  if (!parts.length && !has(contact)) return [SOUDAN_HEAD_LINE];
+  let line = '　　' + parts.join('　');
+  if (has(contact)) line += `（連絡先 ${contact}）`;
+  return [SOUDAN_HEAD_LINE, line];
+}
+
+/* MF-19: ②相談窓口が1つも入力されていないために出力を止めるべきかを返す純関数。
+   isTarget … パート有期法6条1項・派遣法31条の2第2項で明示が義務づけられる方か
+   3項目すべてが空のときだけ true（部署名だけ・連絡先だけでも入力があれば止めない）。 */
+function soudanBlockNeeded(isTarget, dept, person, contact) {
+  if (!isTarget) return false;
+  return !has(dept) && !has(person) && !has(contact);
+}
+
+/* ---- MF-07 有無の明示が必要な特定事項のマスタ（直すのはこの表だけ） ----
+   パート有期則2条1項1号=昇給／2号=退職手当／3号=賞与。派遣は派遣法31条の2第2項。 */
+const PART_ACT_YUMU_FIELDS = [
+  { field: 'raise_flag',  label: '昇給',   basis: 'パート有期則2条1項1号' },
+  { field: 'retire_flag', label: '退職金', basis: 'パート有期則2条1項2号' },
+  { field: 'bonus_flag',  label: '賞与',   basis: 'パート有期則2条1項3号' }
+];
+
+/* ---- MF-10 パート有期則2条1項4号（待遇の相違の説明を求めることができる旨）の施行日 ----
+   令和8年厚生労働省令第87号（2026-04-28公布・2026-10-01施行）。日付をコード内に散らさない。 */
+const PART_ACT_SETSUMEI_ENFORCE_DATE = '2026-10-01';
+
+/* MF-07: 有無明示（昇給・退職金・賞与）が未選択のものを返す純関数。
+   対象は短時間・有期・派遣（パート有期法6条1項／派遣法31条の2第2項）。
+   改修前は未選択でも書面に「無」と印字していたため、事実と異なる明示（パート有期則2条2項）に
+   なりうる。未選択は出力ブロックにし、「無」は利用者が選んだときだけ印字する。
+   引数 values は {フィールド名: 値} の素のオブジェクト（フォーム非依存＝テスト可能）。 */
+function yumuUnselected(isTarget, values) {
+  if (SELFTEST_ACTIVE && !L2_HOOKS.yumuRequired) return [];   // 負検証N8
+  if (!isTarget) return [];
+  return PART_ACT_YUMU_FIELDS.filter(f => !has(values[f.field]));
+}
+
+/* MF-07: 昇給・賞与・退職金の書面1行を組み立てる純関数（番号は呼び出し側が付ける）。
+   未選択（空文字）のときは空文字を返す＝行を出さない。「無」は利用者が選んだときだけ印字する。 */
+function yumuLine(flag, label, note) {
+  // 負検証N8: 未選択を自動的に「無」とみなす改修前の挙動へ戻す差し替え口
+  if (SELFTEST_ACTIVE && !L2_HOOKS.yumuRequired && !has(flag)) flag = '無';
+  if (!has(flag)) return '';
+  if (flag === '有') return `${label}　有${has(note) ? `（${note}）` : ''}`;
+  return `${label}　${flag}`;
+}
+
+/* MF-09: ①説明窓口の書面行を組み立てる純関数。
+   申出先（部署・担当者・連絡先）の明示は義務ではなく「望ましい」ものであり、
+   「説明を求めることができる旨」を表示することで法6条1項の義務は履行される
+   （改正施行通達 第3の1(6)）。したがって窓口が1つも入力されていないときは
+   空の括弧を印字せず、旨だけの1行を返す。 */
+function setsumeiLines(dept, person, contact) {
+  // 負検証N9: 空欄でも括弧つきで印字していた改修前の挙動へ戻す差し替え口
+  if (SELFTEST_ACTIVE && !L2_HOOKS.setsumeiBlankGuard) {
+    return ['・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。',
+            `　　部署名 ${dept}　担当者職氏名 ${person}（連絡先 ${contact}）`];
+  }
+  const parts = [];
+  if (has(dept)) parts.push('部署名 ' + dept);
+  if (has(person)) parts.push('担当者職氏名 ' + person);
+  if (!parts.length && !has(contact)) {
+    // 申出先が1つも入力されていない → 旨のみを明示する（空欄の括弧を書面へ出さない）
+    return ['・通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。'];
+  }
+  let line = '　　' + parts.join('　');
+  if (has(contact)) line += `（連絡先 ${contact}）`;
+  return ['・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。', line];
+}
+
+/* MF-10: 施行日判定の基準日を選ぶ純関数。
+   義務の履行時点は「雇い入れたとき」であり、有期労働契約は更新のたびに「雇い入れ」に当たる
+   （改正施行通達 第3の1(14)(15)）。交付日ではなく入社日／契約始期（更新後の契約の始期）で判定する。
+   日雇は短時間労働者に当たらないため本判定の対象外とし、基準日を空で返す。 */
+function partActBaseDateOf(per, mukiStart, contractStart, issueDate) {
+  // 負検証N10: 基準日を交付日へ戻す差し替え口（改修前の挙動）
+  if (SELFTEST_ACTIVE && L2_HOOKS.actBaseDate === 'issue') return { date: issueDate || '', label: '交付日' };
+  if (per === '有期') return { date: contractStart || '', label: '契約始期（更新の場合は更新後の契約始期）' };
+  if (per === '無期') return { date: mukiStart || '', label: '入社日' };
+  return { date: '', label: '雇入れ日' };
+}
+
+/* フォームから基準日を取る薄いアダプタ（判定本体はフォーム非依存のまま保つ） */
+function partActBaseDate(per) {
+  return partActBaseDateOf(per, val('muki_start'), val('contract_start'), val('issue_date'));
+}
+
+/* MF-10: ①（説明を求めることができる旨）の明示が義務になるかの判定。
+   基準日が空のときは「判定できない」＝false（自動ロックはしない）。空欄は legalChecks が黄で拾う。 */
+function partActSetsumeiMust(cat, per, baseDate) {
+  if (!(cat === '短時間' || per === '有期')) return false;
+  return has(baseDate) && String(baseDate) >= PART_ACT_SETSUMEI_ENFORCE_DATE;
+}
+
+/* MF-11: 「短時間労働者」該当性の判定支援（パート有期法2条1項）。
+   1週間の所定労働時間が同一の事業主に雇用される通常の労働者に比し短ければ該当し、
+   呼称（パート・アルバイト・準社員・嘱託等）は問わない（改正施行通達 第1の4(2)(4)）。
+   本人の実態は利用者しか知らないため出力ブロックはせず、注意喚起にとどめる。 */
+function shortTimeCheck(cat, per, normalHours, workerHours) {
+  // 負検証N11: 呼称（雇用形態の選択）だけで判断する改修前の考え方へ戻す差し替え口
+  if (SELFTEST_ACTIVE && L2_HOOKS.shortByLabelOnly) {
+    return cat === '短時間' ? { level: 'ok', code: 'ok_short' } : { level: 'none', code: 'none' };
+  }
+  const needsPart = (cat === '短時間' || per === '有期' || cat === '派遣');  // すでにパート有期法・派遣法の明示対象
+  const bothEntered = normalHours > 0 && workerHours > 0;
+  if (!bothEntered) {
+    // 短時間・有期・派遣を選んでいれば必要な明示事項はすでに書面へ出るので追加の注意はしない。
+    // 「一般・無期」等は明示事項が1つも出ないため、判定できないこと自体を必ず画面に残す。
+    return needsPart ? { level: 'none', code: 'none' } : { level: 'yellow', code: 'unknown_general' };
+  }
+  const shorter = workerHours < normalHours;
+  if (cat === '短時間') return shorter ? { level: 'ok', code: 'ok_short' } : { level: 'yellow', code: 'not_short_labeled' };
+  if (shorter) return needsPart ? { level: 'yellow', code: 'shorter_other' } : { level: 'red', code: 'shorter_general' };
+  return { level: 'ok', code: 'ok_normal' };
+}
+
+/* MF-11 の画面文言のマスタ（空文字＝表示しない）。文言をコードへ散らさないため1か所にまとめる。 */
+const SHORT_TIME_MESSAGE = {
+  shorter_general: '入力された週の所定労働時間が「通常の労働者」より短いため、この方は【短時間労働者】に当たる可能性が高いです（パート有期法2条1項）。1週間の所定労働時間が同一の事業主に雇用される通常の労働者に比し短ければ該当し、「パート」「アルバイト」「準社員」「嘱託」などの呼称は問いません。該当する場合は昇給・退職金・賞与の有無と相談窓口の明示が必要です（同法6条1項）。雇用形態を「短時間（パート）」に変更するか、入力した週の所定労働時間をご確認ください',
+  shorter_other: '入力された週の所定労働時間が「通常の労働者」より短いため、この方は【短時間労働者】にも当たる可能性があります（パート有期法2条1項・呼称は問いません）。雇用形態を「短時間（パート）」に変更すべきかご確認ください（有期・派遣として必要な明示事項はすでに書面に出ています）',
+  not_short_labeled: '雇用形態で「短時間（パート）」を選んでいますが、入力された週の所定労働時間は「通常の労働者」と同じかそれ以上です。この場合はパート有期法2条1項の【短時間労働者】には当たりません（呼称ではなく週の所定労働時間で判断します）。ただし期間の定めがある方は【有期雇用労働者】として同法の対象になります。入力した週の所定労働時間をご確認ください',
+  unknown_general: '【短時間労働者】に当たらないことをご確認ください。「通常の労働者（正社員等）の週の所定労働時間」と「この方の週の所定労働時間」を入力すると、この画面で確認できます（パート有期法2条1項。通常の労働者より1時間でも短ければ該当し、呼称は問いません。該当する場合は昇給・退職金・賞与の有無と相談窓口の明示が必要です）',
+  ok_short: '週の所定労働時間が「通常の労働者」より短いため【短時間労働者】に当たります（パート有期法2条1項）。必要な明示事項が書面に出ます',
+  ok_normal: ''
+};
+
+/* ==========================================================================
+   §F-3 無期転換の判定支援と社会保険の区分ヘルプ（MF-08・MF-16 ロット5／2026-09-16 実装）
+   --------------------------------------------------------------------------
+   この節が持つもの
+     1. MUKI_TENKAN_YEARS … 労働契約法18条1項の通算契約期間（年）。閾値はここだけに置く
+     2. MUKI_TENKAN_MESSAGE … 画面に出す警告文のマスタ（直すのはここだけ）
+     3. MUKI_TENKAN_HELP … 申込権の要件・クーリング・有期特措法の特例の説明（画面のみ）
+     4. mukiTenkanCheck() … 判定の純関数（フォーム非依存＝セルフテストから直接呼べる）
+     5. SHAKAI_HOKEN_NOTE … MF-16 社会保険（短時間労働者）の区分ヘルプのマスタ
+     6. それらを画面へ描く renderLot5Notes()
+   守っていること
+     ・無期転換申込権の発生は過去の契約履歴に依存し、ツール単体では原理的に判定できない。
+       したがってこの節が出すのは「判定」ではなく「判定支援」であり、出力ブロックにはしない
+       （原さん決定⑨＝判断が要るものは赤警告＋出力前の確認ダイアログ）。
+     ・クーリング（労働契約法18条2項）の期間計算はしない。該当しうる場合は事務所へ案内する。
+     ・入力欄（tsusan_start）は画面だけで使い、書面生成の経路へは一切流さない。
+   ========================================================================== */
+
+/* ---- 負検証（N16・N17）専用の差し替え口。SELFTEST_ACTIVE が true のときだけ効く ---- */
+const L5_HOOKS = {
+  mukiOverCheck: true,       // false にすると通算5年超の判定をしない（＝改修前の「完全手動・既定無」へ戻す）
+  shakaiHokenOldText: false  // true にすると MF-16 改修前の「施行期日政令は未公布」という記述へ戻す
+};
+
+/* 労働契約法18条1項の通算契約期間（年）。この数値を使うのはこのファイルでここ1か所だけ。 */
+const MUKI_TENKAN_YEARS = 5;
+
+// ISO日付にn日を足す（月跨ぎ・うるう年の処理は Date に任せる）
+function addDaysISO(iso, days) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return null;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Number(days));
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+// ISO日付にnか月を足す。日が足りない月は末日へ丸める（addYearsISO と同じ考え方）
+function addMonthsISO(iso, months) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return null;
+  const total = Number(m[1]) * 12 + (Number(m[2]) - 1) + Number(months);
+  const y = Math.floor(total / 12), mo = (total % 12) + 1, d = Number(m[3]);
+  const last = new Date(y, mo, 0).getDate();
+  return `${y}-${String(mo).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`;
+}
+
+/* 起算日から終期までの期間を「○年○か月○日」で表す（終期の日を含めて数える）。
+   終期の翌日を排他的な終端に置くことで、「4/1開始〜翌々年3/31終了＝ちょうど2年」と数えられる。 */
+function spanYearsMonths(startISO, endISO) {
+  if (!has(startISO) || !has(endISO)) return null;
+  const endEx = addDaysISO(endISO, 1);          // 終期の翌日
+  if (!endEx || endEx <= startISO) return null; // 終期が起算日より前（入力ミス）
+  let y = 0;
+  while (y < 100 && addYearsISO(startISO, y + 1) <= endEx) y++;
+  const baseY = addYearsISO(startISO, y);
+  let mo = 0;
+  while (mo < 12 && addMonthsISO(baseY, mo + 1) <= endEx) mo++;
+  const baseM = addMonthsISO(baseY, mo);
+  const days = Math.round((Date.parse(endEx) - Date.parse(baseM)) / 86400000);
+  let text = `${y}年`;
+  if (mo) text += `${mo}か月`;
+  if (days) text += `${days}日`;
+  return { years: y, months: mo, days: days, text: text };
+}
+
+/* MF-08 の画面文言のマスタ。動く値（日付・通算期間）を埋めるため関数で持つ。
+   文言を直すときはこの表だけを直す。 */
+const MUKI_TENKAN_MESSAGE = {
+  // 通算5年超の見込みなのに申込権が「無」のまま（赤警告＋出力前の確認ダイアログ）
+  over: c => `通算契約期間の起算日（${fmtDate(c.start)}）から今回の契約の終期（${fmtDate(c.end)}）までが`
+    + `${c.span ? `通算${c.span.text}となり、` : ''}${MUKI_TENKAN_YEARS}年を超えます。`
+    + `同一の使用者との間の有期労働契約の通算契約期間が${MUKI_TENKAN_YEARS}年を超える方は、`
+    + `いま続いている契約の期間中に申込みをすれば次の契約から無期労働契約になります〔労働契約法18条1項〕。`
+    + `申込権が発生する契約では「申込みができる旨」と「転換後の労働条件」の明示が必要です〔労働基準法施行規則5条5項・6項〕。`
+    + `「無期転換申込権」を【有】に変更してください。`
+    + `なお、契約と契約の間に空白期間（クーリング〔同条2項〕）がある場合や、`
+    + `有期雇用特別措置法の第二種計画認定（定年後に引き続き雇用される高齢者）を受けている場合は結論が変わります。`
+    + `このツールではどちらも判定できません。該当しうる場合はめぐみ事務所へご相談ください`,
+  // 起算日または終期が未入力（判定できないことを必ず画面に残す）
+  unknown: () => `「通算契約期間の起算日」または「契約終期」が未入力のため、無期転換の申込権が発生する契約かどうかを`
+    + `画面で確認できません〔労働契約法18条1項〕。通算契約期間が${MUKI_TENKAN_YEARS}年を超える方には`
+    + `「申込みができる旨」と「転換後の労働条件」の明示が必要です〔労働基準法施行規則5条5項・6項〕。`
+    + `起算日（この方と結んだ最初の有期労働契約の開始日）をご入力ください`,
+  // 起算日が終期より後（入力ミス）
+  invalid: c => `「通算契約期間の起算日」（${fmtDate(c.start)}）が今回の契約の終期（${fmtDate(c.end)}）より後になっています。`
+    + `起算日は、この方と結んだ最初の有期労働契約の開始日をご入力ください`,
+  // 通算5年以下（確認できた事項として緑に出す）
+  under: c => `通算契約期間は今回の契約の終期時点で${c.span ? c.span.text : ''}（${MUKI_TENKAN_YEARS}年以下）です`
+    + `〔労働契約法18条1項〕。${MUKI_TENKAN_YEARS}年を超える更新をするときは無期転換の明示が必要になります`,
+  // すでに申込権「有」を選んでいる
+  selected: () => `無期転換の申込みができる旨と、転換後の労働条件（別紙）が書面に出ます`
+    + `〔労働契約法18条1項・労働基準法施行規則5条5項・6項〕`
+};
+
+/* MF-08 本体：無期転換申込権の判定支援（純関数・フォーム非依存＝テスト可能）。
+   per          … 期間区分（'無期'|'有期'|'日雇'）
+   tsusanStart  … 通算契約期間の起算日（最初の有期労働契約の開始日）
+   contractEnd  … 今回の契約の終期
+   mukiFlag     … 無期転換申込権の選択（'有'|'無'）
+   戻り値 {level:'red'|'yellow'|'ok'|'none', code, ctx}
+   ※ ここで返すのは「判定」ではなく「判定支援」。過去の契約履歴・クーリング・有期特措法の特例は
+      ツールでは分からないため、出力ブロックにはしない（赤警告＋出力前の確認ダイアログまで）。 */
+function mukiTenkanCheck(per, tsusanStart, contractEnd, mukiFlag) {
+  if (per !== '有期') return { level: 'none', code: 'none', ctx: {} };
+  if (mukiFlag === '有') return { level: 'ok', code: 'selected', ctx: {} };
+  if (!has(tsusanStart) || !has(contractEnd)) return { level: 'yellow', code: 'unknown', ctx: {} };
+  const ctx = { start: tsusanStart, end: contractEnd, span: spanYearsMonths(tsusanStart, contractEnd) };
+  if (contractEnd < tsusanStart) return { level: 'yellow', code: 'invalid', ctx };
+  // 負検証N16：通算5年超の判定を外し、申込権の有無を完全に手動任せにしていた改修前の挙動へ戻す差し替え口
+  if (SELFTEST_ACTIVE && !L5_HOOKS.mukiOverCheck) return { level: 'none', code: 'none', ctx };
+  const limit = addYearsISO(tsusanStart, MUKI_TENKAN_YEARS);   // この日「以降」が終期なら通算5年超
+  if (limit && contractEnd >= limit) return { level: 'red', code: 'over', ctx };
+  return { level: 'ok', code: 'under', ctx };
+}
+
+/* MF-08 画面の説明（労働契約法18条1項の要件・クーリング・有期特措法の特例）。画面のみ・書面には出さない。 */
+const MUKI_TENKAN_HELP = {
+  title: '無期転換の申込権について（労働契約法18条）',
+  items: [
+    `<b>要件</b>：同一の使用者との間で結ばれた2つ以上の有期労働契約の<b>通算契約期間が${MUKI_TENKAN_YEARS}年を超える</b>労働者が、`
+      + 'いま続いている契約の期間中に申込みをすると、<b>次の契約から</b>期間の定めのない労働契約になります'
+      + '（使用者は断れません）〔労働契約法18条1項〕。',
+    '<b>明示</b>：申込権が発生する契約を結ぶときは、<b>申込みができる旨</b>と<b>転換後の労働条件</b>の明示が必要です'
+      + '〔労働基準法施行規則5条5項・6項〕。上の欄で「有」を選ぶと、この2つが本紙と別紙に自動で入ります。',
+    '<b>空白期間（クーリング）</b>：契約と契約の間に一定以上の空白期間があると、それより前の契約期間は通算されません'
+      + '〔同条2項〕。<b>このツールは空白期間の計算をしません。</b>間が空いた期間がある方は、'
+      + '通算されるかどうかをめぐみ事務所へご確認ください。',
+    '<b>定年後の再雇用（有期雇用特別措置法の第二種計画認定）</b>：都道府県労働局の第二種計画認定を受けている事業主では、'
+      + '定年後に引き続き雇用される高齢者について、その間は申込権が発生しません。'
+      + '<b>認定を受けている場合は、めぐみ事務所へご確認ください</b>（このツールでは特例の入力はできません）。',
+    `<b>このツールができること</b>：起算日と今回の契約の終期から「通算${MUKI_TENKAN_YEARS}年を超える見込みか」を画面で確認するだけです。`
+      + '<b>通算契約期間は過去の契約の履歴で決まるため、最終的な判定はできません。</b>'
+      + '起算日の欄の内容は書面には印字されません。'
+  ]
+};
+function mukiTenkanHelpHTML() {
+  return `<b>${esc(MUKI_TENKAN_HELP.title)}</b>`
+    + MUKI_TENKAN_HELP.items.map(t => `<div style="margin-top:4px">・${t}</div>`).join('');
+}
+
+/* MF-16 社会保険（短時間労働者）の被保険者区分ヘルプのマスタ。
+   賃金要件（月額8.8万円以上）の撤廃は、令和8年政令第275号（令和8年9月11日公布）で
+   令和8年10月1日施行と確定した（2026-09-16に政令原文PDFで確認。確信度＝高）。
+   撤廃後に残る要件（週20時間・学生除外等）は政令原文に記載がなく、既存の制度知識との整合による（確信度＝中）
+   ため、断定せず「引き続き適用されるものと考えられます」と書き、確認先を案内する。
+   企業規模要件の段階的撤廃（令和9年10月〜令和17年10月）は厚労省の法律案概要PDFに明記（確信度＝高）。 */
+const SHAKAI_HOKEN_NOTE = {
+  checked: '2026-09-16',
+  current: '「短時間労働者」は、週の所定労働時間が20時間以上・学生でないこと・特定適用事業所等'
+    + '（被保険者数が当面51人以上の企業等）に使用されること、といった要件を満たす場合の区分です'
+    + '〔健康保険法3条・厚生年金保険法12条〕。'
+    + '賃金要件（月額8.8万円以上）は<b>令和8年10月1日に撤廃されました</b>'
+    + '（令和8年政令第275号・令和8年9月11日公布／2026-09-16 政令原文で確認）。'
+    + '撤廃後も、週の所定労働時間20時間以上・学生でないこと・企業規模要件'
+    + '（当面51人以上。令和9年10月以降、令和17年10月にかけて段階的に撤廃）は'
+    + '引き続き適用されるものと考えられます〔令和7年法律第74号〕。'
+    + '<b>残る要件の細目まではこのツールで一次資料を確認できていません</b>ので、'
+    + '判断に迷う場合は所属社労士にご確認ください。',
+  // 負検証N17で戻す改修前の記述（この文言が画面に出ていれば誤り）
+  old: '「短時間労働者」は、週20時間以上・月額賃金8.8万円以上・学生でない・特定適用事業所等'
+    + '（被保険者数51人超の企業等）に使用される、という要件を満たす場合の区分です'
+    + '〔健康保険法3条・厚生年金保険法12条〕。<b>要件は2026年8月時点のもの</b>で、'
+    + '賃金要件（8.8万円）は2026年10月撤廃の方向ですが<b>施行期日を定める政令は本ツール確認時点で未公布</b>です'
+    + '（最新の施行状況は所属社労士にご確認ください）。'
+};
+function shakaiHokenNoteHTML() {
+  // 負検証N17：MF-16 改修前の「施行期日政令は未公布」という記述へ戻す差し替え口
+  if (SELFTEST_ACTIVE && L5_HOOKS.shakaiHokenOldText) return SHAKAI_HOKEN_NOTE.old;
+  return SHAKAI_HOKEN_NOTE.current;
+}
+
+/* ロット5でマスタ化した画面文言を描く（画面のみ。書面生成の経路からは呼ばれない）。 */
+function renderLot5Notes() {
+  const help = document.getElementById('mukiTenkanHelp');
+  if (help) help.innerHTML = mukiTenkanHelpHTML();
+  const shaho = document.getElementById('shahoKubunNote');
+  if (shaho) shaho.innerHTML = shakaiHokenNoteHTML();
+}
+
+function legalChecks(st) {
+  const blocks = [], reds = [], yellows = [], oks = [];
+
+  /* ===== MF-06 始業・終業／休憩（労基則5条1項2号・労働基準法34条1項） ===== */
+  // 始業終業の明示が必要な労働時間制度のときだけ必須化する
+  // （フレックス・みなし・裁量は別欄で明示するため対象外）。
+  const needsTimes = TIME_SYSTEMS.indexOf(st.wt) >= 0;
+  const breakInfo = breakMinutesForCheck();
+  if (needsTimes) {
+    const timeRows = getTimes().filter(t => t.start && t.end);
+    if (!timeRows.length) {
+      blocks.push('始業・終業の時刻が未入力です（労基則5条1項2号。労働条件通知書の法定必須事項）');
+    }
+    if (!breakInfo.entered) {
+      blocks.push('休憩時間が未入力です（労基則5条1項2号）。休憩がない場合は「合計時間のみ」を選び「なし」または「0分」と入力してください');
+    } else if (!breakInfo.readable) {
+      yellows.push('休憩時間の合計を読み取れない書式です（例：60分／1時間30分／なし）。法定の休憩時間を満たしているかご確認ください');
+    }
+    // 休憩の法定下限。始業終業の各行について（拘束時間−休憩合計）を労働時間として判定する。
+    if (timeRows.length && breakInfo.readable) {
+      timeRows.forEach(t => {
+        const s = parseHM(t.start), e = parseHM(t.end);
+        if (s == null || e == null) return;
+        let span = e - s; if (span < 0) span += 1440;
+        const workMinutes = span - breakInfo.minutes;
+        const required = breakRequiredMinutes(workMinutes);
+        if (required > 0 && breakInfo.minutes < required) {
+          blocks.push(`${t.label ? `「${t.label}」の` : ''}1日の労働時間が${fmtDur(workMinutes)}のため、休憩は${required}分以上必要です（労働基準法34条1項）。現在の休憩の合計は${breakInfo.minutes}分です`);
+        }
+      });
+    }
+  }
+
+  /* ===== MF-04 割増賃金率の法定下限 ===== */
+  OVERTIME_RATE_RULE.forEach(rule => {
+    const raw = val(rule.field);
+    if (!has(raw)) { yellows.push(`割増賃金率の「${rule.label}」が未入力です`); return; }
+    const rate = numH(raw);
+    if (rate < rule.min) {
+      blocks.push(`割増賃金率の「${rule.label}」が${rate}％で、法定の下限（${rule.kind}${rule.min}％）を下回ります［${rule.basis}］`);
+    }
+  });
+  // 月60時間超だけは根拠条文が別（労基法37条1項ただし書）なので、警告文も分けて出す。
+  {
+    const totalRate = OVERTIME_60OVER_RULE.fields.reduce((sum, f) => sum + numH(val(f)), 0);
+    const allEntered = OVERTIME_60OVER_RULE.fields.every(f => has(val(f)));
+    if (allEntered && totalRate < OVERTIME_60OVER_RULE.min) {
+      blocks.push(`割増賃金率の「${OVERTIME_60OVER_RULE.label}」が合計${totalRate}％で、法定の下限（総率${OVERTIME_60OVER_RULE.min}％）を下回ります［${OVERTIME_60OVER_RULE.basis}］`);
+    }
+  }
+
+  /* ===== MF-05 有期契約の期間が3年を超えるとき ===== */
+  if (st.per === '有期') {
+    const start = val('contract_start'), end = val('contract_end');
+    if (has(start) && has(end)) {
+      const limitDate = addYearsISO(start, CONTRACT_MAX_YEARS);   // この日「以降」が終期なら3年超
+      if (limitDate && end >= limitDate) {
+        reds.push(`契約期間（${fmtDate(start)}〜${fmtDate(end)}）が${CONTRACT_MAX_YEARS}年を超えています。有期労働契約の期間は原則${CONTRACT_MAX_YEARS}年が上限です（労働基準法14条1項）。例外に当たるのは「高度の専門的知識等を有する労働者」または「満60歳以上の労働者」に限られます。該当するかご確認ください`);
+      }
+    }
+  }
+
+  /* ===== MF-08 無期転換申込権の判定支援（労働契約法18条1項・労基則5条5項6項） ===== */
+  // 出力ブロックにはしない。通算契約期間は過去の契約履歴に依存し、クーリング（同条2項）・
+  // 有期特措法の第二種計画認定もツールでは分からないため、判定ではなく判定支援に留める
+  // （原さん決定⑨＝判断が要るものは赤警告＋出力前の確認ダイアログ）。
+  {
+    const mt = mukiTenkanCheck(st.per, val('tsusan_start'), val('contract_end'), radio('muki_flag'));
+    const build = MUKI_TENKAN_MESSAGE[mt.code];
+    if (build) {
+      const text = build(mt.ctx);
+      if (mt.level === 'red') reds.push(text);
+      else if (mt.level === 'yellow') yellows.push(text);
+      else if (mt.level === 'ok') oks.push(text);
+    }
+  }
+
+  /* ===== MF-07 昇給・退職金・賞与の有無が未選択（パート有期則2条1項1〜3号・同条2項） ===== */
+  // 改修前は未選択のまま出力すると書面に「無」と印字していた。事実と異なる明示になりうるため出力ブロックにする。
+  {
+    const isYumuTarget = st.isShort || st.per === '有期' || st.cat === '派遣';
+    const yumuValues = {};
+    PART_ACT_YUMU_FIELDS.forEach(f => { yumuValues[f.field] = val(f.field); });
+    yumuUnselected(isYumuTarget, yumuValues).forEach(f => {
+      blocks.push(`「${f.label}」の有無が未選択です。短時間・有期・派遣の方は有無の明示が必要です［${f.basis}］。`
+        + `未選択のまま出力すると事実と異なる明示になるおそれがあるため（パート有期則2条2項）、「有」「無」のいずれかを選んでください`);
+    });
+  }
+
+  /* ===== MF-19 ②雇用管理の改善等に関する事項に係る相談窓口が1つも未入力（パート有期則2条1項5号） ===== */
+  // 改修前は未入力でも「部署名 　担当者職氏名 （連絡先 ）」と空の括弧つきで印字していた。
+  // ②は必須明示事項で「旨だけ」に落とせないため、1つも入力が無い状態での出力はブロックする。
+  {
+    const isSoudanTarget = st.isShort || st.per === '有期' || st.cat === '派遣';
+    if (soudanBlockNeeded(isSoudanTarget, val('consult_dept'), val('consult_person'), val('consult_contact'))) {
+      blocks.push('「②雇用管理の改善等に関する事項に係る相談窓口」が1つも入力されていません（部署名・担当者職氏名・連絡先のいずれか）。'
+        + '短時間・有期・派遣の方には相談窓口の明示が必要です［パートタイム・有期雇用労働法6条1項・同施行規則2条1項5号（令和8年10月1日前は同項4号）／派遣法31条の2第2項］。'
+        + '実際に対応できる窓口を入力してください');
+    }
+  }
+
+  /* ===== MF-10 パート有期則2条1項4号の施行日判定に使う基準日 ===== */
+  // 義務は「雇い入れたとき」に生じ、有期は更新のたびに「雇い入れ」に当たる（改正施行通達 第3の1(14)(15)）。
+  // 基準日が空だと施行日の前後を機械で判定できないため、黙って通さず必ず画面に残す。
+  if (st.cat === '短時間' || st.per === '有期') {
+    const actBase = partActBaseDate(st.per);
+    if (!has(actBase.date)) {
+      yellows.push(`${actBase.label}が未入力のため、「待遇の相違の説明を求めることができる旨」の明示義務`
+        + `（パート有期則2条1項4号）の施行日（${fmtDate(PART_ACT_SETSUMEI_ENFORCE_DATE)}）以後の雇い入れかどうかを判定できません。`
+        + `${actBase.label}を入力してください。なお有期労働契約は更新のたびに「雇い入れ」に当たるため、更新の都度この明示が必要です`);
+    }
+  }
+
+  /* ===== MF-11 「短時間労働者」該当性（パート有期法2条1項・呼称不問） ===== */
+  {
+    const stJudge = shortTimeCheck(st.cat, st.per, numH(val('normal_weekly_hours')), numH(val('worker_weekly_hours')));
+    const stMsg = SHORT_TIME_MESSAGE[stJudge.code] || '';
+    if (stMsg) {
+      if (stJudge.level === 'red') reds.push(stMsg);
+      else if (stJudge.level === 'yellow') yellows.push(stMsg);
+      else if (stJudge.level === 'ok') oks.push(stMsg);
+    }
+  }
+
+  /* ===== MF-03 最低賃金割れ ===== */
+  const mwInput = collectMinWageInput();
+  const mw = minWageCheck(mwInput);
+  const applied = mw.minWage;
+  const appliedText = applied
+    ? `${applied.pref}の最低賃金 ${Math.round(applied.amount).toLocaleString('ja-JP')}円（${applied.year}・${fmtDate(applied.eff)}発効／${applied.kind}）`
+    : '';
+  // 時間額の表示。下限推定と上限推定が同じなら1つ、違えば幅で示す。
+  const hourlyText = (mw.hourlyLow === mw.hourlyHigh)
+    ? `${mwFmtHourly(mw.numeratorLow, mw.hoursHigh)}円`
+    : `${mwFmtHourly(mw.numeratorLow, mw.hoursHigh)}円〜${mwFmtHourly(mw.numeratorHigh, mw.hoursLow)}円`;
+  if (mw.level === 'red') {
+    reds.push(`時間額に換算すると ${hourlyText} で、${appliedText} を下回ります。`
+      + `最低賃金額以上の賃金を支払う必要があります（最低賃金法4条1項）。賃金額または月の所定労働時間をご確認ください。`
+      + `判断に迷う場合はめぐみ事務所へご相談ください`);
+  } else if (mw.level === 'yellow') {
+    yellows.push(`最低賃金を満たしているか確認できませんでした${appliedText ? `（${appliedText}）` : ''}。${mw.reasons.length ? '理由：' + mw.reasons.join('／') : ''}`);
+  } else if (mw.level === 'green') {
+    oks.push(`時間額 ${hourlyText} ≧ ${appliedText}`);
+    // 緑でも、除外した手当・不明な手当があることは必ず画面に残す（黙って通さない）
+    if (mw.reasons.length) yellows.push('最低賃金の確認にあたり次の点を除外・保留しています：' + mw.reasons.join('／'));
+  }
+  // 最低賃金の判定に共通する限界（ツール未対応の事項）を常に添える
+  if (applied) {
+    yellows.push('この確認は地域別最低賃金（および入力された特定最低賃金）との比較のみです。減額の特例許可（最低賃金法7条）や、入力されていない産業別最低賃金には対応していません');
+  }
+  // 答申段階の数値を使っている場合の明示（原さん決定B-3）
+  if (applied && applied.provisional) {
+    yellows.push(`適用した ${applied.year} の最低賃金額は【答申段階】の数値です（最終決定前のため変わることがあります）。確定額は所属社労士・所轄労働局にご確認ください`);
+  }
+  // デッドマン表示（原さん決定B-2）：改定期（毎年10月）を跨いだら表が古い可能性を自己申告する
+  if (applied && minWageTableStale(MIN_WAGE_CHECKED, calcTodayISO())) {
+    yellows.push(`最低賃金表が古い可能性があります（この表の確認日：${MIN_WAGE_CHECKED}。以降に最低賃金の改定期（毎年10月）を経過しています）。めぐみ事務所へご確認ください`);
+  }
+  // 都道府県を自動で推測して入れた場合は、必ず「推測値である」ことを画面に出す（誤った県で緑判定が出る事故を防ぐ）
+  {
+    const prefSel = document.getElementById('minwagePref');
+    if (applied && prefSel && prefSel.dataset.suggestedValue && prefSel.dataset.suggestedValue === prefSel.value) {
+      yellows.push(`最低賃金の都道府県（${applied.pref}）は「事業場所在地」「就業の場所」から自動で推測した値です。正しいかご確認ください`);
+    }
+  }
+  // 派遣は派遣先の事業場所在地の最低賃金が適用される（最低賃金法13条・18条）
+  if (st.cat === '派遣') {
+    yellows.push('派遣労働者には【派遣先】の事業場所在地の最低賃金が適用されます（最低賃金法13条・18条）。都道府県の選択は派遣先の所在地に合わせてください');
+  }
+
+  /* ===== 既存の「月の所定労働時間が極端に小さい」警告（render() から移設・条件と文言は不変） ===== */
+  // 月の所定労働時間が極端に小さいと固定残業の割増単価（基準内賃金÷所定時間）が過大になり、
+  // 固定残業手当が過大算定される。自動計算が実際に所定時間を分母に使っているときだけ警告する。
+  {
+    const ttw = wageTotals();
+    const schedRaw = numH(val('monthly_scheduled_hours'));
+    const autoUsesSched = ttw.otAuto || ttw.nightAuto || (ttw.otStyle === 'unified' && ttw.uni && ttw.uni.total > 0);
+    if (autoUsesSched && schedRaw > 0 && schedRaw < SCHED_MIN_WARN) {
+      yellows.push(`【要確認】賃金欄の「月の所定労働時間」が「${schedRaw}」と極端に小さいため、固定残業の割増単価や相当時間が不自然に大きく算定されるおそれがあります（例：フルタイムなら173.75など）。入力値が正しければ修正は不要です。`);
+    }
+  }
+
+  return { blocks, reds, yellows, oks, mw };
+}
+
+/* ---- 画面描画（印刷には出さない。#lawCheckNote は @media print で display:none） ---- */
+function renderLawChecks(st) {
+  const pv = $('#preview');
+  if (!pv) return null;
+  const res = legalChecks(st);
+  let box = document.getElementById('lawCheckNote');
+  const html = [];
+  if (res.blocks.length) {
+    html.push(`<div class="law-note law-block" role="alert"><b>⛔ この内容では出力できません（法令違反のおそれ）</b>`
+      + res.blocks.map(t => `<div class="lw-item">・${esc(t)}</div>`).join('') + `</div>`);
+  }
+  if (res.reds.length) {
+    html.push(`<div class="law-note law-red" role="alert"><b>⚠ 法令違反のおそれがあります（出力前に確認します）</b>`
+      + res.reds.map(t => `<div class="lw-item">・${esc(t)}</div>`).join('') + `</div>`);
+  }
+  if (res.yellows.length) {
+    html.push(`<div class="law-note law-yellow" role="status"><b>【要確認】</b>`
+      + res.yellows.map(t => `<div class="lw-item">・${esc(t)}</div>`).join('') + `</div>`);
+  }
+  if (res.oks.length) {
+    html.push(`<div class="law-note law-ok" role="status"><b>✔ 確認できた事項</b>`
+      + res.oks.map(t => `<div class="lw-item">・${esc(t)}</div>`).join('') + `</div>`);
+  }
+  if (!html.length) { if (box) box.remove(); return res; }
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'lawCheckNote';
+    box.setAttribute('aria-live', 'polite');
+    const gapBox = document.getElementById('gapNote');
+    pv.insertBefore(box, gapBox ? gapBox.nextSibling : pv.firstChild);
+  }
+  box.innerHTML = html.join('');
+  return res;
+}
+
+// 賃金欄の「最低賃金の確認」行に、適用される最低賃金を表示する（画面のみ）
+function renderMinWageApplied() {
+  const el = document.getElementById('minWageApplied');
+  if (!el) return;
+  const applied = resolveAppliedMinWage();
+  if (!applied) { el.textContent = '都道府県を選ぶと、適用される最低賃金額と発効日を表示します。'; return; }
+  el.textContent = `適用：${applied.pref}　時間額 ${Math.round(applied.amount).toLocaleString('ja-JP')}円`
+    + `（${applied.year}・${fmtDate(applied.eff)}発効／${applied.kind}）`
+    + (applied.provisional ? '　※答申段階の数値（最終決定前）' : '')
+    + `　［表の確認日 ${MIN_WAGE_CHECKED}］`;
+  // 特定（産業別）を選んだときだけ名称欄を出す
+  const nameRow = document.getElementById('grpMinWageSpecialName');
+  if (nameRow) nameRow.classList.toggle('hidden', (val('minwage_kind') || '地域別') !== '特定');
+}
+
+// 都道府県セレクトを MIN_WAGE_DATA から作る（最低賃金額の唯一のマスタから生成し、作成タブに複製しない）
+function minWagePopulatePrefSelect() {
+  const sel = document.getElementById('minwagePref');
+  if (!sel || sel.dataset.filled) return;
+  Object.keys(MIN_WAGE_DATA).forEach(pref => {
+    const o = document.createElement('option'); o.value = pref; o.textContent = pref; sel.appendChild(o);
+  });
+  sel.dataset.filled = '1';
+}
+
+// 事業場所在地・就業の場所の文字列から都道府県を推測して自動選択する（一致しなければ未選択＝黄のまま）。
+// 未選択のときだけ働き、利用者が自分で選び直したらそれを尊重する。
+// 自動で入れた値には印（dataset.suggestedValue）を残し、legalChecks が「推測値なので確認して」と必ず画面に出す。
+function minWageAutoSuggestPref() {
+  const sel = document.getElementById('minwagePref');
+  if (!sel) return;
+  if (sel.value) {
+    // 利用者が別の県を選び直したら、自動推測の印を消す（以後「推測値です」の注意は出さない）
+    if (sel.dataset.suggestedValue && sel.dataset.suggestedValue !== sel.value) {
+      delete sel.dataset.suggestedValue;
+    }
+    return;
+  }
+  delete sel.dataset.suggestedValue;
+  const text = [val('office_addr'), val('workplace_now')].join(' ');
+  if (!text.trim()) return;
+  // まず正式名称（例：宮城県）で照合し、見つからなければ「県/府/都/道」を除いた語（例：宮城）でも照合する。
+  // 住所に県名が書かれていない例（仙台市宮城野区…）を拾えるが、誤って一致することもあるため必ず確認を促す。
+  const hit = Object.keys(MIN_WAGE_DATA).find(pref => text.indexOf(pref) >= 0)
+    || Object.keys(MIN_WAGE_DATA).find(pref => { const short = pref.replace(/[都道府県]$/, ''); return short.length >= 2 && text.indexOf(short) >= 0; });
+  if (hit) { sel.value = hit; sel.dataset.suggestedValue = hit; }
+}
+
+/* ---- 顧問先版で閉じる機能（原さん決定⑩）。表示だけを閉じ、判定ロジックは残す ---- */
+function hideSelectOption(name, value) {
+  const el = form.elements[name];
+  if (!el || !el.options) return;
+  [...el.options].forEach(o => { if (o.value === value) { o.hidden = true; o.disabled = true; } });
+}
+function hideRadioChoice(name, value) {
+  const g = form.elements[name];
+  if (!g) return;
+  const list = g.length ? [...g] : [g];
+  list.forEach(el => {
+    if (el.value === value) {
+      el.disabled = true;
+      const lb = el.closest('label');
+      if (lb) lb.style.display = 'none';
+    }
+  });
+}
+function applyPublicMode() {
+  if (!PUBLIC_MODE) return;
+  document.body.classList.add('public-mode');
+  // 出来高・年俸（賃金体系）／日雇（期間区分）／派遣（雇用区分）は、顧問先が独力で判断するには
+  // 不確実性が大きいため顧問先版では選べなくする。所内版では従来どおり使える。
+  hideSelectOption('wage_type', '出来高');
+  hideSelectOption('wage_type', '年俸');
+  hideRadioChoice('period_type', '日雇');
+  hideRadioChoice('emp_category', '派遣');
+}
+
+/* ==========================================================================
+   §H 版表示・様式の注記・免責・ダウンロードの取扱い・交付前チェックリスト
+      （MF-13／MF-14／MF-15／MF-17／MF-18 ロット3／2026-09-16 実装）
+   --------------------------------------------------------------------------
+   この節が持つもの
+     1. TOOL_VERSION … 版と、版が基づく法令・データの確認日の内訳（MF-14）
+     2. MODEL_FORM_NOTICE … 厚労省モデル様式との関係の注記（MF-15）
+     3. DISCLAIMER … 免責・利用上の注意・事務所名義（MF-17）
+     4. DOWNLOAD_NOTICE … 保存ファイル（個人情報）の取扱い（MF-18）
+     5. PREDELIVERY_CHECKLIST … 交付前チェックリストの項目マスタ（MF-13）
+     6. それらを画面へ描画する renderStaticNotices() と、
+        チェックリストを「通知書とは別の用紙」として単独印刷する printChecklist()
+
+   ★ 絶対の約束 ★
+     (a) この節が作る文言は【すべて画面専用】。buildBlocks / sheetHTML（書面生成）へは
+         絶対に渡さない。印刷時は CSS の .tool-note / #appFooter で非表示にする。
+         交付する書面は顧問先が労働者へ渡す法定書面であり、第三者（事務所）の免責文・
+         名義が混ざると書面の性格が濁るため（モードB X2 の解消＝MF-17）。
+     (b) 交付前チェックリストは body.print-checklist による単独印刷。
+         通知書（#modeCreate/#preview）は同時に印刷しない。
+     (c) 文言・日付・項目はすべてこの節のマスタに集約する。画面のHTMLへ直書きしない。
+   ========================================================================== */
+
+/* ---- 負検証（N12・N13）専用の差し替え口。SELFTEST_ACTIVE のときだけ効く ---- */
+const L3_HOOKS = {
+  dropChecklistKey: null,      // 交付前チェックリストから指定キーの項目を落とす（N12）
+  leakDisclaimerToSheet: false // 免責文を書面生成（buildBlocks）へ流す（N13）
+};
+
+/* ===== MF-14 版表示の一元化 =====
+   版を上げるときに直すのはこの定数だけ。各データの確認日は「内訳」として
+   それぞれの正本（MEIJI_CHECKED / REFS_CHECKED / MIN_WAGE_CHECKED）から読む。
+   こうしておくと、画面に出る4つの日付が食い違わない。 */
+const TOOL_VERSION = {
+  label: '2026-09-16版',                 // 利用者に見せる版の名前
+  updated: '2026-09-16',                 // この版を公開（更新）した日
+  summary: '法令チェック（最低賃金・割増率・休憩・有期3年超・有無明示・短時間該当性）と交付前チェックリストを追加した版',
+  // 内訳。並び順がそのまま画面の表になる。データを増やしたらここへ1行足す。
+  parts: () => [
+    { label: '労働条件の明示事項の一覧', date: MEIJI_CHECKED,
+      where: '「法令資料」タブ' },
+    { label: '根拠となる法令・公的資料のリンク集', date: REFS_CHECKED,
+      where: '「法令資料」タブ' },
+    { label: '地域別最低賃金の額と発効日', date: MIN_WAGE_CHECKED,
+      where: '「作成」タブの賃金欄・「賃金試算」タブ' }
+  ]
+};
+
+// 内訳の確認日のうち、最も古い日と最も新しい日を返す（「いつ時点の版か」の幅を1か所で示すため）
+function toolVersionRange() {
+  const ds = TOOL_VERSION.parts().map(p => p.date).filter(d => !!d).sort();
+  return { oldest: ds[0] || '', newest: ds[ds.length - 1] || '' };
+}
+
+function toolVersionHTML() {
+  const r = toolVersionRange();
+  const rows = TOOL_VERSION.parts().map(p =>
+    `<tr><th>${esc(p.label)}</th><td>${esc(p.date)}</td><td>${esc(p.where)}</td></tr>`).join('');
+  // 幅がない（＝全部同じ日）ときは1つの日付だけを書く
+  const span = (r.oldest === r.newest) ? `${esc(r.newest)} 時点` : `${esc(r.oldest)} 〜 ${esc(r.newest)} に確認した`;
+  return `<h3>このツールの版</h3>`
+    + `<p class="tn-lead"><b>${esc(TOOL_VERSION.label)}</b>（最終更新日 ${esc(TOOL_VERSION.updated)}）／${esc(TOOL_VERSION.summary)}</p>`
+    + `<p class="tn-lead">この版は <b>${span}</b> 法令・データに基づいています。内訳は次のとおりです。</p>`
+    + `<table class="tn-table"><tr><th>データ</th><th>最終確認日</th><th>画面での表示場所</th></tr>${rows}</table>`
+    + `<p class="tn-foot">※ 画面のほかの場所に出る確認日は、すべてこの表の内訳です。表示されている確認日より後の法令改正・最低賃金の改定は反映されていない場合があります（最低賃金は毎年10月に改定されます）。</p>`;
+}
+
+/* ===== MF-15 厚労省モデル様式との関係の注記 =====
+   改修前は「書式は厚生労働省のモデル様式（令和8年10月版）に準拠しています」と断定していたが、
+   モデル様式にある欄のうち本ツールが持たないものがあるため、事実に合わせて書き改めた。
+   ・2026-09-16に一次資料（改正後モデル労働条件通知書 R8.10対応版・一般労働者用
+     https://www.mhlw.go.jp/content/001696984.pdf ）の全欄を確認して作成している。
+   ・同確認により「最低賃金額」の欄はモデル様式に存在しないことが分かったため、
+     最低賃金は「モデル様式にない、本ツール独自の画面確認機能」として書き分けている。 */
+const MODEL_FORM_NOTICE = {
+  lead: '書式は厚生労働省のモデル労働条件通知書（令和8年10月改正対応版）を<b>参考に</b>作成しています。モデル様式と同一の様式ではなく、モデル様式にある欄のうち次のものは本ツールでは扱っていません。',
+  unsupported: [
+    { item: '就業時転換（交替制の勤務時間の組み合わせと適用日）',
+      how: '専用の欄はありません。交替制の勤務がある場合は「労働時間」欄の<b>「始業・終業に関する備考」</b>に、勤務の組み合わせと適用日を書いてください。' },
+    { item: '代替休暇（労働基準法37条3項）',
+      how: '専用の欄はありません。定めがある場合は「休日・休暇」欄の<b>「その他の休暇」</b>に書いてください。' },
+    { item: '有期雇用特別措置法による特例（無期転換申込権が発生しない期間・特定有期業務）',
+      how: '扱っていません。第一種（高度専門）・第二種（定年後の高齢者）の計画認定を受けている方の書面は、このツールでは作成しないでください。' },
+    { item: '中小企業退職金共済制度（中退共）の加入状況',
+      how: '専用の欄はありません。加入している場合は「その他」欄の<b>「その他の記載事項」</b>に書いてください。' },
+    { item: '創業支援等措置（高年齢者雇用安定法）',
+      how: '専用の欄はありません。該当する場合は「その他」欄の<b>「その他の記載事項」</b>に書いてください。' }
+  ],
+  // モデル様式には無いが本ツールが独自に持っている機能。「準拠」と誤解させないため一緒に示す。
+  extra: '逆に、<b>最低賃金額</b>はモデル様式には欄がありませんが、本ツールでは「作成」タブの賃金欄で適用される最低賃金額を画面に表示し、下回っていないかを確認できます。<b>この確認結果は画面だけのもので、交付する書面には印字しません。</b>'
+};
+
+function modelFormNoticeHTML() {
+  const rows = MODEL_FORM_NOTICE.unsupported.map(u =>
+    `<tr><th>${esc(u.item)}</th><td>${u.how}</td></tr>`).join('');
+  return `<h3>厚生労働省のモデル様式との関係</h3>`
+    + `<p class="tn-lead">${MODEL_FORM_NOTICE.lead}</p>`
+    + `<table class="tn-table"><tr><th>本ツールで扱っていない欄</th><th>どうすればよいか</th></tr>${rows}</table>`
+    + `<p class="tn-foot">${MODEL_FORM_NOTICE.extra}</p>`;
+}
+
+/* ===== MF-17 免責・利用上の注意・事務所名義 =====
+   画面のみ。出力される書面（通知書・雇用契約書・変更通知書・別紙）には一切入れない。
+   事務所名義（officeLine）は顧問先版（PUBLIC_MODE）のときだけ表示する。 */
+const DISCLAIMER = {
+  title: 'ご利用にあたって',
+  items: [
+    '本ツールは<b>労働条件通知書の作成を補助するもの</b>です。作成した書面の内容について責任を負うのは、その書面を交付する事業主（使用者）です。',
+    '<b>出力内容の最終確認は顧問社会保険労務士にご相談ください。</b>とくに解雇・懲戒・有期契約の更新・無期転換・労働条件の不利益変更にかかわる内容は、交付する前にご相談ください。',
+    '<b>法令改正への追随は当事務所が行いますが、画面に表示されている確認日以降の改正は反映されていない場合があります。</b>確認日は「使い方」タブの<b>「このツールの版」</b>でご確認ください。',
+    '画面に出る警告は、入力された内容から機械的に判定できる範囲のものです。入力が実態と合っているかどうかは判定できません。交付する前に「📋 交付前チェック」で確認用紙を印刷し、人の目で確認してください。',
+    '入力した内容はお使いのパソコンのブラウザ内だけで処理され、外部には送信されません。保存したファイル・印刷した書面の管理は、利用される会社の責任で行ってください。'
+  ],
+  // 顧問先版でのみ表示する提供元の名義（MF-17。所内版では出さない）
+  officeLine: '提供：めぐみ事務所（顧問先限定ツール）'
+};
+
+function disclaimerHTML() {
+  return `<h3>${esc(DISCLAIMER.title)}</h3>`
+    + `<ul>${DISCLAIMER.items.map(t => `<li>${t}</li>`).join('')}</ul>`
+    + (PUBLIC_MODE ? `<p class="tn-office">${esc(DISCLAIMER.officeLine)}</p>` : '')
+    + `<p class="tn-foot">※ この枠は画面だけの表示です。印刷・Word・Excelで出力する書面には印字されません。</p>`;
+}
+
+/* ===== MF-18 保存ファイル（個人情報）の取扱い =====
+   このツールは 入力データJSON（ファイル名に氏名が入る）・名簿JSON（登録した全員分）を
+   利用者のパソコンへ書き出す。外部送信はしないが、個人情報そのものがファイルになる。
+   送付手段は事務所側の運用が未確定のため、ここでは手段を断定せず「担当者に確認」で止める。 */
+const DOWNLOAD_NOTICE = {
+  title: '保存したファイル・印刷物の取扱い（個人情報）',
+  lead: 'このツールから保存できるファイルには、<b>氏名・賃金額などの個人情報がそのまま入ります</b>。入力データのファイルは<b>ファイル名にも氏名</b>が入り、名簿のファイルは<b>登録した全員分が1つのファイル</b>になります。',
+  // compact:true の項目は、保存ボタンのすぐ近くに置く小型版にも出す（入力画面が注意書きで埋まらないようにするため）。
+  // 「メール添付をためらわせる一文」は小型版にも必ず残す。
+  items: [
+    { compact: true,  text: '<b>保存先</b>：誰でも開ける共有フォルダではなく、担当者だけが開ける場所に保存してください。会社が貸与したパソコン以外や、私物のUSBメモリには保存しないでください。' },
+    { compact: false, text: '<b>不要になったとき</b>：書面の作成が終わったらファイルを削除し、ごみ箱も空にしてください。作業の途中で保存したファイルも同じです。' },
+    { compact: true,  text: '<b>事務所へ送るとき</b>：<b>メールにそのまま添付して送らないでください。</b>送り方は会社ごとに決めていますので、送る前に事務所の担当者にご確認ください。' },
+    { compact: false, text: '<b>印刷物</b>：出力した書面と交付前チェックリストも個人情報です。プリンターに置いたままにせず、不要になった控えは裁断して廃棄してください。' }
+  ]
+};
+
+// compact=true のときは、保存ボタンの近くに置く短い版を返す（全文は「使い方」タブに出す）
+function downloadNoticeHTML(compact) {
+  const items = DOWNLOAD_NOTICE.items.filter(i => !compact || i.compact);
+  return `<h3>${esc(DOWNLOAD_NOTICE.title)}</h3>`
+    + `<p class="tn-lead">${DOWNLOAD_NOTICE.lead}</p>`
+    + `<ul>${items.map(i => `<li>${i.text}</li>`).join('')}</ul>`
+    + (compact ? `<p class="tn-foot">※ 全文は「使い方」タブに載せています。</p>` : '');
+}
+
+/* ===== MF-13 交付前チェックリスト =====
+   Must fix を全部入れても機械では塞げない入力パターンが4つ残る（設計書 §4）。
+   その受け皿として、人の目で確認する項目を「通知書とは別の用紙」に印刷する。
+   residual:true の4項目は残存リスクそのもので、削ってはならない（セルフテストP20が検査する）。 */
+const PREDELIVERY_CHECKLIST = [
+  {
+    group: 'A. このツールでは判定できない事項（画面に警告が出ていなくても必ず確認）',
+    note: '次の4点は、入力された内容だけでは機械的に判定できません。実態と照らして人の目で確認してください。',
+    items: [
+      { key: 'risk_yuki3y', residual: true,
+        text: '有期契約の場合、1回の契約期間が3年を超えていないか。超えるときは、労働基準法14条1項の例外（高度の専門的知識等を有する労働者／満60歳以上の労働者）に本当に当たるか。',
+        basis: '労働基準法14条1項' },
+      { key: 'risk_muki18', residual: true,
+        text: '無期転換の申込権が発生していないか。通算契約期間は過去の契約の履歴で決まるため、このツールでは判定できません。通算5年を超える更新では、申込みができる旨と転換後の労働条件の明示が必要です。',
+        basis: '労働契約法18条／労働基準法施行規則5条5項・6項' },
+      { key: 'risk_tanjikan', residual: true,
+        text: '「短時間労働者」に当たらないか。1週間の所定労働時間が同じ事業主に雇われる通常の労働者より短ければ、「正社員」「契約社員」などの呼称にかかわらず該当します。入力した週の所定労働時間が実際の働き方と一致しているか。',
+        basis: 'パートタイム・有期雇用労働法2条1項' },
+      { key: 'risk_minwage_hours', residual: true,
+        text: '月給・日給の場合、最低賃金と比べるもとになる「月の所定労働時間」（日給は1日の所定労働時間）が正しいか。ここが誤っていると時間額の換算も最低賃金の判定も誤ります。画面の最低賃金の判定が緑でも確認してください。',
+        basis: '最低賃金法4条1項' }
+    ]
+  },
+  {
+    group: 'B. 記載内容の確認',
+    note: '',
+    items: [
+      { key: 'chk_name_date', text: '労働者の氏名・事業場の名称・使用者職氏名・交付日に誤りがないか。', basis: '' },
+      { key: 'chk_place_job', text: '就業の場所と従事すべき業務について、雇入れ直後の内容と「変更の範囲」の両方が書かれているか。', basis: '労働基準法施行規則5条1項1号の3' },
+      { key: 'chk_time_break', text: '始業・終業の時刻、休憩時間、休日が実際の勤務と一致しているか。交替制・シフト制の場合は勤務の組み合わせが書かれているか。', basis: '労働基準法施行規則5条1項2号' },
+      { key: 'chk_wage', text: '賃金の額・計算方法・締切日・支払日・支払方法・控除が、実際の給与計算と一致しているか。固定残業手当があるときは時間数と金額が書かれているか。', basis: '労働基準法施行規則5条1項3号' },
+      { key: 'chk_yumu', text: '昇給・賞与・退職手当の有無が、事実のとおり選ばれているか（短時間・有期・派遣の方は明示が必要）。', basis: 'パートタイム・有期雇用労働法6条・同則2条' },
+      { key: 'chk_taishoku', text: '退職に関する事項（定年・継続雇用・自己都合退職の手続）と解雇の事由が書かれているか。就業規則を引用する場合、条項番号が漏れなく書かれているか。', basis: '労働基準法施行規則5条1項4号' },
+      { key: 'chk_koushin', text: '有期契約の場合、更新の有無・更新の判断基準・更新上限（ある場合）が書かれているか。', basis: '労働基準法施行規則5条1項1号の2' },
+      { key: 'chk_madoguchi', text: '相談窓口（雇用管理の改善等に関する事項に係る相談窓口）に、実際に対応できる部署・担当者・連絡先が入っているか。', basis: 'パートタイム・有期雇用労働法6条・同則2条' }
+    ]
+  },
+  {
+    group: 'C. 交付の手続き',
+    note: '',
+    items: [
+      { key: 'deliver_two_copies', text: '2部作成し、1部を労働者へ交付したか。雇用契約書の場合は、双方が署名（記名押印）して各1部を保有しているか。', basis: '' },
+      { key: 'deliver_electronic', text: 'メール等で交付する場合は、<u>労働者が希望した場合に限られる</u>ことを確認したか（出力して書面にできる方法に限ります）。希望がなければ紙で交付する。', basis: '労働基準法施行規則5条4項' },
+      { key: 'deliver_keep', text: '会社の控えを保管したか（この確認用紙も一緒に保管してください）。', basis: '' },
+      { key: 'deliver_ask', text: '判断に迷う項目が1つでも残っている場合、交付する前に顧問社会保険労務士に相談したか。', basis: '' }
+    ]
+  }
+];
+
+/* チェックリストの項目を取り出す。負検証N12のときだけ指定キーの項目を落とす。 */
+function predeliveryChecklist() {
+  if (SELFTEST_ACTIVE && L3_HOOKS.dropChecklistKey) {
+    const drop = L3_HOOKS.dropChecklistKey;
+    return PREDELIVERY_CHECKLIST.map(g => ({
+      group: g.group, note: g.note, items: g.items.filter(i => i.key !== drop)
+    }));
+  }
+  return PREDELIVERY_CHECKLIST;
+}
+
+/* 残存リスク（residual:true）の項目数。設計書 §4 の4件と一致していなければならない。 */
+const PREDELIVERY_RESIDUAL_COUNT = 4;
+function predeliveryResidualKeys() {
+  return predeliveryChecklist().reduce((a, g) => a.concat(g.items.filter(i => i.residual).map(i => i.key)), []);
+}
+
+/* 交付前チェックリストの用紙HTMLを組み立てる（画面の #modeChecklist へ入れて単独印刷する）。
+   ★ここで作ったHTMLは通知書の書面（buildBlocks/sheetHTML）へは一切渡さない★ */
+function buildChecklistHTML() {
+  const nm = val('employee_name');
+  const office = val('office_name');
+  const issue = fmtDate(val('issue_date'));
+  const doc = docMeta(radio('docType')).base;
+  const head = `<table><tr>`
+    + `<th style="width:16%">対象者の氏名</th><td style="width:34%">${esc(nm)}</td>`
+    + `<th style="width:16%">事業場名</th><td>${esc(office)}</td></tr>`
+    + `<tr><th>書類の種類</th><td>${esc(doc)}</td>`
+    + `<th>交付予定日</th><td>${esc(issue)}</td></tr>`
+    + `<tr><th>確認した人</th><td></td><th>確認日</th><td></td></tr></table>`;
+  let body = '<table>';
+  predeliveryChecklist().forEach(g => {
+    body += `<tr><td class="cl-g" colspan="2">${esc(g.group)}${g.note ? `<span class="cl-basis">${esc(g.note)}</span>` : ''}</td></tr>`;
+    g.items.forEach(it => {
+      body += `<tr><td class="cl-box">□</td><td>${it.text}`
+        + (it.basis ? `<span class="cl-basis">［${esc(it.basis)}］</span>` : '')
+        + `</td></tr>`;
+    });
+  });
+  body += '</table>';
+  return `<div class="cl-sheet">`
+    + `<h2>労働条件通知書　交付前チェックリスト</h2>`
+    + `<p class="cl-lead">この用紙は、書面を交付する前に会社側で確認するためのものです。<b>労働者へ渡す書類ではありません。</b>確認が終わったら、会社の控えと一緒に保管してください。</p>`
+    + head + body
+    + `<p class="cl-foot">判断に迷う項目が残っている場合は、交付する前に顧問社会保険労務士にご相談ください。`
+    + `　［このツールの版 ${esc(TOOL_VERSION.label)}］</p>`
+    + `</div>`;
+}
+
+/* 交付前チェックリストの単独印刷（既存の printGuide / printCalcSheet と同じ作法）。
+   body に print-checklist を付け、CSS 側で通知書・プレビュー・他タブをすべて隠す。 */
+function printChecklist() {
+  const box = document.getElementById('modeChecklist');
+  if (!box) return;
+  box.innerHTML = buildChecklistHTML();
+  document.body.classList.add('print-checklist');
+  window.print();
+  // 印刷が終わったら用紙の中身を消す（氏名を画面の裏に残したままにしない）
+  const done = () => { document.body.classList.remove('print-checklist'); box.innerHTML = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(done, 2000);
+}
+
+/* 画面のみのお知らせをまとめて描画する。data-* 属性の付いた入れ物すべてに同じHTMLを入れるので、
+   同じ内容が別の場所で食い違うことがない（MF-14の「4つの日付が矛盾する」の再発防止）。 */
+function renderStaticNotices() {
+  const fill = (sel, html) => { document.querySelectorAll(sel).forEach(el => { el.innerHTML = html; }); };
+  fill('[data-tool-version]', toolVersionHTML());
+  fill('[data-model-form-notice]', modelFormNoticeHTML());
+  fill('[data-disclaimer]', disclaimerHTML());
+  // ダウンロード注意だけは、入れ物に tn-compact が付いていれば短い版を入れる
+  document.querySelectorAll('[data-download-notice]').forEach(el => {
+    el.innerHTML = downloadNoticeHTML(el.classList.contains('tn-compact'));
+  });
+}
+
+/* ==========================================================================
+   §G 画面内セルフテスト（?selftest=1）
+   正検証 P1〜P9（ロット1・最低賃金ほか）＋ P10〜P19（ロット2・MF-07/09/10/11）
+          ＋ P20〜P27（ロット3・MF-13/14/15/17/18）＋ P28〜P34（ロット4・MF-12/19）
+          ＋ P35〜P39（ロット5・MF-08/16）
+   負検証 N1〜N7（ロット1）＋ N8〜N11（ロット2）＋ N12〜N13（ロット3）
+          ＋ N14〜N15（ロット4）＋ N16〜N17（ロット5）
+          ／ 補助検証（境界B・発効日R・道具C・デッドマンD）
+   負検証は MW_HOOKS / MIN_WAGE_DATA を一時的に壊し、対応する正検証が
+   「必ず失敗する」ことを確認して元に戻す（＝テストが本当に効いているかの検査）。
+   ========================================================================== */
+
+// テストで使う最低賃金（宮城県・令和8年度）。発効日 2026-10-01 を基準日として解決する。
+function stTestMinWage() { return Object.assign({ pref: '宮城県', kind: '地域別' }, mwResolve('宮城県', '2026-10-01')); }
+
+// 正検証の定義。run() は {ok:boolean, detail:string} を返す。
+function stPositiveCases() {
+  const MW = stTestMinWage();   // 宮城県 令和8年度 = 1,098円
+  const H = 173.75;             // フルタイムの月所定労働時間の例
+  return [
+    { id: 'P1', title: '時給900円・宮城県 → 赤（時間額 900.00）', run: () => {
+        const r = minWageCheck({ wageType: '時給', base: 900, minWage: MW });
+        return { ok: r.level === 'red' && mwFmtHourly(r.numeratorLow, r.hoursHigh) === '900.00',
+                 detail: `level=${r.level} hourly=${mwFmtHourly(r.numeratorLow, r.hoursHigh)}` };
+      } },
+    { id: 'P2', title: '月給187,200円・所定173.75h・宮城県 → 赤', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 187200, monthlyHours: H, minWage: MW });
+        return { ok: r.level === 'red', detail: `level=${r.level} hourly=${mwFmtHourly(r.numeratorLow, r.hoursHigh)} (最賃${MW.amount})` };
+      } },
+    { id: 'P3', title: '月給 = 最賃×所定 ちょうど（190,777.5円／173.75h＝1,098円×173.75） → 緑（等号で通る）', run: () => {
+        // 分子はテーブルの値から計算せず定数で置く。テーブルの額が動けば等号が崩れて赤になる＝負検証N5が効く。
+        const r = minWageCheck({ wageType: '月給', base: 190777.5, monthlyHours: H, minWage: MW });
+        return { ok: r.level === 'green', detail: `level=${r.level} 分子=${r.numeratorLow} hourly=${mwFmtHourly(r.numeratorLow, r.hoursHigh)}` };
+      } },
+    { id: 'P4', title: '月給18万＋精皆勤1万＋通勤5千 → 分子は18万のみ（精皆勤・通勤を除外）', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 180000, monthlyHours: H, minWage: MW,
+          allowances: [ { name: '精皆勤手当', unit: 'month', amount: 10000, cat: 'in' },
+                        { name: '通勤手当', unit: 'month', amount: 5000, cat: 'out' } ] });
+        return { ok: r.numeratorLow === 180000 && r.numeratorHigh === 180000 && r.level === 'red',
+                 detail: `numeratorLow=${r.numeratorLow} numeratorHigh=${r.numeratorHigh} level=${r.level}` };
+      } },
+    { id: 'P5', title: '月給18万＋固定残業手当5万 → 固定残業を分子に含めない', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 180000, monthlyHours: H, minWage: MW, fixedOtAmount: 50000 });
+        return { ok: r.numeratorLow === 180000 && r.level === 'red',
+                 detail: `numeratorLow=${r.numeratorLow} level=${r.level}` };
+      } },
+    { id: 'P6', title: '日給8,000円・9:00-18:00・休憩60分 → 時間額1000.00・赤', run: () => {
+        const r = minWageCheck({ wageType: '日給', base: 8000, dayHoursList: [8], minWage: MW });
+        return { ok: r.level === 'red' && mwFmtHourly(r.numeratorLow, r.hoursHigh) === '1,000.00',
+                 detail: `level=${r.level} hourly=${mwFmtHourly(r.numeratorLow, r.hoursHigh)}` };
+      } },
+    { id: 'P7', title: '月給・所定労働時間が未入力 → 黄（緑でも赤でもない）＋理由に「月の所定労働時間」', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 200000, monthlyHours: 0, minWage: MW });
+        const hasReason = r.reasons.some(x => x.indexOf('月の所定労働時間') >= 0);
+        return { ok: r.level === 'yellow' && hasReason, detail: `level=${r.level} reasons=${r.reasons.join('｜')}` };
+      } },
+    { id: 'P8', title: '自由入力手当「現場手当」2万円で最賃を超える → 黄（不明手当で揺れている）', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 180000, monthlyHours: H, minWage: MW,
+          allowances: [ { name: '現場手当', unit: 'month', amount: 20000, cat: 'in' } ] });
+        return { ok: r.level === 'yellow' && r.numeratorLow === 180000 && r.numeratorHigh === 200000,
+                 detail: `level=${r.level} low=${r.numeratorLow} high=${r.numeratorHigh}` };
+      } },
+    { id: 'P9', title: '年俸420万・所定173.75h → 緑ではなく黄（賞与含みの確認を促す）', run: () => {
+        const r = minWageCheck({ wageType: '年俸', annual: 4200000, monthlyHours: H, minWage: MW });
+        return { ok: r.level === 'yellow', detail: `level=${r.level} low=${r.numeratorLow} high=${r.numeratorHigh}` };
+      } },
+
+    /* ---- ここからロット2（MF-07・MF-09・MF-10・MF-11／2026-09-16） ---- */
+
+    { id: 'P10', title: '［MF-07］短時間で賞与・退職金が未選択 → 2件を検出／一般（非対象）では0件', run: () => {
+        const target = yumuUnselected(true,  { raise_flag: '有', bonus_flag: '', retire_flag: '' });
+        const other  = yumuUnselected(false, { raise_flag: '',   bonus_flag: '', retire_flag: '' });
+        const labels = target.map(f => f.label).join('・');
+        return { ok: target.length === 2 && labels === '退職金・賞与' && other.length === 0,
+                 detail: `対象者=${target.length}件(${labels}) 非対象者=${other.length}件` };
+      } },
+    { id: 'P11', title: '［MF-07］未選択は書面行を出さない／「無」は選んだときだけ印字／「有」＋備考は従来どおり', run: () => {
+        const blank = yumuLine('',   '賞与', '年2回');            // 未選択 → 行を出さない
+        const no    = yumuLine('無', '賞与', '年2回');            // 「無」を選択 → 備考は付けない
+        const yes   = yumuLine('有', '賞与', '年2回');            // 「有」 → 備考つき（改修前と同一）
+        const rise  = yumuLine('有', '昇給', '毎年8月、会社業績による');
+        return { ok: blank === '' && no === '賞与　無' && yes === '賞与　有（年2回）' && rise === '昇給　有（毎年8月、会社業績による）',
+                 detail: `未選択="${blank}" 無="${no}" 有="${yes}" 昇給="${rise}"` };
+      } },
+    { id: 'P12', title: '［MF-10］基準日は無期=入社日／有期=契約始期／日雇=なし（交付日は使わない）', run: () => {
+        const muki = partActBaseDateOf('無期', '2026-10-01', '', '2026-09-20');
+        const yuki = partActBaseDateOf('有期', '', '2026-10-05', '2026-09-20');
+        const hiya = partActBaseDateOf('日雇', '', '', '2026-11-01');
+        return { ok: muki.date === '2026-10-01' && yuki.date === '2026-10-05' && hiya.date === '',
+                 detail: `無期=${muki.date} 有期=${yuki.date} 日雇="${hiya.date}"` };
+      } },
+    { id: 'P13', title: '［MF-10］施行日判定（交付日9/20でも入社日10/1なら義務／入社日9/30なら義務でない／一般・無期は対象外）', run: () => {
+        const on  = partActSetsumeiMust('短時間', '無期', partActBaseDateOf('無期', '2026-10-01', '', '2026-09-20').date);
+        const off = partActSetsumeiMust('短時間', '無期', partActBaseDateOf('無期', '2026-09-30', '', '2026-12-01').date);
+        const upd = partActSetsumeiMust('一般',  '有期', partActBaseDateOf('有期', '', '2026-10-01', '2026-09-01').date);  // 更新後の契約始期
+        const gen = partActSetsumeiMust('一般',  '無期', '2026-10-01');
+        const nil = partActSetsumeiMust('短時間', '無期', '');   // 基準日が空 → 自動ロックしない
+        return { ok: on === true && off === false && upd === true && gen === false && nil === false,
+                 detail: `入社10/1=${on} 入社9/30=${off} 有期更新10/1=${upd} 一般無期=${gen} 基準日空=${nil}` };
+      } },
+    { id: 'P14', title: '［MF-09］①窓口が全部空 → 「旨」だけの1行（空の括弧を書面に出さない）', run: () => {
+        const lines = setsumeiLines('', '', '');
+        const ok = lines.length === 1
+          && lines[0] === '・通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。'
+          && lines.join('').indexOf('（連絡先') < 0 && lines.join('').indexOf('部署名') < 0;
+        return { ok, detail: `行数=${lines.length} / ${lines.join(' ⏎ ')}` };
+      } },
+    { id: 'P15', title: '［MF-09］①窓口が埋まっているとき → 改修前とまったく同じ2行（書面の非改変の確認）', run: () => {
+        const lines = setsumeiLines('総務部', '部長 ○○', '内線100');
+        const ok = lines.length === 2
+          && lines[0] === '・次の窓口に対して、通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。'
+          && lines[1] === '　　部署名 総務部　担当者職氏名 部長 ○○（連絡先 内線100）';
+        return { ok, detail: lines.join(' ⏎ ') };
+      } },
+    { id: 'P16', title: '［MF-09］①窓口が一部だけ → 空の項目と空の括弧を出さない（部署だけ／連絡先だけ）', run: () => {
+        const a = setsumeiLines('総務部', '', '');
+        const b = setsumeiLines('', '', '内線100');
+        const ok = a.length === 2 && a[1] === '　　部署名 総務部'
+          && b.length === 2 && b[1] === '　　（連絡先 内線100）';
+        return { ok, detail: `部署のみ="${a[1]}" 連絡先のみ="${b[1]}"` };
+      } },
+    { id: 'P17', title: '［MF-11］一般・無期で週30h ＜ 通常40h → 赤（呼称ではなく週所定で判断）', run: () => {
+        const r = shortTimeCheck('一般', '無期', 40, 30);
+        return { ok: r.level === 'red' && r.code === 'shorter_general', detail: `level=${r.level} code=${r.code}` };
+      } },
+    { id: 'P18', title: '［MF-11］週所定が未入力：一般・無期は黄（判定不能を必ず出す）／短時間・有期は追加の注意なし', run: () => {
+        const gen = shortTimeCheck('一般', '無期', 0, 0);
+        const sho = shortTimeCheck('短時間', '無期', 0, 0);
+        const yuk = shortTimeCheck('一般', '有期', 0, 0);
+        return { ok: gen.level === 'yellow' && gen.code === 'unknown_general' && sho.code === 'none' && yuk.code === 'none',
+                 detail: `一般無期=${gen.code} 短時間=${sho.code} 有期=${yuk.code}` };
+      } },
+    { id: 'P19', title: '［MF-11］「パート」でも通常の労働者と同一所定なら短時間労働者ではない／有期・派遣で短ければ黄／短時間で短ければOK', run: () => {
+        const same  = shortTimeCheck('短時間', '無期', 40, 40);     // 呼称はパートだが短時間労働者ではない
+        const yuki  = shortTimeCheck('一般',   '有期', 40, 30);     // 有期かつ短い → 黄
+        const haken = shortTimeCheck('派遣',   '無期', 40, 30);     // 派遣かつ短い → 黄
+        const okSh  = shortTimeCheck('短時間', '無期', 40, 30);     // 正しく短時間を選んでいる
+        const norm  = shortTimeCheck('一般',   '無期', 40, 40);     // 通常の労働者と同一 → 該当しない
+        return { ok: same.code === 'not_short_labeled' && yuki.code === 'shorter_other' && haken.code === 'shorter_other'
+                   && okSh.code === 'ok_short' && norm.code === 'ok_normal',
+                 detail: `同一所定のパート=${same.code} 有期短=${yuki.code} 派遣短=${haken.code} 短時間短=${okSh.code} 一般同一=${norm.code}` };
+      } },
+
+    /* ---- ここからロット3（MF-13・MF-14・MF-15・MF-17・MF-18） ---- */
+
+    { id: 'P20', title: '［MF-13］交付前チェックリストに、機械で塞げない残存リスク4件がすべて入っている', run: () => {
+        const keys = predeliveryResidualKeys();
+        const want = ['risk_yuki3y', 'risk_muki18', 'risk_tanjikan', 'risk_minwage_hours'];
+        const ok = keys.length === PREDELIVERY_RESIDUAL_COUNT && want.every(k => keys.indexOf(k) >= 0);
+        return { ok, detail: `残存リスク項目=${keys.length}件（${keys.join(',')}）／必要=${PREDELIVERY_RESIDUAL_COUNT}件` };
+      } },
+    { id: 'P21', title: '［MF-13］印刷する用紙に、残存リスク4件の根拠条文と「2部作成し1部を交付」「電子交付は労働者が希望した場合に限る（労基則5条4項）」が載る', run: () => {
+        const html = buildChecklistHTML();
+        const must = ['労働基準法14条1項', '労働契約法18条', 'パートタイム・有期雇用労働法2条1項', '最低賃金法4条1項',
+                      '2部作成', '労働基準法施行規則5条4項', '労働者が希望した場合に限られる'];
+        const miss = must.filter(m => html.indexOf(m) < 0);
+        return { ok: miss.length === 0, detail: miss.length ? '不足：' + miss.join('／') : `全${must.length}項目あり（${html.length}文字）` };
+      } },
+    { id: 'P22', title: '［MF-17］免責文・事務所名義・ダウンロード注意が、書面生成の4経路（印刷/Word/Excel/一括）のどこにも混入していない', run: () => {
+        render();                                   // LAST_SHEETS＝印刷・Word・一括の素材を作り直す
+        const st = updateVisibility();
+        const blocks = buildBlocks(st);             // Excel出力の素材
+        const sheetText = LAST_SHEETS.join('\n');
+        const blockText = JSON.stringify(blocks);
+        // 各マスタの先頭語を検査語にする（文言を変えてもテストが追随する）
+        const ng = ['本ツールは', 'ご利用にあたって', 'めぐみ事務所', '顧問社会保険労務士',
+                    '保存したファイル', 'このツールの版', 'モデル労働条件通知書'];
+        const hitSheet = ng.filter(w => sheetText.indexOf(w) >= 0);
+        const hitBlock = ng.filter(w => blockText.indexOf(w) >= 0);
+        return { ok: hitSheet.length === 0 && hitBlock.length === 0,
+                 detail: `書面=${hitSheet.join(',') || '混入なし'}／Excel素材=${hitBlock.join(',') || '混入なし'}` };
+      } },
+    { id: 'P23', title: '［MF-14］版の内訳が実際の確認日の定数と一致し、版が基づく期間（最古〜最新）を正しく出す', run: () => {
+        const parts = TOOL_VERSION.parts();
+        const dates = parts.map(p => p.date);
+        const r = toolVersionRange();
+        const html = toolVersionHTML();
+        const ok = dates.length === 3
+          && dates[0] === MEIJI_CHECKED && dates[1] === REFS_CHECKED && dates[2] === MIN_WAGE_CHECKED
+          && r.oldest === dates.slice().sort()[0] && r.newest === dates.slice().sort()[2]
+          && html.indexOf(TOOL_VERSION.label) >= 0
+          && dates.every(d => html.indexOf(d) >= 0);   // 4つの日付が1つの表に揃って出ている
+        return { ok, detail: `内訳=${dates.join('／')} 範囲=${r.oldest}〜${r.newest} 版=${TOOL_VERSION.label}` };
+      } },
+    { id: 'P24', title: '［MF-15］「モデル様式に準拠しています」の断定が消え、扱っていない欄が具体名で列挙されている', run: () => {
+        const html = modelFormNoticeHTML();
+        const guide = document.getElementById('modeGuide');
+        const guideText = guide ? guide.textContent : '';
+        // 2026-09-16に一次資料（モデル労働条件通知書 R8.10対応版）で確認した「様式にあってツールに無い欄」
+        const must = ['就業時転換', '代替休暇', '有期雇用特別措置法', '中小企業退職金共済', '創業支援等措置'];
+        const items = MODEL_FORM_NOTICE.unsupported.map(u => u.item).join('／');
+        const miss = must.filter(w => items.indexOf(w) < 0);
+        // 改修前の断定表示が画面のどこにも残っていないこと
+        const noAssert = guideText.indexOf('モデル様式（令和8年10月版）に準拠しています') < 0
+                      && html.indexOf('に準拠しています') < 0;
+        // 最低賃金額は「様式に欄が無く、本ツール独自の画面確認」である旨を書き分けていること
+        const mwNote = MODEL_FORM_NOTICE.extra.indexOf('最低賃金額') >= 0
+                    && MODEL_FORM_NOTICE.extra.indexOf('交付する書面には印字しません') >= 0;
+        return { ok: miss.length === 0 && noAssert && mwNote,
+                 detail: `扱わない欄=${MODEL_FORM_NOTICE.unsupported.length}件（${items}）／不足=${miss.join(',') || 'なし'}／断定表示の残存=${noAssert ? 'なし' : 'あり'}／最賃の書き分け=${mwNote}` };
+      } },
+    { id: 'P25', title: '［MF-13/17/18］単独印刷の入れ物と、画面のみ表示の非表示指定がCSSに入っている', run: () => {
+        const css = [...document.querySelectorAll('style')].map(s => s.textContent).join('\n');
+        const box = document.getElementById('modeChecklist');
+        const ok = !!box && box.classList.contains('hidden')
+          && css.indexOf('body.print-checklist #modeChecklist{display:block !important') >= 0
+          && css.indexOf('body.print-checklist #preview') >= 0          // 通知書と混ざらない
+          && css.indexOf('body.print-checklist #modeCreate') >= 0
+          && /\.tool-note,#appFooter\{display:none !important\}/.test(css.replace(/\s*\n\s*/g, ''));
+        return { ok, detail: `入れ物=${box ? 'あり(hidden)' : 'なし'}／印刷CSS=${ok ? '正' : '不足'}` };
+      } },
+    { id: 'P26', title: '［MF-18］ダウンロード注意が、保存ボタンのある3画面（作成・一括・試算）に出ており、メール添付を当然視させない文言である', run: () => {
+        const boxes = [...document.querySelectorAll('[data-download-notice]')];
+        const filled = boxes.filter(b => b.innerHTML.indexOf(DOWNLOAD_NOTICE.title) >= 0);
+        const inCreate = boxes.some(b => b.closest('#modeCreate'));
+        const inBatch = boxes.some(b => b.closest('#modeBatch'));
+        const inCalc = boxes.some(b => b.closest('#modeCalc'));
+        // 全文版・短縮版のどちらにも「メール添付をためらわせる一文」と「送り方は担当者に確認」が残っていること
+        const warns = [downloadNoticeHTML(false), downloadNoticeHTML(true)].every(t =>
+          t.indexOf('メールにそのまま添付して送らないでください') >= 0
+          && t.indexOf('事務所の担当者にご確認ください') >= 0);
+        return { ok: filled.length === boxes.length && boxes.length >= 3 && inCreate && inBatch && inCalc && warns,
+                 detail: `設置=${boxes.length}箇所（作成${inCreate ? '○' : '×'}／一括${inBatch ? '○' : '×'}／試算${inCalc ? '○' : '×'}）描画済=${filled.length} 文言=${warns ? '可' : '不可'}` };
+      } },
+    { id: 'P27', title: '［MF-17］事務所名義は顧問先版（PUBLIC_MODE）のときだけ出る', run: () => {
+        const html = disclaimerHTML();
+        const shown = html.indexOf(DISCLAIMER.officeLine) >= 0;
+        const ok = (PUBLIC_MODE === shown);   // 顧問先版なら出る／所内版なら出ない
+        return { ok, detail: `PUBLIC_MODE=${PUBLIC_MODE} 名義表示=${shown}` };
+      } },
+
+    /* ---- ロット4（MF-12 解雇事由の網羅摘示／MF-19 ②相談窓口の空欄ガード）---- */
+    { id: 'P28', title: '［MF-12］就業規則あり＋条項3件 → 事由を全列挙し、条項を網羅摘示する（「等（詳細は就業規則による）」は出ない）', run: () => {
+        const lines = dismissalLines(
+          ['身体又は精神の障害により業務に耐えられないとき', '勤務状況が著しく不良のとき', '経営上やむを得ない事由があるとき'],
+          ['第44条', '第45条第2項', '第46条'], true);
+        const joined = lines.join(' ⏎ ');
+        const ok = lines.length === 4
+          && lines[0] === '　　・身体又は精神の障害により業務に耐えられないとき'
+          && lines[2] === '　　・経営上やむを得ない事由があるとき'
+          && lines[3] === '　　・解雇の事由の詳細は、就業規則第44条、第45条第2項、第46条による。'
+          && joined.indexOf('等（詳細は就業規則による）') < 0;
+        return { ok, detail: `行数=${lines.length} / ${joined}` };
+      } },
+    { id: 'P29', title: '［MF-12］就業規則が無い設定 → 条項の摘示を出さない（存在しない規則を参照させない）／事由は全列挙のまま', run: () => {
+        const lines = dismissalLines(['勤務状況が著しく不良のとき', '服務規律違反を繰り返したとき'], ['第44条'], false);
+        const joined = lines.join(' ⏎ ');
+        const ok = lines.length === 2
+          && joined.indexOf('就業規則') < 0
+          && joined.indexOf('等（詳細は就業規則による）') < 0
+          && lines[1] === '　　・服務規律違反を繰り返したとき';
+        return { ok, detail: `行数=${lines.length} / ${joined}` };
+      } },
+    { id: 'P30', title: '［MF-12］条項が未入力（就業規則あり）→ 事由だけを全列挙／事由も条項も空なら見出しごと出さない', run: () => {
+        const some = dismissalLines(['勤務状況が著しく不良のとき'], [], true);
+        const none = dismissalLines([], [], true);
+        const ok = some.length === 1 && some[0] === '　　・勤務状況が著しく不良のとき'
+          && some.join('').indexOf('等（詳細は就業規則による）') < 0
+          && none.length === 0;
+        return { ok, detail: `条項なし=${some.length}行「${some[0] || ''}」／全部空=${none.length}行` };
+      } },
+    { id: 'P31', title: '［MF-19］②相談窓口が全部空 → 見出しの1行だけ（空の括弧・空の「部署名」を書面に出さない）', run: () => {
+        const lines = soudanLines('', '', '');
+        const joined = lines.join('');
+        const ok = lines.length === 1 && lines[0] === SOUDAN_HEAD_LINE
+          && joined.indexOf('（連絡先') < 0 && joined.indexOf('部署名') < 0 && joined.indexOf('担当者職氏名') < 0;
+        return { ok, detail: `行数=${lines.length} / ${lines.join(' ⏎ ')}` };
+      } },
+    { id: 'P32', title: '［MF-19］②相談窓口が埋まっているとき → 改修前とまったく同じ2行（書面の非改変の確認）', run: () => {
+        const lines = soudanLines('総務部', '課長 鈴木', '内線101');
+        const ok = lines.length === 2
+          && lines[0] === '・雇用管理の改善等に関する事項に係る相談窓口'
+          && lines[1] === '　　部署名 総務部　担当者職氏名 課長 鈴木（連絡先 内線101）';
+        return { ok, detail: lines.join(' ⏎ ') };
+      } },
+    { id: 'P33', title: '［MF-19］②相談窓口が一部だけ → 空の項目と空の括弧を出さない（部署だけ／担当者＋連絡先／連絡先だけ）', run: () => {
+        const a = soudanLines('総務部', '', '');
+        const b = soudanLines('', '課長 鈴木', '内線101');
+        const c = soudanLines('', '', '内線101');
+        const ok = a.length === 2 && a[1] === '　　部署名 総務部'
+          && b.length === 2 && b[1] === '　　担当者職氏名 課長 鈴木（連絡先 内線101）'
+          && c.length === 2 && c[1] === '　　（連絡先 内線101）';
+        return { ok, detail: `部署のみ="${a[1]}" 担当+連絡先="${b[1]}" 連絡先のみ="${c[1]}"` };
+      } },
+    { id: 'P34', title: '［MF-19］法定対象で3項目とも空 → 出力ブロック／1つでも入力があれば止めない／法定対象でなければ止めない', run: () => {
+        const allEmpty = soudanBlockNeeded(true, '', '', '');
+        const onlyContact = soudanBlockNeeded(true, '', '', '内線101');
+        const onlyDept = soudanBlockNeeded(true, '総務部', '', '');
+        const notTarget = soudanBlockNeeded(false, '', '', '');
+        return { ok: allEmpty === true && onlyContact === false && onlyDept === false && notTarget === false,
+                 detail: `全部空=${allEmpty} 連絡先のみ=${onlyContact} 部署のみ=${onlyDept} 非対象=${notTarget}` };
+      } },
+
+    /* ---- ロット5（MF-08 無期転換の判定支援／MF-16 社会保険の区分ヘルプ）---- */
+    { id: 'P35', title: '［MF-08］通算5年超×申込権「無」→赤／5年以下→緑／起算日が空→黄／申込権「有」→緑／無期は対象外', run: () => {
+        const over     = mukiTenkanCheck('有期', '2021-04-01', '2026-04-01', '無');   // 通算5年1日
+        const under    = mukiTenkanCheck('有期', '2024-04-01', '2027-03-31', '無');   // 通算ちょうど3年
+        const unknown  = mukiTenkanCheck('有期', '',           '2027-03-31', '無');   // 起算日が空
+        const selected = mukiTenkanCheck('有期', '2021-04-01', '2026-04-01', '有');   // すでに「有」
+        const muki     = mukiTenkanCheck('無期', '',           '',           '無');   // 無期は対象外
+        const ok = over.level === 'red' && over.code === 'over'
+          && under.level === 'ok' && under.code === 'under'
+          && unknown.level === 'yellow' && unknown.code === 'unknown'
+          && selected.level === 'ok' && selected.code === 'selected'
+          && muki.level === 'none';
+        return { ok, detail: `5年超=${over.level}/${over.code} 5年以下=${under.level}/${under.code} 起算日空=${unknown.level}/${unknown.code} 申込権有=${selected.code} 無期=${muki.code}` };
+      } },
+    { id: 'P36', title: '［MF-08］通算5年の境界（起算日+5年の前日まではセーフ・当日から5年超）／うるう年の起算日でもずれない', run: () => {
+        const safe  = mukiTenkanCheck('有期', '2021-04-01', '2026-03-31', '無');   // ちょうど5年
+        const over  = mukiTenkanCheck('有期', '2021-04-01', '2026-04-01', '無');   // 5年1日
+        const lSafe = mukiTenkanCheck('有期', '2020-02-29', '2025-02-27', '無');   // うるう年起算日
+        const lOver = mukiTenkanCheck('有期', '2020-02-29', '2025-02-28', '無');
+        const ok = safe.code === 'under' && over.code === 'over'
+          && lSafe.code === 'under' && lOver.code === 'over'
+          && safe.ctx.span.text === '5年' && over.ctx.span.text === '5年1日';
+        return { ok, detail: `3/31=${safe.code}(${safe.ctx.span.text}) 4/1=${over.code}(${over.ctx.span.text}) 閏2/27=${lSafe.code} 閏2/28=${lOver.code}` };
+      } },
+    { id: 'P37', title: '［MF-08］画面の説明に労契法18条1項の要件・クーリング（同条2項）・有期特措法の第二種計画認定・判定できない旨が入っている', run: () => {
+        const html = mukiTenkanHelpHTML();
+        const must = ['労働契約法18条1項', `通算契約期間が${MUKI_TENKAN_YEARS}年を超える`, '次の契約から',
+                      '労働基準法施行規則5条5項・6項', 'クーリング', '同条2項',
+                      '有期雇用特別措置法の第二種計画認定', 'めぐみ事務所', '最終的な判定はできません',
+                      '書面には印字されません'];
+        const miss = must.filter(m => html.indexOf(m) < 0);
+        return { ok: miss.length === 0, detail: miss.length ? '不足：' + miss.join('／') : `全${must.length}項目あり（${html.length}文字）` };
+      } },
+    { id: 'P38', title: '［MF-16］社会保険の区分ヘルプが政令確定後の記述になっている（政令番号あり・「未公布」なし）／参照資料にも出典と確認日がある', run: () => {
+        const html = shakaiHokenNoteHTML();
+        const dom = document.getElementById('shahoKubunNote');
+        const domText = dom ? dom.textContent : '';
+        const refOk = REFS.some(g => g.items.some(i =>
+          String(i.name).indexOf('令和8年政令第275号') >= 0 && String(i.note).indexOf(SHAKAI_HOKEN_NOTE.checked) >= 0));
+        const ok = html.indexOf('令和8年政令第275号') >= 0
+          && html.indexOf('令和8年10月1日に撤廃されました') >= 0
+          && html.indexOf('未公布') < 0
+          && html.indexOf('月額賃金8.8万円以上・学生でない') < 0        // 撤廃前の「現存する要件」表現が残っていない
+          && html.indexOf('引き続き適用されるものと考えられます') >= 0  // 確信度=中のため断定しない書き方
+          && domText.indexOf('令和8年政令第275号') >= 0                 // 画面に実際に描かれている
+          && refOk;
+        return { ok, detail: `政令番号=${html.indexOf('令和8年政令第275号') >= 0} 未公布の残存=${html.indexOf('未公布') >= 0} 画面描画=${domText.indexOf('令和8年政令第275号') >= 0} 参照資料=${refOk}` };
+      } },
+    { id: 'P39', title: '［MF-08］通算契約期間の起算日は画面だけで使い、書面生成（印刷/Word/Excel/一括）のどこにも出ない', run: () => {
+        // RadioNodeList（ラジオ群）と単一要素の両方に値を入れられる簡易セッター
+        const put = (n, v) => { const el = form.elements[n]; if (!el) return;
+          if (el.tagName) { el.value = v; return; }
+          [...el].forEach(r => { if (r.type === 'radio') r.checked = (r.value === v); else r.value = v; }); };
+        const backup = serializeState();
+        let ok = false, detail = '';
+        try {
+          put('period_type', '有期');
+          put('contract_start', '2024-04-01');
+          put('contract_end', '2027-03-31');
+          put('tsusan_start', '2019-07-03');      // 他の欄では使わない日付（混入すれば必ず見つかる）
+          render();                                // LAST_SHEETS＝印刷・Word・一括の素材
+          const st = updateVisibility();
+          const blocks = buildBlocks(st);          // Excel出力の素材
+          const sheetText = LAST_SHEETS.join('\n');
+          const blockText = JSON.stringify(blocks);
+          const ng = ['2019-07-03', '令和元年7月3日', '2019年7月3日', '通算契約期間の起算日'];
+          const hitSheet = ng.filter(w => sheetText.indexOf(w) >= 0);
+          const hitBlock = ng.filter(w => blockText.indexOf(w) >= 0);
+          ok = hitSheet.length === 0 && hitBlock.length === 0;
+          detail = `書面=${hitSheet.join(',') || '混入なし'}／Excel素材=${hitBlock.join(',') || '混入なし'}`;
+        } finally {
+          restoreState(backup);                    // 画面を元へ戻す（restoreState の末尾で render() される）
+        }
+        return { ok, detail };
+      } }
+  ];
+}
+
+// 補助検証（設計書§8の負検証N1・N6・N7が「何を壊すと何が失敗するか」を成立させるために必要な検査）
+function stSupportCases() {
+  const MW = stTestMinWage();
+  const H = 173.75;
+  return [
+    { id: 'B1', title: '［丸め境界・教訓L-20260728-03 再現］月給190,708円／173.75h＝1,097.60円 → 赤（四捨五入すれば1,098で緑になる値）', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 1097.6 * H, monthlyHours: H, minWage: MW });
+        return { ok: r.level === 'red' && mwFmtHourly(r.numeratorLow, r.hoursHigh) === '1,097.60',
+                 detail: `level=${r.level} hourly=${mwFmtHourly(r.numeratorLow, r.hoursHigh)}` };
+      } },
+    { id: 'B2', title: '［浮動小数境界］月給140,565.96円／128.02h＝ちょうど1,098円 → 緑（浮動小数の直接比較だと1097.9999…で赤になる値）', run: () => {
+        const r = minWageCheck({ wageType: '月給', base: 140565.96, monthlyHours: 128.02, minWage: MW });
+        return { ok: r.level === 'green', detail: `level=${r.level} 素の除算=${140565.96 / 128.02}` };
+      } },
+    { id: 'R1', title: '［発効日］宮城県 2026-09-30 基準 → 令和7年度 1,038円', run: () => {
+        const e = mwResolve('宮城県', '2026-09-30');
+        return { ok: !!e && e.amount === 1038 && e.year === '令和7年度', detail: e ? `${e.year} ${e.amount}円 (${e.eff})` : 'null' };
+      } },
+    { id: 'R2', title: '［発効日］宮城県 2026-10-01 基準 → 令和8年度 1,098円', run: () => {
+        const e = mwResolve('宮城県', '2026-10-01');
+        return { ok: !!e && e.amount === 1098 && e.year === '令和8年度', detail: e ? `${e.year} ${e.amount}円 (${e.eff})` : 'null' };
+      } },
+    { id: 'R3', title: '［発効日のばらつき］沖縄県 2026-12-01 → 令和7年度 1,023円／2026-12-02 → 令和8年度 1,086円', run: () => {
+        const a = mwResolve('沖縄県', '2026-12-01'), b = mwResolve('沖縄県', '2026-12-02');
+        return { ok: !!a && !!b && a.amount === 1023 && b.amount === 1086,
+                 detail: `12/01=${a ? a.amount : 'null'}円 12/02=${b ? b.amount : 'null'}円` };
+      } },
+    { id: 'R4', title: '［47都道府県］令和8年度の額と発効日が全県に入っている', run: () => {
+        const prefs = Object.keys(MIN_WAGE_DATA);
+        const bad = prefs.filter(p => { const e = MIN_WAGE_DATA[p][0]; return !(e && e.year === '令和8年度' && e.amount > 0 && /^2026-(1[0-2])-\d{2}$/.test(e.eff)); });
+        return { ok: prefs.length === 47 && bad.length === 0, detail: `県数=${prefs.length} 不備=${bad.join(',') || 'なし'}` };
+      } },
+    { id: 'C1', title: '［休憩の下限］労働360分→0分／361分→45分／480分→45分／481分→60分', run: () => {
+        const ok = breakRequiredMinutes(360) === 0 && breakRequiredMinutes(361) === 45
+          && breakRequiredMinutes(480) === 45 && breakRequiredMinutes(481) === 60;
+        return { ok, detail: `${breakRequiredMinutes(360)}/${breakRequiredMinutes(361)}/${breakRequiredMinutes(480)}/${breakRequiredMinutes(481)}` };
+      } },
+    { id: 'C2', title: '［休憩の書式］「1時間」=60／「45分」=45／「1時間30分」=90／「なし」=0／「あとで」=null', run: () => {
+        const ok = parseBreakTotalText('1時間') === 60 && parseBreakTotalText('45分') === 45
+          && parseBreakTotalText('1時間30分') === 90 && parseBreakTotalText('なし') === 0
+          && parseBreakTotalText('あとで') === null;
+        return { ok, detail: `${parseBreakTotalText('1時間')}/${parseBreakTotalText('45分')}/${parseBreakTotalText('1時間30分')}/${parseBreakTotalText('なし')}/${parseBreakTotalText('あとで')}` };
+      } },
+    { id: 'C3', title: '［有期3年］2026-04-01＋3年=2029-04-01（終期2029-03-31はセーフ）／うるう年2024-02-29＋3年=2027-02-28', run: () => {
+        const ok = addYearsISO('2026-04-01', 3) === '2029-04-01' && addYearsISO('2024-02-29', 3) === '2027-02-28';
+        return { ok, detail: `${addYearsISO('2026-04-01', 3)} / ${addYearsISO('2024-02-29', 3)}` };
+      } },
+    { id: 'C4', title: '［通算期間の道具］ちょうど5年＝「5年」／1日超＝「5年1日」／月末繰上げなし（1/31＋1か月＝2/29）／終期が起算日より前＝null', run: () => {
+        const a = spanYearsMonths('2021-04-01', '2026-03-31');   // ちょうど5年（終期の日を含めて数える）
+        const b = spanYearsMonths('2021-04-01', '2026-04-01');   // 5年と1日
+        const c = spanYearsMonths('2024-01-31', '2024-03-30');   // 0年2か月（うるう年の2月末丸め）
+        const ok = a && b && c
+          && a.text === '5年' && b.text === '5年1日' && c.text === '0年2か月'
+          && addDaysISO('2024-02-28', 1) === '2024-02-29' && addDaysISO('2023-02-28', 1) === '2023-03-01'
+          && addMonthsISO('2024-01-31', 1) === '2024-02-29'
+          && spanYearsMonths('2027-04-01', '2026-03-31') === null;
+        return { ok, detail: `${a ? a.text : 'null'} / ${b ? b.text : 'null'} / ${c ? c.text : 'null'} / 1/31+1M=${addMonthsISO('2024-01-31', 1)} / 逆転=${spanYearsMonths('2027-04-01', '2026-03-31')}` };
+      } },
+    { id: 'D1', title: '［デッドマン］確認日2026-09-16・本日2026-09-30 → 古くない／2026-10-01 → 古い／確認日2026-10-05・本日2027-09-30 → 古くない', run: () => {
+        const ok = minWageTableStale('2026-09-16', '2026-09-30') === false
+          && minWageTableStale('2026-09-16', '2026-10-01') === true
+          && minWageTableStale('2026-10-05', '2027-09-30') === false;
+        return { ok, detail: `${minWageTableStale('2026-09-16', '2026-09-30')}/${minWageTableStale('2026-09-16', '2026-10-01')}/${minWageTableStale('2026-10-05', '2027-09-30')}` };
+      } }
+  ];
+}
+
+// 指定IDの検証を1件走らせて合否だけ返す（負検証が「壊れたら失敗するか」を見るために使う）
+function stRunOne(id) {
+  const all = stPositiveCases().concat(stSupportCases());
+  const c = all.find(x => x.id === id);
+  if (!c) return { ok: false, detail: `テストケース ${id} が見つかりません` };
+  try { return c.run(); } catch (e) { return { ok: false, detail: '例外：' + e.message }; }
+}
+
+/* 負検証の定義
+   mutate() で故意に壊し、breaks に挙げた検証が「すべて失敗する」ことを確認して restore() で戻す。
+   1件でも失敗しなければ、その負検証は不合格＝テストが効いていない。 */
+function stNegativeCases() {
+  // ツール既定の切り上げ（千の位）。割増賃金の計算用であり、最賃判定に使ってはいけないもの。
+  const toolRoundUp1000 = v => Math.ceil(v / 1000) * 1000;
+  let savedMiyagi = null;
+  return [
+    { id: 'N1', title: '分子／時間額に丸めを挟む（既存 roundUp＝千の位切り上げ、および四捨五入）',
+      guards: 'L-20260728-03（割増用に丸めた単価を最賃判定へ流用）の再発',
+      breaks: ['P2', 'B1'],
+      run: () => {
+        const results = [];
+        MW_HOOKS.roundHourly = toolRoundUp1000;            // 千の位切り上げ → P2 が緑へ反転するはず
+        results.push({ id: 'P2', r: stRunOne('P2') });
+        MW_HOOKS.roundHourly = v => Math.round(v);          // 四捨五入 → B1 が緑へ反転するはず
+        results.push({ id: 'B1', r: stRunOne('B1') });
+        MW_HOOKS.roundHourly = null;
+        return results;
+      } },
+    { id: 'N2', title: '分子を wageTotals().inBase（割増賃金の算定基礎＝精皆勤手当を含む）へ差し替え',
+      guards: '割増算定基礎との混同', breaks: ['P4'],
+      run: () => { MW_HOOKS.allowMode = 'inBase'; const r = [{ id: 'P4', r: stRunOne('P4') }]; MW_HOOKS.allowMode = 'minwage'; return r; } },
+    { id: 'N3', title: '分子を wageTotals().total（固定残業手当を含む総支給額）へ差し替え',
+      guards: '最賃法4条3項3号（割増賃金は最賃算入外）の無視', breaks: ['P5'],
+      run: () => { MW_HOOKS.allowMode = 'total'; const r = [{ id: 'P5', r: stRunOne('P5') }]; MW_HOOKS.allowMode = 'minwage'; return r; } },
+    { id: 'N4', title: '分母（所定労働時間）が取れないときに緑を返す',
+      guards: '「計算できない＝通す」の禁止', breaks: ['P7'],
+      run: () => { MW_HOOKS.noHoursLevel = 'green'; const r = [{ id: 'P7', r: stRunOne('P7') }]; MW_HOOKS.noHoursLevel = 'yellow'; return r; } },
+    { id: 'N5', title: 'MIN_WAGE_DATA の宮城県 令和8年度の額を1円動かす（＝額をコードにベタ打ちしていないことの証明）',
+      guards: 'テーブルを実際に参照している証明', breaks: ['P3'],
+      run: () => {
+        savedMiyagi = MIN_WAGE_DATA['宮城県'][0].amount;
+        MIN_WAGE_DATA['宮城県'][0].amount = savedMiyagi + 1;   // ちょうど等号のP3が赤へ反転するはず
+        const r = [{ id: 'P3', r: stRunOne('P3') }];
+        MIN_WAGE_DATA['宮城県'][0].amount = savedMiyagi;
+        return r;
+      } },
+    { id: 'N6', title: 'calcResolveMinWage を arr[0] 固定に（発効日を無視する）',
+      guards: '発効日判定の生存確認（県ごとに発効日がR8.10.1〜R8.12.2までばらつくため特に重要）',
+      breaks: ['R1', 'R3'],
+      run: () => {
+        MW_HOOKS.resolver = pref => MIN_WAGE_DATA[pref] ? MIN_WAGE_DATA[pref][0] : null;
+        const r = [{ id: 'R1', r: stRunOne('R1') }, { id: 'R3', r: stRunOne('R3') }];
+        MW_HOOKS.resolver = null;
+        return r;
+      } },
+    { id: 'N7', title: '判定を浮動小数の直接比較へ戻す',
+      guards: '1/100時間単位の境界の揺れ', breaks: ['B2'],
+      run: () => { MW_HOOKS.floatCompare = true; const r = [{ id: 'B2', r: stRunOne('B2') }]; MW_HOOKS.floatCompare = false; return r; } },
+
+    /* ---- ここからロット2（MF-07・MF-09・MF-10・MF-11） ---- */
+
+    { id: 'N8', title: '［MF-07］有無明示の必須化を外し、未選択を自動的に「無」とみなす改修前の挙動へ戻す',
+      guards: '未選択のまま「無」と印字する事実と異なる明示（パート有期則2条2項）の再発',
+      breaks: ['P10', 'P11'],
+      run: () => {
+        L2_HOOKS.yumuRequired = false;
+        const r = [{ id: 'P10', r: stRunOne('P10') }, { id: 'P11', r: stRunOne('P11') }];
+        L2_HOOKS.yumuRequired = true;
+        return r;
+      } },
+    { id: 'N9', title: '［MF-09］①説明窓口の空欄ガードを外し、空でも括弧つきで印字する改修前の挙動へ戻す',
+      guards: '空の括弧（部署名 　担当者職氏名 （連絡先 ））が書面に印字されること',
+      breaks: ['P14'],
+      run: () => {
+        L2_HOOKS.setsumeiBlankGuard = false;
+        const r = [{ id: 'P14', r: stRunOne('P14') }];
+        L2_HOOKS.setsumeiBlankGuard = true;
+        return r;
+      } },
+    { id: 'N10', title: '［MF-10］施行日判定の基準日を「交付日」へ戻す（改修前の挙動）',
+      guards: '義務の履行時点＝雇い入れたとき（有期は更新のたび／改正施行通達 第3の1(14)(15)）',
+      breaks: ['P12', 'P13'],
+      run: () => {
+        L2_HOOKS.actBaseDate = 'issue';
+        const r = [{ id: 'P12', r: stRunOne('P12') }, { id: 'P13', r: stRunOne('P13') }];
+        L2_HOOKS.actBaseDate = 'hire';
+        return r;
+      } },
+    { id: 'N11', title: '［MF-11］短時間労働者の該当性を「呼称（雇用形態の選択）だけ」で判断する考え方へ戻す',
+      guards: 'パート有期法2条1項＝週の所定労働時間で判断・呼称は不問（改正施行通達 第1の4(2)(4)）',
+      breaks: ['P17', 'P18', 'P19'],
+      run: () => {
+        L2_HOOKS.shortByLabelOnly = true;
+        const r = [{ id: 'P17', r: stRunOne('P17') }, { id: 'P18', r: stRunOne('P18') }, { id: 'P19', r: stRunOne('P19') }];
+        L2_HOOKS.shortByLabelOnly = false;
+        return r;
+      } },
+
+    /* ---- ここからロット3（MF-13・MF-17） ---- */
+
+    { id: 'N12', title: '［MF-13］交付前チェックリストから残存リスクの項目（無期転換申込権）を1件削る',
+      guards: '機械で塞げない4件の受け皿が欠けたまま公開されること（設計書§4）',
+      breaks: ['P20', 'P21'],
+      run: () => {
+        L3_HOOKS.dropChecklistKey = 'risk_muki18';   // 残存リスク1件を落とす → 件数検査と文言検査の両方が落ちるはず
+        const r = [{ id: 'P20', r: stRunOne('P20') }, { id: 'P21', r: stRunOne('P21') }];
+        L3_HOOKS.dropChecklistKey = null;
+        return r;
+      } },
+    { id: 'N13', title: '［MF-17］免責文・事務所名義を書面生成（buildBlocks）の経路へ流す',
+      guards: '顧問先が労働者へ交付する法定書面に第三者（事務所）の免責文・名義が印字されること（モードB X2）',
+      breaks: ['P22'],
+      run: () => {
+        L3_HOOKS.leakDisclaimerToSheet = true;
+        const r = [{ id: 'P22', r: stRunOne('P22') }];
+        L3_HOOKS.leakDisclaimerToSheet = false;
+        render();                                    // 改変を反映した LAST_SHEETS を本来の内容へ戻す
+        return r;
+      } },
+
+    /* ---- ロット4（MF-12・MF-19）の負検証 ---- */
+    { id: 'N14', title: '［MF-12］解雇事由を「先頭1件＋等（詳細は就業規則による）」だけ書いていた改修前の挙動へ戻す',
+      guards: '基発45号の「関係条項名を網羅的に示す」水準を満たさない書面（条項番号すら示されない）への逆戻り',
+      breaks: ['P28', 'P29', 'P30'],
+      run: () => {
+        L4_HOOKS.dismissalFullList = false;
+        const r = [{ id: 'P28', r: stRunOne('P28') }, { id: 'P29', r: stRunOne('P29') }, { id: 'P30', r: stRunOne('P30') }];
+        L4_HOOKS.dismissalFullList = true;
+        return r;
+      } },
+    { id: 'N15', title: '［MF-19］②相談窓口の空欄ガードを外し、空でも「部署名 　担当者職氏名 （連絡先 ）」と印字する改修前の挙動へ戻す',
+      guards: '必須明示事項の欄に空の括弧だけが並ぶ書面が顧問先から労働者へ交付されること',
+      breaks: ['P31', 'P33'],
+      run: () => {
+        L4_HOOKS.soudanBlankGuard = false;
+        const r = [{ id: 'P31', r: stRunOne('P31') }, { id: 'P33', r: stRunOne('P33') }];
+        L4_HOOKS.soudanBlankGuard = true;
+        return r;
+      } },
+
+    /* ---- ロット5（MF-08・MF-16）の負検証 ---- */
+    { id: 'N16', title: '［MF-08］通算5年超の判定を外し、無期転換の申込権を完全に手動任せ（既定「無」）にしていた改修前の挙動へ戻す',
+      guards: '通算5年超なのに申込権「無」のまま出力し、労基則5条5項・6項の明示が丸ごと欠落すること（設計書 A5・M7）',
+      breaks: ['P35', 'P36'],
+      run: () => {
+        L5_HOOKS.mukiOverCheck = false;
+        const r = [{ id: 'P35', r: stRunOne('P35') }, { id: 'P36', r: stRunOne('P36') }];
+        L5_HOOKS.mukiOverCheck = true;
+        return r;
+      } },
+    { id: 'N17', title: '［MF-16］社会保険の区分ヘルプを「賃金要件8.8万円の撤廃は施行期日政令が未公布」という改修前の記述へ戻す',
+      guards: '令和8年政令第275号で確定した事実と食い違う説明を顧問先が読むこと',
+      breaks: ['P38'],
+      run: () => {
+        L5_HOOKS.shakaiHokenOldText = true;
+        const r = [{ id: 'P38', r: stRunOne('P38') }];
+        L5_HOOKS.shakaiHokenOldText = false;
+        return r;
+      } }
+  ];
+}
+
+function runSelfTest() {
+  SELFTEST_ACTIVE = true;
+  const rows = [];
+  let pass = 0, fail = 0;
+
+  const addRow = (group, id, title, ok, detail) => {
+    rows.push({ group, id, title, ok, detail });
+    if (ok) pass++; else fail++;
+  };
+
+  // --- 正検証 ---
+  stPositiveCases().forEach(c => {
+    let r; try { r = c.run(); } catch (e) { r = { ok: false, detail: '例外：' + e.message }; }
+    addRow('正検証', c.id, c.title, r.ok, r.detail);
+  });
+  // --- 補助検証 ---
+  stSupportCases().forEach(c => {
+    let r; try { r = c.run(); } catch (e) { r = { ok: false, detail: '例外：' + e.message }; }
+    addRow('補助検証', c.id, c.title, r.ok, r.detail);
+  });
+  // --- 負検証（壊したときに必ず失敗することの確認） ---
+  stNegativeCases().forEach(c => {
+    let results;
+    try { results = c.run(); } catch (e) { results = [{ id: '-', r: { ok: false, detail: '例外：' + e.message } }]; }
+    // 壊した状態で「すべての対象検証が失敗する」ことが合格条件
+    const allBroke = results.length > 0 && results.every(x => x.r.ok === false);
+    const detail = `守るもの：${c.guards}／改変後：` + results.map(x => `${x.id}=${x.r.ok ? '成功のまま（検出できず）' : '失敗（検出OK）'}［${x.r.detail}］`).join('　');
+    addRow('負検証', c.id, c.title, allBroke, detail);
+  });
+
+  SELFTEST_ACTIVE = false;
+
+  // 改変が残っていないことの確認（後始末の検査）
+  const clean = MW_HOOKS.allowMode === 'minwage' && MW_HOOKS.roundHourly === null
+    && MW_HOOKS.noHoursLevel === 'yellow' && MW_HOOKS.floatCompare === false && MW_HOOKS.resolver === null
+    && MIN_WAGE_DATA['宮城県'][0].amount === 1098
+    && L2_HOOKS.yumuRequired === true && L2_HOOKS.setsumeiBlankGuard === true
+    && L2_HOOKS.actBaseDate === 'hire' && L2_HOOKS.shortByLabelOnly === false
+    && L3_HOOKS.dropChecklistKey === null && L3_HOOKS.leakDisclaimerToSheet === false
+    && L4_HOOKS.dismissalFullList === true && L4_HOOKS.soudanBlankGuard === true
+    && L5_HOOKS.mukiOverCheck === true && L5_HOOKS.shakaiHokenOldText === false
+    && predeliveryResidualKeys().length === PREDELIVERY_RESIDUAL_COUNT
+    && LAST_SHEETS.join('\n').indexOf('ご利用にあたって') < 0;   // 書面に免責文が残っていない
+  addRow('後始末', 'Z1', '負検証の改変がすべて元に戻っている（MW_HOOKS・L2_HOOKS・L3_HOOKS・L4_HOOKS・L5_HOOKS・MIN_WAGE_DATA・書面）', clean,
+    `allowMode=${MW_HOOKS.allowMode} roundHourly=${MW_HOOKS.roundHourly} noHoursLevel=${MW_HOOKS.noHoursLevel} floatCompare=${MW_HOOKS.floatCompare} resolver=${MW_HOOKS.resolver} 宮城=${MIN_WAGE_DATA['宮城県'][0].amount}`
+    + ` / yumuRequired=${L2_HOOKS.yumuRequired} setsumeiBlankGuard=${L2_HOOKS.setsumeiBlankGuard} actBaseDate=${L2_HOOKS.actBaseDate} shortByLabelOnly=${L2_HOOKS.shortByLabelOnly}`
+    + ` / dropChecklistKey=${L3_HOOKS.dropChecklistKey} leakDisclaimer=${L3_HOOKS.leakDisclaimerToSheet} 残存リスク=${predeliveryResidualKeys().length}件`
+    + ` / dismissalFullList=${L4_HOOKS.dismissalFullList} soudanBlankGuard=${L4_HOOKS.soudanBlankGuard}`
+    + ` / mukiOverCheck=${L5_HOOKS.mukiOverCheck} shakaiHokenOldText=${L5_HOOKS.shakaiHokenOldText}`);
+
+  const panel = document.createElement('div');
+  panel.id = 'selftestPanel';
+  const groups = ['正検証', '補助検証', '負検証', '後始末'];
+  panel.innerHTML = `<h2>セルフテスト結果　${fail === 0 ? '🟢 全件合格' : '🔴 失敗あり'}　合格 ${pass} 件 ／ 失敗 ${fail} 件</h2>`
+    + `<p class="st-lead">?selftest=1 で実行。正検証＝期待どおりに判定できること。負検証＝故意に壊したときに対応する検証が必ず失敗すること（＝テストが効いていることの検査）。</p>`
+    + groups.map(g => {
+      const list = rows.filter(r => r.group === g);
+      if (!list.length) return '';
+      return `<h3>${g}（${list.filter(r => r.ok).length}/${list.length}）</h3><table class="st-table"><tr><th>#</th><th>判定</th><th>内容</th><th>実測</th></tr>`
+        + list.map(r => `<tr class="${r.ok ? 'st-ok' : 'st-ng'}"><td>${esc(r.id)}</td><td>${r.ok ? 'PASS' : 'FAIL'}</td><td>${esc(r.title)}</td><td>${esc(r.detail)}</td></tr>`).join('')
+        + `</table>`;
+    }).join('');
+  document.body.insertBefore(panel, document.body.firstChild);
+  // 自動判定用（Playwright等から読むため）
+  window.SELFTEST_RESULT = { pass, fail, rows };
+  return window.SELFTEST_RESULT;
+}
+
 function calcPopulatePrefSelect(){
   const sel=document.getElementById('calcPref'); if(!sel || sel.dataset.filled) return;
   const prefs=Object.keys(MIN_WAGE_DATA);
@@ -3645,7 +5932,7 @@ function exportExcel(){
 function clearFormAll(){
   form.reset();
   setAllows('in',[{}]); setAllows('out',[{}]);
-  setTimes([{}]); setBreaks([{}]); setOthers([{}]); setDismissals(['']);
+  setTimes([{}]); setBreaks([{}]); setOthers([{}]); setDismissals(['']); setDismissalClauses(['']);
   EDIT_ID=null; updateRosterBar();
   render();
 }
@@ -3680,6 +5967,7 @@ function loadSample(){
   set('retire_flag','有'); set('retire_note','勤続3年以上、就業規則第40条による');
   set('mandatory_age','満60歳'); set('reemployment','満65歳まで'); set('self_retire','退職30日以上前に届け出ること');
   setDismissals(['身体又は精神の障害により業務に耐えられないとき','勤務状況が著しく不良のとき','服務規律違反を繰り返したとき','経営上やむを得ない事由があるとき']);
+  setDismissalClauses(['第44条','第45条第2項','第46条']);   // MF-12（ロット4）就業規則の関係条項の網羅摘示の記入例
   set('kounen','有'); set('kenpo','有'); set('kenpo_name',''); set('emp_ins','有'); set('rousai','有');
   set('kigyou_nenkin','無'); set('kigyou_nenkin_name',''); set('shakai_riyuu',''); set('rules_place','社内に設置');
   setOthers([{name:'',val:''}]);
@@ -3689,10 +5977,17 @@ function loadSample(){
 calcSetAllowRows([{}]);
 calcPopulatePrefSelect();
 calcLoadSettings();
+minWagePopulatePrefSelect();   // 作成タブ「最低賃金の確認」の都道府県セレクトを MIN_WAGE_DATA から生成
+minWageAutoSuggestPref();      // 事業場所在地・就業の場所から都道府県を推測して初期選択
+applyPublicMode();             // 顧問先版（公開ホスト）のときだけ表示面を閉じる（計算ロジックは分岐しない）
+renderStaticNotices();         // §H 版表示・様式の注記・免責・ダウンロード注意を画面へ描く（書面には出さない）
+renderLot5Notes();             // §F-3 無期転換の説明（MF-08）・社会保険の区分ヘルプ（MF-16）を画面へ描く（書面には出さない）
 buildFormNav();
 buildFsHelp();
 calcRender();
 render();
+// 画面内セルフテスト（?selftest=1）。本番の利用者には一切影響しない。
+if(/[?&]selftest=1(&|$)/.test(location.search)) runSelfTest();
 </script>
 </body>
 </html>
