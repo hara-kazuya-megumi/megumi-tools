@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>処遇改善加算・ベースアップ評価料 試算＆チェックツール</title>
 <style>
+  /* 色の用途ルール：care/med＝制度チップだけに使う。risk＝返還・期限経過・要確認。warn＝注意。ok＝確認済み。
+     新しい色をここに増やさず、この4種＋.em-risk（強調・赤）／.em-ok（強調・緑）を使う。 */
   :root{
     --ground:#F3F5F8; --surface:#FFFFFF; --ink:#1B2430; --muted:#5A6A7A;
     --border:#DBE2EA; --accent:#2A5278; --accent-soft:#EDF2F7; --accent-deep:#1E3C58;
@@ -21,12 +23,12 @@
 
   header.app{background:var(--accent-deep); color:#F2F6FA; padding:22px 0 18px;}
   header.app .wrap{padding-bottom:0;}
-  .app-eyebrow{font-size:11.5px; letter-spacing:.18em; color:#9FB6CB; text-transform:uppercase;}
+  .app-eyebrow{font-size:13px; letter-spacing:.18em; color:#9FB6CB; text-transform:uppercase;}
   h1{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
      font-size:25px; font-weight:600; margin:4px 0 6px; letter-spacing:.03em; text-wrap:balance;}
-  .app-sub{font-size:12.5px; color:#C6D5E2; display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center;}
+  .app-sub{font-size:13px; color:#C6D5E2; display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center;}
   .badge-date{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
-    border-radius:999px; padding:1px 12px; font-size:12px;}
+    border-radius:999px; padding:1px 12px; font-size:13px;}
 
   /* ===== レイアウト（2026-08-07 サイドバー型に変更）=====
      旧: 横1列のタブ（12個で横スクロールが発生し、後ろのタブに気づけなかった）
@@ -37,7 +39,12 @@
   .sidenav{position:sticky; top:0; max-height:100vh; overflow-y:auto;
     background:var(--accent-deep); padding:16px 10px 28px; border-right:3px solid var(--accent);}
   .sn-group{margin-bottom:15px;}
-  .sn-title{font-size:10.5px; letter-spacing:.13em; color:#8FA8BF; font-weight:700; padding:0 10px 5px;}
+  .sn-title{font-size:13px; letter-spacing:.13em; color:#8FA8BF; font-weight:700; padding:0 10px 5px;}
+  /* M1: 制度選択バッジ・関係ないタブの薄字表示 */
+  .sn-seido-badge{display:block; width:100%; text-align:left; font:inherit; font-size:13px; font-weight:700;
+    color:#fff; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:8px;
+    padding:8px 10px; margin:0 10px 12px; cursor:pointer; width:calc(100% - 20px);}
+  .sn-dim{opacity:.4;}
   .sidenav button{display:flex; align-items:flex-start; gap:7px; width:100%; text-align:left;
     appearance:none; border:none; background:transparent; color:#CFDCE8; font:inherit; font-size:13.5px;
     padding:8px 10px; cursor:pointer; border-radius:8px; line-height:1.5; margin-bottom:1px;}
@@ -68,7 +75,7 @@
   .hc-head{display:flex; align-items:center; gap:7px; font-size:15px; font-weight:700; color:var(--accent-deep);}
   .hc-no{background:var(--accent-soft); color:var(--accent-deep); border-radius:7px; padding:1px 8px; font-size:13.5px;}
   .hc-desc{font-size:13px; line-height:1.75;}
-  .hc-when{font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:7px; margin-top:2px;}
+  .hc-when{font-size:13px; color:var(--muted); border-top:1px dashed var(--border); padding-top:7px; margin-top:2px;}
 
   /* 画面が狭いとき：サイドバーは開閉式にして、横スクロールを起こさない */
   @media(max-width:1080px){
@@ -84,6 +91,10 @@
     .sidenav,.navToggle{display:none!important;}
     .layout{display:block;}
     main{max-width:none; padding:0;}
+    .noprint{display:none!important;}
+    .tblwrap{overflow:visible;}
+    table{width:100%; font-size:11pt;}
+    th{white-space:normal;}
   }
   section.tabpane{display:none;}
   section.tabpane.on{display:block;}
@@ -97,8 +108,9 @@
   .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px 24px;}
   @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
 
-  label.fld{display:block; font-size:12.5px; font-weight:700; color:var(--accent-deep); margin-bottom:12px;}
-  label.fld .hint{font-weight:400; color:var(--muted);}
+  .fld{display:block; font-size:13px; font-weight:700; color:var(--accent-deep); margin-bottom:12px;}
+  .fld .hint{font-weight:400; color:var(--muted);}
+  .fld-lbl{display:block;}
   select,input[type=number],input[type=text]{display:block; width:100%; margin-top:4px;
     font:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--border);
     border-radius:6px; background:#fff; color:var(--ink);}
@@ -114,12 +126,12 @@
   table{border-collapse:collapse; width:100%; font-size:13px;}
   .tblwrap{overflow-x:auto; border:1px solid var(--border); border-radius:8px; margin:8px 0 4px;}
   th,td{border-bottom:1px solid var(--border); padding:6px 10px; text-align:left; vertical-align:top;}
-  th{background:var(--accent-soft); color:var(--accent-deep); font-size:12px; white-space:nowrap;}
+  th{background:var(--accent-soft); color:var(--accent-deep); font-size:13px; white-space:nowrap;}
   tr:last-child td{border-bottom:none;}
   td.num,th.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   .tbl-care th{background:var(--care-soft); color:var(--care);}
 
-  .chip{display:inline-block; border-radius:999px; padding:1px 11px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .chip{display:inline-block; border-radius:999px; padding:1px 11px; font-size:13px; font-weight:700; white-space:nowrap;}
   .chip.care{background:var(--care-soft); color:var(--care);}
   .chip.med{background:var(--accent-soft); color:var(--accent);}
   .chip.ok{background:var(--ok-soft); color:var(--ok);}
@@ -127,8 +139,9 @@
   .chip.risk{background:var(--risk-soft); color:var(--risk);}
 
   .note{background:var(--warn-soft); border-left:4px solid var(--warn); border-radius:0 6px 6px 0;
-    padding:9px 14px; font-size:12.5px; margin:10px 0;}
+    padding:9px 14px; font-size:13px; margin:10px 0;}
   .note.risk{background:var(--risk-soft); border-left-color:var(--risk);}
+  .note.warn{background:var(--warn-soft); border-left-color:var(--warn);}
   .note.ok{background:var(--ok-soft); border-left-color:var(--ok);}
   .note.plain{background:var(--accent-soft); border-left-color:var(--accent);}
 
@@ -144,13 +157,15 @@
   .verdict{font-size:16px; font-weight:700; padding:10px 16px; border-radius:8px; margin-top:12px;}
   .verdict.ok{background:var(--ok-soft); color:var(--ok);}
   .verdict.risk{background:var(--risk-soft); color:var(--risk);}
+  .em-risk{color:var(--risk);}
+  .em-ok{color:var(--ok); font-weight:700;}
 
   ul.tight{margin:6px 0; padding-left:22px;}
   ul.tight li{margin:3px 0;}
-  .src{font-size:12px; color:var(--muted);}
+  .src{font-size:13px; color:var(--muted);}
   .src a{color:var(--accent);}
   .kv{display:grid; grid-template-columns:9em 1fr; gap:4px 14px; font-size:13.5px; margin:8px 0;}
-  .kv dt{color:var(--muted); font-weight:700; font-size:12.5px;}
+  .kv dt{color:var(--muted); font-weight:700; font-size:13px;}
   .kv dd{margin:0;}
   @media(max-width:600px){.kv{grid-template-columns:1fr;} .kv dt{margin-top:6px;}}
 
@@ -159,17 +174,53 @@
   .checkline input{width:18px; height:18px; margin-top:3px; accent-color:var(--accent); flex-shrink:0;}
   .checkline .t{flex:1; min-width:0;}
   .checkline .t b{font-size:14px;}
-  .checkline .t .d{font-size:12.5px; color:var(--muted); margin-top:2px;}
-  .checkline .need{display:inline-block; margin-left:8px; font-size:11px; font-weight:700; color:var(--accent-deep);
+  .checkline .t .d{font-size:13px; color:var(--muted); margin-top:2px;}
+  .checkline .need{display:inline-block; margin-left:8px; font-size:13px; font-weight:700; color:var(--accent-deep);
     background:var(--accent-soft); border-radius:999px; padding:1px 10px; vertical-align:middle; white-space:nowrap;}
+  /* M1: 制度選択で表示だけ切り替える（計算には影響しない） */
+  body[data-seido="iryo"] .only-care{display:none;}
+  body[data-seido="kaigo"] .only-med{display:none;}
+  body[data-seido="shougai"] .only-med{display:none;}
+  body[data-seido="hoiku"] .only-care,
+  body[data-seido="hoiku"] .only-med{display:none;}
+  .req-badge{display:inline-block; margin-left:6px; font-size:12px; font-weight:700; color:var(--risk);
+    background:var(--risk-soft); border-radius:999px; padding:1px 8px; vertical-align:middle;}
+  .admin-log{margin-top:14px; border-top:1px dashed var(--border); padding-top:10px;}
+  .admin-log summary{cursor:pointer; font-size:13px; color:var(--muted); font-weight:700;}
+  details.more{margin:2px 0 10px;}
+  details.more summary{cursor:pointer; font-size:13px; color:var(--accent); font-weight:700; list-style:none;}
+  details.more summary::before{content:"▶ "; font-size:9px;}
+  details.more[open] summary::before{content:"▼ "; font-size:9px;}
+  details.more .more-lede{margin-top:6px;}
+  /* M2: 1入力／2結果／3くわしく の3段構成（既存DOMを囲むだけ・ID/順序/イベントは不変） */
+  .step{margin-bottom:16px;}
+  .step-h{font-size:13px; font-weight:700; color:var(--accent-deep); letter-spacing:.03em;
+    border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:10px;}
+  details.step-more-card{margin-top:14px;}
+  details.step-more-card>summary{cursor:pointer; font-size:13px; color:var(--accent); font-weight:700; list-style:none; margin-bottom:6px;}
+  details.step-more-card>summary::before{content:"▶ "; font-size:9px;}
+  details.step-more-card[open]>summary::before{content:"▼ "; font-size:9px;}
+  details.step-more{margin-bottom:16px;}
+  details.step-more>summary{cursor:pointer; list-style:none;}
+  details.step-more>summary::before{content:"▶ "; font-size:9px; margin-right:2px;}
+  details.step-more[open]>summary::before{content:"▼ "; font-size:9px; margin-right:2px;}
+  details.step-more>summary.step-h{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  details.step-more[open]>summary.step-h{border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:10px;}
+  /* M3: 次にやることバー */
+  .next-bar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:18px 0 4px; padding-top:14px; border-top:1px solid var(--border);}
+  .next-bar .next-label{font-size:13px; color:var(--muted); font-weight:700; margin-right:2px;}
+  .next-bar button{font:inherit; font-size:13px; padding:8px 16px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--accent); background:var(--surface); color:var(--accent-deep); font-weight:700;}
+  .next-bar button.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .next-bar button.ghost{border-color:var(--border); color:var(--muted); font-weight:400;}
   .checkline details{margin-top:6px;}
-  .checkline summary{cursor:pointer; font-size:12px; color:var(--accent); font-weight:700; list-style:none;
+  .checkline summary{cursor:pointer; font-size:13px; color:var(--accent); font-weight:700; list-style:none;
     display:inline-flex; align-items:center; gap:5px; width:fit-content;}
   .checkline summary::-webkit-details-marker{display:none;}
   .checkline summary::before{content:"▶"; font-size:9px; transition:transform .15s;}
   .checkline details[open] summary::before{transform:rotate(90deg);}
   .checkline .more-body{margin:8px 0 2px; padding:11px 14px; background:var(--ground);
-    border:1px solid var(--border); border-radius:8px; font-size:12.5px; line-height:1.8;}
+    border:1px solid var(--border); border-radius:8px; font-size:13px; line-height:1.8;}
   .checkline .more-body p{margin:0 0 8px;}
   .checkline .more-body p:last-child{margin-bottom:0;}
   .checkline .more-body .q{color:var(--accent-deep); font-weight:700;}
@@ -179,9 +230,9 @@
   .explain{background:var(--care-soft); border:1px solid #BFE0D9; border-left:4px solid var(--care);
     border-radius:0 8px 8px 0; padding:13px 17px; margin:2px 0 14px;}
   .explain-h{font-weight:700; color:var(--care); font-size:14.5px; margin-bottom:7px;}
-  .explain-intro{font-size:12.5px; color:var(--ink); margin:0 0 10px; padding-bottom:9px; border-bottom:1px dashed #A9D3C9;}
+  .explain-intro{font-size:13px; color:var(--ink); margin:0 0 10px; padding-bottom:9px; border-bottom:1px dashed #A9D3C9;}
   .explain-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px;}
-  .explain-level{font-size:12.5px; margin-bottom:8px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; color:var(--muted);}
+  .explain-level{font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; color:var(--muted);}
   .explain-level b{color:var(--ink);}
   .explain-level .dots{display:inline-flex; gap:5px;}
   .explain-level .dot{width:15px; height:15px; border-radius:50%; background:#fff; border:1.5px solid var(--care);}
@@ -193,15 +244,15 @@
   .h-explain{background:var(--accent-soft); border-radius:8px; padding:13px 17px; margin:14px 0 6px;
     font-size:13px; line-height:1.85;}
   .h-explain b{color:var(--accent-deep);}
-  .h-sub{font-size:12.5px; font-weight:700; color:var(--accent-deep); margin:16px 0 6px; letter-spacing:.02em;}
+  .h-sub{font-size:13px; font-weight:700; color:var(--accent-deep); margin:16px 0 6px; letter-spacing:.02em;}
   .h-steps{counter-reset:st; list-style:none; padding:0; margin:6px 0;}
   .h-steps li{position:relative; padding:7px 8px 7px 38px; border-bottom:1px solid var(--border); font-size:13px; line-height:1.7;}
   .h-steps li:last-child{border-bottom:none;}
   .h-steps li::before{counter-increment:st; content:counter(st); position:absolute; left:4px; top:7px;
     width:24px; height:24px; background:var(--accent); color:#fff; border-radius:50%;
-    font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+    font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;}
   .h-links{display:flex; flex-direction:column; gap:7px; margin:6px 0;}
-  .h-links a{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--accent);
+  .h-links a{display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--accent);
     text-decoration:none; padding:8px 13px; background:#fff; border:1px solid var(--border); border-radius:7px;}
   .h-links a:hover{border-color:var(--accent); background:var(--accent-soft);}
   .h-links a:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
@@ -212,7 +263,7 @@
   .shorui-doc{background:#fff; border:1px solid var(--border); border-radius:8px;
     padding:28px 32px; margin-top:18px; font-size:13px; line-height:1.9; color:#1a1a1a;}
   .shorui-doc .to{font-size:15px; font-weight:700; margin:0 0 2px;}
-  .shorui-doc .date{text-align:right; color:var(--muted); font-size:12.5px; margin:0 0 8px;}
+  .shorui-doc .date{text-align:right; color:var(--muted); font-size:13px; margin:0 0 8px;}
   .shorui-doc .doc-title{text-align:center; font-size:17px; font-weight:700; margin:16px 0; letter-spacing:.04em;}
   .shorui-doc .from{text-align:right; margin-top:22px; white-space:pre-line;}
   .mat-group{margin:10px 0 4px;}
@@ -221,12 +272,12 @@
   .mat-item{padding:6px 0 6px 26px; position:relative; border-bottom:1px dashed var(--border);}
   .mat-item:last-child{border-bottom:none;}
   .mat-item::before{content:"☐"; position:absolute; left:2px; top:5px; color:var(--accent); font-size:15px;}
-  .mat-item .why{display:block; font-size:11.5px; color:var(--muted); margin-top:1px;}
-  .fill-tbl{border-collapse:collapse; width:100%; margin:8px 0 4px; font-size:12.5px;}
+  .mat-item .why{display:block; font-size:13px; color:var(--muted); margin-top:1px;}
+  .fill-tbl{border-collapse:collapse; width:100%; margin:8px 0 4px; font-size:13px;}
   .fill-tbl th,.fill-tbl td{border:1px solid #b7c2cd; padding:6px 9px; text-align:left; vertical-align:top;}
   .fill-tbl th{background:var(--accent-soft); color:var(--accent-deep); font-weight:700; white-space:nowrap;}
   .fill-tbl td.blank{background:#FCFDFE; min-width:6em;}
-  .fill-note{font-size:11.5px; color:var(--muted); margin:4px 0 0;}
+  .fill-note{font-size:13px; color:var(--muted); margin:4px 0 0;}
 
   /* ⑨ 実務Q&A */
   .qa-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px;}
@@ -234,23 +285,23 @@
   .qa-search input{margin-top:0;}
   .qa-filters{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
   .qa-filters button{appearance:none; border:1px solid var(--border); background:#fff; color:var(--muted);
-    font:inherit; font-size:12px; padding:5px 12px; border-radius:999px; cursor:pointer; white-space:nowrap;}
+    font:inherit; font-size:13px; padding:5px 12px; border-radius:999px; cursor:pointer; white-space:nowrap;}
   .qa-filters button:hover{border-color:var(--accent);}
   .qa-filters button.on{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700;}
   .qa-filters button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
-  .qa-count{font-size:12px; color:var(--muted); margin:4px 0 10px;}
+  .qa-count{font-size:13px; color:var(--muted); margin:4px 0 10px;}
   .qa-item{border:1px solid var(--border); border-radius:8px; margin-bottom:8px; overflow:hidden; background:#fff;}
   .qa-item summary{list-style:none; cursor:pointer; padding:12px 15px; display:flex; gap:10px; align-items:flex-start;}
   .qa-item summary::-webkit-details-marker{display:none;}
   .qa-item summary::before{content:"Q"; flex-shrink:0; width:22px; height:22px; border-radius:50%;
-    background:var(--accent); color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+    background:var(--accent); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px;}
   .qa-item[open] summary{border-bottom:1px solid var(--border); background:var(--accent-soft);}
   .qa-item summary .qtext{flex:1; font-weight:700; font-size:13.5px; line-height:1.6;}
   .qa-item summary .qmeta{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;}
   .qa-ans{padding:13px 15px 15px 47px; font-size:13px; line-height:1.85;}
-  .qa-ans .src{margin-top:9px; padding-top:8px; border-top:1px dashed var(--border); font-size:11.5px;}
+  .qa-ans .src{margin-top:9px; padding-top:8px; border-top:1px dashed var(--border); font-size:13px;}
   .qa-ans .src a{word-break:break-all;}
-  .qa-badge{display:inline-block; font-size:10.5px; font-weight:700; border-radius:999px; padding:1px 9px; white-space:nowrap;}
+  .qa-badge{display:inline-block; font-size:13px; font-weight:700; border-radius:999px; padding:1px 9px; white-space:nowrap;}
   .qa-badge.med{background:var(--accent-soft); color:var(--accent);}
   .qa-badge.care{background:var(--care-soft); color:var(--care);}
   .qa-badge.pri{background:var(--ok-soft); color:var(--ok);}
@@ -263,17 +314,19 @@
   .jis-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; margin-bottom:6px;}
   .jis-toolbar .fld{margin-bottom:0; min-width:11em;}
   .ledgerwrap{overflow-x:auto; margin:8px 0;}
-  .ledgerwrap table{border-collapse:collapse; width:100%; font-size:12.5px;}
+  .ledgerwrap table{border-collapse:collapse; width:100%; font-size:13px;}
   .ledgerwrap th,.ledgerwrap td{border:1px solid var(--border); padding:4px 6px;}
-  .ledgerwrap th{background:var(--accent-soft); color:var(--accent-deep); white-space:nowrap; font-size:11.5px;}
-  .ledgerwrap td input,.ledgerwrap td select{width:100%; margin:0; padding:4px 6px; font-size:12.5px;
+  .ledgerwrap th{background:var(--accent-soft); color:var(--accent-deep); white-space:nowrap; font-size:13px;}
+  .ledgerwrap td input,.ledgerwrap td select{width:100%; margin:0; padding:4px 6px; font-size:13px;
     border:1px solid transparent; border-radius:4px; background:transparent;}
   .ledgerwrap td input:focus-visible,.ledgerwrap td select:focus-visible{border-color:var(--accent); background:#fff;}
   .ledgerwrap td input[type=number]{text-align:right; font-variant-numeric:tabular-nums;}
   .ledgerwrap tr:hover td{background:var(--accent-soft);}
+  .ledgerwrap .btn{font-size:13px!important;}
+  #kubunDesc .explain-body{font-size:13px!important;}
   .ledgerwrap td.sum{background:var(--accent-soft); font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
   .pasteBox{display:flex; flex-direction:column; gap:6px; margin:6px 0 14px;}
-  .pasteBox textarea{width:100%; min-height:64px; font:inherit; font-size:12.5px; font-family:ui-monospace,Consolas,monospace;
+  .pasteBox textarea{width:100%; min-height:64px; font:inherit; font-size:13px; font-family:ui-monospace,Consolas,monospace;
     padding:8px 10px; border:1px solid var(--border); border-radius:6px; resize:vertical;}
   .lamp{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; padding:8px 14px;
     border-radius:8px; margin:6px 0;}
@@ -308,12 +361,12 @@
     background:#F7F8FA; border:1px solid var(--border); border-radius:6px;
     padding:9px 11px; margin:10px 0; font-size:13px;}
   .kitei-art pre{margin:0; white-space:pre-wrap; font-family:"MS Gothic","Consolas",monospace;
-    font-size:12.5px; line-height:1.85;}
-  .kitei-copy{width:100%; min-height:118px; font-family:"MS Gothic","Consolas",monospace; font-size:12.5px;
+    font-size:13px; line-height:1.85;}
+  .kitei-copy{width:100%; min-height:118px; font-family:"MS Gothic","Consolas",monospace; font-size:13px;
     border:1px solid var(--border); border-radius:6px; padding:9px 11px; line-height:1.8; resize:vertical;}
   .kigen-hi{background:var(--risk-soft); font-weight:700;}
 
-  footer.app{margin-top:36px; border-top:1px solid var(--border); padding-top:16px; font-size:12px; color:var(--muted);}
+  footer.app{margin-top:36px; border-top:1px solid var(--border); padding-top:16px; font-size:13px; color:var(--muted);}
   @media(prefers-reduced-motion:no-preference){
     section.tabpane.on{animation:fade .18s ease;}
     @keyframes fade{from{opacity:.4;}to{opacity:1;}}
@@ -338,36 +391,37 @@
 <div class="layout">
 
 <nav class="sidenav" id="sidenav" aria-label="機能メニュー" role="tablist">
+  <button type="button" class="sn-seido-badge" id="snSeidoBadge">制度: すべて表示［変える］</button>
   <div class="sn-group">
     <div class="sn-title">はじめに</div>
     <button class="on" data-tab="home" role="tab" id="tabbtn-home" aria-controls="pane-home" aria-selected="true"><span class="sn-ico">🏠</span>ホーム（できること一覧）</button>
-    <button data-tab="hantei" role="tab" id="tabbtn-hantei" aria-controls="pane-hantei" aria-selected="false"><span class="sn-no">①</span>制度判定</button>
+    <button data-tab="hantei" role="tab" id="tabbtn-hantei" aria-controls="pane-hantei" aria-selected="false"><span class="sn-no">1</span>制度判定</button>
   </div>
   <div class="sn-group">
     <div class="sn-title">試算する</div>
-    <button data-tab="kasan" role="tab" id="tabbtn-kasan" aria-controls="pane-kasan" aria-selected="false"><span class="sn-no">②</span>処遇改善加算 試算</button>
-    <button data-tab="bup" role="tab" id="tabbtn-bup" aria-controls="pane-bup" aria-selected="false"><span class="sn-no">③</span>ベースアップ評価料 試算</button>
-    <button data-tab="teate" role="tab" id="tabbtn-teate" aria-controls="pane-teate" aria-selected="false"><span class="sn-no">⑫</span>手当改定シミュレーター<span class="sn-new">NEW</span></button>
+    <button data-tab="kasan" role="tab" id="tabbtn-kasan" aria-controls="pane-kasan" aria-selected="false"><span class="sn-no">2</span>処遇改善加算 試算</button>
+    <button data-tab="bup" role="tab" id="tabbtn-bup" aria-controls="pane-bup" aria-selected="false"><span class="sn-no">3</span>ベースアップ評価料 試算</button>
+    <button data-tab="teate" role="tab" id="tabbtn-teate" aria-controls="pane-teate" aria-selected="false"><span class="sn-no">4</span>手当改定シミュレーター<span class="sn-new">NEW</span></button>
   </div>
   <div class="sn-group">
     <div class="sn-title">要件と期限を確かめる</div>
-    <button data-tab="check" role="tab" id="tabbtn-check" aria-controls="pane-check" aria-selected="false"><span class="sn-no">④</span>要件チェック</button>
-    <button data-tab="sched" role="tab" id="tabbtn-sched" aria-controls="pane-sched" aria-selected="false"><span class="sn-no">⑤</span>年間スケジュール</button>
-    <button data-tab="kigen" role="tab" id="tabbtn-kigen" aria-controls="pane-kigen" aria-selected="false"><span class="sn-no">⑪</span>期限と誓約</button>
+    <button data-tab="check" role="tab" id="tabbtn-check" aria-controls="pane-check" aria-selected="false"><span class="sn-no">5</span>要件チェック</button>
+    <button data-tab="sched" role="tab" id="tabbtn-sched" aria-controls="pane-sched" aria-selected="false"><span class="sn-no">6</span>年間スケジュール</button>
+    <button data-tab="kigen" role="tab" id="tabbtn-kigen" aria-controls="pane-kigen" aria-selected="false"><span class="sn-no">7</span>期限と誓約</button>
   </div>
   <div class="sn-group">
     <div class="sn-title">顧問先に渡す・規程を作る</div>
-    <button data-tab="shorui" role="tab" id="tabbtn-shorui" aria-controls="pane-shorui" aria-selected="false"><span class="sn-no">⑦</span>資料依頼書</button>
-    <button data-tab="kitei" role="tab" id="tabbtn-kitei" aria-controls="pane-kitei" aria-selected="false"><span class="sn-no">⑩</span>賃金規程パターン</button>
+    <button data-tab="shorui" role="tab" id="tabbtn-shorui" aria-controls="pane-shorui" aria-selected="false"><span class="sn-no">8</span>資料依頼書</button>
+    <button data-tab="kitei" role="tab" id="tabbtn-kitei" aria-controls="pane-kitei" aria-selected="false"><span class="sn-no">9</span>賃金規程パターン</button>
   </div>
   <div class="sn-group">
     <div class="sn-title">報告する</div>
-    <button data-tab="jisseki" role="tab" id="tabbtn-jisseki" aria-controls="pane-jisseki" aria-selected="false"><span class="sn-no">⑧</span>実績報告サポート</button>
+    <button data-tab="jisseki" role="tab" id="tabbtn-jisseki" aria-controls="pane-jisseki" aria-selected="false"><span class="sn-no">10</span>実績報告サポート</button>
   </div>
   <div class="sn-group">
     <div class="sn-title">調べる</div>
-    <button data-tab="qa" role="tab" id="tabbtn-qa" aria-controls="pane-qa" aria-selected="false"><span class="sn-no">⑨</span>実務Q&amp;A</button>
-    <button data-tab="data" role="tab" id="tabbtn-data" aria-controls="pane-data" aria-selected="false"><span class="sn-no">⑥</span>料率データ・出典</button>
+    <button data-tab="qa" role="tab" id="tabbtn-qa" aria-controls="pane-qa" aria-selected="false"><span class="sn-no">11</span>実務Q&amp;A</button>
+    <button data-tab="data" role="tab" id="tabbtn-data" aria-controls="pane-data" aria-selected="false"><span class="sn-no">12</span>料率データ・出典</button>
   </div>
 </nav>
 
@@ -376,15 +430,25 @@
 <!-- ================= ⓪ ホーム ================= -->
 <section class="tabpane on" id="pane-home" role="tabpanel" aria-labelledby="tabbtn-home">
   <div class="card">
+    <h2>担当する制度を選ぶ（表示だけ切り替わります）</h2>
+    <div class="fld" role="group" aria-labelledby="segAppSeidoLbl"><span class="fld-lbl" id="segAppSeidoLbl">制度</span>
+      <span class="seg" id="segAppSeido">
+        <button class="on" data-v="all" aria-pressed="true">すべて表示</button><button data-v="kaigo" aria-pressed="false">介護</button><button data-v="shougai" aria-pressed="false">障害福祉</button><button data-v="iryo" aria-pressed="false">医療</button><button data-v="hoiku" aria-pressed="false">保育</button>
+      </span>
+    </div>
+    <p class="src">選んだ制度に関係ないカード・タブは薄く表示されます（押すことはできます）。計算そのものは変わりません。</p>
+  </div>
+  <div class="card">
     <h2>このツールでできること</h2>
-    <p class="lede">介護・障害福祉・医療・保育の<b>処遇改善加算／ベースアップ評価料</b>の実務を、<b>試算 → 要件確認 → 顧問先への依頼 → 規程づくり → 報告</b>の流れで支援します。使いたい作業のカードを押してください（左のメニューからも移動できます）。</p>
-    <div class="note plain"><b>はじめて使う方へ</b>　何をすればよいか分からないときは、まず <b>①制度判定</b> で顧問先の事業種別を選んでください。どの制度が対象になるか、次に何をすべきかが分かります。</div>
+    <p class="lede">介護・障害福祉・医療・保育の<b>処遇改善加算／ベースアップ評価料</b>の実務を、<b>試算 → 要件確認 → 顧問先への依頼 → 規程づくり → 報告</b>の流れで支援します。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">使いたい作業のカードを押してください（左のメニューからも移動できます）。</p></details>
+    <div class="note plain"><b>はじめて使う方へ</b>　何をすればよいか分からないときは、まず <b>「1 制度判定」</b>画面で顧問先の事業種別を選んでください。どの制度が対象になるか、次に何をすべきかが分かります。</div>
   </div>
 
   <h2 class="home-h">1. まず制度を確かめる</h2>
   <div class="home-grid">
     <button class="home-card" data-go="hantei">
-      <span class="hc-head"><span class="hc-no">①</span>制度判定</span>
+      <span class="hc-head"><span class="hc-no">1</span>制度判定</span>
       <span class="hc-desc">顧問先の事業種別から、どの制度（介護／障害福祉／医療／保育）が対象になるかを判定します。両制度の違いの早見表つき。</span>
       <span class="hc-when">こんなとき：新しい顧問先を担当することになった／訪問看護のように制度がまたがる</span>
     </button>
@@ -393,17 +457,17 @@
   <h2 class="home-h">2. 金額を試算する</h2>
   <div class="home-grid">
     <button class="home-card" data-go="kasan">
-      <span class="hc-head"><span class="hc-no">②</span>処遇改善加算 試算</span>
+      <span class="hc-head"><span class="hc-no">2</span>処遇改善加算 試算</span>
       <span class="hc-desc">サービス種別と総単位数から、加算区分ごとの加算額を計算します（令和8年6月改定の6区分に対応）。</span>
       <span class="hc-when">こんなとき：「上位区分に上げたらいくら増えるか」と聞かれた</span>
     </button>
     <button class="home-card" data-go="bup">
-      <span class="hc-head"><span class="hc-no">③</span>ベースアップ評価料 試算</span>
+      <span class="hc-head"><span class="hc-no">3</span>ベースアップ評価料 試算</span>
       <span class="hc-desc">外来・在宅／入院／訪問看護／調剤の区分と算定回数から、評価料収入を試算します。</span>
       <span class="hc-when">こんなとき：医療機関から「うちはいくらになるか」と聞かれた</span>
     </button>
     <button class="home-card hc-new" data-go="teate">
-      <span class="hc-head"><span class="hc-no">⑫</span>手当改定シミュレーター<span class="sn-new">NEW</span></span>
+      <span class="hc-head"><span class="hc-no">4</span>手当改定シミュレーター<span class="sn-new">NEW</span></span>
       <span class="hc-desc"><b>加算が増えた分を、複数の職員の手当へ一括で配分</b>します。Excelから職員リストを貼り付けるだけ。法定福利費と時間外の増加を逆算して<b>原資ぴったりに収めます</b>。</span>
       <span class="hc-when">こんなとき：「加算が増えたが、誰にいくら上げればいいか」と相談された</span>
     </button>
@@ -412,17 +476,17 @@
   <h2 class="home-h">3. 要件と期限を確かめる</h2>
   <div class="home-grid">
     <button class="home-card" data-go="check">
-      <span class="hc-head"><span class="hc-no">④</span>要件チェック</span>
+      <span class="hc-head"><span class="hc-no">5</span>要件チェック</span>
       <span class="hc-desc">キャリアパス要件・職場環境等要件・令和8年度特例要件を1つずつ確認し、取得できる区分を判定します。返還につながる落とし穴も一覧に。</span>
       <span class="hc-when">こんなとき：どの区分まで取れるかを確かめたい</span>
     </button>
     <button class="home-card" data-go="sched">
-      <span class="hc-head"><span class="hc-no">⑤</span>年間スケジュール</span>
+      <span class="hc-head"><span class="hc-no">6</span>年間スケジュール</span>
       <span class="hc-desc">計画書・実績報告・変更届の期限を分野別に一覧化。事務所の年間ルーティンつき。</span>
       <span class="hc-when">こんなとき：今月やるべきことを確認したい</span>
     </button>
     <button class="home-card" data-go="kigen">
-      <span class="hc-head"><span class="hc-no">⑪</span>期限と誓約</span>
+      <span class="hc-head"><span class="hc-no">7</span>期限と誓約</span>
       <span class="hc-desc">顧問先ごとに、分野・年度・誓約項目を選ぶと<b>その顧問先専用の期限一覧</b>が出ます。印刷して顧問先ファイルへ。</span>
       <span class="hc-when">こんなとき：誓約した要件の履行期限（令和9年3月末）を管理したい</span>
     </button>
@@ -431,12 +495,12 @@
   <h2 class="home-h">4. 顧問先に渡す・規程をつくる</h2>
   <div class="home-grid">
     <button class="home-card" data-go="shorui">
-      <span class="hc-head"><span class="hc-no">⑦</span>資料依頼書</span>
+      <span class="hc-head"><span class="hc-no">8</span>資料依頼書</span>
       <span class="hc-desc">試算に必要な資料を顧問先に依頼する文書をWordで出力します。管理台帳のCSVテンプレートもここから。</span>
       <span class="hc-when">こんなとき：顧問先に何を出してもらえばよいか整理したい</span>
     </button>
     <button class="home-card" data-go="kitei">
-      <span class="hc-head"><span class="hc-no">⑩</span>賃金規程パターン</span>
+      <span class="hc-head"><span class="hc-no">9</span>賃金規程パターン</span>
       <span class="hc-desc">配り方6パターン（基本給／毎月手当／資格手当上乗せ／一時金／時給加算／医療のベースアップ手当）の<b>条文案</b>と、割増賃金・社会保険・不利益変更への影響を比較します。</span>
       <span class="hc-when">こんなとき：規程にどう書けばよいか聞かれた</span>
     </button>
@@ -445,17 +509,17 @@
   <h2 class="home-h">5. 報告する・調べる</h2>
   <div class="home-grid">
     <button class="home-card" data-go="jisseki">
-      <span class="hc-head"><span class="hc-no">⑧</span>実績報告サポート</span>
+      <span class="hc-head"><span class="hc-no">10</span>実績報告サポート</span>
       <span class="hc-desc">加算額と賃金改善額を月別・職員別に積み上げ、様式への転記表を作ります。</span>
       <span class="hc-when">こんなとき：実績報告書を作る（介護は令和9年7月31日、医療は毎年8月）</span>
     </button>
     <button class="home-card" data-go="qa">
-      <span class="hc-head"><span class="hc-no">⑨</span>実務Q&amp;A</span>
+      <span class="hc-head"><span class="hc-no">11</span>実務Q&amp;A</span>
       <span class="hc-desc">厚労省の疑義解釈・Q&amp;Aをもとにした実務の疑問集。制度・テーマで絞り込み、キーワード検索もできます。</span>
       <span class="hc-when">こんなとき：顧問先の質問にすぐ答えたい</span>
     </button>
     <button class="home-card" data-go="data">
-      <span class="hc-head"><span class="hc-no">⑥</span>料率データ・出典</span>
+      <span class="hc-head"><span class="hc-no">12</span>料率データ・出典</span>
       <span class="hc-desc">加算率・点数の一覧と、その根拠になった一次資料のURL。改定時はここを更新します。<b>未確認事項もここに明示</b>。</span>
       <span class="hc-when">こんなとき：数字の根拠を確かめたい／改定でデータを直したい</span>
     </button>
@@ -463,7 +527,8 @@
 
   <div class="card" style="margin-top:22px;">
     <h2>あわせて使う資料</h2>
-    <p class="lede">制度の解説・相談対応・様式のダウンロードは、<b>スタッフ育成フォルダの「処遇改善加算・ベースアップ評価料 実務ハンドブック」</b>（HTML・13タブ・全文検索つき）にまとめてあります。<b>本ツールは「計算と手続」、ハンドブックは「知識と相談対応」</b>という役割分担です。</p>
+    <p class="lede">制度の解説・相談対応・様式のダウンロードは、<b>スタッフ育成フォルダの「処遇改善加算・ベースアップ評価料 実務ハンドブック」</b>にまとめてあります。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">（HTML・13タブ・全文検索つき）<b>本ツールは「計算と手続」、ハンドブックは「知識と相談対応」</b>という役割分担です。</p></details>
   </div>
 </section>
 
@@ -471,6 +536,7 @@
 <section class="tabpane" id="pane-hantei" role="tabpanel" aria-labelledby="tabbtn-hantei">
   <div class="card">
     <h2>顧問先の事業種別から対象制度を判定</h2>
+    <div class="step"><div class="step-h">1 入力</div>
     <p class="lede">事業種別を選ぶと、対象となる制度・提出先・主な様式・業際上の整理・事務所の関与ポイントを表示します。</p>
     <label class="fld" style="max-width:520px;">事業種別
       <select id="hanteiSel">
@@ -480,10 +546,15 @@
         <option value="iryo">保険医療機関（医科・歯科の診療所／病院）</option>
         <option value="hkSt">訪問看護ステーション（医療保険＋介護保険）</option>
         <option value="yakkyoku">保険薬局</option>
+        <option value="hoiku">保育所・認定こども園等（処遇改善等加算）</option>
       </select>
     </label>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="hanteiOut"></div>
+    </div>
   </div>
+  <details class="step-more-card"><summary>3 くわしく：両制度のちがい（早見表）</summary>
   <div class="card">
     <h2>両制度のちがい（早見表）</h2>
     <div class="tblwrap"><table>
@@ -496,19 +567,28 @@
       <tr><td><b>未達時</b></td><td>返還（実績報告未提出は全額返還）</td><td>施設基準不適合（実績報告未提出で翌年度算定不可）</td></tr>
     </table></div>
   </div>
+  </details>
+  <div class="next-bar"><span class="next-label">次にやること</span>
+    <button type="button" id="hanteiGoKasan" data-go="kasan">2 処遇改善加算 試算へ（介護・障害福祉）</button>
+    <button type="button" id="hanteiGoBup" data-go="bup">3 ベースアップ評価料 試算へ（医療）</button>
+  </div>
 </section>
 
 <!-- ================= ② 処遇改善加算 試算 ================= -->
 <section class="tabpane" id="pane-kasan" role="tabpanel" aria-labelledby="tabbtn-kasan">
   <div class="card">
     <h2><span class="chip care">介護・障害福祉</span> 処遇改善加算 試算（令和8年6月改定・6区分対応）</h2>
-    <p class="lede">「処遇改善加算等を除く加減算後の月間報酬額」に加算率を乗じた概算です。実際は単位数ベースで端数処理・地域単価の影響があるため、±数％の誤差が出ます。</p>
+    <div class="step"><div class="step-h">1 入力</div>
+    <p class="lede">「処遇改善加算等を除く加減算後の月間報酬額」に加算率を乗じた概算です。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">実際は単位数ベースで端数処理・地域単価の影響があるため、±数％の誤差が出ます。</p></details>
+    <div id="kasanSeidoNote" class="note warn" hidden></div>
+    <div id="kasanSampleBanner" class="note plain">いま見本値で計算しています。実際の数値を入力すると自動で切り替わります。</div>
     <div class="grid3">
-      <label class="fld">制度
+      <div class="fld" role="group" aria-labelledby="segSeidoLbl"><span class="fld-lbl" id="segSeidoLbl">制度</span>
         <span class="seg" id="segSeido">
           <button class="on" data-v="kaigo" aria-pressed="true">介護保険</button><button data-v="shougai" aria-pressed="false">障害福祉</button>
         </span>
-      </label>
+      </div>
       <label class="fld">サービス種別
         <select id="svcSel"></select>
       </label>
@@ -517,18 +597,27 @@
       </label>
     </div>
     <div class="grid3">
-      <label class="fld">適用時期
+      <div class="fld" role="group" aria-labelledby="segPeriodLbl"><span class="fld-lbl" id="segPeriodLbl">適用時期</span>
         <span class="seg" id="segPeriod">
           <button class="on" data-v="r6" aria-pressed="true">令和8年6月以降（新率）</button><button data-v="r45" aria-pressed="false">令和8年4〜5月（旧率）</button>
         </span>
-      </label>
-      <label class="fld">月間報酬額（円） <span class="hint">処遇改善加算等を除く・加減算後</span>
+      </div>
+      <label class="fld">月間報酬額（円）<span class="req-badge">必須</span> <span class="hint">処遇改善加算等を除く・加減算後</span>
         <input type="number" id="hoshuIn" value="3000000" min="0" step="10000">
       </label>
     </div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="kubunDesc"></div>
     <div id="kasanOut" aria-live="polite"></div>
+    <div id="kasanFieldNote" class="note plain" hidden></div>
+    </div>
+    <details class="step step-more"><summary class="step-h">3 くわしく</summary>
     <div class="note">加算額には<b>法定福利費等の事業主負担増加分を含めて</b>賃金改善額を設定できます。月額賃金改善要件（加算Ⅳ相当額の1/2以上を基本給又は決まって毎月支払う手当で改善）の充足を先に確認してください。</div>
+    </details>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="check">5 要件チェックへ</button>
+    </div>
   </div>
 </section>
 
@@ -536,7 +625,11 @@
 <section class="tabpane" id="pane-bup" role="tabpanel" aria-labelledby="tabbtn-bup">
   <div class="card">
     <h2><span class="chip med">医療</span> ベースアップ評価料 試算（令和8年6月改定・告示69号／74号）</h2>
-    <p class="lede">点数×算定回数で評価料収入を概算し、賃上げ目標水準（令和8・9年度 各＋3.2％、看護補助者・事務職員は各＋5.7％）と比較します。<b>正式な区分決定は厚労省の届出様式Excel（自動計算）で行ってください</b>（区分対応表〔別表3〜5〕は本ツール未収載）。</p>
+    <div class="step"><div class="step-h">1 入力</div>
+    <p class="lede">点数×算定回数で評価料収入を概算し、賃上げ目標水準（令和8・9年度 各＋3.2％、看護補助者・事務職員は各＋5.7％）と比較します。令和9年6月以降の目標水準は未反映です（画面内の注意を参照）。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede"><b>正式な区分決定は厚労省の届出様式Excel（自動計算）で行ってください</b>（区分対応表〔別表3〜5〕は本ツール未収載）。</p></details>
+    <div id="bupSeidoNote" class="note warn" hidden></div>
+    <div id="bupSampleBanner" class="note plain">いま見本値で計算しています。実際の数値を入力すると自動で切り替わります。</div>
     <div class="grid3">
       <label class="fld">医療機関種別
         <select id="medType">
@@ -546,64 +639,91 @@
           <option value="hk">訪問看護ステーション（医療保険）</option>
         </select>
       </label>
-      <label class="fld">適用期間
+      <div class="fld" role="group" aria-labelledby="segMedPeriodLbl"><span class="fld-lbl" id="segMedPeriodLbl">適用期間</span>
         <span class="seg" id="segMedPeriod">
           <button class="on" data-v="r8" aria-pressed="true">令和8年6月〜令和9年5月</button><button data-v="r9" aria-pressed="false">令和9年6月以降</button>
         </span>
-      </label>
-      <label class="fld">継続賃上げ機関（注5加算点数）
+      </div>
+      <div class="fld" role="group" aria-labelledby="segKeizokuLbl"><span class="fld-lbl" id="segKeizokuLbl">継続賃上げ機関（注5加算点数）</span>
         <span class="seg" id="segKeizoku">
           <button class="on" data-v="no" aria-pressed="true">通常</button><button data-v="yes" aria-pressed="false">継続賃上げ機関</button>
         </span>
-      </label>
+      </div>
     </div>
-    <div class="note plain" style="margin-top:0;">「継続賃上げ機関」＝ ①令和8年3月31日時点で外来・在宅ベースアップ評価料(Ⅰ)届出済み、又は ②基本給等を令和6年3月比で規定率以上ベアした機関（様式98で証明）。</div>
     <div id="medInputs" class="grid3"></div>
     <div class="grid2">
-      <label class="fld">対象職員の月額賃金総額（円）<span class="hint">医師・歯科医師・看護補助者・事務職員を除く</span>
+      <label class="fld">対象職員の月額賃金総額（円）<span class="req-badge">必須</span> <span class="hint">医師・歯科医師・看護補助者・事務職員を除く</span>
         <input type="number" id="wageMain" value="5000000" min="0" step="100000">
       </label>
-      <label class="fld">看護補助者・事務職員の月額賃金総額（円）
+      <label class="fld">看護補助者・事務職員の月額賃金総額（円）<span class="req-badge">必須</span>
         <input type="number" id="wageJimu" value="1000000" min="0" step="100000">
       </label>
     </div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
+    <div id="bupR9Warn" class="note risk" role="alert" hidden>【注意】「令和9年6月以降」の賃上げ目標水準は、まだ正しく計算されていません。この画面は3.2％／5.7％のまま計算していますが、施設基準通知（保医発0305第8号 第106・別表3）では、令和9年6月以降は、医師・歯科医師を除く対象職員の月額賃金×1.29に対して6.4％（看護補助者・事務職員は11.4％）とし、医師・歯科医師はこの率の対象外で、40歳未満に限り1人あたり常勤54,042円／非常勤（週22時間以上）18,487円を別に加えます。一方で評価料収入は令和9年6月以降の点数（2倍）で計算しているため、下の「上回っています」という判定は実際より甘く出るおそれがあります。令和9年6月以降の比較は、厚労省の届出様式Excelで行い、所属社労士に確認してください。</div>
+    <div id="bupFieldNote" class="note plain" hidden></div>
     <div id="bupOut" aria-live="polite"></div>
+    </div>
+    <details class="step step-more"><summary class="step-h">3 くわしく</summary>
+    <div class="note plain">「継続賃上げ機関」＝ ①令和8年3月31日時点で外来・在宅ベースアップ評価料(Ⅰ)届出済み、又は ②基本給等を令和6年3月比で規定率以上ベアした機関（様式98で証明）。</div>
     <div class="note">対象職員は令和8年6月から「<b>勤務する職員全体（40歳以上の医師・歯科医師と業務委託者を除く）</b>」に拡大（非常勤含む常勤換算、役員除く）。評価料収入は<b>全額</b>を対象職員の基本給等の引上げと、それに連動する賞与・時間外手当・法定福利費等の増加分に充当する必要があります。6月〜翌年5月の収入を当該年4月〜翌年3月の賃金改善に充当可。</div>
+    </details>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="check">5 要件チェックへ</button>
+    </div>
   </div>
 </section>
 
 <!-- ================= ④ 要件チェック ================= -->
 <section class="tabpane" id="pane-check" role="tabpanel" aria-labelledby="tabbtn-check">
-  <div class="card">
+  <div class="note plain" id="checkHoikuNote" hidden>保育は「7 期限と誓約」「9 賃金規程パターン」を参照してください（このツールに保育の要件チェックはありません）。</div>
+  <div class="card only-care">
     <h2><span class="chip care">介護・障害福祉</span> 取得可能区分の判定（令和8年6月以降）</h2>
-    <p class="lede">満たしている要件にチェックを入れると、取得できる最上位の区分を自動判定します。制度は「② 処遇改善加算 試算」タブの選択（介護／障害）と連動します。<b>用語がわからないときは各項目の「くわしく」を開いてください</b>（意味・やること・具体例が読めます）。各項目の右のタグは「その要件がどの区分で必要か」を示します。</p>
+    <div class="step"><div class="step-h">1 入力</div>
+    <p class="lede">満たしている要件にチェックを入れると、取得できる最上位の区分を自動判定します。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">制度は「2 処遇改善加算 試算」画面の選択（介護／障害）と連動します。<b>用語がわからないときは各項目の「くわしく」を開いてください</b>（意味・やること・具体例が読めます）。各項目の右のタグは「その要件がどの区分で必要か」を示します。</p></details>
+    <div id="checkSeidoInfo" class="note plain"></div>
     <div id="reqList"></div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="reqVerdict" aria-live="polite"></div>
+    </div>
+    <details class="step step-more"><summary class="step-h">3 くわしく</summary>
     <div class="note ok">令和8年度は<b>配慮措置</b>として、特例要件を満たす事業所はキャリアパス要件Ⅰ〜Ⅳ・職場環境等要件を「誓約」（令和9年3月末までに対応）で申請時点充足扱いにできます。<b>誓約未達成の場合は返還</b>となるため、受任時は達成計画まで確認してください。</div>
+    </details>
   </div>
-  <div class="card">
+  <div class="card only-med">
     <h2><span class="chip med">医療</span> ベースアップ評価料 コンプライアンス確認</h2>
+    <div class="step"><div class="step-h">1 入力</div>
     <div id="medCheckList"></div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="medCheckOut" aria-live="polite"></div>
+    </div>
   </div>
   <div class="card">
     <h2>返還・不適合につながる落とし穴</h2>
     <ul class="tight">
-      <li><span class="chip risk">介護・障害</span> <b>実績報告書の提出遅延・未提出 → 加算全額返還</b>。期限（最終支払月の翌々月末）は事務所の期限管理台帳に必ず登録。</li>
-      <li><span class="chip risk">介護・障害</span> 賃金改善実施期間内に支払っていない（一時金の支給日が期間外）→ 改善額に算入不可。</li>
-      <li><span class="chip risk">介護・障害</span> 月額賃金改善要件（Ⅳ相当×1/2）を一時金で満たそうとする → 基本給・毎月の手当での改善が必要。</li>
-      <li><span class="chip risk">介護・障害</span> Ⅰロ・Ⅱロの特例要件やキャリアパス要件の「誓約」を令和9年3月末までに達成できない → 返還。</li>
-      <li><span class="chip risk">医療</span> 令和8年5月中の再届出漏れ → 6月以降の新点数を算定できない（既届出機関も全機関再届出）。</li>
-      <li><span class="chip risk">医療</span> 毎年8月の実績報告書＋中間報告書（様式100）の未提出 → 翌年度施設基準不適合。根拠書類は年度終了後3年間保管。</li>
-      <li><span class="chip risk">医療</span> 対象職員数・算定回数に1割以上の変動 → 区分変動があれば月内に変更届出（翌月から新区分）。放置は過大算定のリスク。</li>
+      <li class="only-care"><span class="chip risk">介護・障害</span> <b>実績報告書の提出遅延・未提出 → 加算全額返還</b>。期限（最終支払月の翌々月末）は事務所の期限管理台帳に必ず登録。</li>
+      <li class="only-care"><span class="chip risk">介護・障害</span> 賃金改善実施期間内に支払っていない（一時金の支給日が期間外）→ 改善額に算入不可。</li>
+      <li class="only-care"><span class="chip risk">介護・障害</span> 月額賃金改善要件（Ⅳ相当×1/2）を一時金で満たそうとする → 基本給・毎月の手当での改善が必要。</li>
+      <li class="only-care"><span class="chip risk">介護・障害</span> Ⅰロ・Ⅱロの特例要件やキャリアパス要件の「誓約」を令和9年3月末までに達成できない → 返還。</li>
+      <li class="only-med"><span class="chip risk">医療</span> 令和8年5月中の再届出漏れ → 6月以降の新点数を算定できない（既届出機関も全機関再届出）。</li>
+      <li class="only-med"><span class="chip risk">医療</span> 毎年8月の実績報告書＋中間報告書（様式100）の未提出 → 翌年度施設基準不適合。根拠書類は年度終了後3年間保管。</li>
+      <li class="only-med"><span class="chip risk">医療</span> 対象職員数・算定回数に1割以上の変動 → 区分変動があれば月内に変更届出（翌月から新区分）。放置は過大算定のリスク。</li>
       <li><span class="chip warn">共通</span> 賞与や退職金への充当は原則不可（ベア中心の設計が必要。介護・障害はベースアップ等要件、医療は基本給等への充当義務）。</li>
     </ul>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="kigen">7 期限と誓約へ</button>
+    </div>
   </div>
 </section>
 
 <!-- ================= ⑤ スケジュール ================= -->
 <section class="tabpane" id="pane-sched" role="tabpanel" aria-labelledby="tabbtn-sched">
-  <div class="card">
+  <div class="note plain" id="schedHoikuNote" hidden>保育は「7 期限と誓約」「9 賃金規程パターン」を参照してください（このツールに保育専用のスケジュール表はありません）。</div>
+  <div class="card only-care">
     <h2><span class="chip care">介護</span> 令和8年度の期限（老発0313第6号）</h2>
     <div class="tblwrap"><table class="tbl-care">
       <tr><th style="width:12em;">期限</th><th>手続</th><th>備考</th></tr>
@@ -616,13 +736,13 @@
     </table></div>
     <p class="src">障害福祉も6区分化は令和8年6月施行。障害福祉側の計画書・実績報告の提出期限は事務処理手順通知（厚労省障害保健福祉部・こども家庭庁連名）で<b>要確認</b>（介護と同様の運用が見込まれる）。</p>
   </div>
-  <div class="card">
+  <div class="card only-med">
     <h2><span class="chip med">医療</span> ベースアップ評価料の期限（保医発0305第8号ほか）</h2>
     <div class="tblwrap"><table>
       <tr><th style="width:12em;">期限</th><th>手続</th><th>備考</th></tr>
       <tr><td class="num"><b>令和8年5月中</b></td><td>新様式での届出（様式95〜98）</td><td><b>既届出機関を含む全医療機関が対象</b>。6月1日から新点数を算定するための期限（経過済み：未了先は至急、算定開始日は所轄厚生局に確認）</td></tr>
       <tr><td class="num">毎年6月1日時点</td><td>評価区分の見直し届出</td><td>令和8・9年度は毎年6月1日時点で算定できるよう届出（点数構造の段階変更のため）</td></tr>
-      <tr><td class="num"><b>毎年8月（令和8年度は<span style="color:#b91c1c">8月31日</span>）</b></td><td>前年度分「賃金改善実績報告書」＋当年度分「中間報告書」の<b>2本</b>（様式100）</td><td>地方厚生（支）局へ<b>メールで提出</b>（添付Excelのファイル名に<b>医療機関コードと報告対象年度</b>を記載。やむを得ない場合は書面可）。未提出は翌年度施設基準不適合。根拠書類は3年間保管</td></tr>
+      <tr><td class="num"><b>毎年8月（令和8年度は<span class="em-risk">8月31日</span>）</b></td><td>前年度分「賃金改善実績報告書」＋当年度分「中間報告書」の<b>2本</b>（様式100）</td><td>地方厚生（支）局へ<b>メールで提出</b>（添付Excelのファイル名に<b>医療機関コードと報告対象年度</b>を記載。やむを得ない場合は書面可）。未提出は翌年度施設基準不適合。根拠書類は3年間保管</td></tr>
       <tr><td class="num">変動発生の月内</td><td>変更届出</td><td>対象職員数・算定回数の1割以上変動で区分が変わる場合。翌月から新区分</td></tr>
       <tr><td class="num">令和9年6月1日</td><td>第2段階の点数へ移行（(Ⅰ)は2倍点数、(Ⅱ)区分13〜24・入院区分251〜500が解禁）</td><td>再度の届出（区分見直し）に注意</td></tr>
     </table></div>
@@ -645,9 +765,16 @@
 
 <!-- ================= ⑥ データ・出典 ================= -->
 <section class="tabpane" id="pane-data" role="tabpanel" aria-labelledby="tabbtn-data">
+  <div class="fld" role="group" aria-labelledby="segDataViewLbl" style="margin:0 0 14px;"><span class="fld-lbl" id="segDataViewLbl">表示</span>
+    <span class="seg" id="segDataView">
+      <button class="on" data-v="rates" aria-pressed="true">料率データ</button><button data-v="sources" aria-pressed="false">根拠・未確認事項</button>
+    </span>
+  </div>
+  <div id="dataRates">
   <div class="card">
     <h2>料率データの管理</h2>
-    <p class="lede">加算率は画面上で修正して保存できます（このブラウザに保存されます）。改定・訂正があった場合は一次資料で確認のうえ更新し、確認日をメモしてください。</p>
+    <p class="lede">加算率は画面上で修正して保存できます（このブラウザに保存されます）。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">改定・訂正があった場合は一次資料で確認のうえ更新し、確認日をメモしてください。</p></details>
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <button class="btn ghost" id="btnEdit">料率を編集</button>
       <button class="btn" id="btnSave" disabled>保存</button>
@@ -664,7 +791,7 @@
     <h3><span class="chip care">障害福祉</span> 福祉・介護職員等処遇改善加算率（令和8年6月以降・主要サービス抜粋・単位：％）</h3>
     <div class="tblwrap" id="tblShougai"></div>
     <div class="tblwrap" id="tblShougaiNew"></div>
-    <p class="src"><b style="color:#b91c1c">【要確認】この障害福祉の率は2026-07-03取得のもので、令和8年度の国通知（厚労省・こども家庭庁連名）の原文では未検証です（2026-08-06 再調査時点で国通知の公式URLを特定できず）。試算に使う前に指定権者のページで現行の率・区分を確認してください。</b>障害福祉の全サービスの率は改定告示を参照。令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載・要確認）。障害福祉のキャリアパス要件Ⅳは<b>年額460万円</b>（介護の440万円とは異なる／Q&amp;A第1版で確認）。</p>
+    <p class="src"><b class="em-risk">【要確認】この障害福祉の率は2026-07-03取得のもので、令和8年度の国通知（厚労省・こども家庭庁連名）の原文では未検証です（2026-08-06 再調査時点で国通知の公式URLを特定できず）。試算に使う前に指定権者のページで現行の率・区分を確認してください。</b>障害福祉の全サービスの率は改定告示を参照。令和8年4〜5月は令和6年度改定の旧率のまま（本ツール未収載・要確認）。障害福祉のキャリアパス要件Ⅳは<b>年額460万円</b>（介護の440万円とは異なる／Q&amp;A第1版で確認）。</p>
     <h3><span class="chip med">医療</span> ベースアップ評価料 主要点数（告示69号・74号）</h3>
     <div class="tblwrap" id="tblMed"></div>
     <p class="src"><b>2026-08-07 告示原文で全点数を確認済み</b>（医科点数表 区分Ｏ００１〜Ｏ００３／歯科点数表 区分Ｐ００１・Ｐ００２／調剤点数表 区分40／訪問看護療養費 区分07）。<br>
@@ -676,23 +803,27 @@
     ・<b>調剤</b>＝<b>4点</b>（処方箋の受付1回につき）。<b>注2により令和9年6月以降は100分の200（8点）</b>。継続賃上げ機関の別点数は告示に規定なし。<br>
     医療の点数は告示事項のため画面編集の対象外です。</p>
   </div>
+  </div>
+  <div id="dataSources" hidden>
   <div class="card">
     <h2>出典（一次資料）</h2>
+    <details class="admin-log"><summary>管理者向け：確認記録・更新履歴</summary>
     <div class="note ok"><b>2026-08-06 一次資料の原文で再確認しました</b>
       <ul class="tight" style="margin:6px 0 0;">
         <li><b>介護</b>: 老発0313第6号（令和8年3月13日）の<b>全36頁を原文で読了</b>。本ツールの介護の加算率（令和8年6月以降・新規対象サービス）は<b>「令和8年度介護報酬改定の概要」の加算率表と完全一致</b>を確認（修正不要）。要件①〜⑧・手続期限・保管書類・返還事由も原文と一致。<b>キャリアパス要件Ⅳは令和8年度も年額440万円で据え置き</b>（引上げはされていない）。職場環境等要件は<b>28項目</b>（⑰または⑱が必須／㉔で小規模事業者は生産性向上要件を充足）。<b>令和6年3月15日付 老発0315第2号は令和8年3月31日で廃止</b></li>
-        <li><b>医療</b>: ベースアップ評価料 特設ページ・各届出の手引き（2026年4月版）を原文確認。<b>令和8年度改定で要件変更のため6月算定分から全医療機関が再届出</b>／<b>賃金改善計画書は廃止され、毎年8月に「中間報告書（当年度）＋実績報告書（前年度）」の2本</b>（令和8年度は<b>8月31日</b>）／届出様式は<b>2026-07-31修正版</b>が最新。<b>【2026-08-07 追加確認】告示第69号（医科・歯科・調剤の点数表）・第71号（特掲診療料の施設基準等）・第74号（訪問看護療養費）の原文で全点数を突合し、本ツールの既存の点数データ（外来・在宅(Ⅰ)(Ⅱ)・入院・歯科・訪問看護）が<span style="color:#166534;font-weight:700">すべて告示と一致</span>することを確認。あわせて未収載だった<b>調剤の4点</b>と<b>訪問看護(Ⅱ)の継続賃上げ別表</b>を収載しました</b></li>
+        <li><b>医療</b>: ベースアップ評価料 特設ページ・各届出の手引き（2026年4月版）を原文確認。<b>令和8年度改定で要件変更のため6月算定分から全医療機関が再届出</b>／<b>賃金改善計画書は廃止され、毎年8月に「中間報告書（当年度）＋実績報告書（前年度）」の2本</b>（令和8年度は<b>8月31日</b>）／届出様式は<b>2026-07-31修正版</b>が最新。<b>【2026-08-07 追加確認】告示第69号（医科・歯科・調剤の点数表）・第71号（特掲診療料の施設基準等）・第74号（訪問看護療養費）の原文で全点数を突合し、本ツールの既存の点数データ（外来・在宅(Ⅰ)(Ⅱ)・入院・歯科・訪問看護）が<span class="em-ok">すべて告示と一致</span>することを確認。あわせて未収載だった<b>調剤の4点</b>と<b>訪問看護(Ⅱ)の継続賃上げ別表</b>を収載しました</b></li>
         <li><b>障害福祉</b>: キャリアパス要件Ⅳは<b>年額460万円</b>（Q&amp;A第1版で確認。<b>介護の440万円と異なる</b>）。<b>加算率は令和8年度の一次資料で未検証のため、本ツールの障害福祉の率は2026-07-03取得時のまま据え置いています</b>（下記「未確認事項」参照）</li>
-        <li><b>保育</b>（今回調査対象に追加）: 令和8年度から処遇改善等加算Ⅰ・Ⅱ・Ⅲが<b>区分1・2・3に一本化</b>／キャリアパス要件が<b>減率(▲2%)から算定要件へ</b>／<b>計画書は原則廃止→誓約書</b>／区分2＋区分3の合計額の<b>1/2以上を基本給・毎月手当</b>／<b>令和8年度中に賃金規程の改正が必要</b>。<b>加算率・単価が未確認のため本ツールには試算機能を実装していません</b></li>
+        <li><b>保育</b>（今回調査対象に追加）: 令和7年度から処遇改善等加算Ⅰ・Ⅱ・Ⅲが<b>区分1・2・3に一本化</b>／令和8年度からキャリアパス要件が<b>減率(▲2%)から区分1の算定要件へ</b>／<b>計画書は原則廃止→誓約書</b>／区分2＋区分3の合計額の<b>1/2以上を基本給・毎月手当</b>／<b>令和8年度中に賃金規程の改正が必要</b>。<b>加算率・単価が未確認のため本ツールには試算機能を実装していません</b></li>
       </ul>
-      <div class="src" style="margin-top:6px;">確定事実の全文は <code>knowledge/treatment-improvement/一次資料確定事実_令和8年度_2026-08-06.md</code>、スタッフ向け解説は <code>スタッフ育成/処遇改善加算・ベースアップ評価料/</code> の実務ハンドブック（HTML・4分野対応）にあります。</div>
+      <div class="src" style="margin-top:6px;">確定事実の全文は事務所内部資料（2026-08-06確認）に、スタッフ向け解説は所内の実務ハンドブック（4分野対応）にあります。</div>
     </div>
+    </details>
     <p class="src">以下は2026-07-03取得時の出典一覧です（上記の再確認で内容が一致または補強されたものを含みます）。</p>
     <ul class="tight src">
       <li>【介護】令和8年厚生労働省告示第87号（改定告示）／老発0313第6号「介護職員等処遇改善加算に関する基本的考え方並びに事務処理手順及び様式例の提示について（令和8年度分）」＋別紙1（加算率・要件表）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html" target="_blank" rel="noopener">厚労省 令和8年度介護報酬改定ページ</a></li>
       <li>【障害福祉】「令和8年度障害福祉サービス等報酬改定における改定事項について」（令和8年2月18日 報酬改定検討チーム・厚労省／こども家庭庁）</li>
       <li>【医療】令和8年厚生労働省告示第69号（診療報酬）・第74号（訪問看護療養費）／保医発0305第8号（特掲診療料の施設基準等）— <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html" target="_blank" rel="noopener">厚労省 ベースアップ評価料ページ</a>（疑義解釈その1〜9・届出様式Excel）</li>
-      <li>詳細メモ：knowledge/_updates/2026-07-03_処遇改善加算_令和8年6月改定.md（事務所ナレッジベース）</li>
+      <li>詳細メモ：事務所内部資料（2026-07-03 令和8年6月改定の確認記録）</li>
     </ul>
     <h3>未確認事項（実装済みデータの限界・2026-08-06時点）</h3>
     <div class="note risk"><b>ここに挙げた事項は顧問先への断定回答に使わないでください。</b>一次資料または指定権者・地方厚生局・市区町村に確認してから回答します。</div>
@@ -704,9 +835,14 @@
       <li>医療：<b>訪問看護ステーションの医療保険分・介護保険分の按分方法</b>。同一事業所が訪問看護ベースアップ評価料（医療）と処遇改善加算1.8％（介護・令和8年6月〜）の<b>両方</b>に関わるため、原資と配分を分けて管理する必要があります。</li>
       <li>介護：通所リハ・看護小規模多機能の令和8年4〜5月旧率、端数処理の細部（Q&amp;A第1版）。<b>令和8年4〜5月の率（r45）は一次資料と未突合</b>です（令和8年6月以降の率は一致を確認済み）。</li>
       <li>保育：区分1の加算率（平均経験年数別・2〜12％）、区分2の加算率、区分3の単価（4万円／5千円）、キャリアパス要件の正確な文言と<b>1年間の経過措置の終期</b>、誓約書の様式。<b>この4点が未確定のため保育の試算機能は実装していません</b>（推測値でのツール化は事故につながるため作りません）。</li>
+    </ul>
+    <details class="admin-log"><summary>管理者向け：確認記録・更新履歴（解消済みの論点）</summary>
+    <ul class="tight src">
       <li><s>調剤ベースアップ評価料の点数（未調査）</s> → <b>2026-08-07 解消</b>：調剤点数表 区分40で<b>4点</b>（処方箋の受付1回につき）、注2により令和9年6月以降は100分の200（8点）。継続賃上げ機関の別点数は告示に規定なし。</li>
       <li><s>訪問看護(Ⅱ)の継続賃上げ別表が未収載</s> → <b>2026-08-07 解消</b>：告示74号 区分07の注7（令和8年6月以降・区分1〜18）・注8（令和9年6月以降・区分1〜36）の全額を収載し、継続賃上げ機関の(Ⅱ)も試算対象になりました。</li>
     </ul>
+    </details>
+  </div>
   </div>
 </section>
 
@@ -714,12 +850,13 @@
 <section class="tabpane" id="pane-shorui" role="tabpanel" aria-labelledby="tabbtn-shorui">
   <div class="card">
     <h2>クライアントへの資料依頼書をつくる</h2>
-    <p class="lede">②③の試算をする前に、顧問先から集める必要がある情報の「依頼書」を作成します。制度を選び、宛名などを入力して<b>「Wordで保存」</b>を押すと、そのまま送れる依頼書ファイル（提出物チェックリスト＋顧問先が数値を書き込む記入式シート付き）がダウンロードできます。</p>
+    <p class="lede">「2 処遇改善加算 試算」「3 ベースアップ評価料 試算」の試算をする前に、顧問先から集める必要がある情報の「依頼書」を作成します。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">制度を選び、宛名などを入力して<b>「Wordで保存」</b>を押すと、そのまま送れる依頼書ファイル（提出物チェックリスト＋顧問先が数値を書き込む記入式シート付き）がダウンロードできます。</p></details>
     <div class="grid2">
       <label class="fld">対象制度
         <select id="shoruiSeido">
-          <option value="shoguu">処遇改善加算（介護・障害福祉）— ②の試算用</option>
-          <option value="baseup">ベースアップ評価料（医療）— ③の試算用</option>
+          <option value="shoguu">処遇改善加算（介護・障害福祉）— 「2」の試算用</option>
+          <option value="baseup">ベースアップ評価料（医療）— 「3」の試算用</option>
         </select>
       </label>
       <label class="fld">提出希望日 <span class="hint">任意</span>
@@ -744,7 +881,8 @@
 
   <div class="card">
     <h2>管理台帳のテンプレート（CSV）をつくる</h2>
-    <p class="lede">実績報告は「もらった額」と「配った額」を突合する作業です。<b>年度末にまとめてやろうとすると賃金台帳から拾い直すことになり、必ず合いません。</b>顧問先に渡して<b>毎月埋めてもらう</b>ための台帳テンプレート（列見出しのみのCSV）をダウンロードできます。</p>
+    <p class="lede">実績報告は「もらった額」と「配った額」を突合する作業です。<b>年度末にまとめてやろうとすると賃金台帳から拾い直すことになり、必ず合いません。</b></p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">顧問先に渡して<b>毎月埋めてもらう</b>ための台帳テンプレート（列見出しのみのCSV）をダウンロードできます。</p></details>
     <div class="note plain">出力されるのは<b>列見出しだけ</b>です（実データ・個人情報は一切含みません）。Excelで開いて事業所名を入れ、毎月1行ずつ追記していく使い方を想定しています。文字コードはExcelでそのまま開けるUTF-8（BOM付き）です。</div>
     <div class="tblwrap"><table>
       <tr><th style="width:13em;">台帳</th><th>何のために使うか</th><th></th></tr>
@@ -773,6 +911,9 @@
       <button class="btn" data-csv="all">4種類すべてをまとめてダウンロード</button>
       <span class="src" id="csvMsg"></span>
     </div>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="kitei">9 賃金規程パターンへ</button>
+    </div>
   </div>
 </section>
 
@@ -780,7 +921,10 @@
 <section class="tabpane" id="pane-jisseki" role="tabpanel" aria-labelledby="tabbtn-jisseki">
   <div class="card">
     <h2>実績報告の集計サポート</h2>
-    <p class="lede">顧問先ごとに毎月の賃金改善額・評価料収入・職員データを入力すると、実績報告書（様式）の欄に対応した数字を自動集計し、加算額や収入に対して充足しているかを判定します。<b>このツールは1枚のHTMLでサーバーを持たないため、入力データはこのブラウザに自動保存されるほか、「ファイルに保存」でjsonファイルとして共有ドライブに置き、他のスタッフはそれを「ファイルを読み込み」で開いて引き継げます。</b></p>
+    <p class="lede">顧問先ごとに毎月の賃金改善額・評価料収入・職員データを入力すると、実績報告書（様式）の欄に対応した数字を自動集計し、加算額や収入に対して充足しているかを判定します。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede"><b>このツールは1枚のHTMLでサーバーを持たないため、入力データはこのブラウザに自動保存されるほか、「ファイルに保存」でjsonファイルとして共有ドライブに置き、他のスタッフはそれを「ファイルを読み込み」で開いて引き継げます。</b></p></details>
+    <div class="note risk">入力した職員名・金額はこのブラウザに自動保存されます。共用PCでは作業後に「この顧問先を削除」してください。</div>
+    <div id="jisSeidoNote" class="note plain" hidden></div>
     <div class="jis-toolbar">
       <label class="fld">顧問先を選択
         <select id="jisClientSel"></select>
@@ -810,6 +954,7 @@
 
   <!-- ▼▼ 介護・障害福祉モード ▼▼ -->
   <div id="jisKaigoCard">
+    <div class="step-h">1 入力</div>
     <div class="card">
       <h2><span class="chip care">介護・障害福祉</span> ①令和8年度の加算額（月別）</h2>
       <p class="lede">国民健康保険団体連合会から送付される「処遇改善加算等総額のお知らせ」の金額を月ごとに入力してください。開始月は年度開始月（通常4月）です。</p>
@@ -819,7 +964,7 @@
       <div class="ledgerwrap" id="jisKasan12"></div>
       <div class="pasteBox">
         <span class="fill-note">Excelで12か月分の金額を横一列にコピーした場合はここに貼り付けて反映できます（タブまたは改行区切り・開始月から順に12個）。</span>
-        <textarea id="jisKasanPaste" placeholder="例：1200000&#9;1200000&#9;1250000 …（12個）"></textarea>
+        <textarea id="jisKasanPaste" aria-label="加算額12か月分の貼り付け" placeholder="例：1200000&#9;1200000&#9;1250000 …（12個）"></textarea>
         <button class="btn ghost" id="jisKasanPasteBtn" style="align-self:flex-start;">この内容を12か月へ反映</button>
       </div>
     </div>
@@ -828,7 +973,7 @@
       <h2><span class="chip care">介護・障害福祉</span> ②賃金改善台帳（職員別・月別の積み上げ）</h2>
       <p class="lede">各職員の「基本給の改善額」「毎月の手当の改善額」「一時金（賞与等）」を、支給した年月ごとに1行で入力します。給与ソフトの出力をExcelでコピーして貼り付けられます（列順：職員名／年月／区分／金額。区分は「基本給」「手当」「一時金」のいずれかで入力）。</p>
       <div class="pasteBox">
-        <textarea id="jisChinginPaste" placeholder="例：山田太郎&#9;2026-04&#9;基本給&#9;5000&#10;山田太郎&#9;2026-04&#9;一時金&#9;30000"></textarea>
+        <textarea id="jisChinginPaste" aria-label="賃金改善台帳の貼り付け" placeholder="例：山田太郎&#9;2026-04&#9;基本給&#9;5000&#10;山田太郎&#9;2026-04&#9;一時金&#9;30000"></textarea>
         <button class="btn ghost" id="jisChinginPasteBtn" style="align-self:flex-start;">この内容を台帳へ追加</button>
       </div>
       <div class="ledgerwrap" id="jisChinginLedger"></div>
@@ -838,7 +983,7 @@
     <div class="card">
       <h2><span class="chip care">介護・障害福祉</span> ③要件判定に使う数値</h2>
       <div class="grid3">
-        <label class="fld">処遇改善加算Ⅳ相当額（月額・円）<span class="hint">②タブの試算結果を入力</span>
+        <label class="fld">処遇改善加算Ⅳ相当額（月額・円）<span class="hint">「2 処遇改善加算 試算」画面の試算結果を入力</span>
           <input type="number" id="jisKasan4" value="0" min="0" step="1000">
         </label>
         <label class="fld">改善後の賃金が年額440万円(障害460万円)以上となる者の数
@@ -869,6 +1014,7 @@
       </div>
     </div>
 
+    <div class="step-h">2 結果</div>
     <div class="card">
       <h2>判定結果（介護・障害福祉）</h2>
       <div id="jisKaigoJudge" aria-live="polite"></div>
@@ -883,6 +1029,7 @@
 
   <!-- ▼▼ 医療モード ▼▼ -->
   <div id="jisIryoCard">
+    <div class="step-h">1 入力</div>
     <div class="card">
       <h2><span class="chip med">医療</span> ①職員マスタ（常勤換算の自動計算）</h2>
       <p class="lede">対象職員を職種グループごとに登録します。常勤は自動的に1.0、非常勤は「週の所定労働時間 ÷ 医療機関が定める常勤の所定労働時間」（上限1.0・小数第2位四捨五入）で常勤換算数を自動計算します。</p>
@@ -891,7 +1038,7 @@
       </label>
       <div class="pasteBox">
         <span class="fill-note">列順：氏名／職種グループ（看護職員等・40歳未満医師等・事務職員・看護補助者・薬剤師・歯科衛生士・その他）／雇用形態（常勤・非常勤）／週所定労働時間（非常勤のみ）</span>
-        <textarea id="jisStaffPaste" placeholder="例：鈴木花子&#9;看護職員等&#9;常勤&#9;40&#10;佐藤次郎&#9;事務職員&#9;非常勤&#9;20"></textarea>
+        <textarea id="jisStaffPaste" aria-label="職員マスタの貼り付け" placeholder="例：鈴木花子&#9;看護職員等&#9;常勤&#9;40&#10;佐藤次郎&#9;事務職員&#9;非常勤&#9;20"></textarea>
         <button class="btn ghost" id="jisStaffPasteBtn" style="align-self:flex-start;">この内容を職員マスタへ追加</button>
       </div>
       <div class="ledgerwrap" id="jisStaffLedger"></div>
@@ -919,7 +1066,7 @@
       <div class="ledgerwrap" id="jisIncome12"></div>
       <div class="pasteBox">
         <span class="fill-note">Excelで12か月分の金額を横一列にコピーした場合はここに貼り付け（タブまたは改行区切り・開始月から順に12個）。</span>
-        <textarea id="jisIncomePaste" placeholder="例：1700000&#9;1700000&#9;1750000 …（12個）"></textarea>
+        <textarea id="jisIncomePaste" aria-label="評価料収入12か月分の貼り付け" placeholder="例：1700000&#9;1700000&#9;1750000 …（12個）"></textarea>
         <button class="btn ghost" id="jisIncomePasteBtn" style="align-self:flex-start;">この内容を12か月へ反映</button>
       </div>
     </div>
@@ -930,6 +1077,7 @@
       <div class="tblwrap" id="jisBonusTbl"></div>
     </div>
 
+    <div class="step-h">2 結果</div>
     <div class="card">
       <h2>判定結果（医療）</h2>
       <div id="jisIryoJudge" aria-live="polite"></div>
@@ -941,15 +1089,19 @@
       <p class="fill-note">項目番号は令和8年度改定版 様式100（賃金改善実績報告書・中間報告書）に準拠。収入とベア実績額の突合はここでの概算であり、正式な判定は様式100本体（自動計算）で行ってください。</p>
     </div>
   </div>
+  <div class="next-bar"><span class="next-label">次にやること</span>
+    <button type="button" data-go="home">ホームに戻る</button>
+  </div>
 </section>
 
 <!-- ================= ⑨ 実務Q&A ================= -->
 <section class="tabpane" id="pane-qa" role="tabpanel" aria-labelledby="tabbtn-qa">
   <div class="card">
     <h2>実務Q&amp;A（令和8年度改定・厚労省 疑義解釈／Q&amp;Aベース）</h2>
-    <p class="lede">運用で迷いやすいケース（6月前後の2段階改定、計画と実績のズレ、不足分の賞与調整、集計方法など）を、厚労省の疑義解釈・Q&amp;Aから整理しました。質問をクリックすると回答と出典が開きます。<b>キーワード検索</b>と<b>制度・テーマの絞り込み</b>ができます。</p>
+    <p class="lede">運用で迷いやすいケース（6月前後の2段階改定、計画と実績のズレ、不足分の賞与調整、集計方法など）を、厚労省の疑義解釈・Q&amp;Aから整理しました。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">質問をクリックすると回答と出典が開きます。<b>キーワード検索</b>と<b>制度・テーマの絞り込み</b>ができます。</p></details>
     <div class="qa-toolbar">
-      <div class="qa-search"><input type="text" id="qaSearch" placeholder="キーワードで検索（例：賞与、繰越、40歳、法定福利費、区分変更…）"></div>
+      <div class="qa-search"><input type="text" id="qaSearch" aria-label="Q&Aキーワード検索" placeholder="キーワードで検索（例：賞与、繰越、40歳、法定福利費、区分変更…）"></div>
     </div>
     <div class="qa-filters" id="qaSeidoFilter"></div>
     <div class="qa-filters" id="qaThemeFilter"></div>
@@ -963,23 +1115,8 @@
 <section class="tabpane" id="pane-kitei" role="tabpanel" aria-labelledby="tabbtn-kitei">
   <div class="card">
     <h2>賃金規程パターン — 加算を「どう配るか」をどう書くか</h2>
-    <p class="lede">加算を職員に配る方法は大きく6パターンあります（Fは医療のベースアップ評価料専用）。<b>どのパターンを選ぶかで、賃金規程の書き方・毎月の給与計算・社会保険の手続・将来下げられるかが全部変わります。</b>顧問先には「どれが正解」ではなく「この事業所の事情ならこれが向いている」を提示してください。</p>
-    <div class="note plain"><b>先に押さえる大原則（4分野共通）</b>
-      <ol class="tight" style="margin:6px 0 0;">
-        <li><b>対象項目を特定する。</b>「基本給／どの手当／賞与」のどれで改善するかを規程と計画書で特定します（介護は通知で明文）。</li>
-        <li><b>特定した項目を含め、賃金水準を下げてはいけない。</b>下げるなら特別事情届出書＋労使合意（届出なき引下げは<b>返還事由</b>）。</li>
-        <li><b>1/2以上は「基本給または決まって毎月支払われる手当」で改善する</b>（介護＝加算Ⅳ相当額の1/2以上、保育＝区分2＋区分3の合計額の1/2以上）。<b>一時金だけでは要件を満たせません。</b></li>
-        <li><b>増えた加算額はベースアップ（賃金表の改訂による一律引上げ）が基本</b>（介護の令和8年度）。</li>
-        <li><b>加算原資の分がいくらか区分できる形にする。</b>特に賞与に混ぜるときは業績連動部分と明確に区分することが求められます。</li>
-      </ol>
-    </div>
-    <h3>6パターンの比較</h3>
-    <div class="tblwrap" id="tblKiteiCmp"></div>
-    <div class="note ok"><b>事務所としての推奨</b>　<b>「B（処遇改善手当・毎月定額）を主軸にして、年度末の不足分をD（一時金）で埋める」</b>のが、要件充足と実績報告のしやすさ、経営の柔軟性のバランスが最もよい組み方です。ただし介護の令和8年度は「増えた加算額はベースアップで行うことが基本」とされているため、<b>増加分についてはA（基本給）またはB（毎月の手当）を賃金表の改訂という形で</b>行い、記録に残してください。</div>
-  </div>
-
-  <div class="card">
-    <h2>パターンを選ぶ → 条文案と注意点を出す</h2>
+    <p class="lede">加算を職員に配る方法は大きく6パターンあります（Fは医療のベースアップ評価料専用）。<b>どのパターンを選ぶかで、賃金規程の書き方・毎月の給与計算・社会保険の手続・将来下げられるかが全部変わります。</b></p>
+    <div class="step"><div class="step-h">1 入力</div>
     <div class="grid2">
       <label class="fld">配り方のパターン
         <select id="kiteiSel">
@@ -1000,7 +1137,28 @@
         </select>
       </label>
     </div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="kiteiOut"></div>
+    </div>
+    <details class="step step-more"><summary class="step-h">3 くわしく</summary>
+    <p class="more-lede">顧問先には「どれが正解」ではなく「この事業所の事情ならこれが向いている」を提示してください。</p>
+    <div class="note plain"><b>先に押さえる大原則（4分野共通）</b>
+      <ol class="tight" style="margin:6px 0 0;">
+        <li><b>対象項目を特定する。</b>「基本給／どの手当／賞与」のどれで改善するかを規程と計画書で特定します（介護は通知で明文）。</li>
+        <li><b>特定した項目を含め、賃金水準を下げてはいけない。</b>下げるなら特別事情届出書＋労使合意（届出なき引下げは<b>返還事由</b>）。</li>
+        <li><b>1/2以上は「基本給または決まって毎月支払われる手当」で改善する</b>（介護＝加算Ⅳ相当額の1/2以上、保育＝区分2＋区分3の合計額の1/2以上）。<b>一時金だけでは要件を満たせません。</b></li>
+        <li><b>増えた加算額はベースアップ（賃金表の改訂による一律引上げ）が基本</b>（介護の令和8年度）。</li>
+        <li><b>加算原資の分がいくらか区分できる形にする。</b>特に賞与に混ぜるときは業績連動部分と明確に区分することが求められます。</li>
+      </ol>
+    </div>
+    <h3>6パターンの比較</h3>
+    <div class="tblwrap" id="tblKiteiCmp"></div>
+    <div class="note ok"><b>事務所としての推奨</b>　<b>「B（処遇改善手当・毎月定額）を主軸にして、年度末の不足分をD（一時金）で埋める」</b>のが、要件充足と実績報告のしやすさ、経営の柔軟性のバランスが最もよい組み方です。ただし介護の令和8年度は「増えた加算額はベースアップで行うことが基本」とされているため、<b>増加分についてはA（基本給）またはB（毎月の手当）を賃金表の改訂という形で</b>行い、記録に残してください。</div>
+    </details>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="jisseki">10 実績報告サポートへ</button>
+    </div>
   </div>
 </section>
 
@@ -1008,7 +1166,9 @@
 <section class="tabpane" id="pane-kigen" role="tabpanel" aria-labelledby="tabbtn-kigen">
   <div class="card">
     <h2>顧問先ごとの「期限と誓約」の一覧をつくる</h2>
-    <p class="lede">分野・年度・誓約の有無を選ぶと、その顧問先で<b>いつ何を出すか</b>と<b>誓約した要件の履行期限</b>の一覧が出ます。印刷して顧問先ファイルに綴じる、または顧問先台帳に転記して使ってください。</p>
+    <div class="step"><div class="step-h">1 入力</div>
+    <p class="lede">分野・年度・誓約の有無を選ぶと、その顧問先で<b>いつ何を出すか</b>と<b>誓約した要件の履行期限</b>の一覧が出ます。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">印刷して顧問先ファイルに綴じる、または顧問先台帳に転記して使ってください。</p></details>
     <div class="note risk"><b>誓約の期限管理は事務所の責任範囲です。</b>令和8年度は、誓約すれば要件充足を先送りできますが、<b>令和9年3月末までに整備し、令和8年度実績報告書（令和9年7月31日提出）でその旨を報告する義務</b>を負います。間に合わなければ<b>加算の返還</b>です。人の記憶では必ず落ちるので、顧問先台帳に載せてください。</div>
     <div class="grid2">
       <label class="fld">分野
@@ -1046,7 +1206,13 @@
       <button class="btn" id="btnKigenPrint">印刷する</button>
       <span class="src">※ ブラウザの印刷機能で、表示中のタブだけが印刷されます。</span>
     </div>
+    </div>
+    <div class="step"><div class="step-h">2 結果</div>
     <div id="kigenOut"></div>
+    </div>
+    <div class="next-bar"><span class="next-label">次にやること</span>
+      <button type="button" data-go="shorui">8 資料依頼書へ</button>
+    </div>
   </div>
 </section>
 
@@ -1054,11 +1220,13 @@
 <section class="tabpane" id="pane-teate" role="tabpanel" aria-labelledby="tabbtn-teate">
   <div class="card">
     <h2>手当改定シミュレーター — 増えた加算を複数の職員へ一括で配分する</h2>
-    <p class="lede">加算率・点数の改定で<b>加算額が増えたとき、既にいる職員の手当をいくらに改定するか</b>を一括で試算します。Excelから職員リストを貼り付けて、配分ルールを選ぶだけで、職員ごとの改定後の手当額と、<b>原資に収まるかの検算</b>が出ます。</p>
-    <div class="note plain"><b>なぜ「増加額 ÷ 人数」では足りないのか</b>　手当を上げると<b>法定福利費の事業主負担</b>と<b>時間外手当</b>が連動して増えます。法定福利費だけで概算16.5％なので、<b>手当の額面に回せるのは増加額の85％程度</b>です。本ツールはこれを逆算して「額面でいくら配れるか」から計算します。</div>
+    <p class="lede">加算率・点数の改定で<b>加算額が増えたとき、既にいる職員の手当をいくらに改定するか</b>を一括で試算します。</p>
+    <details class="more"><summary>くわしく</summary><p class="more-lede">Excelから職員リストを貼り付けて、配分ルールを選ぶだけで、職員ごとの改定後の手当額と、<b>原資に収まるかの検算</b>が出ます。<b>なぜ「増加額 ÷ 人数」では足りないのか</b>　手当を上げると<b>法定福利費の事業主負担</b>と<b>時間外手当</b>が連動して増えます。法定福利費だけで概算16.5％なので、<b>手当の額面に回せるのは増加額の85％程度</b>です。本ツールはこれを逆算して「額面でいくら配れるか」から計算します。</p></details>
     <div class="note risk"><b>結果は概算です。</b>実際の適用は所属社労士の確認を要します。<b>職員名の欄は空欄のままでも動きます</b>（社員番号・記号だけでも構いません）。入力した内容が外部に送信されることはありません。</div>
+    <div id="teateSeidoNote" class="note warn" hidden></div>
   </div>
 
+  <div class="step"><div class="step-h">1 入力</div>
   <div class="card">
     <h2>STEP 1　原資（加算の増加額）を入れる</h2>
     <div class="grid2">
@@ -1085,11 +1253,11 @@
       <label class="fld">法定福利費の概算率（％）<span class="hint">医療は上限16.5％</span>
         <input type="number" id="tsFuri" value="16.5" min="0" max="30" step="0.1">
       </label>
-      <label class="fld">時間外手当の増加を見込む
+      <div class="fld" role="group" aria-labelledby="segTsZangyoLbl"><span class="fld-lbl" id="segTsZangyoLbl">時間外手当の増加を見込む</span>
         <div class="seg" id="segTsZangyo">
           <button class="on" data-v="yes" aria-pressed="true">見込む（推奨）</button><button data-v="no" aria-pressed="false">見込まない</button>
         </div>
-      </label>
+      </div>
     </div>
     <div class="grid2" id="tsZangyoOpts">
       <label class="fld">平均の割増率 <span class="hint">法定外1.25／法定内1.0</span>
@@ -1111,7 +1279,7 @@
     </table></div>
     <div class="pasteBox">
       <span class="fill-note">タブ区切り（Excelからのコピー）または カンマ区切り に対応。1行1人。見出し行が含まれていても自動で読み飛ばします。</span>
-      <textarea id="tsPaste" placeholder="例：&#10;A001&#9;介護職員&#9;常勤&#9;1&#9;15000&#9;160&#9;10&#10;A002&#9;介護職員&#9;非常勤&#9;0.5&#9;7500&#9;80&#9;0"></textarea>
+      <textarea id="tsPaste" aria-label="職員リストの貼り付け" placeholder="例：&#10;A001&#9;介護職員&#9;常勤&#9;1&#9;15000&#9;160&#9;10&#10;A002&#9;介護職員&#9;非常勤&#9;0.5&#9;7500&#9;80&#9;0"></textarea>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn" id="tsPasteBtn">貼り付けた内容を取り込む</button>
         <button class="btn ghost" id="tsAddRow">＋1行追加</button>
@@ -1147,15 +1315,17 @@
           <option value="round">四捨五入</option>
         </select>
       </label>
-      <label class="fld">個別調整
+      <div class="fld" role="group" aria-labelledby="segTsManualLbl"><span class="fld-lbl" id="segTsManualLbl">個別調整</span>
         <div class="seg" id="segTsManual">
           <button class="on" data-v="off" aria-pressed="true">自動配分のみ</button><button data-v="on" aria-pressed="false">手入力で上書きする</button>
         </div>
-      </label>
+      </div>
     </div>
     <p class="src">「手入力で上書きする」にすると、表の<b>増額</b>欄を直接編集できます。上書きした職員はそのままの額で計算し、<b>残りの原資を他の職員へ再配分</b>します。</p>
   </div>
+  </div>
 
+  <div class="step"><div class="step-h">2 結果</div>
   <div id="tsResult"></div>
 
   <div class="card noprint" id="tsExportCard" style="display:none;">
@@ -1166,6 +1336,7 @@
       <span class="src" id="tsExportMsg"></span>
     </div>
     <p class="fill-note">CSVは Excel でそのまま開ける UTF-8（BOM付き）です。前提条件（加算額・配分ルール・端数処理・法定福利費率）もCSVの先頭に書き出します。</p>
+  </div>
   </div>
 </section>
 
@@ -1302,8 +1473,8 @@ NAVTOGGLE.addEventListener("click", ()=>{
   const open = SIDENAV.classList.toggle("open");
   NAVTOGGLE.setAttribute("aria-expanded", open ? "true" : "false");
 });
-/* ホーム画面のカードから各機能へ移動する */
-document.getElementById("pane-home").addEventListener("click", e=>{
+/* ホーム画面のカード・各ペインの「次にやること」バーから各機能へ移動する（M3：登録先をmainへ） */
+document.querySelector("main").addEventListener("click", e=>{
   const c = e.target.closest("[data-go]");
   if(c) showPane(c.dataset.go);
 });
@@ -1327,7 +1498,7 @@ const URL_KAIGO="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_000
 const URL_KAIGO_TSUCHI="https://www.mhlw.go.jp/content/12404000/001675724.pdf";
 const URL_KAIGO_RATE="https://www.mhlw.go.jp/content/12404000/001681254.pdf";
 const URL_BUP="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00053.html";
-const URL_BUP_SHISETSU="https://www.mhlw.go.jp/content/12404000/001713811.pdf";
+const URL_BUP_SHISETSU="https://kouseikyoku.mhlw.go.jp/kyushu/000481278.pdf";
 const URL_SHOUGAI="https://www.mhlw.go.jp/content/12200000/001658029.pdf";
 const URL_EGOV="https://laws.e-gov.go.jp/";
 const HANTEI = {
@@ -1339,8 +1510,8 @@ const HANTEI = {
     point:"6区分化（Ⅰイ〜Ⅳ）への区分アップ提案、月額賃金改善要件を満たす賃金規程整備、特例要件（生産性向上）の達成支援、期限管理（4/15計画書・7/31実績報告）。",
     explain:"介護職員等処遇改善加算は、<b>介護職員などの賃金を引き上げた事業所に、介護報酬（利用者へのサービス費）に一定の率を上乗せして支払う</b>国の制度です。上乗せされたお金は必ず職員の賃金改善に使い、使った実績を毎年報告します。令和8年6月から区分が6段階（Ⅰイ〜Ⅳ）になり、率も引き上げられました。区分が上がるほど率は高く、必要な条件も増えます。",
     steps:[
-      "指定を受けている全サービスと、直近の介護報酬請求額（処遇改善加算等を除く額）を把握する（→②で加算見込額を試算）。",
-      "目指す区分を決め、④要件チェックで現状どの区分まで取れるかを確認する。",
+      "指定を受けている全サービスと、直近の介護報酬請求額（処遇改善加算等を除く額）を把握する（→「2 処遇改善加算 試算」画面で加算見込額を試算）。",
+      "目指す区分を決め、「5 要件チェック」画面で現状どの区分まで取れるかを確認する。",
       "不足している要件（キャリアパス・職場環境等）を整備し、賃金規程・就業規則を改定する。",
       "処遇改善計画書を作成し、指定権者へ提出する（令和8年度は4月15日）。",
       "計画どおり賃金改善を実施する（加算Ⅳ相当額の1/2以上を基本給・毎月の手当で）。",
@@ -1360,7 +1531,7 @@ const HANTEI = {
     point:"加算率は訪問看護1.8％・訪問リハ1.5％・居宅介護支援2.1％。要件は「令和8年度特例要件」又は「加算Ⅳ取得に準ずる要件」のいずれか。訪問看護ステーションは医療保険側のベースアップ評価料との整理（賃金改善の按分管理）が必須。",
     explain:"訪問看護・訪問リハビリテーション・居宅介護支援は、従来は処遇改善加算の<b>対象外</b>でしたが、<b>令和8年6月から新たに対象</b>になりました。区分は分かれておらず率は一律（訪問看護1.8％・訪問リハ1.5％・居宅介護支援2.1％）です。訪問看護ステーションが医療保険でも訪問看護を行う場合、医療保険側は別制度（ベースアップ評価料）になります。",
     steps:[
-      "対象化されたサービスの介護報酬請求額を把握する（→②で単一区分として試算）。",
+      "対象化されたサービスの介護報酬請求額を把握する（→「2 処遇改善加算 試算」画面で単一区分として試算）。",
       "算定要件を「令和8年度特例要件」か「加算Ⅳ取得に準ずる要件」のどちらで満たすか決める。",
       "体制届出（居宅系5/15・施設系6/1）と処遇改善計画書（新規対象のみは6/15）を提出する。",
       "訪問看護STは医療保険分と介護保険分の賃金改善原資を分けて管理する。"
@@ -1378,7 +1549,7 @@ const HANTEI = {
     point:"介護と同じ6区分だが、キャリアパス要件Ⅳの年額賃金要件は460万円（介護は440万円）、上乗せ幅も異なる（＋0.3万円/1.0％）。相談系3サービスに5.1％で新設。",
     explain:"福祉・介護職員等処遇改善加算は、<b>障害福祉サービスの報酬に上乗せして、障害福祉の職員の賃金を引き上げる</b>制度です。仕組みは介護とほぼ同じ（令和8年6月から6区分）ですが、根拠法が障害者総合支援法・児童福祉法で、提出先や一部の要件（キャリアパス要件Ⅳの年収は<b>460万円</b>）が異なります。相談系3サービス（計画相談支援など）に5.1％で新設されました。",
     steps:[
-      "指定サービスごとの訓練等給付費・介護給付費の請求額を把握する（→②で試算）。",
+      "指定サービスごとの訓練等給付費・介護給付費の請求額を把握する（→「2 処遇改善加算 試算」画面で試算）。",
       "目指す区分を決め、要件を確認する（キャリアパス要件Ⅳは年収460万円）。",
       "賃金規程・キャリアパスを整備する（<b>官公署への提出代行は行政書士領域</b>。社労士は制度設計面で関与）。",
       "処遇改善計画書を指定権者へ提出し、賃金改善を実施、実績報告を行う。"
@@ -1397,7 +1568,7 @@ const HANTEI = {
     explain:"ベースアップ評価料は、<b>診療報酬（初診料・再診料・入院料などに加算する点数）を通じて、医療機関の職員の賃金を引き上げる</b>制度です。処遇改善加算（介護）と違い「％上乗せ」ではなく「<b>点数（1点＝10円）</b>」で支払われます。令和8年6月に点数が大幅増、対象職員も拡大しました。もらった点数収入は<b>全額を基本給の引上げ（ベア）に使う義務</b>があります。",
     steps:[
       "対象職員を新しい定義で洗い出す（勤務する全職員。40歳以上の医師・歯科医師、業務委託者、役員は除く）。",
-      "レセプト実績（初診・再診・訪問診療の回数、延べ入院患者数）を集める（→③で試算）。",
+      "レセプト実績（初診・再診・訪問診療の回数、延べ入院患者数）を集める（→「3 ベースアップ評価料 試算」画面で試算）。",
       "厚労省の届出様式Excel（自動計算）で区分を確定し、様式95〜98を地方厚生局へ提出する（<b>全機関が5月中に再届出</b>）。",
       "賃金改善（ベア）を実施し、令和8年3月又は5月時点の給与体系を基準として保存する。",
       "毎年8月に実績報告書＋当年度の中間報告書（様式100）を提出する。",
@@ -1405,7 +1576,7 @@ const HANTEI = {
     ],
     links:[
       {label:"厚労省 ベースアップ評価料ページ（届出様式Excel・疑義解釈その1〜9）", url:URL_BUP},
-      {label:"施設基準通知（保医発0305第8号）PDF", url:URL_BUP_SHISETSU}
+      {label:"施設基準通知（保医発0305第8号・0402訂正後）ベースアップ評価料部分の抜粋PDF（九州厚生局掲載）", url:URL_BUP_SHISETSU}
     ]
   },
   hkSt: {
@@ -1442,6 +1613,20 @@ const HANTEI = {
     links:[
       {label:"厚労省 ベースアップ評価料ページ（調剤の点数・様式は要確認）", url:URL_BUP, req:true}
     ]
+  },
+  hoiku: {
+    seido:'<span class="chip care">処遇改善等加算（保育所・認定こども園等）</span>',
+    teishutsu:"市区町村（自治体ごとに異なる）",
+    yoshiki:"誓約書（新規取得等は計画書も）",
+    gyousai:'<span class="chip warn">業際は要確認</span> 児童福祉法・子ども・子育て支援法に基づく手続のため、提出代行の可否は各士業会の見解を要確認。',
+    point:"<b>本ツールに試算機能はありません</b>（区分1・2・3の加算率・単価が未確定のため）。区分1・2・3への一本化は令和7年度から実施済みで、令和8年度はキャリアパス要件が区分1の算定要件になる年のため、賃金規程の改正が必要です。提出先は市区町村で、期限は自治体ごとに異なります。",
+    explain:"保育所・認定こども園等の処遇改善等加算は、<b>施設型給付費等に上乗せして保育士等の賃金を引き上げる</b>制度です。令和7年度から処遇改善等加算Ⅰ・Ⅱ・Ⅲが区分1・2・3に一本化され、計画書は原則廃止されて賃金改善を行う旨の「誓約書」の提出に変わります。区分2＋区分3の合計額の1/2以上を基本給・決まって毎月支払われる手当で改善する必要があります。加算率・単価は一次資料で未確認のため、本ツールでは試算していません。",
+    steps:[
+      "自治体（市区町村）の令和8年度の要綱・様式を確認する（区分・加算率・提出期限は自治体ごとに異なる）。",
+      "「起点賃金水準」を下回らないことを確認し、区分1のキャリアパス要件（経過措置あり）を整理する。",
+      "誓約書（新規取得等は計画書も）を市区町村へ提出する。",
+      "賃金改善を実施し、区分2＋区分3の合計額の1/2以上を基本給・毎月の手当で改善する。"
+    ]
   }
 };
 function renderHantei(){
@@ -1465,6 +1650,20 @@ function renderHantei(){
   document.getElementById("hanteiOut").innerHTML = html;
 }
 document.getElementById("hanteiSel").addEventListener("change", renderHantei);
+/* M3: 1(制度判定)の次にやることバーを、選んだ事業種別に応じて強調する */
+(function(){
+  const KASAN_SEIDO = ["kaigo","kaigoNew","shougai"];
+  const BUP_SEIDO = ["iryo","yakkyoku","hkSt"];
+  const goKasan = document.getElementById("hanteiGoKasan");
+  const goBup = document.getElementById("hanteiGoBup");
+  function updateHanteiNext(){
+    const v = document.getElementById("hanteiSel").value;
+    goKasan.classList.toggle("on", KASAN_SEIDO.includes(v));
+    goBup.classList.toggle("on", BUP_SEIDO.includes(v));
+  }
+  document.getElementById("hanteiSel").addEventListener("change", updateHanteiNext);
+  updateHanteiNext();
+})();
 renderHantei();
 
 /* ==================== ② 処遇改善加算 試算 ==================== */
@@ -1729,6 +1928,9 @@ function renderBup(){
   document.getElementById("bupOut").innerHTML = html;
 }
 buildMedInputs();
+document.getElementById("segMedPeriod").addEventListener("click", ()=>{
+  document.getElementById("bupR9Warn").hidden = (medPeriod !== "r9");
+});
 
 /* ==================== ④ 要件チェック ==================== */
 const REQS = [
@@ -1778,7 +1980,7 @@ function moreBlock(o){
   return h;
 }
 document.getElementById("reqList").innerHTML = REQS.map(r=>
-  '<div class="checkline"><input type="checkbox" id="rq_'+r.id+'"><div class="t"><b>'+r.t+'</b>'
+  '<div class="checkline"><input type="checkbox" id="rq_'+r.id+'"><div class="t"><label for="rq_'+r.id+'"><b>'+r.t+'</b></label>'
   + (r.need?'<span class="need">必要：'+r.need+'</span>':'')
   + '<div class="d">'+r.d+'</div>'+moreBlock(r)+'</div></div>').join("");
 REQS.forEach(r=>document.getElementById("rq_"+r.id).addEventListener("change", renderReq));
@@ -1798,7 +2000,7 @@ function renderReq(){
   let html;
   if(best){
     const okList = order.filter(k=>can[k]).map(k=>"加算"+k).join("・");
-    html = '<div class="verdict ok">【'+label+'】取得可能な最上位区分：<b>加算'+best+'</b>（取得可能：'+okList+'）— 加算率は「② 処遇改善加算 試算」タブでサービス別に確認</div>';
+    html = '<div class="verdict ok">【'+label+'】取得可能な最上位区分：<b>加算'+best+'</b>（取得可能：'+okList+'）— 加算率は「2 処遇改善加算 試算」画面でサービス別に確認</div>';
   } else {
     html = '<div class="verdict risk">【'+label+'】現状では加算Ⅳの要件（月額賃金改善＋キャリアパスⅠ・Ⅱ＋職場環境等要件）を満たしていません。まず基礎3要件の整備から着手してください。</div>';
   }
@@ -1837,7 +2039,7 @@ const MEDCHECKS = [
     example:"年間スケジュールの令和9年5〜6月に「再届出」のリマインドを設定しておく。"}
 ];
 document.getElementById("medCheckList").innerHTML = MEDCHECKS.map((c,i)=>
-  '<div class="checkline"><input type="checkbox" id="mc_'+i+'"><div class="t"><b>'+c.t+'</b><div class="d">'+c.d+'</div>'+moreBlock(c)+'</div></div>').join("");
+  '<div class="checkline"><input type="checkbox" id="mc_'+i+'"><div class="t"><label for="mc_'+i+'"><b>'+c.t+'</b></label><div class="d">'+c.d+'</div>'+moreBlock(c)+'</div></div>').join("");
 MEDCHECKS.forEach((c,i)=>document.getElementById("mc_"+i).addEventListener("change", ()=>{
   const done = MEDCHECKS.filter((c,i)=>document.getElementById("mc_"+i).checked).length;
   document.getElementById("medCheckOut").innerHTML =
@@ -1912,6 +2114,110 @@ document.getElementById("btnReset").addEventListener("click", ()=>{
   renderDataTables(); buildSvcSel();
 });
 renderDataTables();
+/* M4: ⑥料率データ／根拠・未確認事項の表示切替（既存segInitを使うだけ） */
+segInit("segDataView", v=>{
+  document.getElementById("dataRates").hidden = (v!=="rates");
+  document.getElementById("dataSources").hidden = (v!=="sources");
+});
+
+/* ==================== M1 担当する制度の選択（表示専用の絞り込み＋整合案内。計算入力は自動で変えない） ==================== */
+let APP_SEIDO = "all";
+const SEIDO_LABEL = {all:"すべて表示", kaigo:"介護", shougai:"障害福祉", iryo:"医療", hoiku:"保育"};
+const SN_DIM_MAP = { all:[], iryo:["kasan"], kaigo:["bup"], shougai:["bup"], hoiku:["kasan","bup","check"] };
+
+function syncDisplaySelect(id, value){
+  const el = document.getElementById(id);
+  if(!el || el.value===value) return;
+  if(!Array.from(el.options).some(o=>o.value===value)) return;
+  el.value = value;
+  el.dispatchEvent(new Event("change", {bubbles:true}));
+}
+
+function updateM1MismatchNotes(){
+  /* ② kasan：segSeidoは自動で変えない。食い違えば案内＋既存ボタンをclick()させる */
+  const kasanNote = document.getElementById("kasanSeidoNote");
+  if(kasanNote){
+    if((APP_SEIDO==="kaigo"||APP_SEIDO==="shougai") && seido!==APP_SEIDO){
+      kasanNote.hidden = false;
+      kasanNote.innerHTML = '制度選択は「'+SEIDO_LABEL[APP_SEIDO]+'」ですが、この画面は「'+SEIDO_LABEL[seido]+'」で計算しています。 <button type="button" id="kasanSeidoSwitchBtn" class="btn ghost" style="margin-left:6px;">'+SEIDO_LABEL[APP_SEIDO]+'に切り替える</button>';
+      document.getElementById("kasanSeidoSwitchBtn").addEventListener("click", ()=>{
+        const b = document.querySelector('#segSeido button[data-v="'+APP_SEIDO+'"]');
+        if(b) b.click();
+      });
+    } else kasanNote.hidden = true;
+  }
+  /* ④ check：②のseidoに従う旨の案内（情報表示のみ） */
+  const checkInfo = document.getElementById("checkSeidoInfo");
+  if(checkInfo) checkInfo.textContent = '介護・障害福祉の判定は「2 処遇改善加算 試算」で選んだ制度（現在：'+(seido==="kaigo"?"介護":"障害福祉")+'）に従います。';
+  /* ③ bup：medTypeは常に医療の下位区分のため、APP_SEIDOが医療以外なら制度選択側を切り替える案内にする */
+  const bupNote = document.getElementById("bupSeidoNote");
+  if(bupNote){
+    if(APP_SEIDO!=="all" && APP_SEIDO!=="iryo"){
+      bupNote.hidden = false;
+      bupNote.innerHTML = '制度選択は「'+SEIDO_LABEL[APP_SEIDO]+'」ですが、この画面は医療の試算です。 <button type="button" id="bupSeidoSwitchBtn" class="btn ghost" style="margin-left:6px;">医療に切り替える</button>';
+      document.getElementById("bupSeidoSwitchBtn").addEventListener("click", ()=>{
+        const b = document.querySelector('#segAppSeido button[data-v="iryo"]');
+        if(b) b.click();
+      });
+    } else bupNote.hidden = true;
+  }
+  /* ⑫ teate：tsBunyaは自動で変えない。食い違えば案内＋切り替えボタン（selectなのでvalue+change） */
+  const teateNote = document.getElementById("teateSeidoNote");
+  if(teateNote){
+    const tsBunyaEl = document.getElementById("tsBunya");
+    if(tsBunyaEl && APP_SEIDO!=="all" && tsBunyaEl.value!==APP_SEIDO){
+      teateNote.hidden = false;
+      teateNote.innerHTML = '制度選択は「'+SEIDO_LABEL[APP_SEIDO]+'」ですが、この画面の分野は「'+SEIDO_LABEL[tsBunyaEl.value]+'」です。 <button type="button" id="teateSeidoSwitchBtn" class="btn ghost" style="margin-left:6px;">'+SEIDO_LABEL[APP_SEIDO]+'に切り替える</button>';
+      document.getElementById("teateSeidoSwitchBtn").addEventListener("click", ()=>{
+        syncDisplaySelect("tsBunya", APP_SEIDO);
+        updateM1MismatchNotes();
+      });
+    } else teateNote.hidden = true;
+  }
+  /* ⑧ jisseki：jisSeidoは自動で変えない。案内のみ（ボタンなし）。障害福祉は"kaigo"として扱う */
+  const jisNote = document.getElementById("jisSeidoNote");
+  if(jisNote){
+    const jisSeidoEl = document.getElementById("jisSeido");
+    const expect = (APP_SEIDO==="iryo") ? "iryo" : (APP_SEIDO==="all" ? null : "kaigo");
+    if(expect && jisSeidoEl && jisSeidoEl.value!==expect){
+      jisNote.hidden = false;
+      jisNote.textContent = '制度選択は「'+SEIDO_LABEL[APP_SEIDO]+'」ですが、この画面の対象制度は「'+(jisSeidoEl.value==="iryo"?"ベースアップ評価料（医療）":"処遇改善加算（介護・障害福祉）")+'」のままです（自動では変更しません。「対象制度」欄で切り替えてください）。';
+    } else jisNote.hidden = true;
+  }
+}
+
+function applyAppSeido(v){
+  APP_SEIDO = v;
+  document.body.dataset.seido = v;
+  document.getElementById("snSeidoBadge").textContent = "制度: "+SEIDO_LABEL[v]+"［変える］";
+  document.querySelectorAll(".sidenav button[data-tab]").forEach(b=>b.classList.remove("sn-dim"));
+  (SN_DIM_MAP[v]||[]).forEach(tab=>{
+    const b = document.querySelector('.sidenav button[data-tab="'+tab+'"]');
+    if(b) b.classList.add("sn-dim");
+  });
+  const checkHoikuNote = document.getElementById("checkHoikuNote");
+  if(checkHoikuNote) checkHoikuNote.hidden = (v!=="hoiku");
+  const schedHoikuNote = document.getElementById("schedHoikuNote");
+  if(schedHoikuNote) schedHoikuNote.hidden = (v!=="hoiku");
+  /* 自動で合わせる表示用の選択欄（利用者が制度選択を変えたときだけ） */
+  if(v!=="all"){
+    syncDisplaySelect("hanteiSel", v);
+    syncDisplaySelect("kiteiBunya", v);
+    syncDisplaySelect("kigenBunya", v);
+    if(v==="kaigo"||v==="shougai") syncDisplaySelect("shoruiSeido","shoguu");
+    else if(v==="iryo") syncDisplaySelect("shoruiSeido","baseup");
+    /* v==="hoiku" のときshoruiSeidoは変えない（shoguu/baseupしか選択肢がないため） */
+  }
+  updateM1MismatchNotes();
+}
+segInit("segAppSeido", applyAppSeido);
+document.getElementById("snSeidoBadge").addEventListener("click", ()=>showPane("home"));
+/* ②③⑫⑧の入力を利用者が直接変えたときも案内を再評価する（既存のsegInit/changeリスナーとは別の追加リスナー） */
+document.getElementById("segSeido").addEventListener("click", ()=>updateM1MismatchNotes());
+document.getElementById("medType").addEventListener("change", ()=>updateM1MismatchNotes());
+document.getElementById("tsBunya").addEventListener("change", ()=>updateM1MismatchNotes());
+document.getElementById("jisSeido").addEventListener("change", ()=>updateM1MismatchNotes());
+updateM1MismatchNotes();
 
 /* ==================== ⑦ 資料依頼書 ==================== */
 const MATERIALS = {
@@ -2544,7 +2850,7 @@ const U = {
   g5:"https://www.mhlw.go.jp/content/12404000/001698611.pdf",
   g7:"https://www.mhlw.go.jp/content/12404000/001706551.pdf",
   g9:"https://www.mhlw.go.jp/content/12404000/001717147.pdf",
-  shisetsu:"https://www.mhlw.go.jp/content/12404000/001713811.pdf",
+  shisetsu:"https://kouseikyoku.mhlw.go.jp/kyushu/000481278.pdf",
   kaigo:"https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00073.html",
   kaigoQA:"https://www.mhlw.go.jp/content/12404000/001675711.pdf",
   kaigoTsuchi:"https://www.mhlw.go.jp/content/12404000/001675724.pdf",
@@ -3016,7 +3322,7 @@ const KITEI_TETSUZUKI = {
   hoiku:{
     label:"保育",
     items:[
-      "<b>令和8年度は一本化の移行年で、賃金規程の改正が必要な年です</b>（区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わり、1年間の経過措置があります）。",
+      "<b>令和8年度は（令和7年度の一本化に続き）キャリアパス要件が区分1の算定要件になる年で、賃金規程の改正が必要です</b>（区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わり、1年間の経過措置があります）。",
       "<b>計画書は原則廃止され、賃金改善を行う旨の「誓約書」</b>を提出します（新規取得等は計画書も）。<b>提出先は市区町村・期限は自治体ごと</b>です。",
       "区分2＋区分3の合計額の<b>1/2以上を基本給・決まって毎月支払われる手当</b>で改善します。",
       "<b>「起点賃金水準」</b>（基準年度に適用されていた算定方法に基づく賃金水準）を下回らないことが要件です。<b>施設独自に上乗せすると翌年以降その水準の維持義務が生じる</b>ため、安易な上乗せの前に相談してもらう関係を作ってください。"
@@ -3209,7 +3515,7 @@ function kigenRows(bunya, nendo, kei){
   rows.push(["自治体が定める日（例: 4月下旬）","<b>誓約書</b>（賃金改善を行う旨）","<b>令和8年度から計画書の提出は原則廃止</b>され誓約書に。新規で加算を取得する場合などは計画書の提出も求められる。<b>提出先は市区町村・期限は自治体ごと</b>",true]);
   rows.push(["自治体が定める日","実績報告書","<b>期限は自治体ごと</b>。区分2は「新規事由あり＝賃金改善額が加算額以上」「新規事由なし＝支払った賃金が<b>起点賃金水準</b>以上」で判定（要一次確認）",true]);
   if(R8){
-    rows.push(["令和8年度中","<b>賃金規程の改正</b>","<b>一本化の移行年。</b>区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わった（1年間の経過措置あり）。令和8年度中は猶予があるが、<b>逆に言えば令和8年度内に直さなければならない</b>",true]);
+    rows.push(["令和8年度中","<b>賃金規程の改正</b>","<b>一本化（令和7年度）の翌年。</b>区分1のキャリアパス要件が「▲2%の減率」から<b>算定要件そのもの</b>に変わった（1年間の経過措置あり）。令和8年度中は猶予があるが、<b>逆に言えば令和8年度内に直さなければならない</b>",true]);
   }
   rows.push(["令和8年7月〜","減算の新設に注意","<b>安全計画の策定等を行っていない場合</b>・<b>経営情報等の報告を行っていない場合</b>の減算が創設された（R8.7〜）。加算とは別だが顧問先の収入に影響",false]);
   rows.push(["随時","賃金水準を引き下げる場合","<b>特例</b>あり。労使の合意の下、起点となる賃金水準を「必要最小限な範囲」において引き下げられる（介護等と同様の仕組みを保育にも導入）",false]);
@@ -3269,7 +3575,7 @@ function renderKigen(){
 
   html += '<div class="note plain"><b>毎月・毎年の固定ルーティン</b>'+
     "<ul class=\"tight\" style=\"margin:6px 0 0;\">"+
-    "<li><b>毎月</b>：加算収入と賃金改善額を台帳に記録（顧問先から給付費明細・レセプトの控えをもらう運用にする）。台帳のテンプレートは<b>⑦資料依頼書</b>タブでCSV出力できます。</li>"+
+    "<li><b>毎月</b>：加算収入と賃金改善額を台帳に記録（顧問先から給付費明細・レセプトの控えをもらう運用にする）。台帳のテンプレートは<b>「8 資料依頼書」</b>画面でCSV出力できます。</li>"+
     "<li><b>2月</b>：「加算額 vs 賃金改善額」を突合。不足があれば<b>3月の一時金で埋める</b>（不足分を賞与等の一時金として追加配分すれば返還を求めない取扱い）。</li>"+
     "<li><b>四半期</b>：誓約事項の進捗確認。</li>"+
     "<li><b>賃金を動かした3か月後</b>：月額変更届の判定（ベースアップ・手当の新設は<b>固定的賃金の変動</b>）。</li>"+
@@ -3497,7 +3803,7 @@ function tsRender(){
   /* 増加額の表示 */
   const zb = document.getElementById("tsZougenBox");
   if(zouka>0) zb.innerHTML = '<b>加算の増加額：'+yen(zouka)+' ／月</b>　（年間 '+yen(zouka*Math.max(1,num("tsMonths")||12))+'）　この額を配分します。';
-  else if(zouka<0) zb.innerHTML = '<b style="color:var(--risk)">改定後の加算額が改定前を下回っています（'+yen(zouka)+'）。</b>減額の配分はこのツールでは扱いません。減額する場合は<b>特別事情届出書</b>と労使合意が必要です（⑩⑪タブ参照）。';
+  else if(zouka<0) zb.innerHTML = '<b style="color:var(--risk)">改定後の加算額が改定前を下回っています（'+yen(zouka)+'）。</b>減額の配分はこのツールでは扱いません。減額する場合は<b>特別事情届出書</b>と労使合意が必要です（「9 賃金規程パターン」「7 期限と誓約」画面参照）。';
   else zb.innerHTML = '改定前と改定後の加算額を入れてください。増加額を直接入れたい場合は「改定前＝0／改定後＝増加額」でも構いません。';
 
   const tgt = tsStaff.filter(s=>!s.jogai);
@@ -3561,7 +3867,7 @@ function tsRender(){
   const kihonRatio = (r.sumX + ichiji) > 0 ? r.sumX/(r.sumX+ichiji) : 1;
   if(kihonRatio >= 0.5){
     h += '<div class="note ok"><b>🟢 月額賃金改善要件の目安：OK</b>　増加分のうち<b>'+(kihonRatio*100).toFixed(1)+'％を毎月の手当（＝基本給等）</b>で配る計算です（残りを一時金にした場合）。'+
-         '<b>ただし要件の正式な判定は「加算Ⅳ相当額の1/2以上」</b>であり、増加分だけでなく<b>加算額の全体で判定</b>します。②タブの試算と併せて確認してください。</div>';
+         '<b>ただし要件の正式な判定は「加算Ⅳ相当額の1/2以上」</b>であり、増加分だけでなく<b>加算額の全体で判定</b>します。「2 処遇改善加算 試算」画面の試算と併せて確認してください。</div>';
   } else {
     h += '<div class="note risk"><b>🔴 一時金に寄りすぎています</b>　毎月の手当で配るのが<b>'+(kihonRatio*100).toFixed(1)+'％</b>しかありません。'+
          '<b>月額賃金改善要件（加算Ⅳ相当額の1/2以上を基本給等）</b>を満たせない可能性があります。丸め単位を小さくして、余りを減らしてください。</div>';
@@ -3701,6 +4007,62 @@ document.getElementById("tsPrint").addEventListener("click", ()=>window.print())
 document.getElementById("tsBunyaNote").innerHTML = TS_BUNYA_NOTE.kaigo;
 tsRenderTable();
 tsRender();
+
+/* ==================== S7 見本値・未入力の表示（表示だけ。計算ロジックには関与しない） ==================== */
+function fieldLabelText(el){
+  const lab = el.closest("label");
+  if(!lab) return el.id;
+  const clone = lab.cloneNode(true);
+  clone.querySelectorAll("input,select,span.hint,span.req-badge").forEach(n=>n.remove());
+  const t = clone.textContent.trim();
+  return t || el.id;
+}
+function setupSampleAndFillCheck(paneId, bannerId, fieldSelector, noteId){
+  const pane = document.getElementById(paneId);
+  const banner = document.getElementById(bannerId);
+  const note = document.getElementById(noteId);
+  if(!pane) return;
+  let touched = false;
+  function checkFill(){
+    if(!note) return;
+    const bad = [];
+    pane.querySelectorAll(fieldSelector).forEach(el=>{
+      if(el.type==="number" && (el.value===""||Number(el.value)<0)) bad.push(fieldLabelText(el));
+    });
+    note.hidden = bad.length===0;
+    if(bad.length) note.textContent = bad.join("・")+"は0として計算しています。";
+  }
+  pane.addEventListener("input", ()=>{
+    if(!touched){ touched = true; if(banner) banner.hidden = true; }
+    checkFill();
+  });
+  checkFill();
+  return {reset(){ touched=false; if(banner){ banner.hidden=false; banner.textContent="入力欄が作り直されました。回数・人数などが見本値に戻っていないか確認してください。"; } checkFill(); }};
+}
+setupSampleAndFillCheck("pane-kasan","kasanSampleBanner","#hoshuIn","kasanFieldNote");
+const bupSampleCtl = setupSampleAndFillCheck("pane-bup","bupSampleBanner","#wageMain,#wageJimu,#medInputs input","bupFieldNote");
+new MutationObserver(()=>{ if(bupSampleCtl) bupSampleCtl.reset(); })
+  .observe(document.getElementById("medInputs"), {childList:true});
+
+/* ⑧で顧問先を切り替えたり、JSONを読み込んだりした後に、制度の食い違い案内を更新する（表示のみ。計算・保存には触れない） */
+(function(){
+  const jp = document.getElementById("pane-jisseki");
+  if(!jp) return;
+  const refresh = ()=>{ setTimeout(updateM1MismatchNotes, 0); setTimeout(updateM1MismatchNotes, 400); };
+  jp.addEventListener("change", refresh);
+  jp.addEventListener("click", e=>{ if(e.target.closest("button")) refresh(); });
+})();
+
+/* 印刷時はdetailsを開き、印刷後に元の開閉状態へ戻す */
+let printOpenedDetails = [];
+window.addEventListener("beforeprint", ()=>{
+  printOpenedDetails = Array.from(document.querySelectorAll("details:not([open])"));
+  printOpenedDetails.forEach(d=>{ d.open = true; });
+});
+window.addEventListener("afterprint", ()=>{
+  printOpenedDetails.forEach(d=>{ d.open = false; });
+  printOpenedDetails = [];
+});
 </script>
 </body>
 </html>
