@@ -25,11 +25,11 @@
   .btn:hover{filter:brightness(.96)}
   .btn.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5)}
   .btn.print{background:#ffd35c;color:#4a3600}
-  .wrap{display:grid;grid-template-columns:minmax(360px,440px) 1fr;gap:0;align-items:start}
+  .wrap{display:grid;grid-template-columns:196px minmax(460px,1fr) minmax(0,1.25fr);gap:0;align-items:start}   /* 入力列:プレビュー列＝1:1.25（1440px幅で入力列 約550px）。プレビューは列幅に合わせて縮小表示（pvApplyScale） */
   @media(max-width:900px){.wrap{grid-template-columns:1fr}}
   /* ---- form ---- */
-  .form{padding:14px 16px 60px;max-height:calc(100vh - 56px);overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
-  @media(max-width:900px){.form{max-height:none;border-right:0;border-bottom:1px solid var(--line)}.form-nav{position:static;margin:-14px -16px 12px}}
+  .form{padding:14px 16px 60px;max-height:var(--col-h,calc(100vh - 56px));overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+  @media(max-width:900px){.form{max-height:none;overflow:visible;border-right:0;border-bottom:1px solid var(--line)}.form-nav{position:static;margin:-14px -16px 12px}}
   fieldset{border:1px solid var(--line);border-radius:10px;margin:0 0 14px;padding:10px 12px 12px;background:var(--panel)}
   legend{font-weight:700;color:var(--accent);padding:0 6px;font-size:13px}
   .row{display:flex;flex-direction:column;gap:3px;margin:7px 0}
@@ -49,6 +49,10 @@
   .help-guide{background:#e9f6ea;border:1px solid #c4e2c6;color:#245a2b;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.7;margin-bottom:12px}
   .help-guide b{color:#1b6b2e}
   body.help-off .help-note,body.help-off .help-guide{display:none}
+  .usage-guide{background:#e9f6ea;border:1px solid #c4e2c6;color:#245a2b;border-radius:8px;padding:6px 12px;font-size:12.5px;line-height:1.7;margin:4px 0 10px}
+  .usage-guide summary{cursor:pointer;font-weight:700;color:#1b6b2e}
+  .usage-guide b{color:#1b6b2e}
+  .usage-guide .usage-body{margin-top:6px}
   /* タブ・賃金試算 */
   .tabbar{display:flex;gap:4px;background:#e7edf3;padding:6px 12px 0;border-bottom:1px solid var(--line)}
   .tab{border:1px solid var(--line);border-bottom:none;background:#f0f3f6;padding:8px 20px;border-radius:9px 9px 0 0;cursor:pointer;font-weight:700;color:var(--sub);font-size:14px}
@@ -71,7 +75,7 @@
     border-radius:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;line-height:1.6;color:var(--ink);font-weight:400}
   .calc-modes label input{margin-top:4px;flex:0 0 auto}
   .calc-modes label b{color:var(--accent2);font-size:13px;display:block;font-weight:700}
-  .calc-modes label:has(input:checked){background:#eaf1fb;border-color:var(--accent2)}
+  .calc-modes label.is-checked{background:#eaf1fb;border-color:var(--accent2)}
   #modeCalc details{margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fafcfe}
   #modeCalc details summary{cursor:pointer;font-weight:700;color:var(--accent2);font-size:12.5px}
   #modeCalc details[open] summary{margin-bottom:6px}
@@ -125,7 +129,7 @@
   .mini{border:1px solid var(--line);background:#fff;border-radius:6px;width:32px;cursor:pointer;color:var(--warn);font-weight:700}
   .btn-add{border:1px dashed var(--accent);background:var(--chip);color:var(--accent);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700}
   /* ---- preview ---- */
-  .preview{padding:22px;overflow:auto;max-height:calc(100vh - 56px)}
+  .preview{padding:22px;overflow:auto;max-height:var(--col-h,calc(100vh - 56px))}
   @media(max-width:900px){.preview{max-height:none}}
   .sheet{background:#fff;color:#000;font-family:var(--mincho);width:210mm;min-height:297mm;margin:0 auto 20px;
     padding:16mm 15mm;box-shadow:0 3px 14px rgba(0,0,0,.18);font-size:10.5pt;line-height:1.5}
@@ -234,6 +238,15 @@
        ここを外すと顧問先が労働者へ交付する法定書面に第三者の免責文が混入する（MF-17）。 */
     .page-note,.gap-note,.warn-check,.form-nav,.law-note,#lawCheckNote,#selftestPanel,
     .tool-note,#appFooter{display:none !important}
+    /* ステップ化（P1/P2）で増えた画面専用部品は、どの印刷経路でも必ず消す（書面に混ぜない） */
+    .step-rail,.step-foot,.step-head,.step-note,.step-card,.inline-warn,.sub-h,#finalCheck{display:none !important}
+    /* P5：開閉ボタン・ハイライト・ドロワーは印刷に出さない（ドロワーを閉じていても #preview は通常の位置で必ず印刷する） */
+    .pv-toggle{display:none !important}
+    #preview tr.pv-hl > td,#preview tr.pv-hl > td:first-child,#preview div.pv-hl{box-shadow:none !important}
+    #preview [data-pv]:focus{outline:none !important}
+    body.pv-drawer #preview{position:static !important;transform:none !important;visibility:visible !important;box-shadow:none !important;width:auto !important;overflow:visible !important;background:#fff !important}
+    /* 通知書の印刷（単票・bulkPrint）では、入力中の手順に関係なく #preview を必ず出す */
+    body:not(.print-guide):not(.print-checklist):not(.print-calc) #preview{display:block !important}
     /* MF-13 交付前チェックリストの単独印刷。通知書（#modeCreate/#preview）を含め他をすべて消す */
     body.print-checklist header.appbar,body.print-checklist .tabbar,body.print-checklist #rosterBar,
     body.print-checklist #modeCreate,body.print-checklist #preview,body.print-checklist #modeBatch,
@@ -283,6 +296,208 @@
   body.help-off .fs-help{display:inline-block}
   body.help-off fieldset.help-on .help-note{display:block}
   fieldset.help-on .fs-help{background:#245a2b;color:#fff;border-color:#245a2b}
+  /* ---- 入力画面のステップ化（P1/P2・画面のみ。書面・保存データには影響しない） ----
+     手順の切替は .step-off（既存の条件表示 .hidden とは別のクラス）。印刷では .form ごと非表示。 */
+  .step-off{display:none !important}
+  .step-rail{position:sticky;top:0;align-self:start;max-height:var(--col-h,calc(100vh - 56px));overflow:auto;background:var(--panel);
+    border-right:1px solid var(--line);padding:12px 10px}
+  .step-rail .rail-cap{font-size:12px;color:var(--sub);margin:0 0 8px;font-weight:700;line-height:1.4}
+  .step-rail .rail-cap span{display:block;font-weight:400;font-size:11px}
+  .step-rail ol{list-style:none;margin:0;padding:0}
+  .step-rail li{margin-bottom:3px}
+  .step-rail .rail-btn{width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:8px;padding:6px 7px;
+    display:flex;gap:7px;align-items:flex-start;cursor:pointer;font-family:var(--font);color:var(--ink)}
+  .step-rail .rail-btn:hover{background:#eef3f8}
+  .step-rail .rail-btn[aria-current="step"]{background:#e3edf7;border-color:#b9cfe4}
+  .step-rail .rail-no{flex:0 0 22px;height:22px;border-radius:50%;background:#e5e9ee;color:#374151;font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  .step-rail .rail-btn[aria-current="step"] .rail-no{background:var(--accent2);color:#fff}
+  .step-rail .rail-tt{font-size:12.5px;font-weight:700;line-height:1.35}
+  .step-rail .rail-st{display:block;font-size:11px;font-weight:400;margin-top:1px}
+  .rail-st .st-x{color:#8a1f1f;font-weight:700}.rail-st .st-n{color:#7a5b00;font-weight:700}.rail-st .st-o{color:#245a2b}.rail-st .st-r{color:#39506a}
+  .step-rail .rail-foot{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:12px;color:var(--sub)}
+  .step-rail .rail-toggle{display:flex;gap:6px;align-items:flex-start;font-size:12px;font-weight:600;margin-top:8px;cursor:pointer}
+  .step-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:2px 0 10px}
+  .step-head h2{margin:0;font-size:17px;color:var(--accent2)}
+  .step-head h2:focus{outline:2px solid #bcd6ea;outline-offset:2px}
+  .step-head .step-lead{color:var(--sub);font-size:12px}
+  .step-note{background:#f3f6f9;border:1px dashed #c3ced9;border-radius:6px;padding:6px 9px;font-size:12px;color:var(--sub);margin-bottom:10px}
+  .sub-h{font-size:12.5px;color:var(--accent2);margin:12px 0 4px;padding:3px 0 3px 8px;border-left:3px solid #9fbad3;background:#f5f8fb}
+  fieldset > .sub-h:first-of-type{margin-top:4px}
+  .step-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;margin:0 0 14px;background:var(--panel)}
+  .step-card h3{margin:0 0 6px;font-size:13.5px;color:var(--accent)}
+  .step-card .out-btns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .step-card .out-btns .btn{border:1px solid #c7d6e6}
+  .step-foot{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;background:var(--panel);
+    border-top:1px solid var(--line);margin:8px -16px 0;padding:10px 16px 12px;z-index:5;box-shadow:0 -2px 4px rgba(0,0,0,.05)}
+  .step-foot{flex-wrap:wrap}
+  .step-foot .step-sum{flex:1 1 100%;order:-1;min-width:0;font-size:11px;color:var(--sub);text-align:center}
+  .step-foot .step-prev,.step-foot .step-next{flex:1 1 0;min-width:0;white-space:normal;line-height:1.35}
+  .btn.btn-primary{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  #rosterBar #rosterAddNextBtn{background:var(--accent2);color:#fff;border:1px solid var(--accent2)}
+  #finalCheck .fc-group h4 + ul li.np-missing, .np-check li.np-missing{color:#8a1f1f;font-weight:700}
+  .step-foot .btn{border:1px solid #c7d6e6}
+  .step-foot .step-next{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .step-foot .btn:disabled{opacity:.4;cursor:default}
+  /* 欄直下の警告（legalChecks / requiredGaps の写し。正本はプレビュー上部の #gapNote・#lawCheckNote） */
+  .inline-warn{margin:5px 0 2px;font-size:12px;line-height:1.6;display:flex;flex-direction:column;gap:3px}
+  .inline-warn .iw{border-radius:6px;padding:5px 9px;border-left:3px solid}
+  .inline-warn .iw-block{background:#fdecec;border-color:#c96a6a;color:#7a1414;font-weight:700}
+  .inline-warn .iw-red{background:#fdecec;border-color:#e7b3b3;color:#8a1f1f}
+  .inline-warn .iw-gap{background:#fdecec;border-color:#e7b3b3;color:#8a1f1f}
+  .inline-warn .iw-yellow{background:#fff7e0;border-color:#e6c260;color:#7a5a00}
+  .inline-warn .iw-rec{background:#f3f6f9;border-color:#9fb3c8;color:#39506a}
+  /* ⑦ 出力前チェック一覧 */
+  #finalCheck .fc-group{margin:8px 0 0}
+  #finalCheck .fc-group h4{margin:0 0 3px;font-size:12.5px;display:flex;align-items:center;gap:8px}
+  #finalCheck ul{margin:0;padding-left:1.2em;font-size:12px;line-height:1.6}
+  #finalCheck li{margin:2px 0}
+  #finalCheck .fc-fix{font-size:11px;padding:1px 8px;border:1px solid #b9cfe4;background:#eef4fb;color:var(--accent2);border-radius:10px;cursor:pointer}
+  #finalCheck .fc-ok{background:#eef6ef;border:1px solid #bcd8bf;color:#245a2b;border-radius:6px;padding:7px 9px;font-size:12px}
+  #finalCheck .lv-block{color:#7a1414;font-weight:700}#finalCheck .lv-red,#finalCheck .lv-gap{color:#8a1f1f}
+  #finalCheck .lv-yellow{color:#7a5a00}#finalCheck .lv-rec{color:#39506a}
+  /* P5：プレビューの行クリック・ハイライト・狭い画面のドロワー（画面のみ） */
+  #preview [data-pv]{cursor:pointer}
+  #preview [data-pv]:focus{outline:2px solid #2c6e9b;outline-offset:1px}
+  #preview tr.pv-hl > td,#preview div.pv-hl{box-shadow:inset 0 0 0 9999px rgba(255,208,0,.28)}
+  #preview tr.pv-hl > td:first-child,#preview div.pv-hl{box-shadow:inset 5px 0 0 #b07d00,inset 0 0 0 9999px rgba(255,208,0,.28)}   /* 色だけに頼らない：左端の太い線 */
+  .pv-toggle{display:none}
+  body.pv-drawer .pv-toggle{display:inline-block;position:fixed;right:12px;bottom:calc(var(--pv-foot-h,64px) + 10px);z-index:60;border:0;border-radius:22px;padding:10px 16px;
+    background:var(--accent2);color:#fff;font-weight:700;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;font-family:var(--font)}
+  body.pv-drawer #preview{position:fixed;top:0;right:0;bottom:0;width:min(94vw,860px);max-height:none;z-index:50;background:var(--bg);
+    box-shadow:-6px 0 24px rgba(0,0,0,.25);overflow:auto;transform:translateX(105%);visibility:hidden}
+  body.pv-drawer.pv-open #preview{transform:none;visibility:visible}
+  /* 動きは利用者が開閉したときだけ（読込・幅の切替のときは一瞬で閉じた状態にする） */
+  body.pv-drawer.pv-anim #preview{transition:transform .2s,visibility 0s .2s}
+  body.pv-drawer.pv-anim.pv-open #preview{transition:transform .2s}
+  body.pv-drawer.pv-dn-hook:not(.pv-open) #preview{display:none !important}
+  body.pv-drawer.pv-open .pv-toggle{top:10px;bottom:auto}   /* 開いているときはドロワーの右上（最初にフォーカスする閉じるボタン） */
+  #lawCheckNote .law-note-foot{font-size:11px;color:var(--sub);margin:-6px 0 12px}
+  /* ---- P3 代理UI（画面のみ。name なし・印刷では .form ごと非表示） ---- */
+  .ui-folded{display:none !important}
+  .ui-vh-select{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0 !important;opacity:0}
+  .persona-wrap{margin:4px 0 8px}
+  .persona-cap{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .persona{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:6px}
+  .persona-card{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:7px 8px;text-align:left;cursor:pointer;font-family:var(--font);color:var(--ink);line-height:1.35}
+  .persona-card:hover{border-color:#9fbad3}
+  .persona-card[aria-pressed="true"]{border-color:var(--accent2);background:#e3edf7;box-shadow:inset 0 0 0 1px var(--accent2)}
+  .persona-card .pc-ic{font-size:16px;display:block}
+  .persona-card b{display:block;font-size:12.5px}
+  .persona-card small{display:block;color:var(--sub);font-size:10.5px}
+  .persona-effect{background:#f7f9fc;border:1px dashed #b9cfe4;border-radius:7px;padding:6px 9px;font-size:11.5px;margin-top:7px;line-height:1.8}
+  .persona-effect .pe-cap{font-weight:700;color:var(--sub)}
+  .persona-effect .chip{display:inline-block;border:1px solid #b9cfe4;background:#fff;border-radius:10px;padding:0 7px;margin:1px 3px 1px 0}
+  .persona-effect .chip.add{border-color:#9fd2b3;background:#eef6ef}
+  .persona-effect .chip.del{border-color:#e5b3ad;background:#fdecec;text-decoration:line-through}
+  .persona-effect .pe-note{color:var(--sub)}
+  .seg-proxy{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .seg-proxy .seg-cap{font-size:12px;font-weight:700;margin-right:4px}
+  .seg-btn{border:1px solid #c3ced9;background:#fff;border-radius:7px;padding:4px 11px;font-size:12.5px;cursor:pointer;font-family:var(--font);color:var(--ink)}
+  .seg-btn[aria-pressed="true"]{border-color:var(--accent2);background:#e3edf7;font-weight:700;color:var(--accent2)}
+  .seg-proxy.is-empty .seg-btn{background:#fff7d6;border-color:#ecd98a}
+  .ot-pay{margin:6px 0 8px}
+  .scope-same{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:5px}
+  .scope-same .badge-rec{display:inline-block;margin-left:5px;background:#245a2b;color:#fff;border-radius:8px;padding:0 6px;font-size:10px}
+  .scope-same .scope-note{flex:1 1 100%;font-size:11px;color:#7a5a00;line-height:1.55}
+  .rate-default{display:flex;gap:10px;align-items:center;background:#f5f8fb;border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:12px;margin:4px 0 6px}
+  .rate-default .rd-text{flex:1}
+  .linkbtn{background:none;border:0;color:#1d5fa8;text-decoration:underline;padding:0;font-size:12px;cursor:pointer;font-family:var(--font)}
+  .allow-head{font-size:12px;margin:8px 0 3px}
+  #fsWage .row.allow-merged-in > label,#fsWage .row.allow-merged-out > label,
+  #fsWage .row.allow-merged-in > .allow-add-orig,#fsWage .row.allow-merged-out > .allow-add-orig{display:none}   /* .allow-add-orig＝buildProxies が「＋追加」ボタンの入れ物に付ける */
+  #fsWage .row.allow-merged-in{margin-bottom:0}#fsWage .row.allow-merged-out{margin-top:0}
+  #inAllowList.ui-empty-list,#outAllowList.ui-empty-list{display:none}
+  #fsWage .allow-row .a-kind{flex:0 0 58px;border:1px solid #bcd3ee;background:#eaf1fb;color:#1d5fa8;border-radius:6px;font-size:11.5px;font-weight:700;padding:5px 2px;cursor:pointer}
+  #fsWage .allow-row .a-kind.k-out{border-color:#efcfae;background:#fdf1e6;color:#9a4f0b}
+  #fsWage .allow-row .a-name{flex:1 1 calc(100% - 70px)}
+  #fsWage .allow-row .a-amt{flex:1 1 110px;width:auto;min-width:0}
+  #fsWage .allow-row .a-suggest{flex:1 1 100%;font-size:11px;color:#39506a;background:#f3f6f9;border-radius:5px;padding:3px 7px}
+  .allow-add{margin:4px 0}
+  .np-folded{display:none !important}
+  .np-sum{display:flex;gap:10px;align-items:center;background:#f3f6fb;border:1px dashed #9fbad3;border-radius:7px;padding:6px 10px;font-size:12px;margin:4px 0 8px}
+  .np-sum .np-text{flex:1}
+  .np-check .np-list{margin:4px 0 8px;padding-left:1.2em;font-size:12px;line-height:1.8}
+  .np-rail-note{margin-top:6px;font-size:11px;color:#1f4e79;background:#eaf1fb;border-radius:6px;padding:4px 6px}
+  .rail-st .st-np{color:#1f4e79}
+  .mw-meter{margin-top:5px;border-radius:6px;padding:6px 9px;font-size:12.5px;font-weight:700;border:1px solid #cfd8e3;background:#f5f8fb;color:var(--ink)}
+  .mw-meter.ok{background:#eef6ef;border-color:#bcd8bf;color:#245a2b}
+  .mw-meter.bad{background:#fdecec;border-color:#e7b3b3;color:#8a1f1f}
+  .mw-meter.unk{background:#fff7e0;border-color:#e6c260;color:#7a5a00}
+  /* 900px以下は当面1列（手順レールは上部に横並び。ドロワーはP5） */
+  @media(max-width:900px){
+    .step-rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
+    .step-rail ol{display:flex;overflow-x:auto;gap:4px;padding-bottom:4px}
+    .step-rail li{flex:0 0 auto;min-width:118px}
+    /* 横に続きがあることが分かるよう右端を薄くする（右端まで送ったら消す＝.rail-end） */
+    .step-rail ol:not(.rail-end){-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+    .step-rail .rail-cap span::after{content:'　→ 横に送ると続きがあります'}
+  }
+  /* ---- 横並び行の整列（同じ行に並ぶ入力欄は、ラベルが折り返しても top と高さを揃える）----
+     DOM・name・class は変えず CSS だけで揃える。入力欄・選択欄・時刻・日付の高さは --ctl-h に統一。 */
+  :root{--ctl-h:34px}
+  @media(max-width:900px){:root{--ctl-h:40px}}   /* 狭い画面（タッチ）では × を 40×40 に。同じ行の入力欄も 40px にして top・高さをそろえたままにする */
+  #form input[type=time],#form input[type=number]{padding:0 6px;border:1px solid var(--line);border-radius:6px;background:var(--field);
+    font-family:var(--font);font-size:13px;color:var(--ink);min-width:0}
+  #form input[type=text],#form input[type=date],#form input[type=time],#form input[type=number],#form select{height:var(--ctl-h)}
+  #form .mini{height:var(--ctl-h);width:var(--ctl-h);padding:0}
+  #fsWage .allow-row .a-kind{height:var(--ctl-h)}
+  /* 2列・3列の行：各セルをサブグリッドにし「ラベルの段」「入力欄の段」を列をまたいで共有する（長いラベルが折り返しても入力欄の top が揃う） */
+  #form .row.two,#form .row.three{row-gap:0;align-items:start}
+  #form .row.two>*,#form .row.three>*{display:grid;grid-row:span 4;grid-template-rows:subgrid;row-gap:0;min-width:0;align-content:start}
+  #form .row.two>*>label,#form .row.three>*>label{align-self:end;margin-bottom:3px}
+  /* 手当の行：区分｜手当名｜単位｜金額｜× を固定の列で1行に（列が狭いときは2段・列位置は同じ） */
+  #inAllowList,#outAllowList,#timeList{container-type:inline-size}
+  #form .allow-row{display:grid;gap:6px;align-items:center;grid-template-columns:minmax(0,1fr) 88px 104px var(--ctl-h)}
+  #form .allow-row>*{width:100%;min-width:0;margin:0}
+  #form .allow-row>.a-name{grid-column:1;grid-row:1}#form .allow-row>.a-unit{grid-column:2;grid-row:1}
+  #form .allow-row>.a-amt{grid-column:3;grid-row:1}#form .allow-row>.mini{grid-column:4;grid-row:1}
+  #form .allow-row.has-kind{grid-template-columns:58px minmax(0,1fr) 88px 104px var(--ctl-h)}
+  #form .allow-row>.a-kind{grid-column:1;grid-row:1}
+  #form .allow-row.has-kind>.a-name{grid-column:2}#form .allow-row.has-kind>.a-unit{grid-column:3}
+  #form .allow-row.has-kind>.a-amt{grid-column:4}#form .allow-row.has-kind>.mini{grid-column:5}
+  #form .allow-row>.a-suggest{grid-column:1/-1;grid-row:2}
+  #form #otSplit .allow-row{grid-template-columns:1fr 1fr}   /* 固定残業・固定深夜の「時間数｜金額」 */
+  @container (max-width:420px){
+    #form .allow-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
+    #form .allow-row>.a-name{grid-column:1/3;grid-row:1}#form .allow-row>.mini{grid-column:3;grid-row:1}
+    #form .allow-row>.a-unit{grid-column:1;grid-row:2}#form .allow-row>.a-amt{grid-column:2;grid-row:2}
+    #form .allow-row.has-kind{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
+    #form .allow-row.has-kind>.a-name{grid-column:2/4;grid-row:1}#form .allow-row.has-kind>.mini{grid-column:4;grid-row:1}
+    #form .allow-row.has-kind>.a-unit{grid-column:2;grid-row:2}#form .allow-row.has-kind>.a-amt{grid-column:3;grid-row:2}
+    #form .allow-row>.a-suggest{grid-row:3}
+    #form #otSplit .allow-row{grid-template-columns:1fr 1fr}
+  }
+  /* 始業・終業の行：区分｜始業｜〜｜終業｜× を1行に（「〜」は文字のまま3列目に入る。狭いときは区分と×が1段目、時刻が2段目） */
+  #form .time-row{display:grid;gap:6px;align-items:center;justify-items:center;grid-template-columns:minmax(0,1fr) 104px 14px 104px var(--ctl-h)}
+  #form .time-row>*{width:100%;min-width:0;margin:0}
+  #form .time-row>.t-label{grid-column:1;grid-row:1}#form .time-row>.t-start{grid-column:2;grid-row:1}
+  #form .time-row>.t-end{grid-column:4;grid-row:1}#form .time-row>.mini{grid-column:5;grid-row:1}
+  @container (max-width:360px){
+    #form .time-row{grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) var(--ctl-h)}
+    #form .time-row>.t-label{grid-column:1/4;grid-row:1}#form .time-row>.mini{grid-column:4;grid-row:1}
+    #form .time-row>.t-start{grid-column:1;grid-row:2}#form .time-row>.t-end{grid-column:3;grid-row:2}
+  }
+  /* 休憩の行：開始｜〜｜終了｜× */
+  #form .break-row{display:grid;gap:6px;align-items:center;justify-items:center;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) var(--ctl-h)}
+  #form .break-row>*{width:100%;min-width:0;margin:0}
+  #form .break-row>.b-start{grid-column:1;grid-row:1}#form .break-row>.b-end{grid-column:3;grid-row:1}#form .break-row>.mini{grid-column:4;grid-row:1}
+  /* 解雇事由・解雇の条文・その他の行：内容｜×（その他は 項目名｜内容｜×） */
+  #form .other-row{display:grid;gap:6px;align-items:center;grid-template-columns:minmax(0,1fr) var(--ctl-h)}
+  #form .other-row>*{width:100%;min-width:0;margin:0}
+  #form #otherList .other-row{grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) var(--ctl-h)}
+  /* ---- プレビューの縮小表示（画面のみ）----
+     transform で縮めるだけなので .sheet の offsetWidth / scrollHeight（＝estimatePages のページ数推定）は変わらない。
+     縮めた分の余白は負の margin で詰める（--sh-h＝各 .sheet の高さ、--pv-scale＝倍率。pvApplyScale が設定）。印刷では必ず解除。 */
+  @media screen{
+    #preview .sheet{transform:scale(var(--pv-scale,1));transform-origin:top left;
+      margin:0 calc((var(--pv-scale,1) - 1) * 210mm) calc(20px + (var(--pv-scale,1) - 1) * var(--sh-h,297mm)) max(0px,calc((100% - var(--pv-scale,1) * 210mm) / 2))}
+  }
+  .pv-scale-note{margin-bottom:8px}
+  @media print{
+    #preview .sheet{transform:none !important}
+    #pvScaleNote{display:none !important}
+  }
 </style>
 </head>
 <body>
@@ -290,14 +505,14 @@
   <h1>労働条件通知書・雇用契約書 作成ツール</h1>
   <span class="spacer"></span>
   <span id="createActions" style="display:flex;gap:14px;flex-wrap:wrap">
-    <button class="btn print" onclick="doPrint()">🖨 印刷 / PDF</button>
-    <button class="btn" onclick="exportWord()">📄 Word</button>
-    <button class="btn" onclick="exportExcel()">📊 Excel</button>
+    <button class="btn print" onclick="doPrint()" title="印刷またはPDFに保存します（出力前のチェックは手順⑦「確認して出力」で一覧できます）">🖨 印刷 / PDF</button>
+    <button class="btn" onclick="exportWord()" title="Word形式で出力します（出力前のチェックは手順⑦「確認して出力」で一覧できます）">📄 Word</button>
+    <button class="btn" onclick="exportExcel()" title="Excel形式で出力します（出力前のチェックは手順⑦「確認して出力」で一覧できます）">📊 Excel</button>
     <button class="btn ghost" onclick="printChecklist()" title="交付前に人の目で確認する項目を、通知書とは別の用紙として印刷します（この用紙は労働者へ渡すものではありません）">📋 交付前チェック</button>
     <button class="btn ghost" onclick="saveData()">💾 保存</button>
     <button class="btn ghost" onclick="document.getElementById('loadFile').click()">📂 読込</button>
     <input type="file" id="loadFile" accept=".json,application/json" style="display:none" onchange="loadData(this)">
-    <button class="btn ghost" id="helpBtn" onclick="toggleHelp()">❓ ヘルプON</button>
+    <button class="btn ghost" id="helpBtn" onclick="toggleHelp()" aria-pressed="true" title="各欄の下の緑のヒント（説明）の表示・非表示を切り替えます（手順の一覧の「初めての方モード」と同じ切替）">❓ ヒント：表示中</button>
     <button class="btn ghost" onclick="resetForm()">クリア</button>
     <button class="btn ghost" onclick="loadSample()">記入例</button>
   </span>
@@ -314,44 +529,33 @@
 
 <div id="rosterBar">
   <span class="rb-label">👥 名簿 <b id="rosterCount">0</b> 人</span>
-  <button class="btn mini" id="rosterCommitBtn" onclick="rosterCommit()" title="今フォームに入力している内容を、1名分として名簿に登録します">➕ この内容を名簿に追加</button>
-  <button class="btn mini ghost" onclick="rosterAddNext()" title="今の内容を名簿に追加し、氏名・賃金額・手当（支給項目）・社会保険の被保険者区分だけをクリアします。会社情報・労働時間・休日などの条件は残るので、続けて次の方を素早く入力できます">➡ 追加して次の人へ</button>
+  <button class="btn mini" id="rosterAddNextBtn" onclick="rosterAddNext()" title="名簿に追加し、氏名・賃金額・手当・社会保険区分をクリアして次の人の入力に移ります">➡ 追加して次の人へ</button>
+  <button class="btn mini ghost" id="rosterCommitBtn" onclick="rosterCommit()" title="今の内容を1名分として名簿に追加します（次の人へは進みません）">➕ この内容を名簿に追加（次の人へは進まない）</button>
   <button class="btn mini ghost" onclick="switchMode('batch')" title="名簿の一覧・並べ替え・一括出力の画面へ移動します">👥 一括作成タブ</button>
   <span id="rosterStatus" class="rb-status"></span>
 </div>
 
 <div id="modeCreate">
 <div class="wrap">
+  <!-- ============ 手順レール（画面のみ・#form の外。name を持つ要素は置かない） ============ -->
+  <nav id="stepRail" class="step-rail" aria-label="入力の手順" data-ui-only>
+    <h2 class="rail-cap">入力の手順<span>（どこからでも移動できます）</span></h2>
+    <ol id="railList"></ol>
+    <div class="rail-foot">
+      <div id="railTotal" aria-live="polite"></div>
+      <label class="rail-toggle"><input type="checkbox" id="beginnerToggle" onchange="setHelpOff(!this.checked)"> 初めての方モード（緑のヒントを全部表示）</label>
+      <div class="hint">右上の「❓ ヒント」ボタンと同じ切替です。</div>
+    </div>
+  </nav>
   <!-- ============ FORM ============ -->
   <form class="form" id="form" oninput="render()" onchange="render()">
 
-    <nav id="formNav" class="form-nav" aria-label="入力セクションへ移動"></nav>
+    <div class="empty-legend">※ <b>薄い黄色</b>の欄は未入力です（入力すると色が消えます）。いま開いている手順の欄のみ対象です。</div>
 
-    <div class="empty-legend">※ <b>薄い黄色</b>の欄は未入力です（入力すると色が消えます）。表示中の欄のみ対象です。</div>
-
-    <div class="help-guide">
-      <b>🔰 使い方</b><br>
-      ① 上から順に入力します。まず「書類の種類」→「雇用区分」を選ぶと、<b>その人に必要な入力欄だけが自動で表示</b>されます（不要な欄は自動で隠れます）。<br>
-      ② 各欄の下の<b>緑のヒント</b>が「ここを選ぶと何の欄が出るか／どう入力するか」を説明します。慣れたら右上の<b>「❓ ヘルプ」</b>で非表示にできます。<br>
-      ③ 入力し終えたら右上の「印刷/PDF・Word・Excel」で出力。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。<br>
-      ④ 交付する前に右上の<b>「📋 交付前チェック」</b>で確認用紙を印刷し、機械では確認できない項目を人の目で確認してください（この用紙は労働者へ渡すものではありません）。
-    </div>
-
-    <!-- MF-18 ダウンロード物の取扱い（画面のみ。印刷では .tool-note を非表示にしている）。
-         入力画面が注意書きで埋まらないよう、ここは短い版（tn-compact）。全文は「使い方」タブ。 -->
-    <div class="tool-note tn-privacy tn-compact" data-download-notice></div>
-
-    <fieldset id="fsDisplay">
-      <legend>表示設定</legend>
-      <div class="row"><label>日付の表示形式（全書類共通）</label>
-        <div class="seg">
-          <label><input type="radio" name="dateMode" value="wareki" checked> 和暦（例：令和8年7月1日）</label>
-          <label><input type="radio" name="dateMode" value="seireki"> 西暦（例：2026年7月1日）</label>
-        </div>
-        <div class="hint">日付欄はカレンダーから選択できます。ここで選んだ形式で全書類の日付が表示されます。</div>
-      </div>
-    </fieldset>
-
+    <!-- ===== 手順1（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step1" data-step="1" aria-labelledby="stepH1">
+      <div class="step-head" data-ui-only><h2 id="stepH1" tabindex="-1">① 書類の種類と働き方</h2><span class="step-lead">ここで選ぶと、以降の手順には必要な欄だけが出ます</span></div>
+      <div class="step-note hidden" data-ui-only></div>
     <fieldset id="fsDoctype">
       <legend>書類の種類</legend>
       <div class="row"><label>書類種別</label>
@@ -369,21 +573,18 @@
       </div>
     </fieldset>
 
-    <fieldset id="fsBasic">
-      <legend>基本情報</legend>
-      <div class="row two">
-        <div><label>交付日</label><input type="date" name="issue_date"></div>
-        <div><label>社員氏名</label><input type="text" name="employee_name" placeholder="田中　太郎"></div>
-      </div>
-      <div class="row"><label>事業場所在地</label><input type="text" name="office_addr" placeholder="仙台市宮城野区…"></div>
-      <div class="row two">
-        <div><label>事業場名称</label><input type="text" name="office_name" placeholder="株式会社○○"></div>
-        <div><label id="lblEmployer">使用者職氏名</label><input type="text" name="employer" placeholder="代表取締役　○○"></div>
-      </div>
-    </fieldset>
-
     <fieldset id="fsEmpcat">
       <legend>雇用区分（まず選ぶ）</legend>
+      <!-- 画面の使い方（初期は閉じる。初めての方モードの ON／OFF とは無関係）。働き方カードはこの前に JS で入る -->
+      <details class="usage-guide" id="usageGuide" data-ui-only>
+        <summary>🔰 使い方（初めての方はこちら）</summary>
+        <div class="usage-body">
+        ① 左（画面が狭いときは上）の<b>「入力の手順」①〜⑦</b>に沿って、入力欄の下の<b>「次へ →」</b>で進みます（手順の一覧からどの手順へも移動できます）。まず①で「書類の種類」→「雇用区分」を選ぶと、<b>その人に必要な入力欄だけが以降の手順に表示</b>されます（不要な欄は自動で隠れます）。<br>
+        ② 各欄の下の<b>緑のヒント</b>が「ここを選ぶと何の欄が出るか／どう入力するか」を説明します。慣れたら右上の<b>「❓ ヒント」</b>ボタンまたは左の<b>「初めての方モード」</b>で非表示にできます（どちらも同じ切替です）。<br>
+        ③ 入力し終えたら⑦<b>「確認して出力」</b>で出力前チェックを確認し、印刷/PDF・Word・Excelで出力します（右上のボタンからも出力できます）。「💾保存」で入力データを保存し、「📂読込」で後日続きから作業できます。<br>
+        ④ 交付する前に右上の<b>「📋 交付前チェック」</b>で確認用紙を印刷し、機械では確認できない項目を人の目で確認してください（この用紙は労働者へ渡すものではありません）。
+        </div>
+      </details>
       <div class="row"><label>雇用形態</label>
         <div class="seg">
           <label><input type="radio" name="emp_category" value="一般" checked> 一般</label>
@@ -417,6 +618,42 @@
       <div class="note-law hidden" id="warnCombo">短時間・林業に「日雇」の様式はありません。期間区分を見直してください。</div>
     </fieldset>
 
+    <fieldset id="fsDisplay">
+      <legend>表示設定</legend>
+      <div class="row"><label>日付の表示形式（全書類共通）</label>
+        <div class="seg">
+          <label><input type="radio" name="dateMode" value="wareki" checked> 和暦（例：令和8年7月1日）</label>
+          <label><input type="radio" name="dateMode" value="seireki"> 西暦（例：2026年7月1日）</label>
+        </div>
+        <div class="hint">日付欄はカレンダーから選択できます。ここで選んだ形式で全書類の日付が表示されます。</div>
+      </div>
+    </fieldset>
+    </section>
+
+    <!-- ===== 手順2（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step2" data-step="2" aria-labelledby="stepH2">
+      <div class="step-head" data-ui-only><h2 id="stepH2" tabindex="-1">② 本人と会社</h2><span class="step-lead">会社の情報は「➡ 追加して次の人へ」で次の人へ引き継がれます</span></div>
+      <div class="step-note hidden" data-ui-only></div>
+    <fieldset id="fsBasic">
+      <legend>基本情報</legend>
+      <h3 class="sub-h" id="basicSubPerson" data-ui-only>本人</h3>
+      <div class="row two">
+        <div><label>交付日</label><input type="date" name="issue_date"></div>
+        <div><label>社員氏名</label><input type="text" name="employee_name" placeholder="田中　太郎"></div>
+      </div>
+      <h3 class="sub-h" id="basicSubOffice" data-ui-only>会社</h3>
+      <div class="row"><label>事業場所在地</label><input type="text" name="office_addr" placeholder="仙台市宮城野区…"></div>
+      <div class="row two">
+        <div><label>事業場名称</label><input type="text" name="office_name" placeholder="株式会社○○"></div>
+        <div><label id="lblEmployer">使用者職氏名</label><input type="text" name="employer" placeholder="代表取締役　○○"></div>
+      </div>
+    </fieldset>
+    </section>
+
+    <!-- ===== 手順3（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step3" data-step="3" aria-labelledby="stepH3">
+      <div class="step-head" data-ui-only><h2 id="stepH3" tabindex="-1">③ 契約期間・場所・業務</h2></div>
+      <div class="step-note hidden" data-ui-only></div>
     <fieldset id="fsTerm">
       <legend>契約期間</legend>
       <div class="row" id="grpMuki">
@@ -483,7 +720,12 @@
       <div class="row hidden" id="grpShiyo"><label>試用期間の内容</label>
         <input type="text" name="probation_text" placeholder="令和8年7月1日から6か月（就業規則第9条）"></div>
     </fieldset>
+    </section>
 
+    <!-- ===== 手順4（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step4" data-step="4" aria-labelledby="stepH4">
+      <div class="step-head" data-ui-only><h2 id="stepH4" tabindex="-1">④ 労働時間・休日</h2></div>
+      <div class="step-note hidden" data-ui-only></div>
     <fieldset id="fsWorktime">
       <legend>労働時間</legend>
       <div class="row"><label>労働時間制度</label>
@@ -581,11 +823,17 @@
       <div class="row"><label>年次有給休暇</label><input type="text" name="paid_leave" placeholder="労働基準法の定めによる"></div>
       <div class="row"><label>その他の休暇</label><input type="text" name="other_leave" placeholder="特別休暇（慶弔等）"></div>
     </fieldset>
+    </section>
 
+    <!-- ===== 手順5（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step5" data-step="5" aria-labelledby="stepH5">
+      <div class="step-head" data-ui-only><h2 id="stepH5" tabindex="-1">⑤ 賃金</h2><span class="step-lead">上から「最低賃金・基本給 → 手当 → 固定残業 → 割増率 → 支払 → 昇給等」の順です</span></div>
+      <div class="step-note hidden" data-ui-only></div>
     <fieldset id="fsWage">
       <legend>賃金</legend>
       <!-- MF-02／MF-03: 最低賃金の確認（画面のみ・通知書には印字しません）。MF-02の明示欄とMF-03の判定で
            都道府県の選択を共有し、同じUIを二重に作らない。name属性を付けているので既存の保存／復元がそのまま拾う。 -->
+      <h3 class="sub-h" id="wageSub1" data-ui-only>5-1 最低賃金・基本給</h3>
       <div id="grpMinWage">
         <div class="row three">
           <div><label>最低賃金の都道府県</label>
@@ -618,6 +866,10 @@
         <div><label>保障給（円）★必須</label><input type="text" class="num" inputmode="numeric" name="guaranteed_wage" placeholder="180000"></div>
       </div><div class="note-law">出来高払には保障給が必要です（労基法27条）。</div></div>
       <div class="wg wg-year hidden"><div class="row"><label>年額（円・半角数字）</label><input type="text" class="num" inputmode="numeric" name="annual_wage" placeholder="3600000"></div></div>
+      <!-- P3：最低賃金の確認・固定残業の算定の両方に使うため 5-1 へ移した（name・中身は不変） -->
+      <div class="row wg wg-month wg-year wg-deki"><label>月の所定労働時間（固定残業の算定用・最低賃金の確認用・半角数字。小数可）</label>
+        <input type="text" class="num dec" inputmode="decimal" name="monthly_scheduled_hours" placeholder="例：173.75"></div>
+      <h3 class="sub-h" id="wageSub2" data-ui-only>5-2 手当</h3>
       <div class="help-note">手当は「＋追加」で何件でも入れられます。<b>基準内</b>＝残業の割増単価に算入する手当（役職・資格等）、<b>基準外</b>＝算入しない手当（通勤・住宅等）。単位で「日額・1回」等も選べ、月給のときは<b>月額のものだけ総支給額に合算</b>します。</div>
       <div class="row"><label>基準内賃金の手当（割増賃金の単価に算入）</label>
         <div id="inAllowList">
@@ -641,12 +893,11 @@
       </div>
       <div class="row wg wg-month" id="totalRow"><label>総支給額（自動計算・月給のみ）</label>
         <input type="text" id="totalDisp" readonly class="total-box"></div>
+      <h3 class="sub-h" id="wageSub3" data-ui-only>5-3 固定残業</h3>
       <div class="row"><label>固定残業の方式</label>
         <select name="ot_style"><option value="split" selected>区分別（固定残業＋固定深夜）</option><option value="unified">一体型（固定時間外勤務手当・内訳明示）</option></select>
         <div class="help-note">「一体型」は時間外・法定休日・深夜を1本の手当にまとめ、内訳（時間数・金額）を明示します。希望額を6:3:1などで自動按分できます（割増率は下の「割増賃金率」を使用）。</div>
       </div>
-      <div class="row wg wg-month wg-year wg-deki"><label>月の所定労働時間（固定残業の算定用・最低賃金の確認用・半角数字。小数可）</label>
-        <input type="text" class="num dec" inputmode="decimal" name="monthly_scheduled_hours" placeholder="例：173.75"></div>
       <div class="row wg wg-month"><label>自動計算の端数処理（切り上げ単位）</label>
         <select name="round_unit"><option value="0">切り上げなし（円未満四捨五入）</option><option value="10">十の位で切り上げ</option><option value="100">百の位で切り上げ</option><option value="1000" selected>千の位で切り上げ</option></select></div>
       <div id="otSplit">
@@ -696,6 +947,7 @@
         <div class="help-note"><b>チェックあり（既定）</b>＝一体型の固定手当のあとに「実際の割増賃金が本手当額を超える月は差額を追加支給」「本手当があることを理由に割増賃金を減額しない」「月途中の入退社は日割り計算」の注記文を自動で付けます（就業規則の固定残業規定に沿った、後々のトラブル防止用の文言）。不要ならチェックを外すと注記なしになります。</div>
         <div class="help-note">割増率は下の「割増賃金率」の 時間外(125%)・法定休日(135%)・深夜(25%) を使用。按分方式は金額を<b>1円単位で配分し合計が希望額に一致</b>します（切り上げなし）。時間は「○時間分（相当）」で表示します。<b>一体型は月60時間超の追加割増は計算しません</b>。</div>
       </div>
+      <h3 class="sub-h" id="wageSub4" data-ui-only>5-4 割増賃金率</h3>
       <div class="row"><label>割増賃金率（％）</label>
         <div class="help-note">各割増率を％で入力します（初期値は法定：時間外125％・月60時間超は追加25％・法定休日135％・深夜は追加25％）。ここの値は通知書に記載され、<b>固定残業の自動計算にも使われます</b>。「所定超（法定内）」は所定労働時間を超えるが法定8時間内の分で、法律上は割増不要のため通常100％です。</div>
       </div>
@@ -709,6 +961,7 @@
         <div><label>休日 法定外休日</label><input type="text" class="num" inputmode="numeric" name="hol_nonlegal" value="125"></div>
         <div><label>深夜（追加分）</label><input type="text" class="num" inputmode="numeric" name="night_pct" value="25"></div>
       </div>
+      <h3 class="sub-h" id="wageSub5" data-ui-only>5-5 締切・支払</h3>
       <div class="row two">
         <div><label>賃金締切日</label><input type="text" name="wage_closing" placeholder="毎月末日"></div>
         <div><label>賃金支払日</label><input type="text" name="wage_payday" placeholder="翌月10日"></div>
@@ -721,6 +974,7 @@
       </div>
       <div class="row"><label>支払方法・控除の備考（任意）</label><input type="text" name="pay_method_note" placeholder="例：本人名義の指定口座へ振込／控除項目：社宅費・親睦会費"></div>
       <div class="help-note">賃金の<b>支払方法</b>（口座振込・現金等）は労基則5条1項3号の書面明示事項です。口座振込には本人の同意が必要（労基則7条の2）。<b>労使協定に基づく控除</b>（社宅費・親睦会費など法定控除以外の天引き）がある場合は「有」を選び備考に控除項目を記載します。</div>
+      <h3 class="sub-h" id="wageSub6" data-ui-only>5-6 昇給・賞与・退職金</h3>
       <div class="row three">
         <div><label>昇給</label>
           <select name="raise_flag"><option value="">（選択）</option><option value="有">有</option><option value="無">無</option></select></div>
@@ -735,7 +989,12 @@
       <div class="row"><label>退職金の内容（備考）</label><input type="text" name="retire_note" placeholder="例：勤続3年以上、就業規則第40条による（有のとき記載）"></div>
       <div class="hint" id="hintShort"></div>
     </fieldset>
+    </section>
 
+    <!-- ===== 手順6（画面の表示切替は .step-off。fieldset の中身・name は改修前のまま） ===== -->
+    <section class="step" id="step6" data-step="6" aria-labelledby="stepH6">
+      <div class="step-head" data-ui-only><h2 id="stepH6" tabindex="-1">⑥ 退職・社会保険・その他</h2></div>
+      <div class="step-note hidden" data-ui-only></div>
     <fieldset id="fsRetire">
       <legend>退職に関する事項</legend>
       <div class="row two">
@@ -770,7 +1029,7 @@
       <div id="grpShahoKubun">
         <div class="row"><label>社会保険（厚生年金・健康保険）の被保険者区分（任意・見込み）</label>
           <select name="shaho_kubun"><option value="">（選択・通常は空欄でよい）</option><option value="一般">一般の被保険者（短時間労働者以外）</option><option value="短時間労働者">短時間労働者（特定適用事業所等）</option></select></div>
-        <div class="help-note"><b>通常は空欄のままで構いません</b>。上の「雇用形態」欄の「短時間（パート）」とは<b>別の概念</b>です（雇用形態がパートでも、週の所定労働時間が通常の労働者の4分の3以上なら「一般の被保険者」になります）。<span id="shahoKubunNote"></span>本欄は<b>契約締結時点の見込み</b>であり、実際の資格取得は所定労働時間・所定労働日数の実態や事業所の該当状況により確定します。一括作成の「➡ 追加して次の人へ」では賃金額と合わせて自動的にクリアされますが、「➕ この内容を名簿に追加」だけで複製・編集する場合は前の人の選択が残るため、人ごとに見直してください。</div>
+        <div class="help-note"><b>通常は空欄のままで構いません</b>。上の「雇用形態」欄の「短時間（パート）」とは<b>別の概念</b>です（雇用形態がパートでも、週の所定労働時間が通常の労働者の4分の3以上なら「一般の被保険者」になります）。<span id="shahoKubunNote"></span>本欄は<b>契約締結時点の見込み</b>であり、実際の資格取得は所定労働時間・所定労働日数の実態や事業所の該当状況により確定します。一括作成の「➡ 追加して次の人へ」では賃金額と合わせて自動的にクリアされますが、「➕ この内容を名簿に追加」だけで複製・編集する場合は前の人の選択が残るため、人ごとに見直してください（「➡ 追加して次の人へ」では②本人と⑤賃金へ移動し、⑦の一覧に「クリア済み（任意）」と出ます）。</div>
       </div>
       <div class="row two">
         <div><label>雇用保険</label><select name="emp_ins"><option value="有">有</option><option value="無">無</option></select></div>
@@ -840,11 +1099,44 @@
       <div class="row"><label>備考</label><input type="text" name="remarks" placeholder=""></div>
       <div class="row"><label>特記事項（自由記入）</label>
         <textarea name="tokki_jiko" placeholder="上の各項目に当てはまらない、企業独自の就業条件や特別な合意事項などを自由に記載できます（複数行可）。"></textarea></div>
-      <div class="help-note">既存の項目に収まらない独自の就業条件（例：在宅勤務の運用ルール、特別な手当の支給条件等）を自由に記載する欄です。「備考」「その他の記載事項」はどちらも「その他」欄の中の1行（後者は項目名付き）として載りますが、この「特記事項」だけは<b>独立した見出し付きの項目</b>として書面に載ります。長文・複数行を書きたいときはこの欄が向きます。<b>1行ずつ書面に転記されます（空行は詰められます）</b>。<b>無期転換申込権が「有」の場合、無期転換後の労働条件（別紙）にはこの欄の内容は転記されません</b>（有期契約固有の内容を誤って残さないため）。転換後も適用したい内容は出力後に別紙へ追記してください。一括作成の「➡ 追加して次の人へ」でもこの内容は引き継がれるため、人ごとに見直してください。病歴・障害・信条等の<b>要配慮個人情報は記載しないでください</b>。</div>
+      <div class="help-note">既存の項目に収まらない独自の就業条件（例：在宅勤務の運用ルール、特別な手当の支給条件等）を自由に記載する欄です。「備考」「その他の記載事項」はどちらも「その他」欄の中の1行（後者は項目名付き）として載りますが、この「特記事項」だけは<b>独立した見出し付きの項目</b>として書面に載ります。長文・複数行を書きたいときはこの欄が向きます。<b>1行ずつ書面に転記されます（空行は詰められます）</b>。<b>無期転換申込権が「有」の場合、無期転換後の労働条件（別紙）にはこの欄の内容は転記されません</b>（有期契約固有の内容を誤って残さないため）。転換後も適用したい内容は出力後に別紙へ追記してください。一括作成の「➡ 追加して次の人へ」（②本人と⑤賃金へ移動します）でもこの内容は引き継がれるため、⑦「前の人から引き継いだ主な値」で人ごとに見直してください。病歴・障害・信条等の<b>要配慮個人情報は記載しないでください</b>。</div>
     </fieldset>
+    </section>
 
+    <!-- ===== 手順7 確認して出力（既存の出力関数・名簿関数を呼ぶだけ。name を持つ要素は置かない） ===== -->
+    <section class="step" id="step7" data-step="7" aria-labelledby="stepH7">
+      <div class="step-head" data-ui-only><h2 id="stepH7" tabindex="-1">⑦ 確認して出力</h2><span class="step-lead">出力前チェックを確認してから出力します</span></div>
+      <div class="step-card" data-ui-only>
+        <h3>出力前チェック</h3>
+        <p class="hint">①〜⑥の入力から、出力を止める項目（⛔）・未入力の法定明示事項・確認が必要な事項を手順ごとに並べています。「直す」でその手順へ移動します。プレビュー上部の警告と同じ内容です。</p>
+        <div id="finalCheck" aria-live="polite"></div>
+      </div>
+      <div class="step-card" data-ui-only>
+        <h3>出力</h3>
+        <div class="out-btns">
+          <button type="button" class="btn print" onclick="doPrint()">🖨 印刷 / PDF</button>
+          <button type="button" class="btn" onclick="exportWord()">📄 Word</button>
+          <button type="button" class="btn" onclick="exportExcel()">📊 Excel</button>
+          <button type="button" class="btn" onclick="printChecklist()" title="交付前に人の目で確認する項目を、通知書とは別の用紙として印刷します（この用紙は労働者へ渡すものではありません）">📋 交付前チェック用紙</button>
+        </div>
+        <div class="out-btns">
+          <button type="button" class="btn btn-primary" id="rosterAddNextBtn7" onclick="rosterAddNext()" title="名簿に追加し、氏名・賃金額・手当・社会保険区分をクリアして次の人の入力に移ります">➡ 追加して次の人へ</button>
+          <button type="button" class="btn" id="rosterCommitBtn7" onclick="rosterCommit()" title="今の内容を1名分として名簿に追加します（次の人へは進みません）">➕ この内容を名簿に追加（次の人へは進まない）</button>
+        </div>
     <p class="hint" style="color:var(--warn)">
       ※ 出力は下書きです。明示事項の要否・文言・条番号は最新の法令（e-Gov／厚労省）と所属社労士の確認を要します。</p>
+      <!-- MF-18 ダウンロード物の取扱い（画面のみ。印刷では .tool-note を非表示にしている）。
+           出力・保存のボタンのすぐ近くに置く短い版（tn-compact）。全文は「使い方」タブ。 -->
+      <div class="tool-note tn-privacy tn-compact" data-download-notice></div>
+      </div>
+    </section>
+
+    <!-- 手順の移動（画面のみ・name なし・印刷では非表示） -->
+    <div class="step-foot" data-ui-only>
+      <button type="button" class="btn step-prev" id="stepPrev" onclick="goStepRel(-1)">← 戻る</button>
+      <span class="step-sum" id="stepSum" aria-live="polite"></span>
+      <button type="button" class="btn step-next" id="stepNext" onclick="goStepRel(1)">次へ →</button>
+    </div>
   </form>
 
   <!-- ============ PREVIEW ============ -->
@@ -858,7 +1150,7 @@
     <div class="batch-guide">
       <b>👥 複数人をまとめて作成する</b><br>
       ① 「作成」タブで一人目を作り込む → 名簿バーの<b>「➕ この内容を名簿に追加」</b>で登録。<br>
-      ② <b>「➡ 追加して次の人へ」</b>を押すと、氏名・手当（金額・支給項目）・社会保険の被保険者区分だけをクリアし、他の条件（会社情報・労働時間・休日・賃金体系など）は残したまま次の方の入力に移れます。<br>
+      ② <b>「➡ 追加して次の人へ」</b>を押すと、氏名・手当（金額・支給項目）・社会保険の被保険者区分だけをクリアし、他の条件（会社情報・労働時間・休日・賃金体系など）は残したまま次の方の入力に移れます（②本人と⑤賃金へ移動します。2人目以降は②本人と⑤賃金だけを開き、⑦「確認して出力」に前の人から引き継いだ主な値が一覧で出ます。全部の欄を見るときは⑦「全部の手順を見直す」）。<br>
       ③ 下の名簿で各人を<b>編集・複製・並べ替え・削除</b>できます。<b>「💾 名簿を保存」</b>でまとめてダウンロード、<b>「📂 名簿を読込」</b>で後日続きから作業できます。<br>
       ④ 全員そろったら下の<b>一括出力</b>で、まとめて1ファイル（PDF/Word/Excel）または一人ずつ個別ファイルに出力します。
     </div>
@@ -1081,7 +1373,7 @@
 <div id="modeGuide" class="hidden">
   <div class="batch-wrap">
     <div class="batch-guide guide-lead">
-      <span class="guide-lead-text">このページはツール全体の使い方マニュアルです。入力欄ごとの短い説明は、右上の「❓ ヘルプ」ボタンでON/OFFできる緑のヒントをご覧ください。</span>
+      <span class="guide-lead-text">このページはツール全体の使い方マニュアルです。入力欄ごとの短い説明は、右上の「❓ ヒント」ボタン（作成タブ左の「初めての方モード」と同じ切替）で表示・非表示を切り替えられる緑のヒントをご覧ください。</span>
       <button class="guide-btn" onclick="printGuide()">🖨 このマニュアルを印刷</button>
     </div>
 
@@ -1100,8 +1392,8 @@
     <h2>2. 基本の流れ</h2>
     <ol>
       <li>「作成」タブで書類の種類と交付日を選ぶ（交付日は法改正の適用判定にも使われます）。</li>
-      <li>上から順に入力する。入力するとA4プレビューが自動で更新されます。</li>
-      <li>プレビュー上部に赤い警告が出ていないか確認する（意味は「7. 警告表示」参照）。</li>
+      <li>作成タブ左の「入力の手順」①〜⑦に沿って、画面下の「次へ →」で進みながら入力する（左の一覧からどの手順へも移動できます）。入力するとA4プレビューが自動で更新されます。</li>
+      <li>⑦「確認して出力」の出力前チェック（プレビュー上部の警告と同じ内容）で、赤い警告や未入力が残っていないか確認する（意味は「7. 警告表示」参照）。</li>
       <li>「印刷/PDF」「Word」「Excel」のいずれかで出力する。</li>
       <li>続きから作業する可能性があれば「💾 保存」でJSONファイルを保存しておく。</li>
     </ol>
@@ -1109,12 +1401,12 @@
 
     <h2>3. 作成タブの各欄</h2>
     <ul>
-      <li><b>書類の種類</b> — 通知書兼契約書か変更通知書かを選びます。</li>
-      <li><b>契約期間</b> — 有期を選ぶと「更新の有無・更新の基準」「通算契約期間」など有期特有の欄が現れます。無期転換に関する明示が必要な場合は別紙が自動で付きます。</li>
-      <li><b>就業場所・業務</b> — 現在の内容に加えて「変更の範囲」の明示が必須です（令和6年4月改正）。</li>
-      <li><b>労働時間</b> — 選んだ制度（通常・変形・フレックス・裁量など）で欄が変わります。休憩は複数行登録できます。</li>
-      <li><b>賃金</b> — 基準内手当は淡い青、基準外手当は淡いオレンジで背景色が分かれています。固定残業代を使う場合は時間数の入力が必須です。</li>
-      <li><b>相談窓口ほか</b> — 雇用区分に応じて必要な欄（昇給・賞与・退職手当の有無、相談窓口など）が自動で表示されます。</li>
+      <li><b>書類の種類</b>（手順①） — 通知書兼契約書か変更通知書かを選びます。同じ手順①で雇用区分・期間区分も選びます。</li>
+      <li><b>契約期間</b>（手順③） — 有期を選ぶと「更新の有無・更新の基準」「通算契約期間」など有期特有の欄が現れます。無期転換に関する明示が必要な場合は別紙が自動で付きます。</li>
+      <li><b>就業場所・業務</b>（手順③） — 現在の内容に加えて「変更の範囲」の明示が必須です（令和6年4月改正）。</li>
+      <li><b>労働時間</b>（手順④） — 選んだ制度（通常・変形・フレックス・裁量など）で欄が変わります。休憩は複数行登録できます。</li>
+      <li><b>賃金</b>（手順⑤） — 基準内手当は淡い青、基準外手当は淡いオレンジで背景色が分かれています。固定残業代を使う場合は時間数の入力が必須です。</li>
+      <li><b>相談窓口ほか</b>（手順⑤の昇給・賞与・退職金、手順⑥の相談窓口など） — 雇用区分に応じて必要な欄（昇給・賞与・退職手当の有無、相談窓口など）が自動で表示されます。</li>
     </ul>
     <p class="guide-nav">該当の入力欄へ直接移動：
       <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsTerm')">▶ 契約期間</button>
@@ -1122,12 +1414,12 @@
       <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsWorktime')">▶ 労働時間</button>
       <button class="guide-btn secondary" style="padding:4px 12px;font-size:12px" onclick="jumpToCreate('fsWage')">▶ 賃金</button>
     </p>
-    <p>各欄の細かい説明は緑のヒント（❓ヘルプON）に書いてあります。ヘルプOFFのときも、各欄タイトル横の「？」でその欄のヒントだけ表示できます。作成タブ最上部のナビ（章ボタン）からも各欄へ移動できます。</p>
+    <p>各欄の細かい説明は緑のヒント（右上のボタンが「❓ ヒント：表示中」のとき表示）に書いてあります。ヒントを非表示にしているときも、各欄タイトル横の「？」でその欄のヒントだけ表示できます。作成タブ左の「入力の手順」（①〜⑦）からも各手順へ移動でき、手順ごとの「未入力」「出力不可」の件数もそこに表示されます。</p>
 
     <h2>4. 一括作成（名簿）</h2>
     <ol>
       <li>「作成」タブで1人目を作り込み、名簿バーの「➕ この内容を名簿に追加」で登録します。</li>
-      <li>2人目以降は「➡ 追加して次の人へ」を使うと、氏名・賃金・社会保険の被保険者区分だけクリアされ他の条件は引き継がれます（同条件の大量作成向け）。</li>
+      <li>2人目以降は「➡ 追加して次の人へ」を使うと、氏名・賃金・社会保険の被保険者区分だけクリアされ他の条件は引き継がれます（同条件の大量作成向け）。②本人と⑤賃金へ移動します（2人目以降は②本人と⑤賃金だけを開きます）。氏名を入れたら⑤で賃金額を入れ直し、⑦で前の人から引き継いだ主な値（入社日・契約期間・業務・特記事項など）を確認してください。</li>
       <li>「一括作成」タブで一覧の編集・複製・並べ替え・削除ができます。名簿はJSONで保存・読込できます。</li>
       <li>出力は「まとめて1ファイル」（全員印刷／Word連結／Excelは1人1シート）と「1人ずつ個別ファイル」が選べます。</li>
     </ol>
@@ -1146,7 +1438,7 @@
 
     <h2>7. 警告表示の意味</h2>
     <ul>
-      <li><b>画面上部の赤いバナー「⚠ 法定明示事項の未入力」</b> — 労基法上必ず明示しなければならない項目が空欄です。出力時にも確認ダイアログが出ます。</li>
+      <li><b>画面上部の赤いバナー「⚠ 法定明示事項の未入力」</b> — 労基法上必ず明示しなければならない項目が空欄です。出力時にも確認ダイアログが出ます。同じ内容は、該当する欄のすぐ下と、手順⑦「確認して出力」の出力前チェックにも表示されます（左の「入力の手順」には手順ごとの件数が出ます）。</li>
       <li><b>書面の中の赤字の注意書き</b> — 固定残業代の時間数未入力、出来高払の保障給未入力など、このまま交付すると法令上問題になり得る箇所です。下書きを完成品と取り違えないよう、印刷にもあえて赤字が印字されます。入力を補うと消えます。</li>
     </ul>
 
@@ -1189,7 +1481,7 @@
     <h2>10. よくある質問</h2>
     <dl class="qa">
       <dt>Q. 緑のヒントを消したい／出したい</dt>
-      <dd>右上の「❓ ヘルプ」ボタンで切り替えられます。</dd>
+      <dd>右上の「❓ ヒント」ボタン（表示中／非表示が出ます）、または作成タブ左の「初めての方モード」で切り替えられます（どちらも同じ切替です）。最初は表示された状態で始まり、切り替えた状態はお使いのブラウザに記憶されます（個人情報は記憶しません）。</dd>
       <dt>Q. 入力した個人情報はどこかに送られますか？</dt>
       <dd>送られません。処理はすべてブラウザ内で完結し、ファイルとして残るのはご自身で保存したJSONと出力書類だけです。</dd>
       <dt>Q. ブラウザを閉じたら入力内容はどうなりますか？</dt>
@@ -1929,10 +2221,12 @@ function confirmGaps(action){
     return false;
   }
   const g=requiredGaps(st);
-  if(!g.length && !lc.reds.length) return true;
+  const inh=otInheritGap() ? '引き継ぎ確認：前の人は固定残業ありですが、この方の時間数が空です（⑤5-3。支給しない場合は「支給しない」を選んでください）。\n\n' : '';   // I-6（確認レベル・出力は止めない）
+  if(!g.length && !lc.reds.length && !inh) return true;
   let msg='';
   if(g.length) msg+='未入力の法定明示事項があります：\n・'+g.join('\n・')+'\n\n';
   if(lc.reds.length) msg+='法令違反のおそれがあります：\n・'+lc.reds.join('\n・')+'\n\n判断に迷う場合はめぐみ事務所へご相談ください。\n\n';
+  msg+=inh;
   return confirm(msg+'このまま'+action+'しますか？（下書きとしては出力できます）');
 }
 function officeLines(cat){
@@ -2115,64 +2409,587 @@ function render(){
   }
   const bd=document.getElementById('breakTotalDisp'); if(bd){ const t=breakTotalMinutes(); bd.textContent = t>0? `合計休憩時間 ${fmtDur(t)}` : ''; }
   updatePageIndicator();
-  { const gaps=requiredGaps(st); let gb=document.getElementById('gapNote');
+  const gaps=requiredGaps(st);
+  { let gb=document.getElementById('gapNote');
     if(gaps.length){ if(!gb){ gb=document.createElement('div'); gb.id='gapNote'; gb.className='gap-note'; pv.insertBefore(gb, pv.firstChild); }
-      gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／'); }
-    else if(gb){ gb.remove(); }
-    updateFormNav(gaps); }
+      gb.textContent='⚠ 法定明示事項の未入力： '+gaps.join('／')+'（各欄の下と手順⑦にも表示しています）'; }
+    else if(gb){ gb.remove(); } }
   // §F 法令チェック（MF-03最低賃金／MF-04割増率／MF-05有期3年超／MF-06始業終業・休憩）をまとめて描画。
   // 旧「月の所定労働時間が極端に小さい」警告も legalChecks() へ移設して1本化した（文言・条件・値は不変）。
   // 表示はすべて画面のみ（#lawCheckNote は @media print で非表示）。書面生成には一切流さない。
   minWageAutoSuggestPref();   // 住所を入力した時点で都道府県を推測（未選択のときだけ働く）
   renderMinWageApplied();
-  renderLawChecks(st);
-  markEmpty();
+  const lc=renderLawChecks(st);
+  // 手順レールの件数・欄直下の警告・⑦の出力前チェック（画面のみ。判定は上の requiredGaps／legalChecks の結果を使い回す）
+  if(!BULK_MODE){ syncProxies(); renderMinWageMeter(lc); }   // P3 代理UIの表示を元の要素から読み直す（値は書かない）
+  renderInlineWarnings(gaps, lc, st);   // P4 の折りたたみ（syncNextPerson）もこの中で行う
+  markEmpty();   // 代理UI・引き継ぎの折りたたみを反映した後に黄色を付ける（隠れた欄に黄色を残さない）
+  if(!BULK_MODE) decoratePreview();   // P5：画面の #preview にだけ行クリック用の属性・ハイライトを付ける（書面HTMLは不変）
 }
 
 // ===== §E 画面UI（出力書面には影響しない） =====
-// 作成タブ先頭のジャンプナビ：フォームのfieldsetから自動生成し、表示状態と法定明示の残数をrender()ごとに同期する
-const NAV_LABELS={'表示設定':'表示','書類の種類':'書類','基本情報':'基本情報',
-  '雇用区分（まず選ぶ）':'雇用区分','契約期間':'契約期間','就業の場所・業務':'場所・業務','試用期間':'試用',
-  '労働時間':'労働時間','休日・休暇':'休日・休暇','賃金':'賃金','退職に関する事項':'退職','その他':'その他'};
-function buildFormNav(){
-  const nav=document.getElementById('formNav'); if(!nav) return;
-  const cap=document.createElement('span'); cap.className='nav-cap'; cap.textContent='▶ 目次'; cap.setAttribute('aria-hidden','true');
-  nav.appendChild(cap);
-  let firstGapFsId=null;
-  [...document.querySelectorAll('#form > fieldset')].forEach((fs,i)=>{
-    const lg=fs.querySelector('legend'); if(!lg) return;
-    if(!fs.id) fs.id='fsNav'+i;
-    const b=document.createElement('button'); b.type='button'; b.className='nav-chip'; b.dataset.fs=fs.id;
-    const t=lg.textContent.trim(); b.textContent=NAV_LABELS[t]||t; b.title=t+' へ移動'; b.setAttribute('aria-label',t+' へ移動');
-    b.onclick=()=>{ try{ fs.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ fs.scrollIntoView(); } };
-    nav.appendChild(b);
-  });
-  const gb=document.createElement('button'); gb.type='button'; gb.id='navGap'; gb.className='nav-gap ok';
-  gb.textContent='✓ 法定明示OK'; gb.disabled=true; gb.setAttribute('aria-live','polite');
-  nav.appendChild(gb);
-  return firstGapFsId;
+/* ---- 入力画面のステップ化（P1・P2／2026-09-26 設計書_入力画面ステップ化 準拠） ----
+   守っていること（設計書 §2-2 不変条件 I-1〜I-5）
+   ・12個の fieldset は ID と中身ごと手順セクション（section.step）へ移しただけ。name 集合・type・保存JSON・書面生成は不変。
+   ・ここで作る部品（手順レール・戻る／次へ・欄直下の警告・⑦の一覧）には name を付けない（serializeState に混ざらない）。
+     目印として data-ui-only を付け、セルフテスト U3 で「name が無いこと」を検査する。
+   ・画面専用の状態を持つコントロール（初めての方モード）は #form の外（手順レール）に置く（form.reset() で巻き戻らない）。
+   ・警告の判定は requiredGaps()／legalChecks() の結果を使い回すだけ（判定を二重に持たない）。対応付けは STEP_MAP の1か所。
+   ・利用者入力を含みうる文字列（blocks には始業終業の区分名が入る）は textContent でだけ描く。 */
+const STEP_DEFS=[
+  {n:1, rail:'書類と働き方'},
+  {n:2, rail:'本人と会社'},
+  {n:3, rail:'期間・場所・業務'},
+  {n:4, rail:'労働時間・休日'},
+  {n:5, rail:'賃金'},
+  {n:6, rail:'退職・社保・その他'},
+  {n:7, rail:'確認して出力'}
+];
+const STEP_COUNT=STEP_DEFS.length;
+let CUR_STEP=1;   // いま開いている手順（画面だけの状態。保存データには入らない）
+
+/* STEP_MAP：警告の文言 → 手順番号・表示先の対応表（直すのはここ1か所だけ）
+   gaps … requiredGaps() のラベル（固定文字列）と完全一致で引く
+   law  … legalChecks() のメッセージを上から順に正規表現で当て、最初に当たった行を採用する（上の行ほど優先）
+          各行は警告の決まった書き出しに ^ で限定する（文中の利用者入力・理由文に引っ張られないため。2026-09-26 MF-1）
+   anchor … name 属性、'#id'、または '.class'。配列なら「表示中の最初のもの」を使う。
+            表示先がすべて隠れているときは、その手順の見出しの直下に出す。
+   どの行にも当たらないものは ⑦「その他」に出す（黙って捨てない）。行を足し引きしたらセルフテスト U2 を確認する。 */
+const STEP_MAP={
+  gaps:{
+    '雇用区分と期間区分の組合せ（短時間・林業に日雇様式なし）':{step:1, anchor:'#warnCombo'},
+    '契約期間（始期・終期）':{step:3, anchor:'contract_start'},
+    '更新の有無':{step:3, anchor:'renewal'},
+    '更新の判断基準':{step:3, anchor:'renewal_criteria'},
+    '更新上限（上限なしの場合もその旨）':{step:3, anchor:'renewal_cap'},
+    '就労日':{step:3, anchor:'work_days'},
+    '就業の場所（雇入れ直後）':{step:3, anchor:'workplace_now'},
+    '就業の場所（変更の範囲）':{step:3, anchor:'workplace_scope'},
+    '業務の内容（雇入れ直後）':{step:3, anchor:'job_now'},
+    '業務の内容（変更の範囲）':{step:3, anchor:'job_scope'},
+    '入社日（待遇の相違の説明を求めることができる旨の施行日判定に必要）':{step:3, anchor:'muki_start'},
+    '休日':{step:4, anchor:'holiday'},
+    '年次有給休暇':{step:4, anchor:'paid_leave'},
+    '基本単価':{step:5, anchor:'unit_price'},
+    '保障給（労基法27条）':{step:5, anchor:'guaranteed_wage'},
+    '基本給の額':{step:5, anchor:['monthly_wage','daily_wage','hourly_wage','annual_wage']},
+    '固定残業手当の時間数':{step:5, anchor:'fixed_ot_hours'},
+    '固定深夜手当の時間数':{step:5, anchor:'fixed_night_hours'},
+    '賃金締切日':{step:5, anchor:'wage_closing'},
+    '賃金支払日':{step:5, anchor:'wage_payday'},
+    '賃金の支払方法':{step:5, anchor:'pay_method'},
+    '昇給の有無':{step:5, anchor:'raise_flag'},
+    '自己都合退職の手続':{step:6, anchor:'self_retire'},
+    '解雇の事由':{step:6, anchor:'#dismissalList'},
+    '②雇用管理改善の相談窓口（部署名・担当者）':{step:6, anchor:'consult_dept'},
+    '協定対象派遣労働者か否か':{step:6, anchor:'haken_kyotei'},
+    '苦情の処理に関する事項':{step:6, anchor:'haken_kujo'}
+  },
+  law:[
+    /* ★上の行ほど優先。利用者入力を含む文言に注意。
+       legalChecks の文言には利用者が入力した文字列（始業終業の区分名・手当名）や、最低賃金の「理由」文
+       （例：「始業・終業の時刻または休憩時間が未入力…」）が後ろに付くものがある。
+       そのため各行は「その警告の決まった書き出し」に ^ で限定して当て、文中の語には引っ張られないようにする。
+       書き出しの正本は legalChecks()／SHORT_TIME_MESSAGE／MUKI_TENKAN_MESSAGE。文言を直したらここと U2 を確認する。 */
+    {re:/^(時間額に換算すると|最低賃金|この確認は地域別最低賃金|適用した .{1,20}? の最低賃金額|派遣労働者には【派遣先】)/, step:5, anchor:'#grpMinWage'},
+    {re:/^始業・終業の時刻が未入力/,           step:4, anchor:'.wt-times'},
+    {re:/^休憩時間(が未入力|の合計を読み取れない)/, step:4, anchor:'break_mode'},
+    {re:/^(「[\s\S]*」の)?1日の労働時間が[\s\S]*のため、休憩は\d+分以上必要です（労働基準法34条1項）/, step:4, anchor:'break_mode'},   // 区分名（利用者入力）が頭に付く
+    {re:/^割増賃金率の「/,                     step:5, anchor:'#wageSub4'},
+    {re:/^「(昇給|退職金|賞与)」の有無が未選択です/, step:5, anchor:'#wageSub6'},
+    {re:/^(入力された週の所定労働時間が|雇用形態で「短時間（パート）」を選んでいますが|【短時間労働者】に当たらないことを|週の所定労働時間が「通常の労働者」より短いため)/, step:1, anchor:'#grpShortJudge'},
+    {re:/^「②雇用管理の改善等に関する事項に係る相談窓口」が/, step:6, anchor:'consult_dept'},
+    {re:/^(通算契約期間の起算日（|「通算契約期間の起算日」|通算契約期間は|無期転換の申込みができる旨)/, step:3, anchor:['tsusan_start','contract_end']},
+    {re:/^契約期間（[^）]*）が\d+年を超えています/, step:3, anchor:'contract_end'},
+    {re:/^[^、。]{1,40}が未入力のため、「待遇の相違の説明を求めることができる旨」の明示義務/, step:3, anchor:['muki_start','contract_start']},
+    {re:/^【要確認】賃金欄の「月の所定労働時間」/, step:5, anchor:'monthly_scheduled_hours'}
+  ]
+};
+const STEP_MAP_LAW_ROWS=12;   // 上の law の行数（セルフテスト Z1 で負検証の後始末を確認するための固定値）
+/* 記入推奨（原さん決定 2026-09-26）：requiredGaps には無いが、空だと書面の該当箇所が空白になる欄。
+   画面に「記入推奨」と出すだけで、出力は止めない（判定ロジック・出力前の確認ダイアログは不変）。 */
+const REC_FIELDS=[
+  {name:'employee_name', label:'社員氏名', step:2},
+  {name:'issue_date', label:'交付日', step:2},
+  {name:'office_name', label:'事業場名称', step:2}
+];
+const IW_PREFIX={block:'⛔ 出力できません：', red:'⚠ 法令違反のおそれ：', gap:'⚠ 法定明示事項の未入力：', yellow:'【要確認】', rec:'記入推奨：'};
+const IW_ORDER=['block','red','gap','yellow','rec'];
+
+function stepMapGap(label){ return Object.prototype.hasOwnProperty.call(STEP_MAP.gaps, label) ? STEP_MAP.gaps[label] : null; }
+function stepMapLaw(msg){ for(const r of STEP_MAP.law){ if(r.re.test(String(msg))) return r; } return null; }
+function stepOfEl(el){ const s=el&&el.closest?el.closest('#form section.step'):null; return s?Number(s.dataset.step):null; }
+function stepLabel(n){ const d=STEP_DEFS.find(x=>x.n===n); return d?d.rail:''; }
+
+// 判定結果（requiredGaps・legalChecks）と記入推奨を、手順番号つきの一覧にする（判定そのものはしない）
+function collectStepItems(gaps, lc){
+  const items=[];
+  (gaps||[]).forEach(g=>{ const m=stepMapGap(g);
+    items.push({level:'gap', text:g, step:m?m.step:7, anchor:m?m.anchor:null, other:!m}); });
+  if(lc){ [['blocks','block'],['reds','red'],['yellows','yellow']].forEach(([k,lv])=>{
+    (lc[k]||[]).forEach(t=>{ const m=stepMapLaw(t);
+      items.push({level:lv, text:t, step:m?m.step:7, anchor:m?m.anchor:null, other:!m}); }); }); }
+  REC_FIELDS.forEach(f=>{ if(!has(val(f.name))) items.push({level:'rec', text:`「${f.label}」が空欄です（空欄のままでも出力はできますが、書面の該当箇所が空白になります）`, step:f.step, anchor:f.name, other:false}); });
+  return items;
 }
-function updateFormNav(gaps){
-  const nav=document.getElementById('formNav'); if(!nav||!nav.children.length) return;
-  nav.querySelectorAll('.nav-chip').forEach(ch=>{
-    const fs=document.getElementById(ch.dataset.fs);
-    ch.classList.toggle('hidden', !fs || fs.classList.contains('hidden'));
-  });
-  const gb=document.getElementById('navGap'); if(!gb) return;
-  if(gaps.length){ gb.className='nav-gap ng'; gb.disabled=false; gb.textContent='⚠ 法定明示 残'+gaps.length+'件';
-    gb.title='クリックで先頭の未入力欄へ移動：'+gaps.join('／'); gb.setAttribute('aria-label',gb.title);
-    gb.onclick=()=>{ const first=[...nav.querySelectorAll('.nav-chip')].find(c=>!c.classList.contains('hidden'));
-      const fs=first&&document.getElementById(first.dataset.fs); if(fs){ try{fs.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){fs.scrollIntoView();} } }; }
-  else { gb.className='nav-gap ok'; gb.disabled=true; gb.textContent='✓ 法定明示OK'; gb.title=''; gb.removeAttribute('aria-label'); gb.onclick=null; }
+// 表示先（anchor）を探す。隠れている欄（.hidden の中）は使わない。手順の表示切替（.step-off）は見ない
+function resolveAnchor(anchor){
+  const list=Array.isArray(anchor)?anchor:[anchor];
+  for(const a of list){
+    if(!a) continue;
+    let el=null;
+    if(a[0]==='#') el=document.getElementById(a.slice(1));
+    else if(a[0]==='.') el=form.querySelector(a);
+    else { const x=form.elements[a]; el=(x && !x.tagName && x.length)?x[0]:x; }
+    if(!el || el.closest('.hidden,.ui-folded,.np-folded')) continue;
+    if(el.matches && el.matches('input,select,textarea')){
+      const row=el.closest('.row'), cell=el.parentElement;
+      if(row && cell && cell!==row && (row.classList.contains('two')||row.classList.contains('three'))) return {host:cell, mode:'append'};
+      return {host:row||el, mode:'after'};
+    }
+    return {host:el, mode:'after'};
+  }
+  return null;
 }
-// 全体ヘルプOFFのとき、各欄の legend の「？」でその欄のヒントだけ開閉できる
+/* render() の最後に呼ぶ。欄直下の警告・手順レールの件数・⑦の一覧・手順ごとの注記を描き直す（すべて画面のみ）。
+   一括出力中（BULK_MODE）は人数分くり返すため描画を省く（判定は各出力関数の側で行われる）。 */
+function renderInlineWarnings(gaps, lc, st){
+  if(BULK_MODE) return;
+  const items=collectStepItems(gaps, lc);
+  form.querySelectorAll('.inline-warn').forEach(e=>e.remove());
+  syncNextPerson(items);   // P4：2人目以降のモードの折りたたみ（警告の表示先を決める前に行う）
+  const boxes=new Map();
+  items.forEach(it=>{
+    if(it.other) return;   // 手順に当たらないものは ⑦「その他」だけに出す
+    let pos=resolveAnchor(it.anchor);
+    if(!pos){ const head=document.querySelector('#step'+it.step+' .step-head'); if(!head) return; pos={host:head, mode:'after'}; }
+    let box=boxes.get(pos.host);
+    if(!box){ box=document.createElement('div'); box.className='inline-warn'; box.setAttribute('data-ui-only','');
+      if(pos.mode==='append') pos.host.appendChild(box); else pos.host.insertAdjacentElement('afterend', box);
+      boxes.set(pos.host, box); box._items=[]; }
+    box._items.push(it);
+  });
+  boxes.forEach(box=>{
+    box._items.sort((a,b)=>IW_ORDER.indexOf(a.level)-IW_ORDER.indexOf(b.level)).forEach(it=>{
+      const d=document.createElement('div'); d.className='iw iw-'+it.level; d.textContent=IW_PREFIX[it.level]+it.text; box.appendChild(d); });
+    delete box._items;
+  });
+  updateRail(items);
+  renderFinalCheck(items);
+  updateStepNotes();
+}
+// 手順レールの件数（⛔出力不可＝legalChecks の blocks、未入力＝requiredGaps。DOM の空欄＝黄色は数えない）
+function updateRail(items){
+  const cnt=(list,lv)=>list.filter(i=>i.level===lv).length;
+  STEP_DEFS.forEach(d=>{
+    const btn=document.getElementById('railBtn'+d.n); if(!btn) return;
+    const mine = d.n===STEP_COUNT ? items : items.filter(i=>i.step===d.n);
+    const nb=cnt(mine,'block'), ng=cnt(mine,'gap'), nc=cnt(mine,'red')+cnt(mine,'yellow'), nr=cnt(mine,'rec');
+    const st=btn.querySelector('.rail-st'); st.textContent='';
+    const add=(cls,t)=>{ const s=document.createElement('span'); s.className=cls; s.textContent=t; if(st.childNodes.length) st.appendChild(document.createTextNode(' ')); st.appendChild(s); };
+    if(d.n===STEP_COUNT){
+      if(nb) add('st-x','⛔出力不可'+nb); if(ng) add('st-n','未入力'+ng);
+      if(!nb && !ng) add('st-o', nc?'出力できます（要確認'+nc+'）':'出力できます');
+    } else {
+      if(nb) add('st-x','⛔出力不可'+nb); if(ng) add('st-n','未入力'+ng);
+      if(nc) add('st-n','要確認'+nc); if(nr) add('st-r','記入推奨'+nr);
+      if(!nb && !ng && !nc && !nr) add(NEXT_PERSON_MODE.active && [3,4,6].indexOf(d.n)>=0 ? 'st-np' : 'st-o', NEXT_PERSON_MODE.active && [3,4,6].indexOf(d.n)>=0 ? '【引継】' : '✓ 警告なし');
+    }
+    btn.setAttribute('aria-label','手順'+d.n+' '+d.rail+'（'+st.textContent+'）');
+  });
+  const tot=document.getElementById('railTotal');
+  if(tot){ const nb=cnt(items,'block'), ng=cnt(items,'gap'), nc=cnt(items,'red')+cnt(items,'yellow');
+    tot.textContent='全体：出力不可 '+nb+'件／未入力 '+ng+'件／要確認 '+nc+'件'; }
+  let np=document.getElementById('npRailNote');
+  if(!np && tot){ np=document.createElement('div'); np.id='npRailNote'; np.className='np-rail-note'; np.setAttribute('data-ui-only',''); np.setAttribute('aria-live','polite');
+    const tx=document.createElement('span'); tx.className='np-rail-text'; np.appendChild(tx);
+    const b=document.createElement('button'); b.type='button'; b.className='linkbtn'; b.textContent='全部の手順を見直す'; b.onclick=npReviewAll; np.appendChild(b);
+    tot.insertAdjacentElement('afterend', np); }
+  if(np){ np.classList.toggle('hidden', !NEXT_PERSON_MODE.active);
+    const tx=np.querySelector('.np-rail-text'), msg = NEXT_PERSON_MODE.active ? '【引継】2人目以降の入力モード：②本人と⑤賃金だけを開いています（前の人：'+npShort(NEXT_PERSON_MODE.prevName,20)+'）。' : '';
+    if(tx.textContent!==msg) tx.textContent=msg; }
+}
+// ⑦ 出力前チェックの一覧（手順ごと＋どの手順にも当たらないものは「その他」）
+function renderFinalCheck(items){
+  const box=document.getElementById('finalCheck'); if(!box) return;
+  box.textContent='';
+  if(!items.length){
+    const ok=document.createElement('div'); ok.className='fc-ok';
+    ok.textContent='✓ 出力を止める項目・未入力の法定明示事項・確認が必要な事項はありません。交付する前に「📋 交付前チェック用紙」で、機械では確認できない項目を人の目で確認してください。';
+    box.appendChild(ok); return;
+  }
+  const groups=STEP_DEFS.filter(d=>d.n<STEP_COUNT).map(d=>({n:d.n, title:'手順'+d.n+'　'+d.rail, list:items.filter(i=>!i.other && i.step===d.n)}));
+  groups.push({n:null, title:'その他（どの手順にも当たらない警告）', list:items.filter(i=>i.other)});
+  groups.forEach(g=>{
+    if(!g.list.length) return;
+    const wrap=document.createElement('div'); wrap.className='fc-group';
+    const h=document.createElement('h4'); h.textContent=g.title+'（'+g.list.length+'件）';
+    if(g.n){ const b=document.createElement('button'); b.type='button'; b.className='fc-fix'; b.textContent='直す';
+      b.setAttribute('aria-label','手順'+g.n+'「'+stepLabel(g.n)+'」を開いて直す');
+      b.onclick=()=>{ goStep(g.n); const first=g.list[0]; const pos=first&&resolveAnchor(first.anchor);
+        if(pos&&pos.host){ try{ pos.host.scrollIntoView({block:'center'}); }catch(e){} } };
+      h.appendChild(b); }
+    const ul=document.createElement('ul');
+    g.list.slice().sort((a,b)=>IW_ORDER.indexOf(a.level)-IW_ORDER.indexOf(b.level)).forEach(it=>{
+      const li=document.createElement('li'); li.className='lv-'+it.level; li.textContent=IW_PREFIX[it.level]+it.text; ul.appendChild(li); });
+    wrap.appendChild(h); wrap.appendChild(ul); box.appendChild(wrap);
+  });
+}
+// 雇用区分等で手順内の fieldset が丸ごと隠れたとき（日雇の「休日・休暇」「退職」「試用期間」）、その旨を手順の先頭に出す
+function updateStepNotes(){
+  document.querySelectorAll('#form section.step').forEach(sec=>{
+    const note=sec.querySelector(':scope > .step-note'); if(!note) return;
+    const hid=[...sec.querySelectorAll(':scope > fieldset.hidden')].map(fs=>{ const lg=fs.querySelector('legend'); return lg&&lg.firstChild?String(lg.firstChild.textContent).trim():''; }).filter(Boolean);
+    note.textContent = hid.length ? 'この書類・働き方では次の欄はありません（入力不要）：'+hid.join('、') : '';
+    note.classList.toggle('hidden', !hid.length);
+  });
+}
+// 手順レールを STEP_DEFS から作る（#form の外。name を持たないボタンだけ）
+function buildRail(){
+  const ol=document.getElementById('railList'); if(!ol) return;
+  ol.textContent='';
+  STEP_DEFS.forEach(d=>{
+    const li=document.createElement('li');
+    const b=document.createElement('button'); b.type='button'; b.className='rail-btn'; b.id='railBtn'+d.n; b.dataset.step=String(d.n);
+    const no=document.createElement('span'); no.className='rail-no'; no.textContent=String(d.n); no.setAttribute('aria-hidden','true');
+    const tx=document.createElement('span');
+    const tt=document.createElement('span'); tt.className='rail-tt'; tt.textContent=d.rail;
+    const st=document.createElement('span'); st.className='rail-st';
+    tx.appendChild(tt); tx.appendChild(st); b.appendChild(no); b.appendChild(tx);
+    b.onclick=()=>goStep(d.n);
+    li.appendChild(b); ol.appendChild(li);
+  });
+  // 狭い画面で横に送ったとき、右端まで来たらフェードを外す（画面のみ）
+  const edge=()=>ol.classList.toggle('rail-end', ol.scrollLeft+ol.clientWidth>=ol.scrollWidth-2);
+  ol.addEventListener('scroll', edge, {passive:true}); window.addEventListener('resize', edge); edge();
+}
+/* 手順を切り替える（表示だけ。値・判定には触れない）。
+   opt.focus=false … 見出しへフォーカスを移さない（初期表示・特定の欄へ移動するとき） */
+function goStep(n, opt){
+  opt=opt||{};
+  n=Math.max(1, Math.min(STEP_COUNT, Number(n)||1));
+  CUR_STEP=n;
+  document.querySelectorAll('#form section.step').forEach(s=>s.classList.toggle('step-off', Number(s.dataset.step)!==n));
+  document.querySelectorAll('#railList .rail-btn').forEach(b=>{ if(Number(b.dataset.step)===n) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); });
+  const prev=document.getElementById('stepPrev'), next=document.getElementById('stepNext'), sum=document.getElementById('stepSum');
+  const pT=stepTarget(n,-1), nT=stepTarget(n,1);
+  if(prev){ prev.disabled=(pT==null); prev.textContent = pT!=null ? '← 戻る（'+stepLabel(pT)+'）' : '← 戻る'; const pt = pT!=null ? '前の手順（'+stepLabel(pT)+'）へ戻る' : ''; prev.title=pt; if(pt) prev.setAttribute('aria-label', pt); else prev.removeAttribute('aria-label'); }
+  if(next){ next.classList.toggle('hidden', nT==null); if(nT!=null) next.textContent='次へ（'+stepLabel(nT)+'）→'; }
+  if(sum) sum.textContent='手順 '+n+' / '+STEP_COUNT+'：'+stepLabel(n);
+  markEmpty();   // 黄色の未入力表示は「いま開いている手順」の欄だけに付く（markEmpty は表示中の欄だけを見る）
+  try{ form.scrollTop=0; }catch(e){}
+  if(window.matchMedia && window.matchMedia('(max-width:900px)').matches){
+    const r=form.getBoundingClientRect(); if(r.top<0) window.scrollBy(0, r.top-60);
+  }
+  if(opt.focus!==false){ const h=document.getElementById('stepH'+n); if(h){ try{ h.focus({preventScroll:true}); }catch(e){ h.focus(); } } }
+  if(typeof pvFootHeight==='function') pvFootHeight();   // 手順ごとにフッターの高さが変わる（ボタンの折り返し）→ 開閉ボタンの位置を合わせる
+  if(typeof layoutColumns==='function') layoutColumns(); // 3列の高さを画面に合わせる（「次へ」が画面外に出ないように）
+}
+function goStepRel(d){ const t=stepTarget(CUR_STEP, d); if(t!=null) goStep(t); }   // モード ON のときは ②→⑤→⑦（stepTarget）
+
+/* ==========================================================================
+   §E-3 2人目以降の入力モード（P4／設計書 §3）
+   --------------------------------------------------------------------------
+   ・ON にするのは rosterAddNext() だけ。OFF は rosterEdit()・loadData() の成功時・clearFormAll()（resetForm・loadSample も経由）・
+     ⑦「全部の手順を見直す」。restoreState() の中では変えない（一括出力が restoreState をくり返すため）。
+   ・1人目との区別は NEXT_PERSON_MODE.active だけで行う（名簿の人数では判定しない）。
+   ・このモードは「どの欄を開いて見せるか」だけを変える。値・保存・書面・判定には一切触れない。
+   ========================================================================== */
+let NEXT_PERSON_MODE = { active: false, prevName: '' };
+let NP_OPEN = { company: false, wage: false };   // 「見直す」で開いたか（画面だけの状態）
+const NP_SEQ = [2, 5, 7];                        // モード ON のときの「次へ／戻る」の順
+// 負検証専用（N23：restoreState の中でOFF／N24：次の人へで引き継がない／N25：実効判定を OT_PAY だけに／N26：npSetMode(false) で印を消す）
+const P4_HOOKS = { offOnReset: false, otNullOnNext: false, effectiveOtOnly: false, clearInheritOnModeOff: false, keepInheritOnSwitch: false, clearInheritOnInput: false };   // clearInheritOnInput … N28   // keepInheritOnSwitch … N27
+function npSetMode(on, prevName, prevOtPay){
+  if (!on && SELFTEST_ACTIVE && P4_HOOKS.clearInheritOnModeOff) NP_OT_INHERIT = false;   // N26（本番では消さない）
+  NEXT_PERSON_MODE = { active: !!on, prevName: on ? String(prevName || '') : '', prevOtPay: !!(on && prevOtPay) };
+  NP_OPEN = { company: false, wage: false };
+}
+// 「次へ／戻る」の行き先。null＝その向きには進めない
+function stepTarget(from, d){
+  if (!NEXT_PERSON_MODE.active) { const t = from + d; return (t < 1 || t > STEP_COUNT) ? null : t; }
+  if (d > 0) { const t = NP_SEQ.find(s => s > from); return t == null ? null : t; }
+  const c = NP_SEQ.filter(s => s < from); return c.length ? c[c.length - 1] : null;
+}
+function npCompanyEls(){ return [form.elements['office_addr'].closest('.row'), form.elements['office_name'].closest('.row')]; }
+// ⑤の 5-4〜5-6 に当たる要素（見出し 5-4 から賃金の欄の最後まで。欄直下の警告は毎回作り直すので除く）
+function npWageRange(){ const out = []; let e = document.getElementById('wageSub4'); while (e) { if (!e.classList.contains('inline-warn')) out.push(e); e = e.nextElementSibling; } return out; }
+function rawAnchorEls(anchor){
+  return (Array.isArray(anchor) ? anchor : [anchor]).map(a => {
+    if (!a) return null;
+    if (a[0] === '#') return document.getElementById(a.slice(1));
+    if (a[0] === '.') return form.querySelector(a);
+    const x = form.elements[a]; return (x && !x.tagName && x.length) ? x[0] : x;
+  }).filter(Boolean);
+}
+function npShort(v, n){ const s = String(v == null ? '' : v).trim(); if (!s) return '（空欄）'; return s.length > n ? s.slice(0, n) + '…' : s; }
+function npDate(v){ return has(v) ? fmtDate(v) : '（空欄）'; }
+/* renderInlineWarnings から呼ぶ（欄直下の警告を置く前）。②会社カード・⑤5-4〜5-6 の折りたたみと、⑦の引き継ぎ一覧を描く */
+function syncNextPerson(items){
+  const on = NEXT_PERSON_MODE.active;
+  // ② 会社カード
+  const foldC = on && !NP_OPEN.company && has(val('office_name'));   // 事業場名称が空（記入推奨）なら開く
+  npCompanyEls().forEach(e => e.classList.toggle('np-folded', foldC));
+  const cs = document.getElementById('npCompanySum');
+  if (cs) { cs.classList.toggle('ui-folded', !foldC);
+    cs.querySelector('.np-text').textContent = '【引継】前の人から引き継ぎ：事業場名称 ' + npShort(val('office_name'), 30) + '／所在地 ' + npShort(val('office_addr'), 30) + '／使用者 ' + npShort(val('employer'), 30); }
+  // ⑤ 5-4〜5-6（未入力・出力不可・法令違反のおそれ・要確認がある区分は自動で開く）
+  const range = npWageRange();
+  const need = items.some(it => it.step === 5 && (it.level === 'gap' || it.level === 'block' || it.level === 'red' || it.level === 'yellow')
+    && rawAnchorEls(it.anchor).some(el => range.some(r => r === el || r.contains(el))));
+  const foldW = on && !NP_OPEN.wage && !need;
+  range.forEach(e => e.classList.toggle('np-folded', foldW));
+  const ws = document.getElementById('npWageSum');
+  if (ws) { ws.classList.toggle('ui-folded', !foldW);
+    ws.querySelector('.np-text').textContent = '【引継】前の人から引き継ぎ：5-4 割増賃金率・5-5 締切（' + npShort(val('wage_closing'), 12) + '）・支払日（' + npShort(val('wage_payday'), 12)
+      + '）・支払方法・5-6 昇給 ' + (val('raise_flag') || '未選択') + '／賞与 ' + (val('bonus_flag') || '未選択') + '／退職金 ' + (val('retire_flag') || '未選択'); }
+  // ⑦ 前の人から引き継いだ主な値
+  const box = document.getElementById('npCheck'); if (!box) return;
+  const gapOT = otInheritGap();
+  box.classList.toggle('ui-folded', !(on || gapOT));   // モード OFF（全部の手順を見直す後など）でも、引き継ぎ確認があれば出す（I-6）
+  if (!(on || gapOT)) return;
+  const rb = document.getElementById('npReviewAllBtn'); if (rb) rb.classList.toggle('hidden', !on);
+  box.querySelector('.np-cap').textContent = on ? '前の人（' + npShort(NEXT_PERSON_MODE.prevName, 20) + '）から引き継いだ主な値（この方にも当てはまるか見直してください）'
+    : '引き継ぎ確認（前の人は固定残業を支給していました）';
+  const per = radio('period_type'), rows = [];
+  if (on && per === '無期') rows.push({ label: '入社日', value: npDate(val('muki_start')), step: 2, focus: 'pd_muki_start' });
+  if (on && per === '有期') {
+    rows.push({ label: '契約期間', value: npDate(val('contract_start')) + '〜' + npDate(val('contract_end')), step: 2, focus: 'pd_contract_start' });
+    rows.push({ label: '通算契約期間の起算日', value: npDate(val('tsusan_start')), step: 3, focus: 'tsusan_start' });
+  }
+  if (on) {
+    rows.push({ label: '業務の内容（雇入れ直後）', value: npShort(val('job_now'), 40), step: 3, focus: 'job_now' });
+    rows.push({ label: '特記事項', value: npShort(val('tokki_jiko'), 40), step: 6, focus: 'tokki_jiko' });
+    rows.push({ label: '社会保険の被保険者区分', value: has(val('shaho_kubun')) ? '入力済み：' + val('shaho_kubun') : 'クリア済み（任意）', step: 6, focus: 'shaho_kubun' });
+  }
+  if ((on && NEXT_PERSON_MODE.prevOtPay) || gapOT) {   // 前の人が固定残業を支給していた場合（時間数・金額は人ごとにクリアされる）
+    const uni = val('ot_style') === 'unified', eff = otPayEffective();
+    const now = !eff ? '支給しない' : otHoursEmpty() ? '支給する（時間数が未入力）'
+      : uni ? '支給する（一体型）' : '支給する（' + (has(val('fixed_ot_hours')) ? '時間外' + val('fixed_ot_hours') + '時間' : '金額入力あり') + '）';
+    rows.push({ label: '固定残業', value: '前の人：支給する／この方：' + now + (gapOT ? '　⚠ 未入力：' + (uni ? '希望額または時間数' : '時間数') : ''), step: 5,
+      focus: uni ? 'uni_target' : 'fixed_ot_hours', missing: gapOT });
+  }
+  const ul = box.querySelector('.np-list');
+  const key = JSON.stringify(rows.map(r => [r.label, r.value, !!r.missing, r.focus, r.step]));
+  if (ul.dataset.key === key) return;   // 内容が同じなら作り直さない（押している途中のボタンを消さない）
+  ul.dataset.key = key; ul.textContent = '';
+  rows.forEach(r => {
+    const li = uiEl('li', r.missing ? 'np-missing' : null); li.appendChild(uiEl('b', null, r.label + '：')); li.appendChild(uiEl('span', null, r.value + '　'));
+    const b = uiEl('button', 'fc-fix', '直す'); b.type = 'button'; b.setAttribute('aria-label', r.label + 'を直す（手順' + r.step + '）');
+    b.onclick = () => { goStep(r.step, { focus: false }); const el = document.getElementById(r.focus) || form.elements[r.focus];
+      if (el && el.focus) { try { el.focus(); el.scrollIntoView({ block: 'center' }); } catch (e) {} } };
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+// 「見直す」で開いた範囲の中で、見えるようになった最初の入力欄へフォーカスする（⑦の「直す」と同じ作り）
+function npFocusFirst(els){
+  for (const root of els) {
+    const cands = root.matches && root.matches('input,select,textarea') ? [root] : [...root.querySelectorAll('input,select,textarea')];
+    const el = cands.find(x => x.type !== 'hidden' && !x.classList.contains('ui-vh-select') && !x.disabled && x.offsetParent !== null);
+    if (el) { try { el.focus(); el.scrollIntoView({ block: 'center' }); } catch (e) {} return el; }
+  }
+  return null;
+}
+
+/* ==========================================================================
+   §E-4 プレビューと入力欄の行き来・狭い画面のドロワー（P5／設計書 §5 P5・R4）
+   --------------------------------------------------------------------------
+   ・書面HTML（LAST_SHEETS）には属性を1つも足さない。render の後、画面の #preview の DOM にだけ
+     tabindex・role・data-pv を付け、クリック／Enter はイベント委譲で受ける（印刷・PDF・Word・Excel に出ない）。
+   ・入力中の欄に対応する書面の行に .pv-hl を付ける（印刷CSSで打ち消す）。
+   ・900px以下はプレビューをドロワーにする。閉じるときは transform の画面外移動＋visibility:hidden
+     （display:none にしない＝estimatePages の実測と印刷のページ番号 #mpHeader を壊さない）。
+   ========================================================================== */
+/* 書面の行 → 手順・入力欄の対応表（STEP_MAP の一部として1か所に置く）。
+   row … td.k の文字列（完全一致）、または書面の先頭部分のクラス名（cls）
+   focus … 移動した後にフォーカスする欄（配列なら表示中の最初のもの）
+   fields／within … 入力中の欄がこの行に当たるか（ハイライト用）。上の行ほど優先 */
+STEP_MAP.rows = [
+  { cls: 'issue',  step: 2, focus: ['issue_date'], fields: ['issue_date'] },
+  { cls: 'addr',   step: 2, focus: ['employee_name'], fields: ['employee_name'] },
+  { cls: 'office', step: 2, focus: ['office_name'], fields: ['office_addr', 'office_name', 'employer'], npOpen: 'company' },
+  { cls: 'form-kind', step: 1, focus: ['display_category'], fields: ['display_category'] },
+  { cls: 'title',  step: 1, focus: ['docType'], fields: ['docType', 'change_date', 'change_reason', 'change_basis'] },
+  { row: '特記事項', step: 6, focus: ['tokki_jiko'], fields: ['tokki_jiko'] },
+  { row: '契約期間', step: 3, focus: ['muki_start', 'contract_start', 'work_days'], npStep: 2, npFocus: ['#pd_muki_start', '#pd_contract_start'],
+    fields: ['muki_start', 'contract_start', 'contract_end', 'renewal', 'renewal_criteria', 'renewal_cap', 'tsusan_start', 'muki_flag', 'work_days'], within: ['#personDates'] },
+  { row: '試用期間', step: 3, focus: ['probation_flag'], fields: ['probation_flag', 'probation_text'] },
+  { row: '就業の場所', step: 3, focus: ['workplace_now'], fields: ['workplace_now', 'workplace_scope'] },
+  { row: '従事すべき業務の内容', step: 3, focus: ['job_now'], fields: ['job_now', 'job_scope'] },
+  { row: '始業・終業の時刻等', step: 4, focus: ['worktime_system'], within: ['#fsWorktime'] },
+  { row: '休日', step: 4, focus: ['holiday'], fields: ['holiday'] },
+  { row: '休日及び勤務日', step: 4, focus: ['holiday'], fields: ['holiday'] },
+  { row: '休暇', step: 4, focus: ['paid_leave'], fields: ['paid_leave', 'other_leave'] },
+  { row: '賃金', step: 5, focus: ['monthly_wage', 'daily_wage', 'hourly_wage', 'annual_wage', 'unit_price'], within: ['#fsWage'], npOpen: 'wage' },
+  { row: '退職に関する事項', step: 6, focus: ['mandatory_age'], within: ['#fsRetire'] },
+  { row: 'その他', step: 6, focus: ['kenpo_name'], within: ['#fsOther'] }
+];
+const P5_HOOKS = { drawerDisplayNone: false, noNpOpen: false };   // noNpOpen … N30（2人目モードで折りたたみを開かない誤り）   // 負検証（N29）専用：ドロワーを閉じるときに display:none にする誤り を再現する
+// 書面の DOM 要素（td.k の行の tr、または先頭部分の div）から対応表の行を引く
+function pvRowOf(el){
+  if (!el) return null;
+  const tr = el.closest && el.closest('#preview tr');
+  if (tr) { const k = tr.querySelector('td.k'); const key = k ? k.textContent.trim() : ''; return STEP_MAP.rows.find(r => r.row && r.row === key) || null; }
+  const div = el.closest && el.closest('#preview .sheet > div');
+  if (div) return STEP_MAP.rows.find(r => r.cls && div.classList.contains(r.cls)) || null;
+  return null;
+}
+// 対応表の行から「書面のどの要素に付けるか」（td.k の行は tr・先頭部分は div）
+function pvTargets(){
+  const out = [];
+  document.querySelectorAll('#preview .sheet td.k').forEach(k => { const r = STEP_MAP.rows.find(x => x.row && x.row === k.textContent.trim()); if (r) out.push({ el: k.closest('tr'), r, label: k.textContent.trim() }); });
+  document.querySelectorAll('#preview .sheet > div').forEach(d => { const r = STEP_MAP.rows.find(x => x.cls && d.classList.contains(x.cls)); if (r) out.push({ el: d, r, label: ({ issue: '交付日', addr: '氏名', office: '事業場', 'form-kind': '表示用の雇用区分', title: '書類の種類' })[r.cls] || r.cls }); });
+  return out;
+}
+// 行から手順へ移動して欄にフォーカスする（対応しない行は何もしない）
+function pvJump(r){
+  if (!r) return false;
+  pvDrawer(false);   // 狭い画面ではドロワーを閉じて入力欄を見せる
+  // 2人目以降モード：折りたたまれた範囲（②会社・⑤5-4〜5-6）の行は「見直す」と同じく開いてから移動する
+  if (NEXT_PERSON_MODE.active && r.npOpen && !(SELFTEST_ACTIVE && P5_HOOKS.noNpOpen)) { NP_OPEN[r.npOpen] = true; render(); }
+  // 2人目以降モード：入社日・契約期間は②本人カードの代理欄で直す（要確認3）
+  //   代理欄が無い場合（日雇の就労日など）は、通常どおり本来の手順へ
+  const tries = (NEXT_PERSON_MODE.active && r.npStep) ? [[r.npStep, r.npFocus], [r.step, r.focus]] : [[r.step, r.focus]];
+  for (const [step, list] of tries) {
+    goStep(step, { focus: false });
+    for (const n of list) {
+      const x = n[0] === '#' ? document.getElementById(n.slice(1)) : form.elements[n]; let el = (x && !x.tagName && x.length) ? x[0] : x;
+      if (el && el.classList && el.classList.contains('ui-vh-select')) { const g = document.querySelector('.seg-proxy[data-for="' + n + '"] .seg-btn'); if (g) el = g; }
+      if (el && el.offsetParent !== null) { try { el.focus(); el.scrollIntoView({ block: 'center' }); } catch (e) {} return true; }
+    }
+  }
+  const last = tries[tries.length - 1][0]; goStep(last, { focus: false });
+  const h = document.getElementById('stepH' + last); if (h) { try { h.focus(); } catch (e) {} }
+  return true;
+}
+// render の後に、画面の #preview にだけ操作用の属性を付け直す（書面HTMLの文字列は変えない）
+function decoratePreview(){
+  pvTargets().forEach(t => {
+    t.el.setAttribute('tabindex', '0'); t.el.setAttribute('role', 'button'); t.el.dataset.pv = '1';
+    t.el.setAttribute('aria-label', '書面の「' + t.label + '」：押すと手順' + t.r.step + 'の入力欄へ移動します');
+  });
+  pvHighlight();
+  pvApplyScale();
+}
+// 入力中の欄に対応する書面の行をハイライトする
+function pvHighlight(){
+  document.querySelectorAll('#preview .pv-hl').forEach(e => e.classList.remove('pv-hl'));
+  const a = document.activeElement; if (!a || !form.contains(a)) return;
+  const n = a.name || (a.id && a.id.indexOf('pd_') === 0 ? a.id.slice(3) : '');
+  const r = STEP_MAP.rows.find(x => (x.fields && n && x.fields.indexOf(n) >= 0) || (x.within && x.within.some(s => a.closest(s))));
+  if (!r) return;
+  pvTargets().filter(t => t.r === r).forEach(t => t.el.classList.add('pv-hl'));
+}
+// 900px以下のドロワー（開閉は body のクラス。閉じても display:none にしない）
+// ドロワーを開いている間は、外側（入力欄・手順レール・ヘッダー・タブ・名簿バー・フッター）を inert にしてフォーカスを閉じ込める
+const PV_INERT_SEL = ['#form', '#stepRail', 'header.appbar', '.tabbar', '#rosterBar', '#appFooter'];
+function pvDrawer(open){
+  const on = document.body.classList.contains('pv-drawer'), isOpen = on && !!open, was = document.body.classList.contains('pv-open');
+  document.body.classList.toggle('pv-open', isOpen);
+  PV_INERT_SEL.forEach(s => document.querySelectorAll(s).forEach(e => { if (isOpen) e.setAttribute('inert', ''); else e.removeAttribute('inert'); }));
+  const b = document.getElementById('pvToggle'); if (b) { b.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); b.textContent = isOpen ? '✕ プレビューを閉じる' : '📄 プレビュー';
+    if (isOpen && !was) { try { b.focus(); } catch (e) {} } }   // 開いた直後はドロワーの最初の要素（閉じるボタン）へ
+}
+// 広い画面の3列（手順レール・入力欄・プレビュー）の高さ＝画面の高さ − 列の上端（ページ先頭からの実測）− 余白。
+// ヘッダー・タブ・名簿バーの高さは幅や表示・非表示で変わるため、goStep・resize・名簿バーの切替・上の部品の大きさの変化のたびに測り直す。
+// 900px以下（1列・ドロワー）では使わない（media の max-height:none のまま）
+const COL_BOTTOM_MARGIN = 8;
+function layoutColumns(){
+  const root = document.documentElement, f = document.getElementById('form');
+  if (!f || (window.matchMedia && window.matchMedia('(max-width:900px)').matches)) { root.style.removeProperty('--col-h'); return; }
+  const top = f.getBoundingClientRect().top + (window.scrollY || 0);
+  root.style.setProperty('--col-h', Math.max(320, Math.floor(window.innerHeight - top - COL_BOTTOM_MARGIN)) + 'px');
+}
+// プレビューの A4 を列幅に合わせて縮小表示する（画面のみ・transform のため offsetWidth / scrollHeight は不変＝ページ数推定・印刷に影響しない）
+// 倍率＝プレビュー列の内側の幅 ÷ A4 の幅（上限 1）。PV_SCALE_MIN 未満にはしない（それより狭いときは今までどおり横スクロール）
+const PV_SCALE_MIN = 0.6;
+const PV_SCALE_NOTE_BELOW = 0.8;   // この倍率未満で「縮小表示中」の案内を出す
+const PV_SCALE_NOTE_TEXT = '書面を縮小して表示しています。文字の確認は Ctrl＋プラスで拡大するか、「🖨 印刷/PDF」の印刷プレビューで行ってください。';
+function pvApplyScale(){
+  const pv = document.getElementById('preview'); if (!pv) return;
+  const sheets = [...pv.querySelectorAll('.sheet')]; if (!sheets.length) return;
+  const cs = getComputedStyle(pv);
+  const inner = pv.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+  const w = sheets[0].offsetWidth || 794;
+  const sc = inner > 0 ? Math.max(PV_SCALE_MIN, Math.min(1, Math.floor(inner / w * 100) / 100)) : 1;
+  pv.style.setProperty('--pv-scale', String(sc));
+  sheets.forEach(sh => sh.style.setProperty('--sh-h', sh.offsetHeight + 'px'));
+  // 0.8 倍未満のときだけ、プレビュー上部に案内を1行（画面のみ・印刷CSSで消す・textContent で出す）
+  let note = document.getElementById('pvScaleNote');
+  if (sc < PV_SCALE_NOTE_BELOW) {
+    if (!note) { note = document.createElement('div'); note.id = 'pvScaleNote'; note.className = 'page-note pv-scale-note'; note.setAttribute('data-ui-only', ''); note.setAttribute('role', 'note'); }
+    note.textContent = PV_SCALE_NOTE_TEXT;
+    if (note.parentElement !== pv || pv.firstElementChild !== note) pv.insertBefore(note, pv.firstChild);
+  } else if (note) note.remove();
+}
+// 手順フッターの高さを CSS 変数へ（開閉ボタンを「次へ」の上に置くため）
+function pvFootHeight(){ const f = document.querySelector('#form .step-foot'); if (f) document.documentElement.style.setProperty('--pv-foot-h', Math.ceil(f.getBoundingClientRect().height) + 'px'); }
+function pvApplyWidth(){
+  const narrow = !!(window.matchMedia && window.matchMedia('(max-width:900px)').matches);
+  document.body.classList.toggle('pv-drawer', narrow);
+  document.body.classList.toggle('pv-dn-hook', !!(SELFTEST_ACTIVE && P5_HOOKS.drawerDisplayNone));
+  if (!narrow) pvDrawer(false); else pvDrawer(document.body.classList.contains('pv-open'));
+  pvFootHeight();
+  pvApplyScale();
+}
+function buildPreviewNav(){
+  const pv = document.getElementById('preview');
+  pv.addEventListener('click', ev => { const t = ev.target.closest('[data-pv]'); if (!t) return; pvJump(pvRowOf(t)); });
+  pv.addEventListener('keydown', ev => { if (ev.key !== 'Enter' && ev.key !== ' ') return; const t = ev.target.closest('[data-pv]'); if (!t) return; ev.preventDefault(); pvJump(pvRowOf(t)); });
+  form.addEventListener('focusin', pvHighlight);
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'pvToggle'; b.className = 'pv-toggle'; b.setAttribute('aria-controls', 'preview'); b.setAttribute('data-ui-only', '');
+  b.onclick = () => { document.body.classList.add('pv-anim'); pvDrawer(!document.body.classList.contains('pv-open')); };
+  document.getElementById('modeCreate').appendChild(b);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.body.classList.contains('pv-open')) { pvDrawer(false); b.focus(); } });
+  if (window.matchMedia) { const mq = window.matchMedia('(max-width:900px)'); if (mq.addEventListener) mq.addEventListener('change', pvApplyWidth); else if (mq.addListener) mq.addListener(pvApplyWidth); }
+  window.addEventListener('resize', pvFootHeight);
+  window.addEventListener('resize', layoutColumns);
+  window.addEventListener('resize', pvApplyScale);
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => layoutColumns()); ['header.appbar', '.tabbar', '#rosterBar'].forEach(s => { const e = document.querySelector(s); if (e) ro.observe(e); }); }
+  layoutColumns();
+  pvApplyWidth();
+}
+
+// ⑦「全部の手順を見直す」：モードを OFF にして①から
+function npReviewAll(){ npSetMode(false); render(); goStep(1); }
+// 部品を作る（buildProxies から呼ぶ。二重にならないよう data-proxy-built を付ける）
+function buildNextPersonParts(mark){
+  const mk = (id, btnText, onOpen) => { const d = mark(uiEl('div', 'np-sum ui-folded')); d.id = id;
+    d.appendChild(uiEl('span', 'np-text')); const b = uiEl('button', 'linkbtn', btnText); b.type = 'button'; b.onclick = onOpen; d.appendChild(b); return d; };
+  document.getElementById('basicSubOffice').insertAdjacentElement('afterend', mk('npCompanySum', '見直す', () => { NP_OPEN.company = true; render(); npFocusFirst(npCompanyEls()); }));
+  const w4 = document.getElementById('wageSub4'); w4.parentElement.insertBefore(mk('npWageSum', '見直す', () => { NP_OPEN.wage = true; render(); npFocusFirst(npWageRange()); }), w4);
+  const card = mark(uiEl('div', 'step-card np-check ui-folded')); card.id = 'npCheck';
+  card.appendChild(uiEl('h3', 'np-cap'));
+  card.appendChild(uiEl('ul', 'np-list'));
+  const rb = uiEl('button', 'btn', '全部の手順を見直す（通常の入力に戻す）'); rb.type = 'button'; rb.id = 'npReviewAllBtn'; rb.onclick = npReviewAll;
+  card.appendChild(rb);
+  const first = document.querySelector('#step7 .step-card'); first.parentElement.insertBefore(card, first);
+}
+
+/* ヘルプ表示（初めての方モード）。状態の正本は body.help-off（1つだけ）。
+   ヘッダーの「❓ ヒント」ボタンと手順レールの「初めての方モード」は同じ状態の2つのスイッチ。
+   状態は画面設定としてだけ localStorage に保存する（個人情報は入れない・使えない環境では既定＝ON のまま）。 */
+const HELP_STATE_KEY='roudouToolHelpOff_v1';
+function setHelpOff(off, opt){
+  off=!!off;
+  document.body.classList.toggle('help-off', off);
+  const b=document.getElementById('helpBtn'); if(b){ b.textContent = off?'❓ ヒント：非表示':'❓ ヒント：表示中'; b.setAttribute('aria-pressed', off?'false':'true'); }
+  const t=document.getElementById('beginnerToggle'); if(t) t.checked=!off;
+  if(!(opt&&opt.noSave)){ try{ localStorage.setItem(HELP_STATE_KEY, off?'1':'0'); }catch(e){ /* 保存できない環境では記憶しない */ } }
+}
+function initHelpState(){
+  let off=false;   // 初回は「初めての方モード」ON（原さん決定 2026-09-26）
+  try{ off = localStorage.getItem(HELP_STATE_KEY)==='1'; }catch(e){ off=false; }
+  setHelpOff(off, {noSave:true});
+}
+// 全体ヘルプOFFのとき、各欄の legend の「？」でその欄のヒントだけ開閉できる（手順セクションの中の fieldset も対象）
 function buildFsHelp(){
-  [...document.querySelectorAll('#form > fieldset')].forEach(fs=>{
+  [...document.querySelectorAll('#form fieldset')].forEach(fs=>{
     if(!fs.querySelector('.help-note')) return;
     const lg=fs.querySelector('legend'); if(!lg) return;
     const title=lg.textContent.trim();
     const b=document.createElement('button'); b.type='button'; b.className='fs-help'; b.textContent='？';
-    b.title='「'+title+'」のヒントだけを表示／非表示（全欄まとめては右上の❓ヘルプ）';
+    b.title='「'+title+'」のヒントだけを表示／非表示（全欄まとめては右上の「❓ ヒント」ボタン）';
     b.setAttribute('aria-label',title+'のヒントを表示');
     b.setAttribute('aria-pressed','false');
     b.onclick=(ev)=>{ ev.preventDefault(); const on=fs.classList.toggle('help-on');
@@ -2181,11 +2998,398 @@ function buildFsHelp(){
     lg.appendChild(b);
   });
 }
-// 使い方タブから作成タブの該当欄へ直接ジャンプ
+// 使い方タブから作成タブの該当欄へ直接ジャンプ（先にその欄を含む手順を開く）
 function jumpToCreate(fsId){
   switchMode('create');
   const el=document.getElementById(fsId);
+  const n=stepOfEl(el); if(n) goStep(n, {focus:false});
   if(el) setTimeout(()=>{ try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ el.scrollIntoView(); } },60);
+}
+
+/* ==========================================================================
+   §E-2 画面専用の代理UI（入力画面のステップ化 P3／2026-09-26 設計書 §2-3）
+   --------------------------------------------------------------------------
+   守っていること（設計書 §2-2 不変条件）
+     I-1 #form 内の name 集合と type は不変。元の radio／select／input は1つも消さない・変えない。
+     I-2 ここで作る部品には name を付けない（目印は data-ui-only。セルフテスト U1・U3 で検査）。
+     I-3 代理UIで値を変えたら「元の要素」に値を入れ、change を bubbles で発火させる（保存・出力は元の要素だけを見る）。
+     I-4 代理ボタンは元の option／radio から実行時に作る（applyPublicMode の後）。disabled／hidden の選択肢は作らず、
+         押された時にも disabled を確かめる（顧問先版の制限のすり抜け防止）。
+     I-5 表示の同期は render() のたびに元の要素から読み直す（restoreState・form.reset() の後も自動で揃う）。
+         画面専用の状態（固定残業の支給する／しない等）は form の reset イベントで初期化する。
+   ========================================================================== */
+
+/* ---- 働き方カード（マスタはここ1か所。updateVisibility の bad 判定＝日雇×短時間・林業 の組合せは入れない） ---- */
+const PERSONA = {
+  cards: [
+    { emp: '一般',   per: '無期', ic: '🧑‍💼', title: '正社員',       sub: '一般・期間の定めなし' },
+    { emp: '一般',   per: '有期', ic: '📄',   title: '契約社員',     sub: '一般・期間の定めあり' },
+    { emp: '短時間', per: '無期', ic: '⏱',   title: 'パート（無期）', sub: '短時間・期間の定めなし' },
+    { emp: '短時間', per: '有期', ic: '⏱',   title: 'パート（有期）', sub: '短時間・期間の定めあり' },
+    { emp: '一般',   per: '日雇', ic: '📅',   title: '日雇い',       sub: '一般・日々雇い入れ' },
+    { emp: '派遣',   per: '有期', ic: '🏢',   title: '派遣（有期）', sub: '派遣元で雇用・期間の定めあり' },
+    { emp: '派遣',   per: '無期', ic: '🏢',   title: '派遣（無期）', sub: '派遣元で雇用・期間の定めなし' },
+    { emp: '建設',   per: '無期', ic: '🏗',   title: '建設',         sub: '建設労働者・期間の定めなし' },
+    { emp: '林業',   per: '無期', ic: '🌲',   title: '林業',         sub: '林業労働者・期間の定めなし' }
+  ],
+  // 「この働き方で増える欄／なくなる欄」。updateVisibility() の表示切替と同じ内容を、人向けの言葉で持つ
+  effects: {
+    emp: {
+      '一般':   {},
+      '短時間': { add: ['昇給・賞与・退職金の有無（必須・⑤）', '相談窓口（⑥）'] },
+      '派遣':   { add: ['昇給・賞与・退職金の有無（必須・⑤）', '相談窓口（⑥）', '派遣元・派遣先／協定対象か否か／苦情の処理（⑥）'] },
+      '建設':   { add: ['帰郷旅費（⑥）'], note: '使用者欄が「事業主の氏名又は名称」になります' },
+      '林業':   { note: '林業に日雇の様式はありません' }
+    },
+    per: {
+      '無期': { add: ['入社日（③）'] },
+      '有期': { add: ['契約始期・終期（③）', '更新の有無・判断基準・更新上限（③）', '無期転換（③）', '昇給・賞与・退職金の有無（必須・⑤）', '相談窓口（⑥）'] },
+      '日雇': { add: ['就労日（③）'], del: ['試用期間（③）', '休日・休暇（④）', '退職に関する事項（⑥）'],
+              note: '同じ人を継続的に日々雇用し1か月（試用期間は14日）を超える場合は、休日・休暇や退職に関する事項の記載が必要になることがあります。継続雇用となる場合は所属社労士に確認してください。' }
+    }
+  }
+};
+/* ---- 代理セグメントにする select（元の select は視覚的に隠して残す。worktime_system は選択肢が多いので select のまま） ---- */
+const SEG_PROXY_FIELDS = ['wage_type', 'raise_flag', 'bonus_flag', 'retire_flag', 'kounen', 'kenpo', 'emp_ins', 'rousai', 'overtime'];
+/* ---- 「変更なし」ボタン（原さん確定 2026-09-26・根拠は設計書 §2-3。文言を直すときはここだけ） ---- */
+const SCOPE_SAME = {
+  targets: ['workplace_scope', 'job_scope'],
+  plain: '変更なし',
+  same: '変更なし（雇入れ直後と同じ）',
+  badge: '推奨',
+  note: '※配置転換・出向・転勤・職務変更の可能性が少しでもある場合や、テレワークを通常行わせる予定がある場合は使わず、具体的な範囲を書いてください。',
+  help: '「変更の範囲」は、この契約期間中に見込まれる変更（配置転換・出向・職務変更・通常行うテレワークを含む）の範囲です（労基則5条1項1号の3）。'
+    + '配置転換等の予定が実際に一切ない場合に限り「変更なし」と書けます。<b>有期契約を更新するときは、前回の書面の「変更の範囲」をそのまま引き継がず、更新後の契約期間の見込みで見直してください。</b>'
+    + '定型の文言のため、交付前に所属社労士の確認を受けてください。'
+};
+/* ---- 手当の区分（基準内／基準外）の提案。辞書は MINWAGE_ALLOW_RULE（唯一の正本）だけを使い、値を2か所に持たない ---- */
+const ALLOW_KIND_HELP = '<b>手当の区分（基準内・基準外）は、手当の名称ではなく支給の実態で決まります</b>（労基法37条5項・労基則21条）。'
+  + '例えば「住宅手当」でも、住宅に要する費用に応じて支給するのでなく一律定額で支給するなら基準内です。'
+  + '新しく追加した行には、名称から一般的な区分を「提案」として表示しますが、自動では移しません。区分ボタンで切り替えてください（読み込んだ行・転記した行・手で切り替えた行には提案を出しません）。';
+
+let OT_PAY = null;          // 固定残業：null＝保存値から判定／true＝支給する／false＝支給しない（画面だけの状態）
+let RATE_OPEN_USER = false; // 割増率：利用者が「変更する」で開いたか（画面だけの状態）
+// 負検証（N21）専用の差し替え口。SELFTEST_ACTIVE のときだけ効く
+const P3_HOOKS = { otKeepValues: false, otLegacyNullOnly: false };   // otLegacyNullOnly … N22 用（修正前の「null のときだけ戻す」挙動）
+
+function uiEl(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; e.setAttribute('data-ui-only', ''); return e; }
+// 代理UIのボタン群：子は button＋aria-pressed なので、親は role="group"（radiogroup にしない）
+function uiGroup(el, label){ el.setAttribute('role', 'group'); if (label) el.setAttribute('aria-label', label); return el; }
+function fireChange(el){ el.dispatchEvent(new Event('change', { bubbles: true })); }
+function radioEls(name){ const g = form.elements[name]; return g ? (g.length ? [...g] : [g]) : []; }
+
+/* 代理UIを作る（初期化で1回。applyPublicMode の後に呼ぶ）。やり直しても二重にならないよう、作った部品は先に消す */
+function buildProxies(){
+  document.querySelectorAll('#form [data-proxy-built]').forEach(e => e.remove());
+  document.querySelectorAll('#form .ui-vh-select').forEach(s => { s.classList.remove('ui-vh-select'); s.removeAttribute('aria-hidden'); s.removeAttribute('tabindex'); });
+  const mark = e => { e.setAttribute('data-proxy-built', ''); return e; };
+  // 1) 働き方カード（雇用形態の行の前）
+  {
+    const empRow = radioEls('emp_category')[0].closest('.row');
+    const wrap = mark(uiEl('div', 'persona-wrap'));
+    const h = uiEl('div', 'persona-cap', 'よくある働き方から選ぶ（下の「雇用形態」「期間区分」にそのまま入ります）');
+    const grid = uiGroup(uiEl('div', 'persona'), 'よくある働き方');
+    PERSONA.cards.forEach(c => {
+      const re = radioEls('emp_category').find(r => r.value === c.emp), rp = radioEls('period_type').find(r => r.value === c.per);
+      if (!re || !rp || re.disabled || rp.disabled) return;   // 顧問先版で閉じた選択肢のカードは作らない
+      const b = uiEl('button', 'persona-card'); b.type = 'button'; b.dataset.emp = c.emp; b.dataset.per = c.per;
+      b.setAttribute('aria-pressed', 'false');
+      b.appendChild(uiEl('span', 'pc-ic', c.ic)).setAttribute('aria-hidden', 'true');
+      b.appendChild(uiEl('b', null, c.title)); b.appendChild(uiEl('small', null, c.sub));
+      b.onclick = () => personaPick(c.emp, c.per);
+      grid.appendChild(b);
+    });
+    const eff = uiEl('div', 'persona-effect'); eff.id = 'personaEffect'; eff.setAttribute('aria-live', 'polite');
+    wrap.appendChild(h); wrap.appendChild(grid); wrap.appendChild(eff);
+    const ug = document.getElementById('usageGuide');   // 並び：書類の種類 → 働き方カード → 🔰使い方（閉）→ 雇用形態
+    empRow.parentElement.insertBefore(wrap, (ug && ug.parentElement === empRow.parentElement) ? ug : empRow);
+  }
+  // 2) 代理セグメント
+  SEG_PROXY_FIELDS.forEach(n => {
+    const sel = form.elements[n]; if (!sel || sel.tagName !== 'SELECT') return;
+    const cell = sel.parentElement;
+    const lb = cell.querySelector('label');
+    const g = uiGroup(mark(uiEl('div', 'seg-proxy')), lb ? lb.textContent.trim() : n); g.dataset.for = n;
+    [...sel.options].forEach(o => {
+      if (o.value === '' || o.hidden || o.disabled) return;   // 未選択の「（選択）」と、顧問先版で閉じた選択肢は作らない
+      const b = uiEl('button', 'seg-btn', o.textContent.replace(/^（選択）$/, '')); b.type = 'button'; b.dataset.value = o.value;
+      b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => segPick(n, o.value);
+      g.appendChild(b);
+    });
+    sel.insertAdjacentElement('afterend', g);
+    sel.classList.add('ui-vh-select'); sel.setAttribute('aria-hidden', 'true'); sel.setAttribute('tabindex', '-1');
+  });
+  // 3) 「変更なし」ボタン
+  SCOPE_SAME.targets.forEach(n => {
+    const inp = form.elements[n]; if (!inp) return;
+    const box = mark(uiEl('div', 'scope-same')); box.dataset.for = n;
+    const b1 = uiEl('button', 'btn-add', SCOPE_SAME.plain); b1.type = 'button'; b1.onclick = () => scopeSamePick(n, SCOPE_SAME.plain);
+    const b2 = uiEl('button', 'btn-add', SCOPE_SAME.same); b2.type = 'button'; b2.onclick = () => scopeSamePick(n, SCOPE_SAME.same);
+    b2.appendChild(uiEl('span', 'badge-rec', SCOPE_SAME.badge));
+    const note = uiEl('div', 'scope-note', SCOPE_SAME.note);
+    box.appendChild(b1); box.appendChild(b2); box.appendChild(note);
+    inp.insertAdjacentElement('afterend', box);
+  });
+  {
+    const fsPlace = document.getElementById('fsPlace');
+    const hn = mark(uiEl('div', 'help-note')); hn.innerHTML = SCOPE_SAME.help;   // 固定文言のみ（利用者入力は入らない）
+    fsPlace.appendChild(hn);
+  }
+  // 4) 割増率「✓ 法定どおり」の折りたたみ
+  {
+    const r1 = form.elements['ot_60under'].closest('.row'), r2 = form.elements['hol_legal'].closest('.row');
+    const box = mark(uiEl('div', 'rate-default')); box.id = 'rateDefault';
+    const t = uiEl('span', 'rd-text'); t.id = 'rateDefaultText';
+    const b = uiEl('button', 'linkbtn', '変更する'); b.type = 'button'; b.id = 'rateDefaultBtn';
+    b.onclick = () => { RATE_OPEN_USER = !RATE_OPEN_USER; syncProxies(); if (RATE_OPEN_USER) { try { form.elements['ot_60under'].focus(); } catch (e) {} } };
+    box.appendChild(t); box.appendChild(b);
+    r1.parentElement.insertBefore(box, r1);
+    r1.dataset.rateRow = '1'; r2.dataset.rateRow = '1';
+  }
+  // 5) 固定残業「支給しない／支給する」（方式の行の前）
+  {
+    const styleRow = form.elements['ot_style'].closest('.row');
+    const g = uiGroup(mark(uiEl('div', 'seg-proxy ot-pay')), '固定残業代（みなし残業手当）'); g.id = 'otPaySeg';
+    g.appendChild(uiEl('span', 'seg-cap', '固定残業代（みなし残業手当）：'));
+    [['0', '支給しない'], ['1', '支給する']].forEach(([v, txt]) => {
+      const b = uiEl('button', 'seg-btn', txt); b.type = 'button'; b.dataset.value = v; b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => otPaySet(v === '1');
+      g.appendChild(b);
+    });
+    styleRow.parentElement.insertBefore(g, styleRow);
+  }
+  // 6) 手当の統合表（見た目だけ。正本は #inAllowList／#outAllowList のまま）
+  {
+    const inList = document.getElementById('inAllowList'), outList = document.getElementById('outAllowList');
+    const inRow = inList.closest('.row'), outRow = outList.closest('.row');
+    inRow.classList.add('allow-merged-in'); outRow.classList.add('allow-merged-out');
+    [inRow, outRow].forEach(row => [...row.children].forEach(c => { if (c.querySelector(':scope > .btn-add')) c.classList.add('allow-add-orig'); }));
+    const head = mark(uiEl('div', 'allow-head'));
+    head.appendChild(uiEl('b', null, '手当（上から 基準内 → 基準外 の順）'));
+    head.appendChild(uiEl('span', 'hint', '　左の区分ボタンで基準内／基準外を切り替えます'));
+    inRow.parentElement.insertBefore(head, inRow);
+    const add = mark(uiEl('div', 'allow-add'));
+    const ab = uiEl('button', 'btn-add', '＋ 手当を追加（区分はあとで選べます）'); ab.type = 'button';
+    ab.onclick = () => { addAllow('in'); const rows = inList.querySelectorAll('.allow-row'); const r = rows[rows.length - 1]; if (r) { r.dataset.uiNew = '1'; syncProxies(); try { r.querySelector('.a-name').focus(); } catch (e) {} } };
+    add.appendChild(ab);
+    outRow.insertAdjacentElement('afterend', add);
+    const hn = mark(uiEl('div', 'help-note')); hn.innerHTML = ALLOW_KIND_HELP;   // 固定文言のみ
+    add.insertAdjacentElement('afterend', hn);
+  }
+  // P4) 2人目以降の入力モードの要約・⑦の引き継ぎ一覧
+  buildNextPersonParts(mark);
+  // 7) 最低賃金の時間額の常時表示（計算はしない。legalChecks の mw を表示するだけ）
+  {
+    const ap = document.getElementById('minWageApplied');
+    const m = mark(uiEl('div', 'mw-meter')); m.id = 'minWageMeter'; m.setAttribute('role', 'status');
+    ap.insertAdjacentElement('afterend', m);
+  }
+  // 9) ②本人カードの入社日・契約期間（③の欄へ書き込む代理。P4 の前準備）
+  {
+    const personRow = form.elements['employee_name'].closest('.row');
+    const box = mark(uiEl('div', 'row two person-dates')); box.id = 'personDates';
+    [['muki_start', '入社日（③「契約期間」と同じ欄）'], ['contract_start', '契約始期（③と同じ欄）'], ['contract_end', '契約終期（③と同じ欄）']].forEach(([n, lab]) => {
+      const c = uiEl('div', 'pd-cell'); c.dataset.for = n;
+      const l = uiEl('label', null, lab); const id = 'pd_' + n; l.htmlFor = id;
+      const i = uiEl('input'); i.type = 'date'; i.id = id; i.className = 'pd-input';
+      i.addEventListener('input', () => { const o = form.elements[n]; if (o && o.value !== i.value) { o.value = i.value; fireChange(o); } });
+      c.appendChild(l); c.appendChild(i); box.appendChild(c);
+    });
+    personRow.insertAdjacentElement('afterend', box);
+  }
+}
+
+// 働き方カード：元の radio に checked を入れて change を発火（disabled は押されても入れない）
+function personaPick(emp, per){
+  const re = radioEls('emp_category').find(r => r.value === emp), rp = radioEls('period_type').find(r => r.value === per);
+  if (!re || !rp || re.disabled || rp.disabled) return false;
+  re.checked = true; rp.checked = true;
+  fireChange(re); fireChange(rp);
+  return true;
+}
+// 代理セグメント：元の select に値を入れて change を発火（disabled／hidden の選択肢は入れない）
+function segPick(name, value){
+  const sel = form.elements[name]; if (!sel) return false;
+  const opt = [...sel.options].find(o => o.value === value);
+  if (!opt || opt.disabled || opt.hidden) return false;
+  if (sel.value !== value) { sel.value = value; fireChange(sel); }
+  return true;
+}
+// 「変更なし」：空欄のときだけ書き込み、値があれば確認する
+function scopeSamePick(name, text){
+  const inp = form.elements[name]; if (!inp) return;
+  const cur = String(inp.value || '').trim();
+  if (cur === text) return;
+  if (cur && !confirm('いま「' + cur + '」と入力されています。「' + text + '」に書き換えますか？')) return;
+  inp.value = text; fireChange(inp);
+}
+// 固定残業「支給する」の判定（設計書 §2-3。保存値から決める）
+function otPayFromValues(){
+  return val('ot_style') === 'unified' || has(val('fixed_ot_hours')) || has(val('fixed_ot_amount')) || has(val('fixed_night_hours')) || has(val('fixed_night_amount'));
+}
+/* 設計書 I-6・§2-2-2 画面状態台帳：書面の中身に影響する表示・警告は、保存データと reset で消えない状態から毎回計算する。
+   OT_PAY は「利用者が明示的に選んだ」ことだけを表す（form.reset で null に戻る）。
+   NP_OT_INHERIT は「前の人は固定残業を支給していた」という引き継ぎの印。reset・npSetMode(false)（全部の手順を見直す）では消えない。
+   消えるのは、名簿へ保存したとき（rosterCommit／rosterAddNext）と、別の人に切り替えたとき（clearFormAll・loadData の成功時・rosterEdit）だけ。
+   固定残業の値を入力しただけでは消さない（値があれば otInheritGap は出ないので誤検知にはならない）。
+   ※明示的な「支給しない」では印を残し、OT_PAY=false で抑えるだけにする（reset 後は安全側＝「支給する（空・赤字）」へ戻る。原さん決定 2026-09-27 の許容） */
+let NP_OT_INHERIT = false;
+// この人の固定残業の時間数・金額（一体型は希望額・時間数）がすべて空か
+function otHoursEmpty(){
+  if (val('ot_style') === 'unified') return !['uni_target', 'uni_h_ot', 'uni_h_hol', 'uni_h_night'].some(n => has(val(n)));
+  return !['fixed_ot_hours', 'fixed_ot_amount', 'fixed_night_hours', 'fixed_night_amount'].some(n => has(val(n)));
+}
+// 実効の支給状態＝値あり ‖ OT_PAY===true ‖（引き継ぎの印 && OT_PAY!==false）。⑤5-3 の表示・⑦の赤字・出力時の確認はこの関数だけを見る
+function otPayEffective(){
+  if (SELFTEST_ACTIVE && P3_HOOKS.otLegacyNullOnly) return OT_PAY === true || (OT_PAY === null && otPayFromValues());   // N22（P3 レビュー前の判定）
+  if (SELFTEST_ACTIVE && P4_HOOKS.effectiveOtOnly) return OT_PAY === true;                                                // N25（OT_PAY だけの判定）
+  return otPayFromValues() || OT_PAY === true || (NP_OT_INHERIT && OT_PAY !== false);
+}
+// 引き継ぎ確認：前の人は固定残業ありで、この人も「支給する」なのに時間数・金額が空
+function otInheritGap(){ return NP_OT_INHERIT && otPayEffective() && otHoursEmpty(); }
+// 別の人に切り替える操作（clearFormAll〔resetForm・loadSample〕・loadData の成功時・rosterEdit）では印を消す。
+// 「全部の手順を見直す」と form.reset（一括出力を含む）では消さない（設計書 §2-2-2・統括回答 2026-09-27）
+function npClearInheritOnSwitch(){ if (!(SELFTEST_ACTIVE && P4_HOOKS.keepInheritOnSwitch)) NP_OT_INHERIT = false; }
+// 固定残業「支給しない／する」の切替。「支給しない」は値を残したまま隠さない（4欄を空・ot_style=split・自動計算を外す）
+function otPaySet(pay){
+  if (pay) { OT_PAY = true; syncProxies(); render(); return true; }
+  const hasVal = otPayFromValues() || form.elements['fixed_ot_auto'].checked || form.elements['fixed_night_auto'].checked;
+  if (hasVal && !confirm('固定残業代を「支給しない」にすると、固定残業の時間数・金額（区分別・一体型とも）を空にし、自動計算のチェックを外します。よろしいですか？')) return false;
+  if (!(SELFTEST_ACTIVE && P3_HOOKS.otKeepValues)) {
+    ['fixed_ot_hours', 'fixed_ot_amount', 'fixed_night_hours', 'fixed_night_amount'].forEach(n => {
+      const el = form.elements[n]; el.disabled = false; delete el.dataset.auto; el.value = ''; });
+    form.elements['fixed_ot_auto'].checked = false; form.elements['fixed_night_auto'].checked = false;
+    form.elements['ot_style'].value = 'split';
+  }
+  OT_PAY = false;
+  fireChange(form.elements['ot_style']);
+  return true;
+}
+// 手当行の区分を切り替える＝行を相手のリストへ DOM 移動するだけ（getAllows／setAllows は不変）
+function allowMoveRow(row, toKind){
+  const target = allowListEl(toKind); if (!row || !target || row.parentElement === target) return;
+  target.appendChild(row); fireChange(row.querySelector('.a-name'));
+}
+function allowSuggest(name){
+  const key = String(name || '').trim(); if (!key) return null;
+  const rule = MINWAGE_ALLOW_RULE[key];
+  if (!rule || rule.pseudo) return null;
+  return { cat: rule.cat, help: rule.help };
+}
+
+/* render() のたびに、代理UIの表示を元の要素から読み直す（値は書き込まない。書き込むのは利用者の操作のときだけ） */
+function syncProxies(){
+  const emp = radio('emp_category'), per = radio('period_type');
+  // 働き方カード
+  document.querySelectorAll('#form .persona-card').forEach(b => b.setAttribute('aria-pressed', (b.dataset.emp === emp && b.dataset.per === per) ? 'true' : 'false'));
+  const eff = document.getElementById('personaEffect');
+  if (eff) {
+    const e1 = PERSONA.effects.emp[emp] || {}, e2 = PERSONA.effects.per[per] || {};
+    const uniq = a => a.filter((x, i) => a.indexOf(x) === i);
+    const add = uniq([].concat(e1.add || [], e2.add || [])), del = uniq([].concat(e1.del || [], e2.del || []));
+    eff.textContent = '';
+    eff.appendChild(uiEl('span', 'pe-cap', 'この働き方（' + emp + '・' + per + '）で増える欄：'));
+    if (add.length) add.forEach(x => eff.appendChild(uiEl('span', 'chip add', x))); else eff.appendChild(uiEl('span', 'pe-none', 'なし'));
+    if (del.length) { eff.appendChild(uiEl('span', 'pe-cap', '　なくなる欄：')); del.forEach(x => eff.appendChild(uiEl('span', 'chip del', x))); }
+    [e1.note, e2.note].filter(Boolean).forEach(x => eff.appendChild(uiEl('div', 'pe-note', '※ ' + x)));
+  }
+  // 代理セグメント
+  document.querySelectorAll('#form .seg-proxy[data-for]').forEach(g => {
+    const sel = form.elements[g.dataset.for]; if (!sel) return;
+    g.querySelectorAll('.seg-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.value === sel.value ? 'true' : 'false'));
+    g.classList.toggle('is-empty', sel.value === '');
+  });
+  // 「変更なし」：日雇では出さない
+  document.querySelectorAll('#form .scope-same').forEach(b => b.classList.toggle('ui-folded', per === '日雇'));
+  // 割増率の折りたたみ：1つでも既定値と違う／空なら自動で開く
+  {
+    const names = ['ot_60under', 'ot_60over', 'ot_shotei', 'hol_legal', 'hol_nonlegal', 'night_pct'];
+    const allDefault = names.every(n => { const el = form.elements[n]; return has(el.value) && el.value === el.defaultValue; });
+    const open = !allDefault || RATE_OPEN_USER;
+    document.querySelectorAll('#form [data-rate-row]').forEach(r => r.classList.toggle('ui-folded', !open));
+    const t = document.getElementById('rateDefaultText'), b = document.getElementById('rateDefaultBtn');
+    if (t) t.textContent = allDefault
+      ? '✓ 法定どおり（時間外 ' + form.elements['ot_60under'].defaultValue + '％・月60時間超 ＋' + form.elements['ot_60over'].defaultValue + '％・所定超（法定内） ' + form.elements['ot_shotei'].defaultValue
+        + '％・法定休日 ' + form.elements['hol_legal'].defaultValue + '％・法定外休日 ' + form.elements['hol_nonlegal'].defaultValue + '％・深夜 ＋' + form.elements['night_pct'].defaultValue + '％）'
+      : '初期値（法定どおり）から変更されています。下の各欄を確認してください。';
+    if (b) { b.classList.toggle('hidden', !allDefault); b.textContent = open ? '閉じる' : '変更する'; b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  }
+  // 固定残業「支給しない／する」
+  {
+    // 約束：固定残業の値が1つでもあれば必ず「支給する」で表示する（値を隠さない）。判定は otPayEffective() の1か所だけ（I-6）。
+    // 値が入っている間は「支給する」を選んだものとして扱う（入力中に値を消しても欄が勝手に隠れないように）。
+    if (otPayFromValues() && !(SELFTEST_ACTIVE && (P3_HOOKS.otLegacyNullOnly || P4_HOOKS.effectiveOtOnly))) OT_PAY = true;
+    const pay = otPayEffective();
+    document.querySelectorAll('#otPaySeg .seg-btn').forEach(b => b.setAttribute('aria-pressed', (b.dataset.value === '1') === pay ? 'true' : 'false'));
+    [form.elements['ot_style'].closest('.row'), form.elements['round_unit'].closest('.row'), document.getElementById('otSplit'), document.getElementById('otUnified')]
+      .forEach(e => { if (e) e.classList.toggle('ui-folded', !pay); });
+  }
+  // 手当の統合表：各行に区分ボタンと提案を付ける
+  {
+    // 両方のリストが未入力（名称も金額も空）のときは、空の行を先頭の1行だけ見せる（画面上だけ。DOM・setAllows は変えない）
+    const rows = [...allowListEl('in').querySelectorAll('.allow-row'), ...allowListEl('out').querySelectorAll('.allow-row')];
+    const blank = r => !r.querySelector('.a-name').value.trim() && !r.querySelector('.a-amt').value.trim();
+    const allBlank = rows.length > 0 && rows.every(blank);
+    rows.forEach((r, i) => r.classList.toggle('ui-folded', allBlank && i > 0 && r.dataset.uiNew !== '1' && r.dataset.uiTouched !== '1' && !r.contains(document.activeElement)));
+  }
+  ['in', 'out'].forEach(kind => {
+    const list = allowListEl(kind);
+    list.classList.toggle('ui-empty-list', ![...list.querySelectorAll('.allow-row')].some(r => !r.classList.contains('ui-folded')));
+    list.querySelectorAll('.allow-row').forEach(r => {
+      let kb = r.querySelector(':scope > .a-kind');
+      if (!kb) { kb = uiEl('button', 'a-kind'); kb.type = 'button'; r.insertBefore(kb, r.firstChild);
+        kb.onclick = () => { const k = r.parentElement === allowListEl('in') ? 'out' : 'in'; r.dataset.uiTouched = '1'; allowMoveRow(r, k); }; }
+      const now = r.parentElement === allowListEl('in') ? 'in' : 'out';
+      kb.textContent = now === 'in' ? '基準内' : '基準外'; kb.classList.toggle('k-out', now === 'out');
+      r.classList.toggle('has-kind', !!r.querySelector(':scope > .a-kind'));   // CSS の列割り（.allow-row.has-kind）用。区分ボタンを外したら外す
+      kb.setAttribute('aria-label', '区分：' + kb.textContent + '（押すと' + (now === 'in' ? '基準外' : '基準内') + 'へ切り替え）');
+      let sg = r.querySelector(':scope > .a-suggest');
+      const isNew = r.dataset.uiNew === '1' && r.dataset.uiTouched !== '1';
+      const s = isNew ? allowSuggest(r.querySelector('.a-name').value) : null;
+      if (!s && isNew && !r.querySelector('.a-name').value.trim()) {   // 追加した直後の空の行
+        if (!sg) { sg = uiEl('div', 'a-suggest'); r.appendChild(sg); }
+        if (sg.dataset.key !== 'hint') { sg.dataset.key = 'hint'; sg.textContent = '区分（基準内／基準外）は左のボタンで切り替えられます。手当名を入れると一般的な区分を提案します。'; }
+        return;
+      }
+      if (!s) { if (sg) sg.remove(); return; }
+      if (!sg) { sg = uiEl('div', 'a-suggest'); r.appendChild(sg); }
+      // 内容が変わらないときは作り直さない（入力欄から直接ボタンを押すと、blur→change→render で押す前のボタンが消えて押せなくなるため）
+      const sgKey = s.cat + '|' + now + '|' + s.help;
+      if (sg.dataset.key === sgKey) return;
+      sg.dataset.key = sgKey;
+      sg.textContent = '';
+      const label = s.cat === 'in' ? '基準内' : '基準外';
+      if (s.cat === now) sg.appendChild(uiEl('span', null, '✓ 名称からは一般に' + label + '：' + s.help));
+      else {
+        sg.appendChild(uiEl('span', null, '提案：名称からは一般に' + label + '（' + s.help + '）　'));
+        const ap = uiEl('button', 'linkbtn', label + 'に切り替える'); ap.type = 'button';
+        ap.onclick = () => { r.dataset.uiTouched = '1'; allowMoveRow(r, s.cat); };
+        sg.appendChild(ap);
+      }
+    });
+  });
+  // ②本人カードの入社日・契約期間（期間区分に合わせて出し分け。値は元の欄から読む）
+  document.querySelectorAll('#personDates .pd-cell').forEach(c => {
+    const n = c.dataset.for, show = (n === 'muki_start') ? per === '無期' : per === '有期';
+    c.classList.toggle('ui-folded', !show);
+    const i = c.querySelector('input'), o = form.elements[n];
+    if (o && i && document.activeElement !== i && i.value !== o.value) i.value = o.value;
+  });
+}
+// 最低賃金の時間額の常時表示（legalChecks が返す mw をそのまま表示。新しい計算はしない）
+function renderMinWageMeter(lc){
+  const m = document.getElementById('minWageMeter'); if (!m) return;
+  m.className = 'mw-meter';
+  const mw = lc && lc.mw;
+  if (!mw || !mw.minWage) { m.textContent = '都道府県を選ぶと、この方の賃金を時間額にした値と最低賃金を並べて表示します。'; return; }
+  const minTxt = '最低賃金 ' + Math.round(mw.minWage.amount).toLocaleString('ja-JP') + '円';
+  const hourly = (mw.hourlyLow === mw.hourlyHigh)
+    ? mwFmtHourly(mw.numeratorLow, mw.hoursHigh) + '円'
+    : mwFmtHourly(mw.numeratorLow, mw.hoursHigh) + '円〜' + mwFmtHourly(mw.numeratorHigh, mw.hoursLow) + '円';
+  if (mw.level === 'red') { m.classList.add('bad'); m.textContent = '⚠ 時間額 ' + hourly + ' ＜ ' + minTxt + '（下回っています。下の警告を確認してください）'; }
+  else if (mw.level === 'green') { m.classList.add('ok'); m.textContent = '✓ 時間額 ' + hourly + ' ≧ ' + minTxt; }
+  else { m.classList.add('unk'); m.textContent = '？ この入力では時間額を確定できません（' + minTxt + '。理由は下の【要確認】）'; }
 }
 
 function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; window.print(); }
@@ -2249,15 +3453,21 @@ function saveData(){
 function loadData(input){
   const f=input.files&&input.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{ const txt=String(r.result).replace(/^﻿/,''); const obj=JSON.parse(txt); restoreState(obj); const d=(obj&&obj.savedAt)?`（${String(obj.savedAt).slice(0,10)} 保存のデータ）`:''; alert('入力データを読み込みました'+d+'。続きから作業できます。'); }
+  r.onload=()=>{ try{ const obj=applyLoadedData(String(r.result)); const d=(obj&&obj.savedAt)?`（${String(obj.savedAt).slice(0,10)} 保存のデータ）`:''; alert('入力データを読み込みました'+d+'。続きから作業できます。'); }
     catch(e){ alert('読み込みに失敗しました：'+e.message); } input.value=''; };
   r.readAsText(f,'utf-8');
+}
+// 読み込んだ JSON 文字列を画面へ反映する（loadData の成功時の処理。例外は呼び出し側で表示する）
+function applyLoadedData(txt){
+  const obj=JSON.parse(String(txt).replace(/^﻿/,'')); restoreState(obj);
+  npClearInheritOnSwitch(); npSetMode(false); render(); goStep(1, {focus:false});   // 別の人のデータなので引き継ぎの印は消す
+  return obj;
 }
 
 // ===== ヘルプ表示の切替（新任スタッフ向け説明）=====
 function toggleHelp(){
-  const off=document.body.classList.toggle('help-off');
-  const b=document.getElementById('helpBtn'); if(b) b.textContent = off?'❓ ヘルプOFF':'❓ ヘルプON';
+  // 状態の正本は body.help-off。手順レールの「初めての方モード」と同期し、画面設定として記憶する（setHelpOff）
+  setHelpOff(!document.body.classList.contains('help-off'));
 }
 function printGuide(){
   document.body.classList.add('print-guide');
@@ -2365,6 +3575,7 @@ function switchMode(m){
   });
   document.getElementById('createActions').style.display = (m==='create')?'flex':'none';
   const rb=document.getElementById('rosterBar'); if(rb) rb.style.display = (m==='create')?'flex':'none';
+  if(typeof layoutColumns==='function') layoutColumns();   // 名簿バーの表示切替で列の上端が変わる
   if(m==='calc') calcRender();
   if(m==='batch') renderRoster();
   if(m==='refs') renderRefs();
@@ -2384,40 +3595,71 @@ function rosterStatus(msg){
 }
 function updateRosterBar(){
   const c=document.getElementById('rosterCount'); if(c) c.textContent=ROSTER.length;
-  const btn=document.getElementById('rosterCommitBtn');
-  if(btn){
-    if(EDIT_ID!=null){ const e=ROSTER.find(x=>x.id===EDIT_ID); const nm=e?(sf(e.state,'employee_name')||'（無題）'):''; btn.textContent='✔ 編集中「'+nm+'」を上書き保存'; }
-    else btn.textContent='➕ この内容を名簿に追加';
-  }
+  // ヘッダーの名簿バーと⑦のボタンは同じ文言にする（編集中は「上書き保存」）
+  const e=EDIT_ID!=null ? ROSTER.find(x=>x.id===EDIT_ID) : null; const nm=e?(sf(e.state,'employee_name')||'（無題）'):'';
+  ['rosterCommitBtn','rosterCommitBtn7'].forEach(id=>{ const b=document.getElementById(id); if(!b) return;
+    b.textContent = EDIT_ID!=null ? '✔ 編集中「'+nm+'」を上書き保存' : '➕ この内容を名簿に追加（次の人へは進まない）'; });
+  ['rosterAddNextBtn','rosterAddNextBtn7'].forEach(id=>{ const b=document.getElementById(id); if(!b) return;
+    b.textContent = EDIT_ID!=null ? '➡ 上書き保存して次の人へ' : '➡ 追加して次の人へ'; });
+}
+// 名簿の二重登録の検知：直前に名簿へ追加した内容と、今の入力が同じか（保存データの中身で比べる。時刻は serializeState に含まれない）
+let LAST_ROSTER_ADD_ID=null;
+function rosterCanonJSON(s){ const c=v=>Array.isArray(v)?v.map(c):(v&&typeof v==='object')?Object.keys(v).sort().reduce((o,k)=>(o[k]=c(v[k]),o),{}):v; const x=c(s); if(x&&typeof x==='object') delete x.savedAt; return JSON.stringify(x); }
+function rosterIsDupOfLast(st){
+  const last=LAST_ROSTER_ADD_ID!=null ? ROSTER.find(x=>x.id===LAST_ROSTER_ADD_ID) : null;
+  return !!last && rosterCanonJSON(last.state)===rosterCanonJSON(st);
 }
 function rosterCommit(){
   const st=serializeState();
   if(EDIT_ID!=null){
     const e=ROSTER.find(x=>x.id===EDIT_ID);
-    if(e){ e.state=st; rosterStatus('「'+(sf(st,'employee_name')||'無題')+'」を上書き保存しました。'); }
+    if(e){ e.state=st; LAST_ROSTER_ADD_ID=e.id; rosterStatus('「'+(sf(st,'employee_name')||'無題')+'」を上書き保存しました。'); }   // 上書きした人を「直前に登録した内容」とする（続けて次の人へ→二重登録の確認が効く）
     EDIT_ID=null;
   } else {
-    ROSTER.push({id:++ROSTER_SEQ, state:st});
+    if(rosterIsDupOfLast(st) && !confirm('この内容はすでに名簿に追加済みです。別の人としてもう1人分追加しますか？')) return;
+    ROSTER.push({id:++ROSTER_SEQ, state:st}); LAST_ROSTER_ADD_ID=ROSTER_SEQ;
     rosterStatus('名簿に追加しました（現在 '+ROSTER.length+' 人）。');
   }
-  renderRoster(); updateRosterBar();
+  NP_OT_INHERIT=false;   // 名簿へ保存したら引き継ぎの印は消す（I-6・画面状態台帳）
+  renderRoster(); updateRosterBar(); render();
 }
 function rosterAddNext(){
-  ROSTER.push({id:++ROSTER_SEQ, state:serializeState()});
+  const prevName=val('employee_name');   // ⑦の「前の人」の表示用（画面だけ）
+  const st=serializeState();
+  let saved='';
+  if(EDIT_ID!=null){
+    // 編集中：その人を上書き保存してから次の人へ（新しく1件増やさない）
+    const e=ROSTER.find(x=>x.id===EDIT_ID); if(e) e.state=st; saved='「'+(sf(st,'employee_name')||'無題')+'」を上書き保存し、';
+  } else if(rosterIsDupOfLast(st)){
+    if(!confirm('この内容はすでに名簿に追加済みです。追加せずに次の人へ進みますか？')) return;
+    saved='（すでに追加済みのため名簿には追加せず）';
+  } else {
+    ROSTER.push({id:++ROSTER_SEQ, state:st}); LAST_ROSTER_ADD_ID=ROSTER_SEQ; saved='名簿に追加し、';
+  }
   EDIT_ID=null;
+  // 固定残業の支給状態は前の人から引き継ぐ（統括決定 P4 MF-1。⑤5-3 を開いたまま時間数・金額を入れ直してもらう）
+  const prevOtPay = otPayEffective() || !otHoursEmpty();   // 前の人の実効の支給状態（I-6）
   // 次の人用に「氏名」「賃金額」「手当（支給項目）」「社保被保険者区分（賃金額に連動するため）」だけをクリア（他条件は維持）
   ['employee_name','monthly_wage','daily_wage','hourly_wage','annual_wage',
    'unit_price','guaranteed_wage','uni_target','uni_h_ot','uni_h_hol','uni_h_night',
    'fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount','shaho_kubun']
     .forEach(n=>{ const el=form.elements[n]; if(el){ el.disabled=false; el.value=''; } });
   setAllows('in',[{}]); setAllows('out',[{}]);
+  npSetMode(true, prevName, prevOtPay);   // P4：2人目以降の入力モード（②本人と⑤賃金だけを開く）。ON にするのはここだけ
+  // 前の人の支給状態は「引き継ぎの印」で持つ（reset・全部見直すでは消えない＝I-6）。OT_PAY はこの人の明示的な選択なので空に戻す
+  NP_OT_INHERIT = (SELFTEST_ACTIVE && P4_HOOKS.otNullOnNext) ? false : prevOtPay;   // N24：引き継がない（レビュー前の挙動）
+  OT_PAY = null;
   render(); renderRoster(); updateRosterBar();
-  rosterStatus('名簿に追加し、氏名・手当・社会保険の被保険者区分をクリアしました（現在 '+ROSTER.length+' 人）。続けて次の方を入力してください。');
+  rosterStatus(saved+'氏名・手当・社会保険の被保険者区分をクリアしました（現在 '+ROSTER.length+' 人）。②本人と⑤賃金だけを開く入力モードにしたので、②で氏名、⑤で賃金額を入れ、⑦で引き継いだ値を確認してください。');
+  goStep(2, {focus:false});   // 氏名欄は手順②にあるため、先に②を開いてからフォーカスする
   const nm=form.elements['employee_name']; if(nm){ try{nm.focus();nm.scrollIntoView({block:'center'});}catch(e){} }
 }
 function rosterEdit(id){
   const e=ROSTER.find(x=>x.id===id); if(!e) return;
   restoreState(e.state); EDIT_ID=id; switchMode('create'); updateRosterBar();
+  npClearInheritOnSwitch();   // 名簿の別の人を開くので引き継ぎの印を消す
+  npSetMode(false); render();
+  goStep(7, {focus:false});   // 原さん決定（要確認5）：編集は⑦の全体状況から始め、「直す」で各手順へ
   rosterStatus('「'+(sf(e.state,'employee_name')||'無題')+'」を読み込みました。編集後「上書き保存」を押してください。');
   window.scrollTo(0,0);
 }
@@ -2538,9 +3780,24 @@ function bulkGapReport(){
       +blockLines.join('\n')+'\n\nご不明な点はめぐみ事務所へご相談ください。');
     return false;
   }
-  if(!lines.length) return true;
-  return confirm('未入力の法定明示事項または法令違反のおそれがある人がいます：\n'+lines.join('\n')
+  const mix=rosterOtMixMessage();   // I-6：名簿の中の固定残業の整合（確認レベル・出力は止めない）
+  if(!lines.length && !mix) return true;
+  if(!mix) return confirm('未入力の法定明示事項または法令違反のおそれがある人がいます：\n'+lines.join('\n')
     +'\n\n判断に迷う場合はめぐみ事務所へご相談ください。\n\nこのまま出力しますか？');
+  let msg='';
+  if(lines.length) msg+='未入力の法定明示事項または法令違反のおそれがある人がいます：\n'+lines.join('\n')+'\n\n判断に迷う場合はめぐみ事務所へご相談ください。\n\n';
+  return confirm(msg+mix+'\n\nこのまま出力しますか？');
+}
+// 名簿の中の固定残業の整合チェック（保存データだけから計算する。名簿ファイルに引き継ぎの印は持たせない）
+// 同じ方式（区分別／一体型）なのに、固定残業ありの人と空の人が混ざっていたら知らせる
+function rosterOtMixMessage(){
+  const g={};
+  ROSTER.forEach(e=>{ const s=e.state, style=sf(s,'ot_style')||'split';
+    const hasOt = style==='unified' ? ['uni_target','uni_h_ot','uni_h_hol','uni_h_night'].some(n=>has(sf(s,n))) : ['fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount'].some(n=>has(sf(s,n)));
+    (g[style]=g[style]||{with:[],without:[]})[hasOt?'with':'without'].push(sf(s,'employee_name')||'無題'); });
+  const lines=Object.keys(g).filter(k=>g[k].with.length && g[k].without.length)
+    .map(k=>'・'+(k==='unified'?'一体型':'区分別')+'：固定残業ありの人（'+g[k].with.join('、')+'）と、固定残業が空の人（'+g[k].without.join('、')+'）が混ざっています');
+  return lines.length ? '名簿内の確認（固定残業）：\n'+lines.join('\n')+'\n固定残業が空の人が「支給しない」で正しいかご確認ください。' : '';
 }
 function bulkPrint(){
   if(!ROSTER.length){ alert('名簿が空です。'); return; }
@@ -2745,13 +4002,15 @@ function calcImportAllows(){
    （新年度改定が公布・答申されても発効日前は前年度額を使い、発効日を過ぎると自動で新額に切替）。手動で年度を選ぶこともできる。
    出典:
    - 令和8年度: 厚生労働省「令和8年度 地域別最低賃金 答申状況」https://www.mhlw.go.jp/content/11302000/001745621.pdf （legal-research確認 2026-09-16）
+     再確認 2026-09-28：同PDF（答申状況）を取得して機械抽出し、47都道府県すべての時間額・発効日が下の表と一致（値の変更なし）。
+       全国一覧ページ（MIN_WAGE_SOURCE）には令和8年度分が未掲載（答申段階のまま）のため provisional:true は維持。
      ★この年度は provisional:true ＝【答申段階】の数値。最終決定（各労働局の公示）が出た県から順に差し替え、
        差し替え済みの県は provisional を false にし、MIN_WAGE_CHECKED を確認日で更新すること。
      ★発効日は県ごとに 2026-10-01〜2026-12-02 までばらつく。「10月に一斉に切り替わる」前提で書き換えないこと。
    - 令和7年度: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf ／発効日は同一覧（legal-research確認 2026-07-05）
    - 令和6年度: 厚生労働省・兵庫労働局「地域別最低賃金全国一覧（令和6年）」ほか2ソースで相互照合（legal-research確認 2026-07-05）
    来年度改定時は、各県配列の先頭に {year,amount,eff} を1件足すだけで自動判定・年度選択がそのまま働く。 ===== */
-const MIN_WAGE_CHECKED='2026-09-16';   // 最低賃金テーブルを一次資料で確認した日（デッドマン表示の基準日）
+const MIN_WAGE_CHECKED='2026-09-28';   // 最低賃金テーブルを一次資料で確認した日（デッドマン表示の基準日）
 const MIN_WAGE_SOURCE='厚生労働省「地域別最低賃金の全国一覧」https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/';
 const MIN_WAGE_DATA={
  "北海道":[{year:"令和8年度",amount:1131,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
@@ -3805,7 +5064,7 @@ function renderLawChecks(st) {
     const gapBox = document.getElementById('gapNote');
     pv.insertBefore(box, gapBox ? gapBox.nextSibling : pv.firstChild);
   }
-  box.innerHTML = html.join('');
+  box.innerHTML = html.join('') + '<div class="law-note-foot">（各欄の下と手順⑦にも表示しています）</div>';
   return res;
 }
 
@@ -4167,7 +5426,12 @@ function renderStaticNotices() {
           ＋ P20〜P27（ロット3・MF-13/14/15/17/18）＋ P28〜P34（ロット4・MF-12/19）
           ＋ P35〜P39（ロット5・MF-08/16）
    負検証 N1〜N7（ロット1）＋ N8〜N11（ロット2）＋ N12〜N13（ロット3）
-          ＋ N14〜N15（ロット4）＋ N16〜N17（ロット5）
+          ＋ N14〜N15（ロット4）＋ N16〜N17（ロット5）＋ N18〜N20（入力画面のステップ化）
+   UI検証 U1〜U3（入力画面のステップ化 P1・P2／name 集合の不変・STEP_MAP の網羅・代理UIに name なし）
+          ＋ U4〜U5（P3／顧問先版の代理UI・固定残業「支給しない」）／負検証 N21・N22（P3）
+          ＋ U6〜U7（P4／2人目以降の入力モード）／負検証 N23・N24（P4）
+          ＋ U8（I-6 画面状態台帳）／負検証 N25〜N28（I-6）
+          ＋ U9〜U10（P5／プレビュー行→手順・ドロワー）／負検証 N29・N30（P5）＋ U11（①の入口の並び）
           ／ 補助検証（境界B・発効日R・道具C・デッドマンD）
    負検証は MW_HOOKS / MIN_WAGE_DATA を一時的に壊し、対応する正検証が
    「必ず失敗する」ことを確認して元に戻す（＝テストが本当に効いているかの検査）。
@@ -4599,9 +5863,633 @@ function stSupportCases() {
   ];
 }
 
+/* ---- UI検証 U1〜U3（入力画面のステップ化 P1・P2／2026-09-26） ----
+   U1 … #form 内の name 集合と type が改修前と同じ（保存JSONの互換＝設計書 I-1）
+   U2 … requiredGaps／legalChecks の全メッセージが STEP_MAP のどれかの行に当たる（黙って捨てない）
+   U3 … 画面専用の部品（data-ui-only）や _ui 始まりの name を持つ要素が無い（設計書 I-2） */
+// 改修前の版（2026-09-26 採取・固定点）の #form 内 name:type をソートして '|' で連結したもの（151要素）
+const UI_BASELINE_NAME_TYPES = 'annual_days:text|annual_wage:text|base_wage_name:text|bonus_flag:select-one|bonus_note:text|break_mode:radio|break_mode:radio|break_total:text|change_basis:text|change_date:date|change_reason:text|consecutive_days:text|consent_flag:select-one|consult_contact:text|consult_dept:text|consult_person:text|contract_end:date|contract_start:date|core_time:text|daily_wage:text|dateMode:radio|dateMode:radio|deemed_hours2:text|deemed_hours:text|display_category:text|docType:radio|docType:radio|docType:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_ins:select-one|employee_name:text|employer:text|fixed_night_amount:text|fixed_night_auto:checkbox|fixed_night_hours:text|fixed_night_name:text|fixed_ot60_show:checkbox|fixed_ot_amount:text|fixed_ot_auto:checkbox|fixed_ot_hours:text|fixed_ot_name:text|flex_time:text|guaranteed_wage:text|haken_kujo:text|haken_kyotei:select-one|haken_kyotei_end:date|haken_moto:text|haken_saki:text|has_work_rules:checkbox|health_measure:text|henkei_start:text|hol_legal:text|hol_nonlegal:text|holiday:text|hourly_wage:text|issue_date:date|job_now:textarea|job_scope:text|kenpo:select-one|kenpo_name:text|kigyou_nenkin:select-one|kigyou_nenkin_name:text|kikyo:text|kounen:select-one|mandatory_age:text|minwage_kind:select-one|minwage_pref:select-one|minwage_special_amount:text|minwage_special_name:text|monthly_scheduled_hours:text|monthly_wage:text|muki_flag:radio|muki_flag:radio|muki_start:date|night_pct:text|normal_weekly_hours:text|office_addr:text|office_name:text|ot_60over:text|ot_60under:text|ot_shotei:text|ot_style:select-one|other_leave:text|overtime:select-one|paid_leave:text|pay_deduction:select-one|pay_method:select-one|pay_method_note:text|period_type:radio|period_type:radio|period_type:radio|probation_flag:radio|probation_flag:radio|probation_text:text|raise_flag:select-one|raise_note:text|reemployment:text|remarks:text|renewal:select-one|renewal_cap:text|renewal_criteria:text|retire_flag:select-one|retire_note:text|round_unit:select-one|rousai:select-one|rules_place:text|self_retire:text|setsumei_contact:text|setsumei_dept:text|setsumei_person:text|settle_period:text|settle_total:text|shaho_kubun:select-one|shakai_riyuu:text|show_breakdown:checkbox|show_setsumei:checkbox|specific_period:text|std_daily:text|target_period:text|target_work:text|tokki_jiko:textarea|tsusan_start:date|uni_h_hol:text|uni_h_night:text|uni_h_ot:text|uni_mode:radio|uni_mode:radio|uni_name:text|uni_note_clause:checkbox|uni_r_hol:text|uni_r_night:text|uni_r_ot:text|uni_target:text|unit_price:text|wage_closing:text|wage_payday:text|wage_type:select-one|weekly_hours_flag:checkbox|weekly_hours_note:text|work_days:text|worker_kind:radio|worker_kind:radio|worker_weekly_hours:text|workplace_now:text|workplace_scope:text|worktime_note:textarea|worktime_system:select-one';
+function stFormNameTypes(){ return [...form.elements].filter(e => e.name).map(e => e.name + ':' + e.type).sort(); }
+/* U2 の期待値表（実装の STEP_MAP とは別に、設計書 §4 と requiredGaps／legalChecks の文言を読んで手で決めた固定点）。
+   STEP_MAP の行の順番・step を書き換えたら、ここと一致しなくなって U2 が落ちる。 */
+const ST_GAP_EXPECT = {
+  '雇用区分と期間区分の組合せ（短時間・林業に日雇様式なし）': 1,
+  '契約期間（始期・終期）': 3, '更新の有無': 3, '更新の判断基準': 3, '更新上限（上限なしの場合もその旨）': 3, '就労日': 3,
+  '就業の場所（雇入れ直後）': 3, '就業の場所（変更の範囲）': 3, '業務の内容（雇入れ直後）': 3, '業務の内容（変更の範囲）': 3,
+  '入社日（待遇の相違の説明を求めることができる旨の施行日判定に必要）': 3,
+  '休日': 4, '年次有給休暇': 4,
+  '基本単価': 5, '保障給（労基法27条）': 5, '基本給の額': 5, '固定残業手当の時間数': 5, '固定深夜手当の時間数': 5,
+  '賃金締切日': 5, '賃金支払日': 5, '賃金の支払方法': 5, '昇給の有無': 5,
+  '自己都合退職の手続': 6, '解雇の事由': 6, '②雇用管理改善の相談窓口（部署名・担当者）': 6, '協定対象派遣労働者か否か': 6, '苦情の処理に関する事項': 6
+};
+// U2 の材料：requiredGaps のラベルは関数本文から抜き出す（実装とは別経路の列挙）。
+// legalChecks は文言マスタと代表シナリオを本番の legalChecks に通して集め、シナリオごとの期待（含む語→手順番号）と照合する。
+const stHookSave = {};
+const ST_TODAY_ORIGINAL = calcTodayISO;   // Z1 で「日付の差し替えが戻っている」ことを確かめるための控え   // U2 の差し替え口で退避した本番の値
+function stStepMapCoverage(){
+  const src = String(requiredGaps), labels = [], re = /(?:,|g\.push\()\s*'([^']+)'\s*\)/g; let m;
+  while ((m = re.exec(src))) labels.push(m[1]);
+  const gapMiss = labels.filter(l => !stepMapGap(l));
+  const gapWrong = labels.filter(l => { const g = stepMapGap(l); return !g || ST_GAP_EXPECT[l] !== g.step; });
+  const msgs = [], expectFail = [];
+  const check = (list, has, step, note) => {
+    const hit = list.filter(t => t.indexOf(has) >= 0);
+    if (!hit.length) { expectFail.push(`${note}：「${has}」を含む警告が出ていない`); return; }
+    hit.forEach(t => { const r = stepMapLaw(t); if (!r || r.step !== step) expectFail.push(`${note}：「${has}」→ 期待${step}／実際${r ? r.step : 'なし'}`); });
+  };
+  const dict = [];
+  Object.values(SHORT_TIME_MESSAGE).forEach(t => { if (t) { msgs.push(t); dict.push(t); } });
+  dict.forEach(t => check([t], t.slice(0, 8), 1, '短時間労働者の文言マスタ'));
+  const ctx = { start: '2020-04-01', end: '2026-03-31', span: { text: '6年' } };
+  Object.values(MUKI_TENKAN_MESSAGE).forEach(f => { const t = f(ctx); msgs.push(t); check([t], t.slice(0, 8), 3, '無期転換の文言マスタ'); });
+  const set = (n, v) => { const el = form.elements[n]; if (!el) return;
+    if (el.length && el[0] && el[0].type === 'radio') [...el].forEach(r => r.checked = (r.value === v));
+    else if (el.type === 'checkbox') el.checked = !!v; else el.value = v; };
+  // [準備, 期待（含む語 → 手順番号）]
+  const scenarios = [
+    ['空の状態', () => {}, [['始業・終業の時刻が未入力', 4], ['休憩時間が未入力', 4]]],
+    ['割増率の下限割れ・未入力／最賃割れ', () => { loadSample(); set('ot_60under', '120'); set('hol_legal', ''); set('wage_type', '時給'); set('hourly_wage', '900'); },
+      [['割増賃金率の「', 5], ['時間額に換算すると', 5], ['この確認は地域別最低賃金', 5], ['最低賃金の都道府県（', 5]]],
+    ['短時間：有無未選択・相談窓口・入社日・該当性の食い違い', () => { loadSample(); set('emp_category', '短時間'); set('raise_flag', ''); set('bonus_flag', ''); set('muki_start', '');
+        set('normal_weekly_hours', '40'); set('worker_weekly_hours', '40'); },
+      [['」の有無が未選択です', 5], ['「②雇用管理の改善等', 6], ['入社日が未入力のため', 3], ['雇用形態で「短時間（パート）」を選んでいますが', 1]]],
+    ['有期3年超・通算5年超', () => { loadSample(); set('period_type', '有期'); set('contract_start', '2026-10-01'); set('contract_end', '2030-03-31');
+        set('tsusan_start', '2020-04-01'); set('muki_flag', '無'); },
+      [['年を超えています。有期労働契約の期間', 3], ['通算契約期間の起算日（', 3]]],
+    ['派遣・契約期間が空', () => { loadSample(); set('emp_category', '派遣'); set('period_type', '有期'); set('contract_start', ''); set('contract_end', ''); },
+      [['派遣労働者には【派遣先】', 5], ['契約始期（更新の場合は更新後の契約始期）が未入力のため', 3], ['「通算契約期間の起算日」または', 3]]],
+    ['所定時間が極端に小さい・休憩が読めない', () => { loadSample(); set('monthly_scheduled_hours', '20'); set('break_mode', 'total'); set('break_total', 'abc'); },
+      [['【要確認】賃金欄の「月の所定労働時間」', 5], ['休憩時間の合計を読み取れない', 4]]],
+    ['休憩の法定下限（区分名に「最低賃金」「割増賃金率の「」を含む利用者入力）', () => { loadSample();
+        setTimes([{ label: '最低賃金・割増賃金率の「始業・終業', start: '09:00', end: '18:00' }]); setBreaks([{ start: '12:00', end: '12:30' }]); },
+      [['1日の労働時間が', 4]]],
+    ['日給・始業終業が空（最賃の理由文に「始業・終業…休憩」が付く）', () => { loadSample(); set('wage_type', '日給'); set('daily_wage', '10000');
+        setTimes([{}]); setBreaks([{}]); },
+      [['最低賃金を満たしているか確認できませんでした', 5], ['始業・終業の時刻が未入力', 4]]],
+    ['手当名に「休憩」を含む（利用者入力が最賃の理由文に入る）', () => { loadSample();
+        setAllows('in', [{ name: '休憩手当', unit: 'month', amount: '10000' }]); },
+      [['休憩手当', 5]]],
+    // 以下2件はテスト専用の差し替え口で出す（本番の値・関数は後始末で必ず元に戻す）
+    ['最低賃金が答申段階（MW_HOOKS.resolver で provisional を立てる）', () => { loadSample(); stHookSave.active = SELFTEST_ACTIVE; SELFTEST_ACTIVE = true;
+        MW_HOOKS.resolver = (p, b) => { const x = calcResolveMinWage(p, b); return x ? Object.assign({}, x, { provisional: true }) : x; }; },
+      [['【答申段階】', 5]], () => { MW_HOOKS.resolver = null; SELFTEST_ACTIVE = stHookSave.active; }],
+    ['最低賃金表が古い（calcTodayISO を改定期の後の日付に差し替え）', () => { loadSample(); stHookSave.today = calcTodayISO; calcTodayISO = () => '2099-10-02'; },
+      [['最低賃金表が古い可能性', 5]], () => { calcTodayISO = stHookSave.today; }]
+  ];
+  const backup = serializeState(), backupEditId = EDIT_ID, backupStep = CUR_STEP;   // clearFormAll が EDIT_ID と手順を①に戻すので退避して戻す
+  let reasonHasTimes = false;
+  try {
+    scenarios.forEach(([note, fn, exp, post]) => {
+      try { clearFormAll(); fn(); render(); const st = updateVisibility(); const r = legalChecks(st);
+        const list = r.blocks.concat(r.reds, r.yellows);
+        list.forEach(t => msgs.push(t));
+        exp.forEach(([has, step]) => check(list, has, step, note));
+        if (note.indexOf('日給') === 0) reasonHasTimes = list.some(t => /^最低賃金を満たしているか/.test(t) && t.indexOf('始業・終業') >= 0);
+      } finally { if (post) post(); }
+    });
+  } finally { restoreState(backup); EDIT_ID = backupEditId; goStep(backupStep, { focus: false }); }
+  if (!reasonHasTimes) expectFail.push('日給シナリオ：最賃の理由文に「始業・終業」が含まれていない（MF-1 の再現条件になっていない）');
+  const lawMiss = msgs.filter(t => !stepMapLaw(t));
+  return { labels, gapMiss, gapWrong, msgs, lawMiss, expectFail };
+}
+function stUiCases() {
+  return [
+    { id: 'U1', title: '［ステップ化］#form 内の name 集合と type が改修前（固定点151要素）と同じ＝保存JSONの互換', run: () => {
+        const now = stFormNameTypes(), base = UI_BASELINE_NAME_TYPES.split('|');
+        const cnt = a => a.reduce((m, x) => (m[x] = (m[x] || 0) + 1, m), {});
+        const cn = cnt(now), cb = cnt(base);
+        const added = Object.keys(cn).filter(k => (cn[k] || 0) > (cb[k] || 0)), removed = Object.keys(cb).filter(k => (cb[k] || 0) > (cn[k] || 0));
+        return { ok: now.join('|') === UI_BASELINE_NAME_TYPES && base.length === 151,
+                 detail: `現在=${now.length}要素 改修前=${base.length}要素 増=${added.join(',') || 'なし'} 減=${removed.join(',') || 'なし'}` };
+      } },
+    { id: 'U2', title: '［ステップ化］requiredGaps の全ラベル（27件）と legalChecks の全メッセージが STEP_MAP に対応し、振り分け先の手順が期待値表と一致', run: () => {
+        const r = stStepMapCoverage();
+        const ok = r.labels.length === 27 && Object.keys(ST_GAP_EXPECT).length === 27 && r.gapMiss.length === 0 && r.gapWrong.length === 0
+          && r.msgs.length > 0 && r.lawMiss.length === 0 && r.expectFail.length === 0;
+        return { ok, detail: `ラベル=${r.labels.length}件 未対応=${r.gapMiss.length}件 手順違い=${r.gapWrong.length}件${r.gapWrong.length ? '（' + r.gapWrong.join('／') + '）' : ''}`
+          + `／メッセージ=${r.msgs.length}件 未対応=${r.lawMiss.length}件${r.lawMiss.length ? '（' + r.lawMiss.map(x => x.slice(0, 30)).join('／') + '…）' : ''}`
+          + `／期待との不一致=${r.expectFail.length}件${r.expectFail.length ? '（' + r.expectFail.join('／') + '）' : ''}` };
+      } },
+    { id: 'U3', title: '［ステップ化］画面専用の部品（data-ui-only・手順レール）に name が無く、_ui 始まりの name も無い', run: () => {
+        const bad = [...form.elements].filter(e => e.name && (/^_ui/.test(e.name) || e.closest('[data-ui-only]')));
+        const outside = [...document.querySelectorAll('[data-ui-only][name], [data-ui-only] [name]')];
+        const rail = document.getElementById('stepRail'), foot = document.querySelector('#form .step-foot');
+        const ui = document.querySelectorAll('[data-ui-only]').length;
+        return { ok: bad.length === 0 && outside.length === 0 && !!rail && !rail.closest('#form') && !!foot && ui > 0,
+                 detail: `name付き画面専用部品=${bad.length + outside.length}件（${bad.concat(outside).map(e => e.name).join(',') || 'なし'}）／画面専用部品=${ui}箇所／レールは#formの外=${!!rail && !rail.closest('#form')}` };
+      } },
+    { id: 'U4', title: '［ステップ化P3］顧問先版では派遣・日雇のカードと出来高・年俸のボタンを作らず、押されても入らない（所内版は全部出る）', run: () => stPublicProxyCheck() },
+    { id: 'U5', title: '［ステップ化P3］固定残業「支給しない」で4欄が空・ot_style=split・自動計算OFFになり、書面に固定残業が出ない（区分別・一体型）', run: () => stOtPayCheck() },
+    { id: 'U6', title: '［ステップ化P4］「追加して次の人へ」でモードON・②へ／次へ戻るが ②⑤⑦（SEQ外は前後のSEQ）／restoreState の繰返し・一括出力の後もモードが保たれる', run: () => stNextPersonCheck() },
+    { id: 'U7', title: '［ステップ化P4］名簿の編集（rosterEdit）はモードOFFで⑦に着地／⑦「全部の手順を見直す」でOFF・①へ／clearFormAll でOFF', run: () => stNextPersonOffCheck() },
+    { id: 'U9', title: '［ステップ化P5］書面の行をクリック／Enter → 対応する手順・欄へ移動（期待値表16件）・入力中の欄の行をハイライト・書面HTMLは不変', run: () => stPreviewNavCheck() },
+    { id: 'U10', title: '［ステップ化P5］狭い画面のドロワーを閉じても estimatePages が変わらない・印刷CSSで開閉ボタンとハイライトが消え #preview が出る', run: () => stDrawerCheck() },
+    { id: 'U11', title: '［ステップ化P5］①の並び（書類の種類→働き方カード→🔰使い方）と、使い方の折りたたみが初期は閉じていること', run: () => stUsageGuideCheck() },
+    { id: 'U12', title: '［整列］1440px 相当の入力列で ①〜⑦ の横並び行（2列・3列・手当・始業終業・休憩・解雇/その他・本人カードの日付）の top 差・高さ差が 2px 以下／プレビュー縮小で estimatePages 不変・印刷で解除', run: () => stAlignCheck() },
+    { id: 'U8', title: '［I-6 画面状態台帳］前の人が支給していた2人目：一括出力6経路・全部見直すの直後も 5-3 が開き⑦に赤字／誤検知なし／名簿内の整合チェック', run: () => stI6Check() }
+  ];
+}
+// U6・U7 の準備と後始末（名簿・編集ID・モード・手順・名簿バーの表示を必ず元に戻す）
+// confirm は呼ばれた文言を記録し、返す値を stConfirmAnswer で切り替える（二重登録の確認の検査用）
+let stConfirmAnswer = true, stConfirmLog = [];
+function stWithRosterSandbox(fn){
+  const backup = serializeState(), cs = CUR_STEP, eid = EDIT_ID, np = JSON.parse(JSON.stringify(NEXT_PERSON_MODE)), npo = JSON.parse(JSON.stringify(NP_OPEN));
+  const roster = ROSTER, seq = ROSTER_SEQ, lastAdd = LAST_ROSTER_ADD_ID, inh = NP_OT_INHERIT, _cf = window.confirm, _al = window.alert, _dl = download;
+  const rs = document.getElementById('rosterStatus'), rsText = rs ? rs.textContent : '';
+  const mode = document.querySelector('.tab.active'), prevMode = mode ? mode.id.replace(/^tab/, '').toLowerCase() : 'create';
+  try { stConfirmAnswer = true; stConfirmLog = []; window.confirm = m => { stConfirmLog.push(String(m)); return stConfirmAnswer; }; window.alert = () => {}; ROSTER = []; LAST_ROSTER_ADD_ID = null; return fn(); }
+  finally {
+    window.confirm = _cf; window.alert = _al; download = _dl; ROSTER = roster; ROSTER_SEQ = seq; LAST_ROSTER_ADD_ID = lastAdd;
+    // 判定はすべて fn() の中で終わっている。ここは画面の後片付け（OT_PAY は restoreState の form.reset に任せ、手で戻さない）
+    NP_OT_INHERIT = inh; restoreState(backup); EDIT_ID = eid; NEXT_PERSON_MODE = np; NP_OPEN = npo; switchMode(prevMode); renderRoster(); updateRosterBar(); render();
+    if (rs) rs.textContent = rsText; goStep(cs, { focus: false });
+  }
+}
+// 検査の記録：[項目名, 実測, 期待値, 期待値の出所]。等式（実測===期待値）で判定し、不合格の項目だけを detail に出す
+function stLedger(){ const rows = []; return { eq: (name, actual, expected, src) => rows.push({ name, actual, expected, src, ok: JSON.stringify(actual) === JSON.stringify(expected) }), rows }; }
+function stLedgerResult(L){ const bad = L.rows.filter(r => !r.ok);
+  return { ok: bad.length === 0 && L.rows.length > 0, detail: bad.length ? '不合格：' + bad.map(r => `${r.name}（実測=${JSON.stringify(r.actual)} 期待=${JSON.stringify(r.expected)}）`).join('／') : `全${L.rows.length}項目 合格`, rows: L.rows }; }
+const stRailText = n => document.querySelector('#railBtn' + n + ' .rail-st').textContent;
+const stNpList = () => [...document.querySelectorAll('#npCheck .np-list li')].map(x => x.querySelector('b').textContent.replace(/：$/, ''));
+const stFolded = el => !!el && (el.classList.contains('ui-folded') || el.classList.contains('np-folded') || !!el.closest('.ui-folded,.np-folded,.hidden'));
+// U8：画面状態台帳（設計書 I-6・§2-2-2）。検証する状態（OT_PAY・引き継ぎの印）は途中で手で戻さず、本番の経路を通した直後の状態で確かめる
+// U9：書面の行 → 手順・欄の対応（期待値表は設計書 §5 P5 と書面の項目名から手で作った固定点）。本番の入口＝#preview のクリック・Enter
+function stPreviewNavCheck(){
+  const L = stLedger(), SRC = '設計書 §5 P5（期待値表は手で作成）';
+  const backup = serializeState(), cs = CUR_STEP, eid = EDIT_ID;
+  const set = (n, v) => { const el = form.elements[n]; if (el.length && el[0] && el[0].type === 'radio') [...el].forEach(r => r.checked = (r.value === v)); else el.value = v; };
+  const findEl = (kind, key) => kind === 'td' ? [...document.querySelectorAll('#preview .sheet td.k')].find(k => k.textContent.trim() === key) : document.querySelector('#preview .sheet > div.' + key);
+  const click = el => el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  const act = () => { const a = document.activeElement; return a ? (a.name || a.id || a.className) : ''; };
+  try {
+    const cases = [
+      ['td', '契約期間', 3, 'muki_start'], ['td', '試用期間', 3, 'probation_flag'], ['td', '就業の場所', 3, 'workplace_now'],
+      ['td', '従事すべき業務の内容', 3, 'job_now'], ['td', '始業・終業の時刻等', 4, 'worktime_system'], ['td', '休日', 4, 'holiday'],
+      ['td', '休暇', 4, 'paid_leave'], ['td', '賃金', 5, 'monthly_wage'], ['td', '退職に関する事項', 6, 'mandatory_age'],
+      ['td', 'その他', 6, 'kenpo_name'], ['div', 'issue', 2, 'issue_date'], ['div', 'addr', 2, 'employee_name'], ['div', 'office', 2, 'office_name']
+    ];
+    loadSample(); render();
+    cases.forEach(([kind, key, step, focus]) => { goStep(1, { focus: false }); const el = findEl(kind, key);
+      if (el) click(el); L.eq(`行「${key}」をクリック → 手順・欄`, [!!el, CUR_STEP, act()], [true, step, focus], SRC); });
+    // 有期の契約期間・短時間の「休日及び勤務日」・特記事項
+    loadSample(); set('period_type', '有期'); set('contract_start', '2026-10-01'); set('contract_end', '2027-09-30'); set('emp_category', '短時間'); set('tokki_jiko', 'テスト用の特記'); render();
+    [['td', '契約期間', 3, 'contract_start'], ['td', '休日及び勤務日', 4, 'holiday'], ['td', '特記事項', 6, 'tokki_jiko']].forEach(([kind, key, step, focus]) => {
+      goStep(1, { focus: false }); const el = findEl(kind, key); if (el) click(el); L.eq(`行「${key}」をクリック → 手順・欄`, [!!el, CUR_STEP, act()], [true, step, focus], SRC); });
+    // キーボード（Enter）でも移動できる・tabindex と role が DOM にだけ付く
+    loadSample(); render(); goStep(1, { focus: false });
+    const w = findEl('td', '賃金').closest('tr');
+    w.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    L.eq('Enter で「賃金」の行 → 手順⑤', [w.getAttribute('tabindex'), w.getAttribute('role'), CUR_STEP], ['0', 'button', 5], SRC + '・アクセシビリティ');
+    // 対応しない行（本文の書き出し「以下のとおり…」）は何もしない
+    goStep(3, { focus: false }); const lead = document.querySelector('#preview .sheet > div.lead'); if (lead) click(lead);
+    L.eq('対応しない行（本文の書き出し）をクリック → 何もしない', [!!lead, CUR_STEP, !!(lead && lead.getAttribute('tabindex'))], [true, 3, false], SRC);
+    // 入力中の欄に対応する行をハイライト
+    goStep(3, { focus: false }); form.elements['job_now'].focus(); render();
+    const hl = [...document.querySelectorAll('#preview .pv-hl')].map(e => (e.querySelector('td.k') || e).textContent.trim());
+    L.eq('業務の欄を入力中 → 「従事すべき業務の内容」の行だけハイライト', hl, ['従事すべき業務の内容'], SRC);
+    goStep(5, { focus: false }); form.elements['monthly_wage'].focus(); pvHighlight();
+    L.eq('賃金の欄を入力中 → 「賃金」の行だけハイライト', [...document.querySelectorAll('#preview .pv-hl')].map(e => (e.querySelector('td.k') || e).textContent.trim()), ['賃金'], SRC);
+    // 書面HTML（LAST_SHEETS）には操作用の属性・クラスを足していない
+    L.eq('書面HTMLに data-pv・tabindex・role・pv-hl が入っていない', /data-pv|tabindex|role=|pv-hl/.test(LAST_SHEETS.join('')), false, '設計書 §5 P5（書面HTMLに属性を足さない）');
+  } finally { restoreState(backup); EDIT_ID = eid; goStep(cs, { focus: false }); }
+  // 2人目以降モード（名簿を使うので名簿の後始末つき）
+  stWithRosterSandbox(() => {
+    const NP = '統括指示（P5 最後の手直し 3・4）';
+    loadSample(); render(); rosterAddNext(); goStep(5, { focus: false });
+    click(findEl('td', '契約期間'));
+    L.eq('2人目：「契約期間」の行 → ②本人カードの入社日（代理欄）', [CUR_STEP, document.activeElement && document.activeElement.id], [2, 'pd_muki_start'], NP + '・要確認3');
+    radioEls('period_type').find(r => r.value === '有期').click(); set('contract_start', '2026-10-01'); set('contract_end', '2027-09-30'); render(); goStep(5, { focus: false });
+    click(findEl('td', '契約期間'));
+    L.eq('2人目（有期）：「契約期間」の行 → ②の契約始期（代理欄）', [CUR_STEP, document.activeElement && document.activeElement.id], [2, 'pd_contract_start'], NP + '・要確認3');
+    radioEls('period_type').find(r => r.value === '無期').click(); render();
+    goStep(7, { focus: false }); const npc = NP_OPEN.company; click(findEl('div', 'office'));
+    L.eq('2人目：事業場の行 → 会社カードを開いてから事業場名称へ', [npc, NP_OPEN.company, npCompanyEls().some(e => e.classList.contains('np-folded')), CUR_STEP, act()], [false, true, false, 2, 'office_name'], NP);
+    goStep(7, { focus: false }); const npw = NP_OPEN.wage; click(findEl('td', '賃金'));
+    L.eq('2人目：「賃金」の行 → 5-4〜5-6 を開いてから月額へ（賃金締切日も見える）', [npw, NP_OPEN.wage, npWageRange().some(e => e.classList.contains('np-folded')), CUR_STEP, act(), form.elements['wage_closing'].offsetParent !== null], [false, true, false, 5, 'monthly_wage', true], NP);
+  });
+  return stLedgerResult(L);
+}
+// U10：狭い画面のドロワー。閉じていても estimatePages が変わらない（display:none にしない）・印刷CSSで部品とハイライトが消える
+function stDrawerCheck(){
+  const L = stLedger(), R4 = '設計書 §6 R4';
+  const backup = serializeState(), cs = CUR_STEP, body = document.body, had = ['pv-drawer', 'pv-open', 'pv-dn-hook'].map(c => body.classList.contains(c));
+  const setCls = (drawer, open) => { body.classList.toggle('pv-drawer', drawer); body.classList.toggle('pv-open', drawer && open); body.classList.toggle('pv-dn-hook', drawer && !!(SELFTEST_ACTIVE && P5_HOOKS.drawerDisplayNone)); };
+  let sim = null;
+  try {
+    const set = (n, v) => { const el = form.elements[n]; if (el.length && el[0] && el[0].type === 'radio') [...el].forEach(r => r.checked = (r.value === v)); else el.value = v; };
+    loadSample(); set('period_type', '有期'); set('contract_start', '2026-10-01'); set('contract_end', '2027-09-30'); set('muki_flag', '有'); render();   // 本紙＋無期転換の別紙
+    setCls(false, false); const wide = estimatePages(); const sheets = document.querySelectorAll('#preview .sheet').length;
+    setCls(true, false); const closed = estimatePages(); const hdrClosed = !!document.getElementById('mpHeader') === (closed >= 2);
+    setCls(true, true); const open = estimatePages();
+    L.eq('ドロワー閉・開でも estimatePages が広い画面と同じ（2枚以上の書面）', [sheets >= 2, wide >= 2, closed, open, hdrClosed], [true, true, wide, wide, true], R4);
+    // 広い画面でも狭い画面でも、手順フッター（次へ・戻る）がスクロールなしで画面内に収まる
+    setCls(false, false); pvApplyWidth(); window.scrollTo(0, 0); goStep(1, { focus: false });
+    { const nb = document.getElementById('stepNext').getBoundingClientRect(), pb = document.getElementById('stepPrev').getBoundingClientRect();
+      L.eq('スクロールなしで「次へ」「戻る」の下端が画面の高さ以下', [nb.height > 0, nb.bottom <= window.innerHeight, pb.bottom <= window.innerHeight], [true, true, true], '統括指示（1440px で次へが画面外に出る件）'); }
+    // 印刷CSSを画面に写して確かめる（ドロワー閉のまま）
+    setCls(true, false); form.elements['job_now'].focus(); pvHighlight();
+    const rules = []; [...document.styleSheets].forEach(ss => { try { [...ss.cssRules].forEach(r => { if (r instanceof CSSMediaRule && /print/.test(r.conditionText || r.media.mediaText)) [...r.cssRules].forEach(x => { if (x.selectorText) rules.push(x.cssText); }); }); } catch (e) {} });
+    sim = document.createElement('style'); sim.textContent = rules.join('\n'); document.head.appendChild(sim);
+    const pv = document.getElementById('preview'), cs2 = getComputedStyle(pv), tg = document.getElementById('pvToggle');
+    const hlTd = document.querySelector('#preview .pv-hl td');
+    L.eq('印刷時：ドロワー閉でも #preview が出る（visibility・transform・position）', [cs2.visibility, cs2.transform, cs2.position, cs2.display !== 'none'], ['visible', 'none', 'static', true], R4);
+    L.eq('印刷時：開閉ボタンは出ない・ハイライトは消える', [tg ? getComputedStyle(tg).display : 'none', hlTd ? getComputedStyle(hlTd).boxShadow : 'none'], ['none', 'none'], '設計書 §5 P5');
+    sim.remove(); sim = null;
+    // 開閉ボタンと「次へ」が重ならない（この画面の幅で、ドロワー表示にして実測）
+    setCls(true, false); goStep(1, { focus: false }); pvFootHeight();
+    const a = document.getElementById('pvToggle').getBoundingClientRect(), n = document.getElementById('stepNext').getBoundingClientRect();
+    const overlap = !(a.right <= n.left || n.right <= a.left || a.bottom <= n.top || n.bottom <= a.top);
+    L.eq('ドロワー閉：「📄 プレビュー」と「次へ」の矩形が重ならない', [a.width > 0, n.width > 0, overlap], [true, true, false], 'ui Must fix（P5）');
+    // 開いたら外側を inert・閉じるボタンにフォーカス／閉じたら inert を外す
+    pvDrawer(true);
+    const inertOpen = PV_INERT_SEL.map(s => !!document.querySelector(s) && document.querySelector(s).hasAttribute('inert'));
+    L.eq('ドロワー開：外側（入力欄・レール・ヘッダー・タブ・名簿バー・フッター）が inert、閉じるボタンにフォーカス', [inertOpen, document.activeElement && document.activeElement.id, document.getElementById('preview').hasAttribute('inert')], [PV_INERT_SEL.map(() => true), 'pvToggle', false], 'ui（P5）');
+    pvDrawer(false);
+    L.eq('ドロワー閉：inert を外す', PV_INERT_SEL.map(s => !!document.querySelector(s) && document.querySelector(s).hasAttribute('inert')), PV_INERT_SEL.map(() => false), 'ui（P5）');
+  } finally {
+    if (sim) sim.remove();
+    ['pv-drawer', 'pv-open', 'pv-dn-hook'].forEach((c, i) => body.classList.toggle(c, had[i])); pvDrawer(had[1]);
+    restoreState(backup); goStep(cs, { focus: false });
+  }
+  return stLedgerResult(L);
+}
+// U11：①の入口の並び（書類の種類 → 働き方カード → 🔰使い方（閉）→ 雇用形態）と、使い方が初めての方モードと無関係に閉じて始まること
+function stUsageGuideCheck(){
+  const L = stLedger(), SRC = '統括指示（P5 最後の手直し 6）・モック案A';
+  const ug = document.getElementById('usageGuide'), pc = document.querySelector('#step1 .persona-wrap'), dt = document.getElementById('fsDoctype'), emp = radioEls('emp_category')[0].closest('.row');
+  const before = (x, y) => !!(x && y && (x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING));
+  L.eq('並び：書類の種類 → 働き方カード → 使い方 → 雇用形態（すべて手順①の中）', [before(dt, pc), before(pc, ug), before(ug, emp), !!(ug && ug.closest('#step1'))], [true, true, true, true], SRC);
+  L.eq('使い方は <details> で、初期は閉じている・見出しの文言', [ug && ug.tagName, ug && ug.open, ug && ug.querySelector('summary').textContent.trim()], ['DETAILS', false, '🔰 使い方（初めての方はこちら）'], SRC);
+  const was = document.body.classList.contains('help-off');
+  setHelpOff(true, { noSave: true }); const offShown = getComputedStyle(ug).display !== 'none', offOpen = ug.open;
+  setHelpOff(false, { noSave: true }); const onShown = getComputedStyle(ug).display !== 'none', onOpen = ug.open;
+  setHelpOff(was, { noSave: true });
+  L.eq('初めての方モードの ON／OFF と無関係（どちらでも表示され、閉じたまま）', [offShown, offOpen, onShown, onOpen], [true, false, true, false], SRC);
+  L.eq('緑のヒント（help-note）は初めての方モード ON で表示のまま', (() => { setHelpOff(false, { noSave: true }); const h = document.querySelector('#fsEmpcat .help-note'); const v = !!h && getComputedStyle(h).display !== 'none'; setHelpOff(was, { noSave: true }); return v; })(), true, '原さん決定（初めての方モードは初期 ON）');
+  return stLedgerResult(L);
+}
+// U12：横並び行の整列（同じ行に並ぶ入力欄の top の差・高さの差が 2px 以下）。入力列を 1440px 幅のときの幅（ST_ALIGN_W）にして ①〜⑦ を実測する
+const ST_ALIGN_W = 546;   // 1440px 幅での入力列の実測幅（.wrap の 196px minmax(460px,1fr) minmax(0,1.25fr)）
+const ALIGN_HOOKS = { noAlign: false };   // 負検証（N31）専用：2列・3列の行のサブグリッドを外す（改修前の「ラベルが折り返すと入力欄がずれる」状態）
+function stAlignScan(){
+  const CTRL = 'input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select:not(.ui-vh-select),textarea,button.mini,button.a-kind,.seg-proxy .seg-btn';
+  const vis = e => !!(e && e.getClientRects().length) && getComputedStyle(e).visibility !== 'hidden';
+  const firstCtrl = c => [...c.querySelectorAll(CTRL)].find(vis) || null;
+  const out = [];
+  [...document.querySelectorAll('#form .row.two, #form .row.three, #form .allow-row, #form .time-row, #form .break-row, #form .other-row')].filter(vis).forEach(row => {
+    const isGrid = row.matches('.row.two, .row.three');
+    let els, lk = null;
+    if (isGrid) { const cells = [...row.children].filter(c => vis(c) && firstCtrl(c)); els = cells.map(firstCtrl); lk = cells.map(c => Math.round(c.getBoundingClientRect().top)); }
+    else els = [...row.children].filter(c => vis(c) && c.matches(CTRL));
+    if (els.length < 2) return;
+    const rs = els.map(e => e.getBoundingClientRect()), lines = [];
+    rs.forEach((r, i) => {   // グリッド行＝同じグリッド行のセル同士、手当・始業終業などの2段＝縦の範囲が重なるもの同士を1ラインとして比べる
+      const L = isGrid ? lines.find(l => l.k === lk[i]) : lines.find(l => r.top < l.bottom && r.bottom > l.top);
+      if (L) { L.items.push(i); L.top = Math.min(L.top, r.top); L.bottom = Math.max(L.bottom, r.bottom); } else lines.push({ k: isGrid ? lk[i] : null, top: r.top, bottom: r.bottom, items: [i] });
+    });
+    let dTop = 0, dH = 0;
+    lines.forEach(l => { const ts = l.items.map(i => rs[i].top), hs = l.items.filter(i => els[i].tagName !== 'TEXTAREA').map(i => rs[i].height);
+      dTop = Math.max(dTop, Math.max(...ts) - Math.min(...ts)); if (hs.length > 1) dH = Math.max(dH, Math.max(...hs) - Math.min(...hs)); });
+    const st = row.closest('section.step');
+    out.push({ key: (st ? st.id : '?') + ' ' + (row.id ? '#' + row.id : '.' + [...row.classList].join('.')) + ' [' + (els[0].name || els[0].className) + ']',
+      kind: isGrid ? (row.id === 'personDates' ? 'personDates' : 'grid') : [...row.classList].find(c => /-row$/.test(c)), lines: lines.length, dTop, dH, h: rs.map(r => Math.round(r.height)) });
+  });
+  return out;
+}
+function stAlignCheck(){
+  const L = stLedger(), SRC = '統括指示（同じ行の入力欄のずれ）';
+  const backup = serializeState(), cs = CUR_STEP, fw = form.style.width, fm = form.style.maxWidth;
+  let inj = null;
+  try {
+    if (SELFTEST_ACTIVE && ALIGN_HOOKS.noAlign) { inj = document.createElement('style'); inj.setAttribute('data-st-inject', ''); inj.textContent = '#form .row.two>*,#form .row.three>*{display:block !important}'; document.head.appendChild(inj); }
+    form.style.width = ST_ALIGN_W + 'px'; form.style.maxWidth = 'none';
+    const set = (n, v) => { const el = form.elements[n]; if (el.length && el[0] && el[0].type === 'radio') { const r = [...el].find(x => x.value === v); if (r && !r.disabled) [...el].forEach(x => x.checked = (x === r)); } else el.value = v; };
+    const emps = ['一般', '短時間', '派遣', '建設', '林業'], wages = ['月給', '時給', '日給', '出来高', '年俸'];
+    const all = {}; let k = 0;
+    ['NOTICE', 'CONTRACT', 'CHG'].forEach(dt => ['無期', '有期', '日雇'].forEach(per => {
+      loadSample(); set('docType', dt); set('period_type', per); set('emp_category', emps[k % 5]); set('wage_type', wages[k % 5]); set('ot_style', k % 2 ? 'unified' : 'split');
+      set('contract_start', '2026-10-01'); set('contract_end', '2027-09-30'); set('muki_flag', '有'); k++; render();
+      for (let n = 1; n <= 7; n++) {
+        goStep(n, { focus: false });
+        const unf = [...document.querySelectorAll('#form .row.ui-folded')]; unf.forEach(e => e.classList.remove('ui-folded'));   // 「変更する」で開く割増率の行も測る
+        stAlignScan().forEach(r => { const a = all[r.key]; if (!a || r.dTop > a.dTop || r.dH > a.dH || r.lines > a.lines) all[r.key] = r; });
+        unf.forEach(e => e.classList.add('ui-folded'));
+      }
+    }));
+    const rows = Object.values(all), kinds = [...new Set(rows.map(r => r.kind))].sort();
+    L.eq('測った行の種類（2列・3列・本人カードの日付・手当・始業終業・休憩・解雇／その他）と行数', [kinds, rows.length >= 25], [['allow-row', 'break-row', 'grid', 'other-row', 'personDates', 'time-row'], true], SRC);
+    L.eq('同じ行の入力欄の top の差が 2px を超える行（①〜⑦・9通り）', rows.filter(r => r.dTop > 2).map(r => r.key + '=' + Math.round(r.dTop) + 'px'), [], SRC);
+    L.eq('同じ行の入力欄の高さの差が 2px を超える行', rows.filter(r => r.dH > 2).map(r => r.key + '=' + Math.round(r.dH) + 'px'), [], SRC);
+    L.eq('1440px 相当で「区分｜手当名｜単位｜金額｜×」と「区分｜始業〜終業｜×」が1段に収まる', [rows.filter(r => /a-kind/.test(r.key)).map(r => r.lines), rows.filter(r => r.kind === 'time-row').map(r => r.lines)], [[1, 1], [1]], SRC);
+    const ctlH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ctl-h'), 10);
+    goStep(2, { focus: false }); const hs = ['employee_name', 'issue_date'].map(n => Math.round(form.elements[n].getBoundingClientRect().height));
+    goStep(4, { focus: false }); hs.push(Math.round(document.querySelector('#timeList .t-start').getBoundingClientRect().height));
+    goStep(5, { focus: false }); hs.push(Math.round(form.elements['minwage_pref'].getBoundingClientRect().height), Math.round(document.querySelector('#inAllowList .mini').getBoundingClientRect().height));
+    L.eq('入力欄・日付・時刻・選択欄・×ボタンの高さがそろう（--ctl-h）', hs, [ctlH, ctlH, ctlH, ctlH, ctlH], SRC);
+    // プレビューの縮小表示：transform なので .sheet の offsetWidth / scrollHeight とページ数推定は倍率によらず同じ・印刷では解除
+    loadSample(); set('period_type', '有期'); set('contract_start', '2026-10-01'); set('contract_end', '2027-09-30'); set('muki_flag', '有'); render();
+    const pv = document.getElementById('preview'), dims = () => [...pv.querySelectorAll('.sheet')].map(x => [x.offsetWidth, x.scrollHeight]);
+    pv.style.setProperty('--pv-scale', '1'); const d1 = dims(), p1 = estimatePages();
+    pv.style.setProperty('--pv-scale', '0.6'); const d6 = dims(), p6 = estimatePages(), tr = getComputedStyle(pv.querySelector('.sheet')).transform;
+    pvApplyScale();
+    L.eq('縮小表示でも .sheet の offsetWidth・scrollHeight・estimatePages が等倍と同じ（2枚以上）', [d6, p6, d1.length >= 2, /^matrix\(0\.6,/.test(tr)], [d1, p1, true, true], '統括指示（estimatePages を壊さない）');
+    const media = []; [...document.styleSheets].forEach(ss => { try { [...ss.cssRules].forEach(r => { if (r instanceof CSSMediaRule) [...r.cssRules].forEach(x => { if (x.selectorText === '#preview .sheet') media.push([(r.conditionText || r.media.mediaText), x.style.transform, x.style.getPropertyPriority('transform')]); }); }); } catch (e) {} });
+    const hasSel = []; const walk = rs => [...rs].forEach(x => { if (x.selectorText && /:has\(/.test(x.selectorText)) hasSel.push(x.selectorText); if (x.cssRules) walk(x.cssRules); });
+    [...document.styleSheets].forEach(ss => { try { walk(ss.cssRules); } catch (e) {} });
+    L.eq('CSS に :has() のセレクタが無い（非対応の環境で区分ボタンと手当名が重ならない）', hasSel, [], 'ui Should fix（揃え）');
+    L.eq('区分ボタンのある手当の行＝has-kind の行（過不足なし）', [...document.querySelectorAll('#inAllowList .allow-row, #outAllowList .allow-row')].filter(r => !!r.querySelector(':scope > .a-kind') !== r.classList.contains('has-kind')).length, 0, 'ui Should fix（揃え）');
+    L.eq('縮小は @media screen の中だけ・@media print で transform:none !important', [media.some(m => /screen/.test(m[0]) && /scale/.test(m[1])), media.some(m => /print/.test(m[0]) && m[1] === 'none' && m[2] === 'important'), media.filter(m => /print/.test(m[0]) && /scale/.test(m[1])).length], [true, true, 0], '統括指示（印刷時は縮小を解除）');
+  } finally {
+    if (inj) inj.remove();
+    form.style.width = fw; form.style.maxWidth = fm;
+    restoreState(backup); goStep(cs, { focus: false }); pvApplyScale();
+  }
+  return stLedgerResult(L);
+}
+function stI6Check(){
+  return stWithRosterSandbox(() => {
+    const L = stLedger(), LED = '設計書 I-6・§2-2-2', ORG = '原さん決定（2026-09-27）';
+    const _st = window.setTimeout, _pr = window.print;
+    const syncTimers = () => { window.setTimeout = (fn) => { fn(); return 0; }; window.print = () => {}; };   // bulkPrint・bulkExportEach の遅延処理をその場で走らせる
+    const realTimers = () => { window.setTimeout = _st; window.print = _pr; };
+    download = () => {};
+    const otRow = () => [...document.querySelectorAll('#npCheck .np-list li')].find(x => /^固定残業：/.test(x.textContent));
+    const shown = () => ({ eff: otPayEffective(), splitOpen: !stFolded(document.getElementById('otSplit')),
+      pressed: (document.querySelector('#otPaySeg .seg-btn[aria-pressed="true"]') || {}).dataset ? document.querySelector('#otPaySeg .seg-btn[aria-pressed="true"]').dataset.value : null,
+      red: !!(otRow() && otRow().classList.contains('np-missing')), card: !document.getElementById('npCheck').classList.contains('ui-folded') });
+    const WARN = { eff: true, splitOpen: true, pressed: '1', red: true, card: true };
+    const noOtState = () => { loadSample(); ['fixed_ot_hours', 'fixed_ot_amount'].forEach(n => form.elements[n].value = ''); form.elements['fixed_ot_auto'].checked = false; render(); return serializeState(); };
+    // 準備：1人目（記入例＝固定残業あり）を「次の人へ」で登録 → 2人目は氏名だけ入力（時間数は空）。名簿には固定残業が空の人も1人入れて、一括出力の確認を必ず出す
+    const prep = () => { ROSTER = []; LAST_ROSTER_ADD_ID = null; const none = noOtState(); loadSample(); render(); rosterAddNext();
+      ROSTER.push({ id: ++ROSTER_SEQ, state: none }); form.elements['employee_name'].value = '二人目　花子'; fireChange(form.elements['employee_name']); };
+    const paths = [
+      ['bulkGapReport（OK）', () => { stConfirmAnswer = true; bulkGapReport(); }],
+      ['bulkGapReport（キャンセル）', () => { stConfirmAnswer = false; bulkGapReport(); stConfirmAnswer = true; }],
+      ['bulkPrint', () => { syncTimers(); try { bulkPrint(); } finally { realTimers(); } }],
+      ['bulkWordCombined', () => bulkWordCombined()],
+      ['bulkExcelCombined', () => bulkExcelCombined()],
+      ['bulkExportEach', () => { syncTimers(); try { bulkExportEach('doc'); } finally { realTimers(); } }]
+    ];
+    // 台帳の直積：前の人が支給していた2人目 × 一括出力の6経路（OK/キャンセルを含む）→ 直後に 5-3 が開き・⑦に赤字
+    paths.forEach(([name, run]) => {
+      prep(); L.eq('前提（' + name + ' の前）：5-3 が開き⑦に赤字', shown(), WARN, LED);
+      run(); switchMode('create');
+      L.eq(name + ' の直後：5-3 が開き⑦に赤字（OT_PAY は reset で null）', Object.assign(shown(), { otPay: OT_PAY, mode: NEXT_PERSON_MODE.active }), Object.assign({}, WARN, { otPay: null, mode: true }), LED);
+    });
+    // bulkGapReport に名簿内の整合チェックが確認として出る（出力は止めない）
+    prep(); stConfirmAnswer = true; stConfirmLog = []; const okRet = bulkGapReport();
+    L.eq('名簿内の整合チェックが確認に出て、OK なら出力を続ける', [stConfirmLog.some(m => m.indexOf('名簿内の確認（固定残業）') >= 0), okRet], [true, true], ORG);
+    // 「全部の手順を見直す」の後に一括出力しても警告が出る（印は npSetMode(false) で消えない）
+    prep(); npReviewAll(); bulkWordCombined(); switchMode('create');
+    L.eq('全部見直す→一括出力の後：5-3 が開き、⑦の引き継ぎ確認に赤字', shown(), WARN, LED);
+    stConfirmAnswer = false; stConfirmLog = []; const r1 = confirmGaps('印刷');
+    stConfirmAnswer = true; stConfirmLog = []; const r2 = confirmGaps('印刷');
+    L.eq('単票の出力確認に「引き継ぎ確認」が出る（キャンセル＝止まる／OK＝出力できる）', [r1, r2, stConfirmLog.some(m => m.indexOf('引き継ぎ確認：前の人は固定残業ありですが') >= 0)], [false, true, true], ORG);
+    // 前の人が「支給しない」：一括出力の後も警告は出ない（誤検知なし）
+    { ROSTER = []; LAST_ROSTER_ADD_ID = null; noOtState(); otPaySet(false); rosterAddNext(); form.elements['employee_name'].value = '二人目　次郎'; fireChange(form.elements['employee_name']);
+      bulkWordCombined(); switchMode('create');
+      L.eq('前の人が支給しない→一括出力の後：警告なし', [otPayEffective(), !!otRow(), stFolded(document.getElementById('otSplit'))], [false, false, true], LED);
+      stConfirmLog = []; confirmGaps('印刷'); L.eq('前の人が支給しない：単票の確認に「引き継ぎ確認」は出ない', stConfirmLog.some(m => m.indexOf('引き継ぎ確認') >= 0), false, ORG);
+      ROSTER.push({ id: ++ROSTER_SEQ, state: noOtState() }); stConfirmLog = []; bulkGapReport();
+      L.eq('固定残業が全員空の名簿：整合チェックは出ない', stConfirmLog.some(m => m.indexOf('名簿内の確認') >= 0), false, ORG); }
+    // 2人目で明示的に「支給しない」→ その場は隠れる／一括出力の後は「支給する（空・赤字）」へ戻る（原さんが許容した揺れ）
+    prep(); otPaySet(false);
+    L.eq('2人目で明示的に「支給しない」：その場では 5-3 が隠れ赤字なし', [otPayEffective(), stFolded(document.getElementById('otSplit')), !!(otRow() && otRow().classList.contains('np-missing'))], [false, true, false], ORG);
+    bulkWordCombined(); switchMode('create');
+    L.eq('その後に一括出力：「支給する（空・赤字）」へ戻る（許容の揺れ・期待値）', shown(), WARN, ORG);
+    // 値があれば必ず「支給する」（P3 の約束の回帰）・値を入れても印は残る（赤字は値があるので出ない）
+    prep(); form.elements['fixed_ot_hours'].value = '10'; form.elements['fixed_ot_hours'].dispatchEvent(new Event('input', { bubbles: true }));
+    L.eq('2人目で時間数を入力：実効＝支給する・印は残る・赤字なし・⑦に時間数', [otPayEffective(), NP_OT_INHERIT, !!(otRow() && otRow().classList.contains('np-missing')), /この方：支給する（時間外10時間）/.test(otRow() ? otRow().textContent : '')], [true, true, false, true], '設計書 §2-2-2（2026-09-27 改訂）');
+    bulkWordCombined(); switchMode('create');
+    L.eq('値がある人は一括出力の後も「支給する」', [otPayEffective(), !stFolded(document.getElementById('otSplit'))], [true, true], 'P3 の約束（値があれば必ず表示）');
+    // 時間数を入れる→消す→一括出力：安全側に戻る（5-3 が開き赤字）
+    prep(); const fh = form.elements['fixed_ot_hours']; fh.value = '10'; fh.dispatchEvent(new Event('input', { bubbles: true })); fh.value = ''; fh.dispatchEvent(new Event('input', { bubbles: true }));
+    bulkWordCombined(); switchMode('create');
+    L.eq('時間数を入れる→消す→一括出力の後：5-3 が開き⑦に赤字', shown(), WARN, '設計書 §2-2-2（2026-09-27 改訂）');
+    // 一体型で法定休日・深夜の時間数だけを入れた人は「空」ではない（A2）
+    { ROSTER = []; LAST_ROSTER_ADD_ID = null; loadSample(); form.elements['ot_style'].value = 'unified'; render(); rosterAddNext();
+      const beforeGap = otInheritGap(); form.elements['uni_h_hol'].value = '4'; fireChange(form.elements['uni_h_hol']);
+      const st2 = serializeState(); const withOnlyHol = { state: st2 }; const none = { state: Object.assign({}, st2, { fields: Object.assign({}, st2.fields, { uni_h_hol: '' }) }) };
+      const saveR = ROSTER; ROSTER = [{ id: 901, state: withOnlyHol.state }, { id: 902, state: none.state }]; const mix = rosterOtMixMessage(); ROSTER = saveR;
+      L.eq('一体型：法定休日の時間数だけでも「空」でない（引き継ぎ確認なし・名簿の整合チェックで「あり」に数える）', [beforeGap, otHoursEmpty(), otInheritGap(), /固定残業ありの人（[^）]*）と、固定残業が空の人/.test(mix)], [true, false, false, true], '統括指示（P4 小修正 A2）'); }
+    // 名簿へ保存したら印は消える
+    prep(); rosterCommit(); L.eq('名簿へ保存したら引き継ぎの印は消える', NP_OT_INHERIT, false, LED);
+    // 別の人に切り替える操作では印を消す（統括回答 2026-09-27）。確認は固定残業なし・ブロックなしの人の状態で行う
+    const SW = '統括回答（2026-09-27）';
+    { const none = noOtState(); prep(); clearFormAll(); const inhAfter = NP_OT_INHERIT, cardAfter = document.getElementById('npCheck').classList.contains('ui-folded');
+      restoreState(none); stConfirmAnswer = true; stConfirmLog = []; confirmGaps('印刷');
+      L.eq('clearFormAll の後：印＝false・⑦に引き継ぎの表示なし・確認に「引き継ぎ確認」なし', [inhAfter, cardAfter, stConfirmLog.some(m => m.indexOf('引き継ぎ確認') >= 0)], [false, true, false], SW); }
+    { prep(); const noneId = ROSTER[ROSTER.length - 1].id; rosterEdit(noneId); stConfirmAnswer = true; stConfirmLog = []; confirmGaps('印刷');
+      L.eq('固定残業なしの人を rosterEdit で開く：印＝false・確認に「引き継ぎ確認」なし', [NP_OT_INHERIT, stConfirmLog.some(m => m.indexOf('引き継ぎ確認') >= 0)], [false, false], SW); }
+    { const noneTxt = JSON.stringify(noOtState()); prep(); applyLoadedData(noneTxt);
+      L.eq('loadData（読込の成功時の処理）の後：印＝false・引き継ぎ確認なし', [NP_OT_INHERIT, otInheritGap()], [false, false], SW); }
+    // 編集中に「上書き保存」→「次の人へ」で件数が増えない（二重登録の確認が効く）
+    { ROSTER = []; LAST_ROSTER_ADD_ID = null; loadSample(); render(); rosterCommit(); const id = ROSTER[0].id;
+      rosterEdit(id); form.elements['monthly_wage'].value = '210000'; render(); rosterCommit();
+      stConfirmAnswer = true; stConfirmLog = []; rosterAddNext();
+      L.eq('編集中に上書き保存→次の人へ：件数は増えない（二重登録の確認が出る）', [ROSTER.length, sf(ROSTER[0].state, 'monthly_wage'), stConfirmLog[0] || ''], [1, '210000', 'この内容はすでに名簿に追加済みです。追加せずに次の人へ進みますか？'], '統括決定（P4 再レビュー）'); }
+    return stLedgerResult(L);
+  });
+}
+function stNextPersonCheck(){
+  return stWithRosterSandbox(() => {
+    const L = stLedger(), S3 = '設計書§3', ORG = '統括決定（P4 レビュー）';
+    loadSample(); render(); L.eq('1人目はモードOFF', NEXT_PERSON_MODE.active, false, S3);
+    const prevName = val('employee_name');
+    rosterAddNext();
+    L.eq('rosterAddNext でモードON', NEXT_PERSON_MODE.active, true, S3);
+    L.eq('前の人の氏名を記録', NEXT_PERSON_MODE.prevName, prevName, S3);
+    L.eq('②へ移動', CUR_STEP, 2, S3);
+    L.eq('氏名にフォーカス', document.activeElement === form.elements['employee_name'], true, S3);
+    L.eq('名簿の件数', ROSTER.length, 1, S3);
+    L.eq('②会社カードは【引継】の要約（欄は隠れる）', npCompanyEls().map(stFolded), [true, true], S3);
+    L.eq('②本人カードは開いている', [stFolded(document.getElementById('personDates')), stFolded(form.elements['employee_name'])], [false, false], S3);
+    // SEQ の遷移（設計書 §3 の表から手で作った期待値）
+    [[2, 1, 5], [5, 1, 7], [7, 1, null], [7, -1, 5], [5, -1, 2], [2, -1, null], [3, 1, 5], [4, 1, 5], [6, 1, 7], [3, -1, 2], [4, -1, 2], [6, -1, 5], [1, 1, 2]]
+      .forEach(([from, d, to]) => L.eq(`SEQ ${from}${d > 0 ? '→次へ' : '→戻る'}`, stepTarget(from, d), to, S3));
+    goStep(2, { focus: false }); goStepRel(1); L.eq('②で次へ→⑤', CUR_STEP, 5, S3); goStepRel(1); L.eq('⑤で次へ→⑦', CUR_STEP, 7, S3); goStepRel(-1); L.eq('⑦で戻る→⑤', CUR_STEP, 5, S3);
+    L.eq('⑤の戻るの表示（行き先つき）', document.getElementById('stepPrev').textContent, '← 戻る（' + stepLabel(2) + '）', 'ui-3');
+    L.eq('⑤5-4〜5-6は【引継】の要約', npWageRange().every(e => e.classList.contains('np-folded')), true, S3);
+    form.elements['wage_payday'].value = ''; render(); L.eq('5-5に未入力→自動で開く', npWageRange().some(e => e.classList.contains('np-folded')), false, S3);
+    form.elements['wage_payday'].value = '翌月10日'; form.elements['hol_legal'].value = ''; render();
+    L.eq('5-4の割増率が空（要確認＝yellow）→自動で開く', npWageRange().some(e => e.classList.contains('np-folded')), false, 'correctness（P4）');
+    form.elements['hol_legal'].value = '135'; render();
+    L.eq('折りたたまれた欄に黄色が残らない', [...form.querySelectorAll('.np-folded .empty-field, .np-folded.empty-field')].length, 0, 'correctness（P4）');
+    // 4) レールから③・⑥を直接開いて欄を空にすると【引継】→件数、戻すと【引継】
+    L.eq('③は【引継】', stRailText(3), '【引継】', ORG);
+    document.getElementById('railBtn3').click(); L.eq('レールから③を開く', CUR_STEP, 3, ORG);
+    const jn = form.elements['job_now'].value; form.elements['job_now'].value = ''; fireChange(form.elements['job_now']);
+    L.eq('③の業務を空→未入力1', stRailText(3), '未入力1', ORG);
+    form.elements['job_now'].value = jn; fireChange(form.elements['job_now']); L.eq('③を戻す→【引継】', stRailText(3), '【引継】', ORG);
+    document.getElementById('railBtn6').click(); const sr = form.elements['self_retire'].value; form.elements['self_retire'].value = ''; fireChange(form.elements['self_retire']);
+    L.eq('⑥の自己都合退職を空→未入力1', stRailText(6), '未入力1', ORG);
+    form.elements['self_retire'].value = sr; fireChange(form.elements['self_retire']); L.eq('⑥を戻す→【引継】', stRailText(6), '【引継】', ORG);
+    // ⑦の引き継ぎ一覧（記入例＝無期・固定残業あり（区分別・自動計算））
+    L.eq('⑦の一覧（無期）', stNpList(), ['入社日', '業務の内容（雇入れ直後）', '特記事項', '社会保険の被保険者区分', '固定残業'], S3 + '・' + ORG);
+    L.eq('社保区分は「クリア済み（任意）」', /クリア済み（任意）/.test(document.querySelectorAll('#npCheck .np-list li')[3].textContent), true, S3);
+    // 2) 2人目を有期にする：⑦が契約期間・通算起算日に切り替わる／②の日付代理で元の欄に入る
+    const snapNp = () => ({ list: stNpList(), rail: [3, 4, 6].map(stRailText) });
+    const before = snapNp();
+    radioEls('period_type').find(r => r.value === '有期').click();
+    L.eq('有期：⑦の一覧', stNpList().slice(0, 3), ['契約期間', '通算契約期間の起算日', '業務の内容（雇入れ直後）'], S3);
+    const pd = document.getElementById('pd_contract_start'); pd.value = '2027-04-01'; pd.dispatchEvent(new Event('input', { bubbles: true }));
+    L.eq('有期：②の代理で契約始期に入る', val('contract_start'), '2027-04-01', '設計書§3（要確認3）');
+    // 3) 日雇→無期と往復：表示・レール・⑦が往復前と一致
+    radioEls('period_type').find(r => r.value === '無期').click();
+    L.eq('有期→無期に戻すと⑦・レールが最初と同じ', snapNp(), before, ORG);
+    const hiya = radioEls('period_type').find(r => r.value === '日雇');
+    if (hiya.disabled) {   // 顧問先版（applyPublicMode）では日雇は選べない
+      hiya.click(); L.eq('顧問先版：日雇は選べない（期間区分は無期のまま）', radio('period_type'), '無期', 'applyPublicMode（原さん決定⑩）');
+    } else {
+      hiya.click();
+      L.eq('日雇：⑦に日付の行がない', stNpList().filter(x => /入社日|契約期間|起算日/.test(x)).length, 0, S3);
+      L.eq('日雇：④の休日・休暇が隠れ、手順の注記に出る', [document.getElementById('fsHolyday').classList.contains('hidden'), /休日・休暇/.test(document.querySelector('#step4 .step-note').textContent)], [true, true], ORG);
+    }
+    radioEls('period_type').find(r => r.value === '無期').click();
+    L.eq('日雇→無期に戻すと⑦・レールが最初と同じ', snapNp(), before, ORG);
+    // restoreState をくり返してもモードは変わらない／一括出力の後も保たれる
+    for (let i = 0; i < 3; i++) restoreState(serializeState());
+    L.eq('restoreState を3回くり返してもON', NEXT_PERSON_MODE.active, true, S3);
+    form.elements['employee_name'].value = '山田　花子'; form.elements['monthly_wage'].value = '190000'; render(); rosterCommit();
+    let word = null; download = (fn, c) => { word = c; }; bulkWordCombined();
+    L.eq('一括Wordの後もON', [!!word, NEXT_PERSON_MODE.active], [true, true], S3);
+    // 1) MF-1：前の人の固定残業の支給状態を引き継ぐ（区分別・自動計算あり／なし、一体型）
+    const otCase = (label, prep, style) => {
+      loadSample(); prep(); render(); ROSTER = []; LAST_ROSTER_ADD_ID = null; rosterAddNext();
+      const box = document.getElementById(style === 'unified' ? 'otUnified' : 'otSplit');
+      L.eq(`MF-1 ${label}：次の人へ後に5-3が開いている`, [otPayEffective(), stFolded(form.elements['ot_style'].closest('.row')), stFolded(box)], [true, false, false], ORG);
+      const li = [...document.querySelectorAll('#npCheck .np-list li')].find(x => /^固定残業：/.test(x.textContent));
+      L.eq(`MF-1 ${label}：⑦に固定残業の行（時間数が空なら未入力として目立たせる）`, [!!li, li ? li.classList.contains('np-missing') : null], [true, true], ORG);
+    };
+    otCase('区分別・自動計算あり', () => {}, 'split');
+    otCase('区分別・自動計算なし', () => { form.elements['fixed_ot_auto'].checked = false; form.elements['fixed_ot_amount'].value = '30000'; }, 'split');
+    otCase('一体型', () => { form.elements['ot_style'].value = 'unified'; }, 'unified');
+    { loadSample(); ['fixed_ot_hours', 'fixed_ot_amount'].forEach(n => form.elements[n].value = ''); form.elements['fixed_ot_auto'].checked = false; render(); otPaySet(false); ROSTER = []; LAST_ROSTER_ADD_ID = null; rosterAddNext();
+      L.eq('MF-1 前の人が「支給しない」：false のまま・⑦に固定残業の行なし', [otPayEffective(), stNpList().indexOf('固定残業') >= 0], [false, false], ORG); }
+    return stLedgerResult(L);
+  });
+}
+function stNextPersonOffCheck(){
+  return stWithRosterSandbox(() => {
+    const L = stLedger(), S3 = '設計書§3', ORG = '統括決定（P4 レビュー MF-2）';
+    loadSample(); render(); rosterCommit(); const id = ROSTER[ROSTER.length - 1].id;
+    form.elements['employee_name'].value = '佐藤　次郎'; render(); rosterAddNext(); L.eq('前提：モードON', NEXT_PERSON_MODE.active, true, S3);
+    rosterEdit(id); L.eq('rosterEdit：OFF・⑦・編集ID', [NEXT_PERSON_MODE.active, CUR_STEP, EDIT_ID], [false, 7, id], '原さん決定（要確認5）');
+    L.eq('OFFでは要約・一覧を出さない', [document.getElementById('npCheck').classList.contains('ui-folded'), npCompanyEls().some(e => e.classList.contains('np-folded'))], [true, false], S3);
+    L.eq('編集中のボタン文言（ヘッダーと⑦で同じ）', [document.getElementById('rosterCommitBtn').textContent, document.getElementById('rosterCommitBtn7').textContent], ['✔ 編集中「田中　太郎」を上書き保存', '✔ 編集中「田中　太郎」を上書き保存'], ORG + '(c)');
+    // (b) 編集中に「次の人へ」＝上書き保存して次の人へ（件数は増えない）
+    const n0 = ROSTER.length; form.elements['monthly_wage'].value = '205000'; render(); stConfirmLog = []; rosterAddNext();
+    L.eq('(b) 編集中に次の人へ：件数は増えない・上書きされる・EDIT_ID=null・確認なし', [ROSTER.length, sf(ROSTER.find(x => x.id === id).state, 'monthly_wage'), EDIT_ID, NEXT_PERSON_MODE.active, stConfirmLog.length], [n0, '205000', null, true, 0], ORG + '(b)');
+    document.getElementById('npReviewAllBtn').click(); L.eq('「全部の手順を見直す」：OFF・①', [NEXT_PERSON_MODE.active, CUR_STEP], [false, 1], S3);
+    L.eq('OFFでは 1〜7 を順に', stepTarget(2, 1), 3, S3);
+    rosterAddNext(); document.querySelector('#npRailNote button').click(); L.eq('レールの「全部の手順を見直す」でもOFF', NEXT_PERSON_MODE.active, false, 'ui-4');
+    rosterAddNext(); clearFormAll(); L.eq('clearFormAll でOFF', NEXT_PERSON_MODE.active, false, S3);
+    rosterAddNext(); loadSample(); L.eq('loadSample でOFF', NEXT_PERSON_MODE.active, false, S3);
+    // (a) 二重登録：直前に追加した内容と同じなら確認。OK／キャンセルの結果＝名簿の件数
+    ROSTER = []; LAST_ROSTER_ADD_ID = null; loadSample(); render();
+    stConfirmLog = []; rosterCommit(); L.eq('(a) 1回目の追加は確認なし', [ROSTER.length, stConfirmLog.length], [1, 0], ORG + '(a)');
+    stConfirmAnswer = false; stConfirmLog = []; rosterCommit();
+    L.eq('(a) 名簿に追加：同じ内容→確認・キャンセルで件数そのまま', [stConfirmLog[0], ROSTER.length], ['この内容はすでに名簿に追加済みです。別の人としてもう1人分追加しますか？', 1], ORG + '(a)');
+    stConfirmAnswer = true; stConfirmLog = []; rosterCommit(); L.eq('(a) 名簿に追加：OKで1件増える', [stConfirmLog.length, ROSTER.length], [1, 2], ORG + '(a)');
+    stConfirmAnswer = false; stConfirmLog = []; const nmBefore = val('employee_name'); rosterAddNext();
+    L.eq('(a) 次の人へ：同じ内容→確認・キャンセルなら何もしない', [stConfirmLog[0], ROSTER.length, NEXT_PERSON_MODE.active, val('employee_name')], ['この内容はすでに名簿に追加済みです。追加せずに次の人へ進みますか？', 2, false, nmBefore], ORG + '(a)');
+    stConfirmAnswer = true; stConfirmLog = []; rosterAddNext();
+    L.eq('(a) 次の人へ：OKなら追加せずに次の人へ', [stConfirmLog.length, ROSTER.length, NEXT_PERSON_MODE.active, val('employee_name')], [1, 2, true, ''], ORG + '(a)');
+    // 誤検知がない：氏名だけ変えたら確認は出ない
+    form.elements['employee_name'].value = '高橋　三郎'; render(); stConfirmLog = []; rosterCommit();
+    L.eq('(a) 氏名だけ変えた場合は確認なしで追加', [stConfirmLog.length, ROSTER.length], [0, 3], ORG + '(a)');
+    // 複製（rosterDup）は確認の対象外
+    stConfirmLog = []; rosterDup(ROSTER[ROSTER.length - 1].id); L.eq('複製は確認なしで1件増える', [stConfirmLog.length, ROSTER.length], [0, 4], ORG);
+    return stLedgerResult(L);
+  });
+}
+// U4 の中身。所内版では顧問先版の閉じ方（applyPublicMode と同じ関数）を一時的に再現して確認し、必ず元に戻す
+function stProxyInventory(){
+  return { cards: [...document.querySelectorAll('#form .persona-card')].map(b => b.dataset.emp + '/' + b.dataset.per),
+           wage: [...document.querySelectorAll('#form .seg-proxy[data-for="wage_type"] .seg-btn')].map(b => b.dataset.value) };
+}
+function stPublicProxyCheck(){
+  const closed = s => !s.cards.some(c => /^派遣\//.test(c) || /\/日雇$/.test(c)) && s.wage.indexOf('出来高') < 0 && s.wage.indexOf('年俸') < 0 && s.cards.length > 0 && s.wage.length > 0;
+  const noBad = PERSONA.cards.every(c => !(c.per === '日雇' && (c.emp === '短時間' || c.emp === '林業')));
+  const guard = () => personaPick('派遣', '有期') === false && segPick('wage_type', '出来高') === false && segPick('wage_type', '年俸') === false
+    && radio('emp_category') !== '派遣' && val('wage_type') !== '出来高' && val('wage_type') !== '年俸' && personaPick('一般', '日雇') === false && radio('period_type') !== '日雇';
+  if (PUBLIC_MODE) {
+    const s = stProxyInventory(), g = guard();
+    return { ok: closed(s) && g && noBad, detail: `顧問先版（実表示）：カード=${s.cards.join(',')}／賃金ボタン=${s.wage.join(',')}／押しても入らない=${g}／bad組合せなし=${noBad}` };
+  }
+  const full = stProxyInventory();
+  const allShown = full.cards.length === PERSONA.cards.length && ['出来高', '年俸'].every(v => full.wage.indexOf(v) >= 0);
+  const opts = [...form.elements['wage_type'].options].filter(o => o.value === '出来高' || o.value === '年俸').map(o => ({ o, h: o.hidden, d: o.disabled }));
+  const rads = radioEls('period_type').filter(r => r.value === '日雇').concat(radioEls('emp_category').filter(r => r.value === '派遣'))
+    .map(r => ({ r, d: r.disabled, disp: r.closest('label').style.display }));
+  const backup = serializeState(), cs = CUR_STEP, eid = EDIT_ID;
+  let sim = null, g = false;
+  try {
+    hideSelectOption('wage_type', '出来高'); hideSelectOption('wage_type', '年俸'); hideRadioChoice('period_type', '日雇'); hideRadioChoice('emp_category', '派遣');
+    buildProxies(); render(); sim = stProxyInventory(); g = guard();
+  } finally {
+    opts.forEach(x => { x.o.hidden = x.h; x.o.disabled = x.d; });
+    rads.forEach(x => { x.r.disabled = x.d; x.r.closest('label').style.display = x.disp; });
+    buildProxies(); restoreState(backup); EDIT_ID = eid; goStep(cs, { focus: false });
+  }
+  const after = stProxyInventory();
+  const ok = allShown && closed(sim) && g && noBad && after.cards.length === PERSONA.cards.length && after.wage.indexOf('出来高') >= 0;
+  return { ok, detail: `所内版：カード${full.cards.length}枚・賃金ボタン=${full.wage.join(',')}／顧問先版を再現：カード=${sim.cards.join(',')}・賃金ボタン=${sim.wage.join(',')}・押しても入らない=${g}／元に戻した後：カード${after.cards.length}枚／bad組合せなし=${noBad}` };
+}
+// U5 の中身
+function stOtPayCheck(){
+  const backup = serializeState(), cs = CUR_STEP, eid = EDIT_ID, _cf = window.confirm;
+  const four = () => ['fixed_ot_hours', 'fixed_ot_amount', 'fixed_night_hours', 'fixed_night_amount'].every(n => val(n) === '');
+  let r;
+  try {
+    window.confirm = () => true;
+    loadSample(); render();
+    const otLine = /固定残業手当　[0-9,]+円/;   // 書面の固定残業の行（「固定残業手当は算入しない」という固定の注記とは区別する）
+    const before = OT_PAY === true && otLine.test(LAST_SHEETS.join(''));       // 記入例は固定残業あり（前提の確認）
+    otPaySet(false); render();
+    const a1 = four(), a2 = val('ot_style') === 'split', a3 = !form.elements['fixed_ot_auto'].checked && !form.elements['fixed_night_auto'].checked;
+    const a4 = !otLine.test(LAST_SHEETS.join(''));
+    loadSample(); form.elements['ot_style'].value = 'unified'; render();
+    const uBefore = LAST_SHEETS.join('').indexOf('固定時間外勤務手当') >= 0;
+    otPaySet(false); render();
+    const u1 = val('ot_style') === 'split' && four() && LAST_SHEETS.join('').indexOf('固定時間外勤務手当') < 0;
+    // MF-1：「支給しない」の後に賃金試算タブから反映（form.reset を通らない経路）→ 値が入ったら必ず表示される
+    const shown = style => { const ids = [form.elements['ot_style'].closest('.row'), document.getElementById(style === 'unified' ? 'otUnified' : 'otSplit')];
+      return ids.every(e => !e.classList.contains('ui-folded')) && document.querySelector('#otPaySeg .seg-btn[aria-pressed="true"]').dataset.value === '1'; };
+    const tr = {};
+    ['split', 'unified'].forEach(style => {
+      loadSample(); render(); otPaySet(false); render();
+      const hiddenBefore = document.getElementById('otSplit').classList.contains('ui-folded');
+      stCalcTransfer(style);
+      const hasVal = style === 'unified' ? val('ot_style') === 'unified' : has(val('fixed_ot_hours'));
+      tr[style] = { hiddenBefore, hasVal, shown: shown(style) };
+    });
+    const trOk = ['split', 'unified'].every(s => tr[s].hiddenBefore && tr[s].hasVal && tr[s].shown);
+    r = { ok: before && a1 && a2 && a3 && a4 && uBefore && u1 && trOk,
+          detail: `前提（記入例に固定残業あり）=${before}／区分別：4欄空=${a1} split=${a2} 自動OFF=${a3} 書面に固定残業なし=${a4}／一体型：前提=${uBefore} 支給しない後=${u1}`
+            + `／支給しない→賃金試算から反映：区分別 ${JSON.stringify(tr.split)} 一体型 ${JSON.stringify(tr.unified)}` };
+  } finally { window.confirm = _cf; restoreState(backup); EDIT_ID = eid; goStep(cs, { focus: false }); }
+  return r;
+}
+// 賃金試算タブで固定残業20h（一体型は希望額から按分）の試算を作り、本番の calcTransferToCreate で作成タブへ反映する（試算タブの入力は元に戻す）
+function stCalcTransfer(style){
+  const cf = document.getElementById('calcForm'), saved = [...cf.elements].map(e => [e, e.type === 'radio' || e.type === 'checkbox' ? e.checked : e.value]);
+  const _cf = window.confirm, _al = window.alert; window.confirm = () => true; window.alert = () => {};
+  const mode = document.querySelector('.tab.active'), prevMode = mode ? mode.id.replace(/^tab/, '').toLowerCase() : 'create';
+  try {
+    const setc = (n, v) => { const e = cf.elements[n]; if (e.length && e[0] && e[0].type === 'radio') [...e].forEach(x => x.checked = (x.value === v)); else e.value = v; };
+    setc('calc_mode', 'forward'); setc('calc_base', '210000'); setc('calc_sched', '160'); setc('calc_ot_hours', '20'); setc('calc_ot_style', style);
+    calcRender(); calcTransferToCreate(); render();
+  } finally {
+    window.confirm = _cf; window.alert = _al;
+    saved.forEach(([e, v]) => { if (e.type === 'radio' || e.type === 'checkbox') e.checked = v; else e.value = v; });
+    calcRender(); switchMode(prevMode);
+  }
+}
+
 // 指定IDの検証を1件走らせて合否だけ返す（負検証が「壊れたら失敗するか」を見るために使う）
 function stRunOne(id) {
-  const all = stPositiveCases().concat(stSupportCases());
+  const all = stPositiveCases().concat(stSupportCases(), stUiCases());
   const c = all.find(x => x.id === id);
   if (!c) return { ok: false, detail: `テストケース ${id} が見つかりません` };
   try { return c.run(); } catch (e) { return { ok: false, detail: '例外：' + e.message }; }
@@ -4757,7 +6645,89 @@ function stNegativeCases() {
         const r = [{ id: 'P38', r: stRunOne('P38') }];
         L5_HOOKS.shakaiHokenOldText = false;
         return r;
-      } }
+      } },
+
+    /* ---- 入力画面のステップ化（P1・P2）の負検証 ---- */
+    { id: 'N18', title: '［ステップ化］STEP_MAP の対応表から「最低賃金」の行／「解雇の事由」のラベルを1つずつ削る',
+      guards: '対応の無い警告が欄直下・手順レールの件数から黙って消えること（設計書 §4）',
+      breaks: ['U2', 'U2'],
+      run: () => {
+        const i = STEP_MAP.law.findIndex(x => x.anchor === '#grpMinWage');
+        const saved = STEP_MAP.law.splice(i, 1);
+        const r1 = { id: 'U2', r: stRunOne('U2') };
+        STEP_MAP.law.splice(i, 0, ...saved);
+        const g = STEP_MAP.gaps['解雇の事由']; delete STEP_MAP.gaps['解雇の事由'];
+        const r2 = { id: 'U2', r: stRunOne('U2') };
+        STEP_MAP.gaps['解雇の事由'] = g;
+        return [r1, r2];
+      } },
+    { id: 'N19', title: '［ステップ化］画面専用の代理UIに name を付ける（_ui_ot_use／_ui 始まりでない名前の2通り）',
+      guards: '代理UIの値が保存JSONに新しいキーとして混入すること（設計書 I-1・I-2・R1）',
+      breaks: ['U1', 'U3', 'U1', 'U3'],
+      run: () => {
+        const r = [];
+        ['_ui_ot_use', 'ot_use_proxy'].forEach(nm => {
+          const b = document.createElement('button'); b.type = 'button'; b.name = nm; b.setAttribute('data-st-inject', '1');
+          document.querySelector('#step5 .step-head').appendChild(b);
+          r.push({ id: 'U1', r: stRunOne('U1') }, { id: 'U3', r: stRunOne('U3') });
+          b.remove();
+        });
+        return r;
+      } },
+    { id: 'N20', title: '［ステップ化］STEP_MAP の行の振り分け先（step）を書き換える（割増率の行 5→4／ラベル「休日」4→5）',
+      guards: '警告が別の手順の欄・件数に出ること（correctness MF-2）',
+      breaks: ['U2', 'U2'],
+      run: () => {
+        const row = STEP_MAP.law.find(x => x.anchor === '#wageSub4'); row.step = 4;
+        const r1 = { id: 'U2', r: stRunOne('U2') }; row.step = 5;
+        STEP_MAP.gaps['休日'].step = 5;
+        const r2 = { id: 'U2', r: stRunOne('U2') }; STEP_MAP.gaps['休日'].step = 4;
+        return [r1, r2];
+      } },
+    { id: 'N21', title: '［ステップ化P3］固定残業「支給しない」で値を残したまま隠す（設計書が禁止している実装）',
+      guards: '画面では「支給しない」なのに、隠れた固定残業の値が書面に出ること（設計書 §6 R3）',
+      breaks: ['U5'],
+      run: () => { P3_HOOKS.otKeepValues = true; const r = [{ id: 'U5', r: stRunOne('U5') }]; P3_HOOKS.otKeepValues = false; return r; } },
+    { id: 'N22', title: '［ステップ化P3］「値があれば必ず表示する」約束を外し、OT_PAY が null のときだけ「支給する」に戻す（修正前の挙動）',
+      guards: '「支給しない」の後に賃金試算から反映した固定残業が、値の入ったまま隠れること（correctness・qa MF-1）',
+      breaks: ['U5'],
+      run: () => { P3_HOOKS.otLegacyNullOnly = true; const r = [{ id: 'U5', r: stRunOne('U5') }]; P3_HOOKS.otLegacyNullOnly = false; return r; } },
+    { id: 'N23', title: '［ステップ化P4］restoreState の中（form.reset）で2人目以降モードを OFF にする（設計書 §3 が禁止している実装）',
+      guards: '一括出力（restoreState のくり返し）の後に、2人目以降のモードが勝手に解除されること',
+      breaks: ['U6'],
+      run: () => { P4_HOOKS.offOnReset = true; const r = [{ id: 'U6', r: stRunOne('U6') }]; P4_HOOKS.offOnReset = false; return r; } },
+    { id: 'N24', title: '［ステップ化P4］「次の人へ」で固定残業の支給状態を引き継がず OT_PAY=null に戻す（レビュー前の挙動）',
+      guards: '2人目の区分別の固定残業が「支給しない」で隠れ、自動計算のチェックが付いたまま書面から警告なしに抜けること（correctness P4 MF-1）',
+      breaks: ['U6'],
+      run: () => { P4_HOOKS.otNullOnNext = true; const r = [{ id: 'U6', r: stRunOne('U6') }]; P4_HOOKS.otNullOnNext = false; return r; } },
+    { id: 'N25', title: '［I-6］実効の支給状態を OT_PAY===true だけの判定に戻す',
+      guards: '一括出力の restoreState（form.reset）で OT_PAY が null に戻ると、2人目の固定残業が隠れて警告も消えること（correctness P4 2巡目）',
+      breaks: ['U8'],
+      run: () => { P4_HOOKS.effectiveOtOnly = true; const r = [{ id: 'U8', r: stRunOne('U8') }]; P4_HOOKS.effectiveOtOnly = false; return r; } },
+    { id: 'N26', title: '［I-6］npSetMode(false)（全部の手順を見直す等）で引き継ぎの印を消す',
+      guards: '「全部の手順を見直す」の後に一括出力すると、2人目の固定残業の空欄が警告なしで出力されること',
+      breaks: ['U8'],
+      run: () => { P4_HOOKS.clearInheritOnModeOff = true; const r = [{ id: 'U8', r: stRunOne('U8') }]; P4_HOOKS.clearInheritOnModeOff = false; return r; } },
+    { id: 'N27', title: '［I-6］別の人に切り替える操作（clearFormAll・loadData・rosterEdit）で引き継ぎの印を消さない',
+      guards: 'ほかの人の書面で余計な「引き継ぎ確認」が出て、確認が形骸化すること（統括回答 2026-09-27）',
+      breaks: ['U8'],
+      run: () => { P4_HOOKS.keepInheritOnSwitch = true; const r = [{ id: 'U8', r: stRunOne('U8') }]; P4_HOOKS.keepInheritOnSwitch = false; return r; } },
+    { id: 'N28', title: '［I-6］固定残業の値を入力しただけで引き継ぎの印を消す（修正前の挙動）',
+      guards: '時間数を入れてから消した後の一括出力で、2人目の固定残業の空欄が警告なしに出力されること（correctness Should fix）',
+      breaks: ['U8'],
+      run: () => { P4_HOOKS.clearInheritOnInput = true; const r = [{ id: 'U8', r: stRunOne('U8') }]; P4_HOOKS.clearInheritOnInput = false; return r; } },
+    { id: 'N29', title: '［P5］狭い画面でドロワーを閉じるとき #preview を display:none にする',
+      guards: 'estimatePages が1ページと誤判定し、印刷のページ番号（#mpHeader）が消えること（設計書 R4）',
+      breaks: ['U10'],
+      run: () => { P5_HOOKS.drawerDisplayNone = true; const r = [{ id: 'U10', r: stRunOne('U10') }]; P5_HOOKS.drawerDisplayNone = false; return r; } },
+    { id: 'N30', title: '［P5］2人目モードで、折りたたまれた範囲（②会社・⑤5-4〜5-6）の行を押しても開かない',
+      guards: '書面の行を押しても欄が隠れたままで、どこを直せばよいか分からないこと（qa P5）',
+      breaks: ['U9'],
+      run: () => { P5_HOOKS.noNpOpen = true; const r = [{ id: 'U9', r: stRunOne('U9') }]; P5_HOOKS.noNpOpen = false; return r; } },
+    { id: 'N31', title: '［整列］2列・3列の行のセルをサブグリッドにしない（改修前：片方のラベルが2行に折り返すと入力欄が約22px下にずれる）',
+      guards: '同じ行に並ぶ入力欄の高さがガタガタになり、どの欄がどのラベルか読み違えること（統括指示）',
+      breaks: ['U12'],
+      run: () => { ALIGN_HOOKS.noAlign = true; const r = [{ id: 'U12', r: stRunOne('U12') }]; ALIGN_HOOKS.noAlign = false; return r; } }
   ];
 }
 
@@ -4781,6 +6751,11 @@ function runSelfTest() {
     let r; try { r = c.run(); } catch (e) { r = { ok: false, detail: '例外：' + e.message }; }
     addRow('補助検証', c.id, c.title, r.ok, r.detail);
   });
+  // --- UI検証（入力画面のステップ化） ---
+  stUiCases().forEach(c => {
+    let r; try { r = c.run(); } catch (e) { r = { ok: false, detail: '例外：' + e.message }; }
+    addRow('UI検証', c.id, c.title, r.ok, r.detail);
+  });
   // --- 負検証（壊したときに必ず失敗することの確認） ---
   stNegativeCases().forEach(c => {
     let results;
@@ -4803,8 +6778,11 @@ function runSelfTest() {
     && L4_HOOKS.dismissalFullList === true && L4_HOOKS.soudanBlankGuard === true
     && L5_HOOKS.mukiOverCheck === true && L5_HOOKS.shakaiHokenOldText === false
     && predeliveryResidualKeys().length === PREDELIVERY_RESIDUAL_COUNT
-    && LAST_SHEETS.join('\n').indexOf('ご利用にあたって') < 0;   // 書面に免責文が残っていない
-  addRow('後始末', 'Z1', '負検証の改変がすべて元に戻っている（MW_HOOKS・L2_HOOKS・L3_HOOKS・L4_HOOKS・L5_HOOKS・MIN_WAGE_DATA・書面）', clean,
+    && LAST_SHEETS.join('\n').indexOf('ご利用にあたって') < 0   // 書面に免責文が残っていない
+    && STEP_MAP.law.length === STEP_MAP_LAW_ROWS && !!STEP_MAP.gaps['解雇の事由'] && !document.querySelector('[data-st-inject]')
+    && STEP_MAP.gaps['休日'].step === 4 && STEP_MAP.law.find(x => x.anchor === '#wageSub4').step === 5   // N18・N19・N20 の後始末
+    && P3_HOOKS.otKeepValues === false && P3_HOOKS.otLegacyNullOnly === false && P4_HOOKS.offOnReset === false && P4_HOOKS.otNullOnNext === false && P4_HOOKS.effectiveOtOnly === false && P4_HOOKS.clearInheritOnModeOff === false && P4_HOOKS.keepInheritOnSwitch === false && P4_HOOKS.clearInheritOnInput === false && P5_HOOKS.drawerDisplayNone === false && P5_HOOKS.noNpOpen === false && ALIGN_HOOKS.noAlign === false && MW_HOOKS.resolver === null && calcTodayISO === ST_TODAY_ORIGINAL;   // N21・U2 の差し替え口の後始末
+  addRow('後始末', 'Z1', '負検証の改変がすべて元に戻っている（MW_HOOKS・L2_HOOKS・L3_HOOKS・L4_HOOKS・L5_HOOKS・MIN_WAGE_DATA・書面・STEP_MAP・注入した部品）', clean,
     `allowMode=${MW_HOOKS.allowMode} roundHourly=${MW_HOOKS.roundHourly} noHoursLevel=${MW_HOOKS.noHoursLevel} floatCompare=${MW_HOOKS.floatCompare} resolver=${MW_HOOKS.resolver} 宮城=${MIN_WAGE_DATA['宮城県'][0].amount}`
     + ` / yumuRequired=${L2_HOOKS.yumuRequired} setsumeiBlankGuard=${L2_HOOKS.setsumeiBlankGuard} actBaseDate=${L2_HOOKS.actBaseDate} shortByLabelOnly=${L2_HOOKS.shortByLabelOnly}`
     + ` / dropChecklistKey=${L3_HOOKS.dropChecklistKey} leakDisclaimer=${L3_HOOKS.leakDisclaimerToSheet} 残存リスク=${predeliveryResidualKeys().length}件`
@@ -4813,7 +6791,7 @@ function runSelfTest() {
 
   const panel = document.createElement('div');
   panel.id = 'selftestPanel';
-  const groups = ['正検証', '補助検証', '負検証', '後始末'];
+  const groups = ['正検証', '補助検証', 'UI検証', '負検証', '後始末'];
   panel.innerHTML = `<h2>セルフテスト結果　${fail === 0 ? '🟢 全件合格' : '🔴 失敗あり'}　合格 ${pass} 件 ／ 失敗 ${fail} 件</h2>`
     + `<p class="st-lead">?selftest=1 で実行。正検証＝期待どおりに判定できること。負検証＝故意に壊したときに対応する検証が必ず失敗すること（＝テストが効いていることの検査）。</p>`
     + groups.map(g => {
@@ -5425,6 +7403,7 @@ function loadCalc(input){
 
 function calcRender(){
   const cf=document.getElementById('calcForm');
+  cf.querySelectorAll('.calc-modes label').forEach(l=>{ const i=l.querySelector('input'); l.classList.toggle('is-checked', !!(i && i.checked)); });   // 選択中のモードを強調（:has を使わない）
   const cget=n=>{ const el=cf.elements[n]; return el?el.value:''; };
   const cnum=n=>numH(cget(n));
   const mode=cget('calc_mode')||'forward';
@@ -5739,6 +7718,7 @@ function calcTransferToCreate(){
   }
   render();
   switchMode('create');
+  goStep(5, {focus:false});   // 転記先の総支給額欄は手順⑤「賃金」にある
   setTimeout(()=>{ const el=document.getElementById('totalRow'); if(el) el.scrollIntoView({block:'center', behavior:'smooth'}); }, 50);
 }
 
@@ -5934,6 +7914,9 @@ function clearFormAll(){
   setAllows('in',[{}]); setAllows('out',[{}]);
   setTimes([{}]); setBreaks([{}]); setOthers([{}]); setDismissals(['']); setDismissalClauses(['']);
   EDIT_ID=null; updateRosterBar();
+  npClearInheritOnSwitch();   // 別の人に切り替える操作なので引き継ぎの印を消す
+  npSetMode(false);           // P4：クリア・記入例では2人目以降のモードを解除
+  goStep(1, {focus:false});   // クリア・記入例（loadSample）は手順①から始める
   render();
 }
 function resetForm(){ if(confirm('入力内容をクリアします。よろしいですか？（名簿は消えません）')){ clearFormAll(); } }
@@ -5982,7 +7965,15 @@ minWageAutoSuggestPref();      // 事業場所在地・就業の場所から都�
 applyPublicMode();             // 顧問先版（公開ホスト）のときだけ表示面を閉じる（計算ロジックは分岐しない）
 renderStaticNotices();         // §H 版表示・様式の注記・免責・ダウンロード注意を画面へ描く（書面には出さない）
 renderLot5Notes();             // §F-3 無期転換の説明（MF-08）・社会保険の区分ヘルプ（MF-16）を画面へ描く（書面には出さない）
-buildFormNav();
+buildRail();                   // 手順レール（#form の外・name なし）
+buildProxies();                // P3 代理UI（applyPublicMode の後に作る＝閉じた選択肢は作らない）
+// 引き継ぎの印は、固定残業の値を入力しただけでは消さない（値を入れて消した後の一括出力で安全側が外れるため。値があれば otInheritGap は出ない）。
+// N28 専用：値の入力で印を消す誤り（修正前の挙動）を再現する差し替え口
+form.addEventListener('input', ev=>{ if(!(SELFTEST_ACTIVE && P4_HOOKS.clearInheritOnInput)) return; const n=ev.target&&ev.target.name; if(NP_OT_INHERIT && ['fixed_ot_hours','fixed_ot_amount','fixed_night_hours','fixed_night_amount','uni_target','uni_h_ot','uni_h_hol','uni_h_night'].indexOf(n)>=0 && !otHoursEmpty()) NP_OT_INHERIT=false; });
+buildPreviewNav();   // P5：プレビューの行クリック・ハイライト・狭い画面のドロワー
+form.addEventListener('reset', ()=>{ OT_PAY=null; RATE_OPEN_USER=false; if(SELFTEST_ACTIVE && P4_HOOKS.offOnReset) NEXT_PERSON_MODE.active=false; });   // restoreState・clearFormAll の form.reset() で画面専用の状態も初期化（I-5）
+initHelpState();               // 初めての方モード（初期ON・画面設定として記憶）とヘッダー「❓ ヒント」ボタンを同期
+goStep(1, {focus:false});      // 最初は手順①だけを表示
 buildFsHelp();
 calcRender();
 render();
