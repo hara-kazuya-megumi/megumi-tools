@@ -25,10 +25,10 @@
   .btn:hover{filter:brightness(.96)}
   .btn.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5)}
   .btn.print{background:#ffd35c;color:#4a3600}
-  .wrap{display:grid;grid-template-columns:196px minmax(460px,1fr) minmax(0,1.25fr);gap:0;align-items:start}   /* 入力列:プレビュー列＝1:1.25（1440px幅で入力列 約550px）。プレビューは列幅に合わせて縮小表示（pvApplyScale） */
+  .wrap{display:grid;grid-template-columns:196px minmax(460px,1fr) minmax(0,1.2fr);gap:0;align-items:start}   /* 入力列:プレビュー列＝1:1.2（1440px幅で入力列 約565px＝手当が1段に収まる）。プレビューは列幅に合わせて縮小表示（pvApplyScale） */
   @media(max-width:900px){.wrap{grid-template-columns:1fr}}
   /* ---- form ---- */
-  .form{padding:14px 16px 60px;max-height:var(--col-h,calc(100vh - 56px));overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+  .form{padding:14px 16px 20px;max-height:var(--col-h,calc(100vh - 56px));overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
   @media(max-width:900px){.form{max-height:none;overflow:visible;border-right:0;border-bottom:1px solid var(--line)}.form-nav{position:static;margin:-14px -16px 12px}}
   fieldset{border:1px solid var(--line);border-radius:10px;margin:0 0 14px;padding:10px 12px 12px;background:var(--panel)}
   legend{font-weight:700;color:var(--accent);padding:0 6px;font-size:13px}
@@ -228,7 +228,7 @@
   .batch-sec .brow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   /* ---- print ---- */
   @media print{
-    header.appbar,.tabbar,.form,#rosterBar,#modeBatch,#modeCalc,#modeGuide,#modeRefs{display:none !important}
+    header.appbar,.tabbar,.form,.form-col,#rosterBar,#modeBatch,#modeCalc,#modeGuide,#modeRefs{display:none !important}
     body.print-guide #modeCreate,body.print-guide #preview{display:none !important}
     body.print-guide #modeGuide{display:block !important;color:#000}
     body{background:#fff}
@@ -328,8 +328,28 @@
   .step-card h3{margin:0 0 6px;font-size:13.5px;color:var(--accent)}
   .step-card .out-btns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
   .step-card .out-btns .btn{border:1px solid #c7d6e6}
-  .step-foot{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;background:var(--panel);
-    border-top:1px solid var(--line);margin:8px -16px 0;padding:10px 16px 12px;z-index:5;box-shadow:0 -2px 4px rgba(0,0,0,.05)}
+  /* 手順の移動の帯：入力欄（#form）の外に置き、入力欄と場所を分ける（入力欄の上に浮かせて重ねない・2026-10-21 統括指示）。
+     広い画面：入力列（.form-col）＝上の #form（ここだけスクロール）＋下の帯（常に列の最下部＝画面の下端）。
+     狭い画面：帯は画面の下端に固定し、帯の実高さ（--step-foot-h・JS の pvFootHeight で実測）だけページの下に余白を取る
+     ＝最後の欄まで帯の上に出せる。フォーカス・ジャンプ時も scroll-padding-bottom で帯の裏に入れない */
+  .step-foot{position:static;display:flex;align-items:center;gap:8px;background:var(--panel);
+    border-top:1px solid var(--line);margin:0;padding:8px 16px 10px}
+  .form-col{display:flex;flex-direction:column;height:var(--col-h,calc(100vh - 56px));border-right:1px solid var(--line);background:var(--panel)}
+  .form-col > .form{flex:1 1 auto;min-height:0;max-height:none;border-right:0}
+  .form-col > .step-foot{flex:none;box-shadow:0 -2px 6px rgba(0,0,0,.06)}
+  @media screen and (max-width:900px){
+    .form-col{display:block;height:auto;border-right:0}
+    .form-col > .step-foot{position:fixed;left:0;right:0;bottom:0;z-index:40;box-shadow:0 -2px 8px rgba(0,0,0,.14);
+      padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px))}   /* z-index：プレビューのドロワー（50）・開閉ボタン（60）より下 */
+    body{padding-bottom:var(--step-foot-h,0px)}
+    html{scroll-padding-bottom:calc(var(--step-foot-h,0px) + 12px)}
+  }
+  /* 見出しの横の小さな「← 戻る／次へ →」（長い手順でも末尾まで行かずに移動できる。行き先は title・aria-label） */
+  .step-mininav{display:inline-flex;gap:6px;margin-left:auto;align-self:center}
+  .step-mini{border:1px solid #c7d6e6;background:#fff;color:var(--accent2);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+  .step-mini.step-mini-next{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .step-mini:disabled{opacity:.4;cursor:default}
+  @media(max-width:900px){.step-mininav{margin-left:0;flex-basis:100%}}   /* 狭い画面では見出しの下の左端（右下の「📄 プレビュー」と重ならない側）に置く */
   .step-foot{flex-wrap:wrap}
   .step-foot .step-sum{flex:1 1 100%;order:-1;min-width:0;font-size:11px;color:var(--sub);text-align:center}
   .step-foot .step-prev,.step-foot .step-next{flex:1 1 0;min-width:0;white-space:normal;line-height:1.35}
@@ -371,7 +391,8 @@
   body.pv-drawer.pv-anim #preview{transition:transform .2s,visibility 0s .2s}
   body.pv-drawer.pv-anim.pv-open #preview{transition:transform .2s}
   body.pv-drawer.pv-dn-hook:not(.pv-open) #preview{display:none !important}
-  body.pv-drawer.pv-open .pv-toggle{top:10px;bottom:auto}   /* 開いているときはドロワーの右上（最初にフォーカスする閉じるボタン） */
+  body.pv-drawer.pv-open .pv-toggle{top:10px;bottom:auto}
+  body.pv-drawer .pv-toggle.pv-dim{opacity:.35;pointer-events:none}   /* スクロール中に手順の帯と重なっている間だけ（止まって0.3秒で戻す） */   /* 開いているときはドロワーの右上（最初にフォーカスする閉じるボタン） */
   #lawCheckNote .law-note-foot{font-size:11px;color:var(--sub);margin:-6px 0 12px}
   /* ---- P3 代理UI（画面のみ。name なし・印刷では .form ごと非表示） ---- */
   .ui-folded{display:none !important}
@@ -447,37 +468,35 @@
   #form .row.two>*,#form .row.three>*{display:grid;grid-row:span 4;grid-template-rows:subgrid;row-gap:0;min-width:0;align-content:start}
   #form .row.two>*>label,#form .row.three>*>label{align-self:end;margin-bottom:3px}
   /* 手当の行：区分｜手当名｜単位｜金額｜× を固定の列で1行に（列が狭いときは2段・列位置は同じ） */
-  #inAllowList,#outAllowList,#timeList{container-type:inline-size}
-  #form .allow-row{display:grid;gap:6px;align-items:center;grid-template-columns:minmax(0,1fr) 88px 104px var(--ctl-h)}
+  /* ※ container-type（コンテナクエリ）は使わない：Chrome で、空の手当に1文字目を入れた直後にその行のレイアウトが消え、
+       入力中の欄からフォーカスが外れて文字が入らなくなる（2026-09-30 実測）。1段／2段の切替は JS（allowFitLayout）が
+       リストの幅を測って .allow-2row／.time-2row を付け外しする。 */
+  #form .allow-row{display:grid;gap:6px;align-items:center;grid-template-columns:minmax(160px,1fr) 80px 96px var(--ctl-h)}
   #form .allow-row>*{width:100%;min-width:0;margin:0}
   #form .allow-row>.a-name{grid-column:1;grid-row:1}#form .allow-row>.a-unit{grid-column:2;grid-row:1}
   #form .allow-row>.a-amt{grid-column:3;grid-row:1}#form .allow-row>.mini{grid-column:4;grid-row:1}
-  #form .allow-row.has-kind{grid-template-columns:58px minmax(0,1fr) 88px 104px var(--ctl-h)}
+  #form .allow-row.has-kind{grid-template-columns:58px minmax(160px,1fr) 80px 96px var(--ctl-h)}
   #form .allow-row>.a-kind{grid-column:1;grid-row:1}
   #form .allow-row.has-kind>.a-name{grid-column:2}#form .allow-row.has-kind>.a-unit{grid-column:3}
   #form .allow-row.has-kind>.a-amt{grid-column:4}#form .allow-row.has-kind>.mini{grid-column:5}
   #form .allow-row>.a-suggest{grid-column:1/-1;grid-row:2}
+  /* 2段（リストが狭いとき）：1段目＝区分｜手当名｜×、2段目＝単位｜金額（列の位置は同じ） */
+  #form .allow-2row .allow-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
+  #form .allow-2row .allow-row>.a-name{grid-column:1/3;grid-row:1}#form .allow-2row .allow-row>.mini{grid-column:3;grid-row:1}
+  #form .allow-2row .allow-row>.a-unit{grid-column:1;grid-row:2}#form .allow-2row .allow-row>.a-amt{grid-column:2;grid-row:2}
+  #form .allow-2row .allow-row.has-kind{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
+  #form .allow-2row .allow-row.has-kind>.a-name{grid-column:2/4;grid-row:1}#form .allow-2row .allow-row.has-kind>.mini{grid-column:4;grid-row:1}
+  #form .allow-2row .allow-row.has-kind>.a-unit{grid-column:2;grid-row:2}#form .allow-2row .allow-row.has-kind>.a-amt{grid-column:3;grid-row:2}
+  #form .allow-2row .allow-row>.a-suggest{grid-row:3}
   #form #otSplit .allow-row{grid-template-columns:1fr 1fr}   /* 固定残業・固定深夜の「時間数｜金額」 */
-  @container (max-width:420px){
-    #form .allow-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
-    #form .allow-row>.a-name{grid-column:1/3;grid-row:1}#form .allow-row>.mini{grid-column:3;grid-row:1}
-    #form .allow-row>.a-unit{grid-column:1;grid-row:2}#form .allow-row>.a-amt{grid-column:2;grid-row:2}
-    #form .allow-row.has-kind{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr) var(--ctl-h)}
-    #form .allow-row.has-kind>.a-name{grid-column:2/4;grid-row:1}#form .allow-row.has-kind>.mini{grid-column:4;grid-row:1}
-    #form .allow-row.has-kind>.a-unit{grid-column:2;grid-row:2}#form .allow-row.has-kind>.a-amt{grid-column:3;grid-row:2}
-    #form .allow-row>.a-suggest{grid-row:3}
-    #form #otSplit .allow-row{grid-template-columns:1fr 1fr}
-  }
   /* 始業・終業の行：区分｜始業｜〜｜終業｜× を1行に（「〜」は文字のまま3列目に入る。狭いときは区分と×が1段目、時刻が2段目） */
   #form .time-row{display:grid;gap:6px;align-items:center;justify-items:center;grid-template-columns:minmax(0,1fr) 104px 14px 104px var(--ctl-h)}
   #form .time-row>*{width:100%;min-width:0;margin:0}
   #form .time-row>.t-label{grid-column:1;grid-row:1}#form .time-row>.t-start{grid-column:2;grid-row:1}
   #form .time-row>.t-end{grid-column:4;grid-row:1}#form .time-row>.mini{grid-column:5;grid-row:1}
-  @container (max-width:360px){
-    #form .time-row{grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) var(--ctl-h)}
-    #form .time-row>.t-label{grid-column:1/4;grid-row:1}#form .time-row>.mini{grid-column:4;grid-row:1}
-    #form .time-row>.t-start{grid-column:1;grid-row:2}#form .time-row>.t-end{grid-column:3;grid-row:2}
-  }
+  #form .time-2row .time-row{grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) var(--ctl-h)}
+  #form .time-2row .time-row>.t-label{grid-column:1/4;grid-row:1}#form .time-2row .time-row>.mini{grid-column:4;grid-row:1}
+  #form .time-2row .time-row>.t-start{grid-column:1;grid-row:2}#form .time-2row .time-row>.t-end{grid-column:3;grid-row:2}
   /* 休憩の行：開始｜〜｜終了｜× */
   #form .break-row{display:grid;gap:6px;align-items:center;justify-items:center;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) var(--ctl-h)}
   #form .break-row>*{width:100%;min-width:0;margin:0}
@@ -548,7 +567,10 @@
     </div>
   </nav>
   <!-- ============ FORM ============ -->
-  <form class="form" id="form" oninput="render()" onchange="render()">
+  <!-- 入力列＝上の入力欄（#form・ここだけがスクロール）＋下の手順の帯（#stepFoot）。帯は #form の外に置き、入力欄と場所を分ける（重ねない）。
+       この囲みは画面の配置だけ（name なし・data-ui-only は付けない＝中の入力欄まで画面専用扱いにしないため）。印刷では囲みごと非表示 -->
+  <div class="form-col" id="formCol">
+  <form class="form" id="form" oninput="renderFromInput(event)" onchange="renderFromInput(event)">
 
     <div class="empty-legend">※ <b>薄い黄色</b>の欄は未入力です（入力すると色が消えます）。いま開いている手順の欄のみ対象です。</div>
 
@@ -843,10 +865,14 @@
           <div><label>特定（産業別）の時間額（円）</label>
             <input type="text" class="num" inputmode="numeric" name="minwage_special_amount" placeholder="該当する場合のみ"></div>
         </div>
+        <!-- 判定に使う最低賃金（設計書_労働条件通知書ツール_最低賃金の改定後額の選択_2026-10-21）。name 付き＝既存の保存・復元に乗る。
+             選択肢は minWageSyncYearSelect() が都道府県ごとに作る（自動／本日時点の年度とそれより新しい年度。過去の年度は出さない） -->
+        <div class="row"><label for="minwageYear">判定に使う最低賃金</label>
+          <select name="minwage_year" id="minwageYear" aria-describedby="minWageApplied"><option value="auto">自動（発効前を含む最新の改定額で判定）</option></select></div>
         <div class="row hidden" id="grpMinWageSpecialName"><label>特定（産業別）最低賃金の名称</label>
           <input type="text" name="minwage_special_name" placeholder="例：宮城県自動車小売業最低賃金"></div>
-        <div class="hint" id="minWageApplied">都道府県を選ぶと、適用される最低賃金額と発効日を表示します。</div>
-        <div class="help-note">ここで選んだ都道府県の最低賃金と、下で入力する賃金額・月の所定労働時間から<b>時間額</b>を計算し、最低賃金を下回っていないかを画面で確認します（<b>確認結果は通知書には印字されません</b>）。初期値は「事業場所在地」「就業の場所」から自動で推測します。<b>派遣</b>の場合は<b>派遣先</b>の事業場所在地の最低賃金が適用されます（最低賃金法13条・18条）。特定（産業別）最低賃金がある業種では、地域別と特定のうち<b>高い方</b>が適用されます（額は手入力してください）。</div>
+        <div class="hint" id="minWageApplied" aria-live="polite">都道府県を選ぶと、適用される最低賃金額と発効日を表示します。</div>
+        <div class="help-note">ここで選んだ都道府県の最低賃金と、下で入力する賃金額・月の所定労働時間から<b>時間額</b>を計算し、最低賃金を下回っていないかを画面で確認します（<b>確認結果は通知書には印字されません</b>）。初期値は「事業場所在地」「就業の場所」から自動で推測します。<b>派遣</b>の場合は<b>派遣先</b>の事業場所在地の最低賃金が適用されます（最低賃金法13条・18条）。特定（産業別）最低賃金がある業種では、地域別と特定のうち<b>高い方</b>が適用されます（額は手入力してください）。<b>「判定に使う最低賃金」が「自動」のときは、発効前を含めて最新の改定額で判定します</b>（最も厳しい側。本日時点の額で確かめたいときは年度を選んでください。賃金試算タブの「自動」は本日時点で有効な額のため、既定が異なります）。<b>「答申段階」</b>は、地方最低賃金審議会が答申した額で、最終決定（労働局長の決定・公示）の前の数値です。</div>
       </div>
       <div class="row"><label>基本賃金の種類</label>
         <select name="wage_type">
@@ -854,7 +880,7 @@
           <option value="時給">時給</option><option value="出来高">出来高（歩合）</option>
           <option value="年俸">年俸</option>
         </select>
-        <div class="help-note">選択で基本給の入力欄が変わります。<b>出来高</b>は保障給（労基法27条）が必須。<b>月給</b>のときだけ「総支給額」が自動計算され、固定残業の自動計算も使えます。金額欄は<b>半角数字</b>のみ（全角は自動変換）。</div>
+        <div class="help-note">選択で基本給の入力欄が変わります。<b>出来高</b>は保障給（労基法27条）が必須。<b>月給</b>のときだけ「総支給額」が自動計算され、固定残業の自動計算も使えます。金額欄は<b>半角数字</b>で入力します（全角で入れても計算・書面は半角として扱い、欄を離れると表示も半角に直ります）。</div>
       </div>
       <div class="row"><label>基本給の項目名（会社の呼称に合わせて変更可）</label>
         <input type="text" name="base_wage_name" value="基本給" placeholder="例：基本給／基礎給"></div>
@@ -1131,13 +1157,14 @@
       </div>
     </section>
 
-    <!-- 手順の移動（画面のみ・name なし・印刷では非表示） -->
-    <div class="step-foot" data-ui-only>
-      <button type="button" class="btn step-prev" id="stepPrev" onclick="goStepRel(-1)">← 戻る</button>
-      <span class="step-sum" id="stepSum" aria-live="polite"></span>
-      <button type="button" class="btn step-next" id="stepNext" onclick="goStepRel(1)">次へ →</button>
-    </div>
   </form>
+  <!-- 手順の移動（画面のみ・name なし・印刷では非表示）。#form の外：広い画面は入力列の最下部、狭い画面は画面の下端に固定。入力欄の上には重ねない -->
+  <div class="step-foot" id="stepFoot" data-ui-only role="navigation" aria-label="手順の移動">
+    <button type="button" class="btn step-prev" id="stepPrev" onclick="goStepRel(-1)">← 戻る</button>
+    <span class="step-sum" id="stepSum" aria-live="polite"></span>
+    <button type="button" class="btn step-next" id="stepNext" onclick="goStepRel(1)">次へ →</button>
+  </div>
+  </div><!-- /form-col -->
 
   <!-- ============ PREVIEW ============ -->
   <div class="preview" id="preview"></div>
@@ -1191,7 +1218,7 @@
 <!-- ============ 賃金試算（通知書には反映しない独立モード） ============ -->
 <div id="modeCalc" class="hidden">
   <div class="calc-wrap">
-    <form id="calcForm" oninput="calcRender()" onchange="calcRender()">
+    <form id="calcForm" oninput="calcRenderFromInput(event)" onchange="calcRenderFromInput(event)">
       <div class="empty-legend">※ <b>薄い黄色</b>の欄は、選択中の試算モードで<b>計算に必要な未入力欄</b>です（都道府県・コメント等の任意欄は光りません）。</div>
       <fieldset>
         <legend>① 試算の種類</legend>
@@ -1241,7 +1268,7 @@
           <div><label>地域別最低賃金(円/時)</label><input type="text" class="cnum" inputmode="numeric" name="calc_minwage" placeholder="例：1100" oninput="calcMinwageManual()"></div>
         </div>
         <div class="hint" id="calcMinWageHint"></div>
-        <div class="help-note">都道府県を選ぶと最低賃金が自動入力されます（手動で上書き可）。<b>年度が「自動」のとき、本日時点で発効済みの最新額を表示します</b>（新年度改定が出ても発効日前は前年度額のまま。発効日を過ぎると自動で新額に切り替わります）。将来・過去の契約を試算したいときは年度を手動で選べます。結果欄に時間単価との比較を、採用した年度・発効日つきで表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項各号・地域別最低賃金の定めによる）。空欄のときは判定を表示しません。</div>
+        <div class="help-note">都道府県を選ぶと最低賃金が自動入力されます（手動で上書き可）。<b>年度が「自動」のとき、本日時点で発効済みの最新額を表示します</b>（新年度改定が出ても発効日前は前年度額のまま。発効日を過ぎると自動で新額に切り替わります）。将来・過去の契約を試算したいときは年度を手動で選べます（作成タブの「判定に使う最低賃金」の「自動」は発効前を含めて最新の改定額を使うため、既定が異なります）。結果欄に時間単価との比較を、採用した年度・発効日つきで表示します。<b>比較の対象からは精皆勤手当・通勤手当・家族手当を除外します</b>（最低賃金法4条3項各号・地域別最低賃金の定めによる）。空欄のときは判定を表示しません。</div>
         <div class="row"><button type="button" class="btn-add" onclick="calcSaveSettings()">📌 共通設定を既定値として記憶</button>
           <div class="hint">所定労働時間・割増率・端数処理・都道府県・年度・最賃額をこの端末のブラウザに記憶し、次回このツールを開いたときに復元します（顧問先ごとに異なるため、押したときだけ保存されます）。</div>
         </div>
@@ -1521,7 +1548,7 @@ const $ = s => document.querySelector(s);
 const form = $('#form');
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const has = v => v!=null && String(v).trim()!=='';
-const val = n => { const el=form.elements[n]; return el ? String(el.value||'').trim() : ''; };
+const val = n => { const el=form.elements[n]; if(!el) return ''; if(el.classList && el.classList.contains('num')) return numNormStr(el).trim(); return String(el.value||'').trim(); };   // 数値欄（.num）は半角に直した値で読む（入力中の全角でも計算・書面は同じ。MF-2）
 const radio = n => { const el=form.elements[n]; return el ? (el.value||'') : ''; };
 
 // ===== 日付整形（全書類共通で 和暦／西暦 を切替）=====
@@ -1562,16 +1589,20 @@ const TIME_SYSTEMS=['通常','1か月単位変形','1年単位変形','1週間�
 
 // ===== 金額ユーティリティ =====
 function toHalf(s){ return String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/．/g,'.'); }
-function normalizeNum(inp){ if(!inp) return; let v; if(inp.classList.contains('dec')){ v=toHalf(inp.value).replace(/[^\d.]/g,''); const i=v.indexOf('.'); if(i>=0) v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,''); }else{ v=toHalf(inp.value).replace(/[^\d]/g,''); } if(v!==inp.value) inp.value=v; }
-function normalizeAllNumeric(){
-  document.querySelectorAll('input.num').forEach(normalizeNum);           // 賃金の金額欄
+// 数値欄の値を「半角に直した結果」で返す（欄の表示は書き換えない）。normalizeNum（blur 時の表示の書き換え）と同じ規則
+function numNormStr(inp){ if(!inp) return ''; if(SELFTEST_ACTIVE && NUM_HOOKS.rawRead) return String(inp.value||''); let v; if(inp.classList.contains('dec')){ v=toHalf(inp.value).replace(/[^\d.]/g,''); const i=v.indexOf('.'); if(i>=0) v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,''); }else{ v=toHalf(inp.value).replace(/[^\d]/g,''); } return v; }
+function normalizeNum(inp){ if(!inp) return; const v=numNormStr(inp); if(v!==inp.value) inp.value=v; }
+const NUM_HOOKS = { rawRead: false };   // 負検証（N34）専用：全角のまま読む（MF-2 の誤り）
+// skipEl … 入力中（フォーカス中）の欄は書き換えない（blur のとき focusout で正規化する）
+function normalizeAllNumeric(skipEl){
+  document.querySelectorAll('input.num').forEach(i=>{ if(i!==skipEl) normalizeNum(i); });           // 賃金の金額欄
   document.querySelectorAll('#inAllowList .allow-row, #outAllowList .allow-row').forEach(r=>{  // 手当（月/日/時/回は数字のみ、その他は自由）
     const u=r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month';
-    if(u!=='other') normalizeNum(r.querySelector('.a-amt'));
+    const a=r.querySelector('.a-amt'); if(u!=='other' && a!==skipEl) normalizeNum(a);
   });
 }
-function parseYen(x){ const s=String(x==null?'':x).replace(/[,，円\s]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s):null; }
-function numStr(x){ const s=String(x==null?'':x).replace(/[,，]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s).toLocaleString('ja-JP')+'円':(x==null?'':String(x)); }
+function parseYen(x){ const s0=String(x==null?'':x), s=(SELFTEST_ACTIVE && NUM_HOOKS.rawRead ? s0 : toHalf(s0)).replace(/[,，円\s]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s):null; }   // 全角数字も半角に直して読む（MF-2）
+function numStr(x){ const s=(SELFTEST_ACTIVE && NUM_HOOKS.rawRead ? String(x==null?'':x) : toHalf(String(x==null?'':x))).replace(/[,，]/g,''); return /^\d+(\.\d+)?$/.test(s)?Number(s).toLocaleString('ja-JP')+'円':(x==null?'':String(x)); }
 
 // ===== 手当（基準内／基準外を複数入力）=====
 const ALLOW_UNIT_OPTS='<option value="month">月額</option><option value="day">日額</option><option value="hour">時間額</option><option value="count">回数(1回)</option><option value="other">その他</option>';
@@ -1581,11 +1612,11 @@ function _allowRowHTML(){ return '<input type="text" class="a-name" placeholder=
   '<select class="a-unit">'+ALLOW_UNIT_OPTS+'</select>'+
   '<input type="text" class="a-amt" placeholder="金額/内容"><button type="button" class="mini" onclick="delAllow(this)" title="削除">×</button>'; }
 function getAllows(kind){
-  return [...allowListEl(kind).querySelectorAll('.allow-row')].map(r=>({
-    name:r.querySelector('.a-name').value.trim(),
-    unit:(r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month'),
-    amount:r.querySelector('.a-amt').value.trim()
-  })).filter(a=>a.name||a.amount);
+  return [...allowListEl(kind).querySelectorAll('.allow-row')].map(r=>{
+    const unit=(r.querySelector('.a-unit')?r.querySelector('.a-unit').value:'month'), a=r.querySelector('.a-amt');
+    return { name:r.querySelector('.a-name').value.trim(), unit,
+      amount:(unit!=='other' ? numNormStr(a) : a.value).trim() };   // 月額・日額・時間額・回数は半角に直した値で読む（MF-2）
+  }).filter(a=>a.name||a.amount);
 }
 function addAllow(kind,item){
   const row=document.createElement('div'); row.className='allow-row'; row.innerHTML=_allowRowHTML();
@@ -1849,10 +1880,9 @@ function updateVisibility(){
   // 試用期間
   $('#grpShiyo').classList.toggle('hidden', radio('probation_flag')!=='有');
   // 労働時間制度
-  document.querySelectorAll('.wt').forEach(e=>e.classList.add('hidden'));
   const paramMap={"1か月単位変形":".wt-1m","1年単位変形":".wt-1y","フレックスタイム":".wt-flex",
     "事業場外みなし":".wt-minashi","専門業務型裁量":".wt-sairyo","企画業務型裁量":".wt-sairyo"};
-  if(paramMap[wt]) show(paramMap[wt]);
+  { const wtSel=paramMap[wt]||null; document.querySelectorAll('.wt').forEach(e=>e.classList.toggle('hidden', !(wtSel && e.matches(wtSel)))); }   // 全部隠す→出す、の二度書きをしない
   // 始業終業リストは明示が必要な制度で表示
   document.querySelector('.wt-times').classList.toggle('hidden', !TIME_SYSTEMS.includes(wt));
   // 休憩の入力モード（時刻指定／合計のみ）
@@ -1860,8 +1890,8 @@ function updateVisibility(){
   $('#breakTimeMode').classList.toggle('hidden', bm!=='time');
   $('#breakTotalMode').classList.toggle('hidden', bm!=='total');
   // 賃金体系
-  document.querySelectorAll('.wg').forEach(e=>e.classList.add('hidden'));
-  show({"月給":".wg-month","日給":".wg-day","時給":".wg-hour","出来高":".wg-deki","年俸":".wg-year"}[wg]||".wg-month");
+  { const wgSel={"月給":".wg-month","日給":".wg-day","時給":".wg-hour","出来高":".wg-deki","年俸":".wg-year"}[wg]||".wg-month";
+    document.querySelectorAll('.wg').forEach(e=>e.classList.toggle('hidden', !e.matches(wgSel))); }
   // 固定残業の方式（区分別／一体型）
   const otStyle=val('ot_style')||'split';
   $('#otSplit').classList.toggle('hidden', otStyle!=='split');
@@ -1880,20 +1910,20 @@ function updateVisibility(){
   const ssEl=form.elements['show_setsumei'];
   if(ssEl){ const must=partActSetsumeiMust(cat, per, partActBaseDate(per).date);
     if(must && !ssEl.checked) ssEl.checked=true;
-    ssEl.disabled=must; }
+    if(ssEl.disabled!==must) ssEl.disabled=must; }
   $('.ex-haken').classList.toggle('hidden', cat!=='派遣');
   $('.ex-kensetsu').classList.toggle('hidden', cat!=='建設');
   // ラベル切替
-  $('#lblEmployer').textContent = (cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名';
-  $('#lblHoliday').textContent = (cat==='短時間'||cat==='派遣')?'休日及び勤務日':'休日';
-  $('#lblRetireAllow').textContent = '退職金';
-  $('#hintShort').textContent = (isShort||per==='有期'||cat==='派遣')?'短時間・有期・派遣は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条・派遣法31条の2）。未選択のままでは出力できません（「有」「無」のいずれかを選んでください）。':'';
+  uiSetText($('#lblEmployer'), (cat==='建設'||cat==='林業')?'事業主の氏名又は名称':'使用者職氏名');
+  uiSetText($('#lblHoliday'), (cat==='短時間'||cat==='派遣')?'休日及び勤務日':'休日');
+  uiSetText($('#lblRetireAllow'), '退職金');
+  uiSetText($('#hintShort'), (isShort||per==='有期'||cat==='派遣')?'短時間・有期・派遣は昇給・退職手当・賞与の「有無」明示が必要（パート有期法6条・派遣法31条の2）。未選択のままでは出力できません（「有」「無」のいずれかを選んでください）。':'');
   // 無効な組合せ
   const bad = (per==='日雇' && (cat==='短時間'||cat==='林業'));
   $('#warnCombo').classList.toggle('hidden', !bad);
   // 労働時間の根拠法
   const note = WT_LAW[wt]||'';
-  $('#wtNote').textContent = note?('※ '+note):'';
+  uiSetText($('#wtNote'), note?('※ '+note):'');
   $('#wtNote').classList.toggle('hidden', !note);
   // 週所定労働時間の目安（チェックを入れたときだけ入力欄を表示）
   $('#grpWeeklyHours').classList.toggle('hidden', !form.elements['weekly_hours_flag'].checked);
@@ -2368,15 +2398,66 @@ function updatePageIndicator(){
 function markEmpty(){
   const skip=/\b(a-name|a-amt|o-name|o-val)\b/;
   form.querySelectorAll('input[type=text],input[type=date],textarea,select').forEach(el=>{
-    if(el.readOnly||el.disabled||skip.test(el.className)){ el.classList.remove('empty-field'); return; }
+    if(el.readOnly||el.disabled||skip.test(el.className)){ if(el.classList.contains('empty-field')) el.classList.remove('empty-field'); return; }
     const visible = el.offsetParent!==null;
     el.classList.toggle('empty-field', visible && String(el.value||'').trim()==='');
   });
 }
 
 let LAST_SHEETS=[];
+/* 日本語入力（IME）の変換中は、render／calcRender の描き直しを止める（変換中に同じ行の DOM や値を書き換えると、
+   変換が途中で確定・中断されることがあるため）。compositionend で1回だけ描き直す。 */
+let IME_COMPOSING = false;
+const IME_PENDING = { create: false, calc: false };
+// 負検証専用：noGuard … N32（変換中も描き直す）／holdInBody … N33（render 本体で保留する＝MF-1 の誤り）
+const IME_HOOKS = { noGuard: false, holdInBody: false };
+function imeHold(kind, ev){
+  const composing = IME_COMPOSING || !!(ev && ev.isComposing);
+  if (composing && !(SELFTEST_ACTIVE && IME_HOOKS.noGuard)) { IME_PENDING[kind] = true; return true; }
+  return false;
+}
+// 入力イベント（form の oninput／onchange）から来た描き直しの入口。変換中はここでだけ保留する
+function renderFromInput(ev){ if (imeHold('create', ev)) return; render(); }
+function calcRenderFromInput(ev){ if (imeHold('calc', ev)) return; calcRender(); }
+// 保留を解いて、保留があれば1回だけ描き直す（compositionend のほか、compositionend が来ないまま残った場合の戻し口）
+function imeRelease(){
+  IME_COMPOSING = false;
+  const c = IME_PENDING.create, k = IME_PENDING.calc; IME_PENDING.create = false; IME_PENDING.calc = false;
+  if (c) render(); if (k && typeof calcRender === 'function') calcRender();
+}
+document.addEventListener('compositionstart', () => { IME_COMPOSING = true; }, true);
+document.addEventListener('compositionend', imeRelease, true);
+document.addEventListener('focusout', () => { if (IME_COMPOSING || IME_PENDING.create || IME_PENDING.calc) imeRelease(); }, true);
+window.addEventListener('blur', () => { if (IME_COMPOSING || IME_PENDING.create || IME_PENDING.calc) imeRelease(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && (IME_COMPOSING || IME_PENDING.create || IME_PENDING.calc)) imeRelease(); });
+// 日付をまたいで開いたままのとき：最低賃金の「本日時点」「発効前」・選択肢を新しい日付で作り直す（qa S1）。
+// visibilitychange（表示に戻った）と focus の両方で呼ぶが、日付が変わったときだけ render を1回呼ぶ（二重に描かない）
+let MW_SEEN_DAY = calcTodayISO();
+function mwDayRollCheck(){ const t = calcTodayISO(); if (t === MW_SEEN_DAY) return false; MW_SEEN_DAY = t; render(); return true; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') mwDayRollCheck(); });
+window.addEventListener('focus', mwDayRollCheck);
+// 金額欄の全角→半角は、入力中（フォーカス中）は行わず、欄を離れたとき（blur）に行う（入力中に値を書き換えるとカーソルが動くため）
+form.addEventListener('focusout', ev => {
+  const t = ev.target; if (!t || !t.matches) return;
+  if (t.matches('input.num') || (t.matches('.a-amt') && t.closest('#inAllowList, #outAllowList'))) {
+    const before = t.value; normalizeAllNumeric(null); if (t.value !== before) render();
+  }
+});
+// ツールのボタンからの印刷（単票・一括・チェックリスト・使い方・試算書）は printNow を通す。ブラウザの Ctrl+P だけを beforeprint で扱う
+let PRINT_BY_TOOL = false, BULK_PRINTING = false, PRINT_BY_TOOL_TIMER = null;
+const PRINT_BY_TOOL_RESET_MS = 4000;   // afterprint が来ないブラウザ向けの戻し（window.print が同期で止まらない環境でも、印刷ダイアログの間は立てたまま）
+function printByToolReset(){ PRINT_BY_TOOL = false; clearTimeout(PRINT_BY_TOOL_TIMER); PRINT_BY_TOOL_TIMER = null; window.removeEventListener('afterprint', printByToolReset); }
+function printNow(){
+  PRINT_BY_TOOL = true; clearTimeout(PRINT_BY_TOOL_TIMER);
+  window.addEventListener('afterprint', printByToolReset);
+  PRINT_BY_TOOL_TIMER = setTimeout(printByToolReset, PRINT_BY_TOOL_RESET_MS);
+  window.print();
+}
+// Ctrl+P の経路：印刷の直前に、欄の表示を半角に直して描き直す（一括印刷など、ツールが組み立てたプレビューは触らない）
+window.addEventListener('beforeprint', () => { if (PRINT_BY_TOOL || BULK_MODE || BULK_PRINTING) return; IME_COMPOSING = false; IME_PENDING.create = false; normalizeAllNumeric(null); render(); });
 function render(){
-  normalizeAllNumeric();
+  if (SELFTEST_ACTIVE && IME_HOOKS.holdInBody && imeHold('create')) return;   // N33 専用（本番では render 本体は保留しない）
+  normalizeAllNumeric(document.activeElement);
   const st=updateVisibility();
   const dm=docMeta(st.doc);
   const chgMeta = dm.chg?[
@@ -2392,13 +2473,14 @@ function render(){
   if(appendix) sheets.push(sheetHTML(appendix.title, appendix.lead, appendix.blocks, {sign:false, leave:true}));
   const tt=wageTotals();
   const otInp=form.elements['fixed_ot_amount'];
-  if(otInp){ if(tt.otAuto){ otInp.disabled=true; otInp.value=tt.otAmt; otInp.dataset.auto='1'; }
-    else { otInp.disabled=false; if(otInp.dataset.auto==='1'){ otInp.value=''; delete otInp.dataset.auto; } } }
+  const setAuto=(inp,on,amt)=>{   // 値が同じなら書き換えない
+    if(on){ if(!inp.disabled) inp.disabled=true; if(inp.value!==String(amt)) inp.value=amt; if(inp.dataset.auto!=='1') inp.dataset.auto='1'; }
+    else { if(inp.disabled) inp.disabled=false; if(inp.dataset.auto==='1'){ inp.value=''; delete inp.dataset.auto; } } };
+  if(otInp) setAuto(otInp, tt.otAuto, tt.otAmt);
   const ngInp=form.elements['fixed_night_amount'];
-  if(ngInp){ if(tt.nightAuto){ ngInp.disabled=true; ngInp.value=tt.nightAmt; ngInp.dataset.auto='1'; }
-    else { ngInp.disabled=false; if(ngInp.dataset.auto==='1'){ ngInp.value=''; delete ngInp.dataset.auto; } } }
+  if(ngInp) setAuto(ngInp, tt.nightAuto, tt.nightAmt);
   const td=$('#totalDisp');
-  if(td){ td.value=`${tt.total.toLocaleString('ja-JP')}円　（うち基準内賃金 ${tt.inBase.toLocaleString('ja-JP')}円／基準外 ${tt.outSum.toLocaleString('ja-JP')}円）`; }
+  if(td){ const tv=`${tt.total.toLocaleString('ja-JP')}円　（うち基準内賃金 ${tt.inBase.toLocaleString('ja-JP')}円／基準外 ${tt.outSum.toLocaleString('ja-JP')}円）`; if(td.value!==tv) td.value=tv; }
   LAST_SHEETS=sheets;
   const pv=$('#preview');
   if(!has(val('employee_name')) && !has(val('office_name'))){
@@ -2407,7 +2489,7 @@ function render(){
   } else {
     pv.innerHTML=sheets.map(s=>`<div class="sheet">${s}</div>`).join('');
   }
-  const bd=document.getElementById('breakTotalDisp'); if(bd){ const t=breakTotalMinutes(); bd.textContent = t>0? `合計休憩時間 ${fmtDur(t)}` : ''; }
+  const bd=document.getElementById('breakTotalDisp'); if(bd){ const t=breakTotalMinutes(); uiSetText(bd, t>0? `合計休憩時間 ${fmtDur(t)}` : ''); }
   updatePageIndicator();
   const gaps=requiredGaps(st);
   { let gb=document.getElementById('gapNote');
@@ -2418,6 +2500,7 @@ function render(){
   // 旧「月の所定労働時間が極端に小さい」警告も legalChecks() へ移設して1本化した（文言・条件・値は不変）。
   // 表示はすべて画面のみ（#lawCheckNote は @media print で非表示）。書面生成には一切流さない。
   minWageAutoSuggestPref();   // 住所を入力した時点で都道府県を推測（未選択のときだけ働く）
+  minWageSyncYearSelect();    // 都道府県が変わったら「判定に使う最低賃金」の選択肢を作り直す（無い年度なら自動へ）
   renderMinWageApplied();
   const lc=renderLawChecks(st);
   // 手順レールの件数・欄直下の警告・⑦の出力前チェック（画面のみ。判定は上の requiredGaps／legalChecks の結果を使い回す）
@@ -2556,23 +2639,33 @@ function resolveAnchor(anchor){
 function renderInlineWarnings(gaps, lc, st){
   if(BULK_MODE) return;
   const items=collectStepItems(gaps, lc);
-  form.querySelectorAll('.inline-warn').forEach(e=>e.remove());
   syncNextPerson(items);   // P4：2人目以降のモードの折りたたみ（警告の表示先を決める前に行う）
-  const boxes=new Map();
+  // 表示先ごとに警告をまとめ、今ある箱と中身が同じなら作り直さない（入力中の欄のそばで DOM を動かさない）
+  const want=new Map();
   items.forEach(it=>{
     if(it.other) return;   // 手順に当たらないものは ⑦「その他」だけに出す
     let pos=resolveAnchor(it.anchor);
     if(!pos){ const head=document.querySelector('#step'+it.step+' .step-head'); if(!head) return; pos={host:head, mode:'after'}; }
-    let box=boxes.get(pos.host);
-    if(!box){ box=document.createElement('div'); box.className='inline-warn'; box.setAttribute('data-ui-only','');
-      if(pos.mode==='append') pos.host.appendChild(box); else pos.host.insertAdjacentElement('afterend', box);
-      boxes.set(pos.host, box); box._items=[]; }
-    box._items.push(it);
+    let w=want.get(pos.host); if(!w){ w={mode:pos.mode, items:[]}; want.set(pos.host, w); }
+    w.items.push(it);
   });
-  boxes.forEach(box=>{
-    box._items.sort((a,b)=>IW_ORDER.indexOf(a.level)-IW_ORDER.indexOf(b.level)).forEach(it=>{
-      const d=document.createElement('div'); d.className='iw iw-'+it.level; d.textContent=IW_PREFIX[it.level]+it.text; box.appendChild(d); });
-    delete box._items;
+  const placed=box=>{ const h=box._iwHost; if(!h||!h.isConnected) return false; return box._iwMode==='append' ? box.parentElement===h : box.previousElementSibling===h; };
+  const keep=new Set();
+  form.querySelectorAll('.inline-warn').forEach(box=>{
+    const w=box._iwHost && want.get(box._iwHost);
+    if(!w || w.box || w.mode!==box._iwMode || !placed(box)){ box.remove(); return; }
+    w.box=box; keep.add(box);
+  });
+  want.forEach((w, host)=>{
+    const sorted=w.items.slice().sort((a,b)=>IW_ORDER.indexOf(a.level)-IW_ORDER.indexOf(b.level));
+    const sig=sorted.map(it=>it.level+'|'+it.text).join('\n');
+    let box=w.box;
+    if(!box){ box=document.createElement('div'); box.className='inline-warn'; box.setAttribute('data-ui-only','');
+      if(w.mode==='append') host.appendChild(box); else host.insertAdjacentElement('afterend', box);
+      box._iwHost=host; box._iwMode=w.mode; }
+    if(box._iwSig===sig) return;
+    box._iwSig=sig; box.textContent='';
+    sorted.forEach(it=>{ const d=document.createElement('div'); d.className='iw iw-'+it.level; d.textContent=IW_PREFIX[it.level]+it.text; box.appendChild(d); });
   });
   updateRail(items);
   renderFinalCheck(items);
@@ -2676,16 +2769,40 @@ function goStep(n, opt){
   if(prev){ prev.disabled=(pT==null); prev.textContent = pT!=null ? '← 戻る（'+stepLabel(pT)+'）' : '← 戻る'; const pt = pT!=null ? '前の手順（'+stepLabel(pT)+'）へ戻る' : ''; prev.title=pt; if(pt) prev.setAttribute('aria-label', pt); else prev.removeAttribute('aria-label'); }
   if(next){ next.classList.toggle('hidden', nT==null); if(nT!=null) next.textContent='次へ（'+stepLabel(nT)+'）→'; }
   if(sum) sum.textContent='手順 '+n+' / '+STEP_COUNT+'：'+stepLabel(n);
+  syncStepMiniNav(n, pT, nT);   // 見出しの横の小さな戻る・次へ（下の帯と同じ行き先）
   markEmpty();   // 黄色の未入力表示は「いま開いている手順」の欄だけに付く（markEmpty は表示中の欄だけを見る）
   try{ form.scrollTop=0; }catch(e){}
   if(window.matchMedia && window.matchMedia('(max-width:900px)').matches){
     const r=form.getBoundingClientRect(); if(r.top<0) window.scrollBy(0, r.top-60);
   }
+  // 利用者の操作で移動したとき（帯・見出しの横・レール）は、新しい手順の見出し（小さな戻る・次へ）が画面に入るようにする
+  if(opt.focus!==false){ const hd=document.querySelector('#step'+n+' .step-head'); if(hd){ const hr=hd.getBoundingClientRect(); if(hr.top<0 || hr.bottom>window.innerHeight-Math.max(64, stepFootH()+8)) window.scrollBy(0, hr.top-12); } }   // 下は手順の帯（実測の高さ）と右下の「📄 プレビュー」の置き場（最低 64px）
   if(opt.focus!==false){ const h=document.getElementById('stepH'+n); if(h){ try{ h.focus({preventScroll:true}); }catch(e){ h.focus(); } } }
   if(typeof pvFootHeight==='function') pvFootHeight();   // 手順ごとにフッターの高さが変わる（ボタンの折り返し）→ 開閉ボタンの位置を合わせる
-  if(typeof layoutColumns==='function') layoutColumns(); // 3列の高さを画面に合わせる（「次へ」が画面外に出ないように）
+  if(typeof layoutColumns==='function') layoutColumns(); // 3列の高さを画面に合わせる
+  if(typeof allowFitLayout==='function') allowFitLayout(); // 表示した手順の手当・始業終業のリスト幅で 1段／2段 を決める（非表示中は測れないため）
 }
-function goStepRel(d){ const t=stepTarget(CUR_STEP, d); if(t!=null) goStep(t); }   // モード ON のときは ②→⑤→⑦（stepTarget）
+function goStepRel(d){ const t=stepTarget(CUR_STEP, d); if(t!=null) goStep(t); }
+// 各手順の見出しの横に、小さな「← 戻る／次へ →」を作る（画面のみ・name なし。押すと下の帯と同じ goStepRel）
+function buildStepMiniNav(){
+  document.querySelectorAll('#form section.step .step-head').forEach(h=>{
+    if(h.querySelector('.step-mininav')) return;
+    const w=document.createElement('span'); w.className='step-mininav'; w.setAttribute('data-ui-only','');
+    const mk=(cls,txt,d)=>{ const b=document.createElement('button'); b.type='button'; b.className='step-mini '+cls; b.textContent=txt; b.onclick=()=>goStepRel(d); return b; };
+    w.appendChild(mk('step-mini-prev','← 戻る',-1)); w.appendChild(mk('step-mini-next','次へ →',1));
+    h.appendChild(w);
+  });
+}
+function syncStepMiniNav(n, pT, nT){
+  const h=document.querySelector('#step'+n+' .step-head'); if(!h) return;
+  const p=h.querySelector('.step-mini-prev'), x=h.querySelector('.step-mini-next'); if(!p||!x) return;
+  p.disabled=(pT==null);
+  const pt = pT!=null ? '前の手順（'+stepLabel(pT)+'）へ戻る' : '前の手順はありません';
+  p.title=pt; p.setAttribute('aria-label', pt);
+  x.classList.toggle('hidden', nT==null);
+  const nt = nT!=null ? '次の手順（'+stepLabel(nT)+'）へ進む' : '';
+  x.title=nt; if(nt) x.setAttribute('aria-label', nt); else x.removeAttribute('aria-label');
+}   // モード ON のときは ②→⑤→⑦（stepTarget）
 
 /* ==========================================================================
    §E-3 2人目以降の入力モード（P4／設計書 §3）
@@ -2761,6 +2878,9 @@ function syncNextPerson(items){
     rows.push({ label: '業務の内容（雇入れ直後）', value: npShort(val('job_now'), 40), step: 3, focus: 'job_now' });
     rows.push({ label: '特記事項', value: npShort(val('tokki_jiko'), 40), step: 6, focus: 'tokki_jiko' });
     rows.push({ label: '社会保険の被保険者区分', value: has(val('shaho_kubun')) ? '入力済み：' + val('shaho_kubun') : 'クリア済み（任意）', step: 6, focus: 'shaho_kubun' });
+    // 判定に使う最低賃金（前の人の選択がそのまま残るため、年度を選んでいたら気づけるように出す）
+    { const ys = document.getElementById('minwageYear'), o = ys && ys.selectedIndex >= 0 ? ys.options[ys.selectedIndex] : null;
+      rows.push({ label: '判定に使う最低賃金', value: (has(val('minwage_pref')) ? val('minwage_pref') + '・' : '都道府県未選択・') + (o ? o.textContent : '自動（発効前を含む最新の改定額で判定）'), step: 5, focus: 'minwageYear' }); }
   }
   if ((on && NEXT_PERSON_MODE.prevOtPay) || gapOT) {   // 前の人が固定残業を支給していた場合（時間数・金額は人ごとにクリアされる）
     const uni = val('ot_style') === 'unified', eff = otPayEffective();
@@ -2882,7 +3002,7 @@ function pvHighlight(){
 }
 // 900px以下のドロワー（開閉は body のクラス。閉じても display:none にしない）
 // ドロワーを開いている間は、外側（入力欄・手順レール・ヘッダー・タブ・名簿バー・フッター）を inert にしてフォーカスを閉じ込める
-const PV_INERT_SEL = ['#form', '#stepRail', 'header.appbar', '.tabbar', '#rosterBar', '#appFooter'];
+const PV_INERT_SEL = ['#form', '#stepFoot', '#stepRail', 'header.appbar', '.tabbar', '#rosterBar', '#appFooter'];
 function pvDrawer(open){
   const on = document.body.classList.contains('pv-drawer'), isOpen = on && !!open, was = document.body.classList.contains('pv-open');
   document.body.classList.toggle('pv-open', isOpen);
@@ -2922,8 +3042,33 @@ function pvApplyScale(){
     if (note.parentElement !== pv || pv.firstElementChild !== note) pv.insertBefore(note, pv.firstChild);
   } else if (note) note.remove();
 }
-// 手順フッターの高さを CSS 変数へ（開閉ボタンを「次へ」の上に置くため）
-function pvFootHeight(){ const f = document.querySelector('#form .step-foot'); if (f) document.documentElement.style.setProperty('--pv-foot-h', Math.ceil(f.getBoundingClientRect().height) + 'px'); }
+// 手当・始業終業のリストの幅を測って、1段に収まらなければ2段の配置に切り替える（container query の代わり）
+const ALLOW_NAME_MIN = 160;   // 1段にする最低限の手当名の幅(px)。区分58｜手当名｜単位80｜金額96｜×（1440px 幅では手当名 約175px）
+const TIME_LABEL_MIN = 100;   // 1段のときの区分名の最小幅(px)。区分｜始業104｜〜14｜終業104｜×
+function allowFitLayout(){
+  const ctl = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ctl-h')) || 34;
+  const inner = el => { const cs = getComputedStyle(el); return el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0); };
+  [['inAllowList', 58 + ALLOW_NAME_MIN + 80 + 96 + ctl + 4 * 6, 'allow-2row'], ['outAllowList', 58 + ALLOW_NAME_MIN + 80 + 96 + ctl + 4 * 6, 'allow-2row'],
+   ['timeList', TIME_LABEL_MIN + 104 + 14 + 104 + ctl + 4 * 6, 'time-2row']].forEach(([id, need, cls]) => {
+    const el = document.getElementById(id); if (!el) return;
+    const w = inner(el); if (w <= 0) return;   // 非表示中は測れないので今の配置のまま
+    const narrow = w < need;
+    if (el.classList.contains(cls) !== narrow) el.classList.toggle(cls, narrow);
+  });
+}
+// 手順の帯の高さ（表示されていなければ 0。他のタブ表示中など）
+function stepFootH(){ const f = document.getElementById('stepFoot'); return (f && f.getClientRects().length) ? Math.ceil(f.getBoundingClientRect().height) : 0; }
+// 手順の帯の高さを CSS 変数へ。帯の高さはボタンの折り返しで変わるため、goStep・resize・帯の大きさの変化（ResizeObserver）のたびに測り直す。
+//   --step-foot-h … 狭い画面（帯を画面の下端に固定）で、ページの下の余白と scroll-padding-bottom に使う（広い画面・非表示のときは 0）
+//   --pv-foot-h   … 「📄 プレビュー」の開閉ボタンを帯の上に出すための、画面の下端から帯の上端までの高さ
+function pvFootHeight(){
+  const f = document.getElementById('stepFoot'), root = document.documentElement; if (!f) return;
+  const h = stepFootH(), fixed = h > 0 && getComputedStyle(f).position === 'fixed';
+  root.style.setProperty('--step-foot-h', (fixed ? h : 0) + 'px');
+  let pv = 0;
+  if (h > 0) { const r = f.getBoundingClientRect(); if (fixed || r.bottom >= window.innerHeight - 16) pv = Math.max(0, Math.ceil(window.innerHeight - r.top)); }
+  root.style.setProperty('--pv-foot-h', pv + 'px');
+}
 function pvApplyWidth(){
   const narrow = !!(window.matchMedia && window.matchMedia('(max-width:900px)').matches);
   document.body.classList.toggle('pv-drawer', narrow);
@@ -2945,6 +3090,32 @@ function buildPreviewNav(){
   window.addEventListener('resize', pvFootHeight);
   window.addEventListener('resize', layoutColumns);
   window.addEventListener('resize', pvApplyScale);
+  window.addEventListener('resize', allowFitLayout);
+  // 帯の大きさが変わったら（折り返し・タブの切替で表示／非表示）、下余白と開閉ボタンの位置を測り直す
+  if (window.ResizeObserver) { const sf = document.getElementById('stepFoot'); if (sf) new ResizeObserver(() => pvFootHeight()).observe(sf); }
+  // 狭い画面：Tab 等で帯（画面の下端に固定）の裏にある欄へ移ったら、その欄が帯の上に出るまでページを送る
+  //（ブラウザの「必要なら見える位置へ」は scroll-padding-bottom を見ずに「画面内なら動かさない」ことがあるための保険。値には触れない）
+  document.addEventListener('focusin', ev => {
+    const f = document.getElementById('stepFoot'), t = ev.target;
+    if (!f || !t || !t.getBoundingClientRect || f.contains(t) || (t.closest && t.closest('#preview, .pv-toggle'))) return;
+    if (!f.getClientRects().length) return;   // 帯が表示されていない（他のタブを表示中＝#modeCreate が非表示）ときは何もしない（矩形が 0 のため画面が飛ぶ）
+    if (getComputedStyle(f).position !== 'fixed') return;
+    const fr = f.getBoundingClientRect(), r = t.getBoundingClientRect();
+    if (r.height > 0 && r.bottom > fr.top - 4) window.scrollBy(0, Math.min(r.bottom - fr.top + 12, r.top - 8));   // 背の高い欄は上端を画面から出さない
+  });
+  // 狭い画面：帯（#stepFoot）と「📄 プレビュー」が重なる間だけ、ボタンを薄くして押す先を帯に譲る
+  //（開閉ボタンは --pv-foot-h で帯の上に出すため通常は重ならない。万一の保険として残す）
+  { let last = 0, tm = null;
+    const cross = () => { const t = document.getElementById('pvToggle'), f = document.getElementById('stepFoot'); if (!t || !f) return false;
+      if (!document.body.classList.contains('pv-drawer') || document.body.classList.contains('pv-open')) return false;
+      const a = t.getBoundingClientRect(), c = f.getBoundingClientRect(); return !(a.right <= c.left || c.right <= a.left || a.bottom <= c.top || c.bottom <= a.top); };
+    window.addEventListener('scroll', () => {
+      const now = performance.now();
+      if (now - last >= 60) { last = now; const t = document.getElementById('pvToggle'); if (t) { const on = cross(); if (t.classList.contains('pv-dim') !== on) t.classList.toggle('pv-dim', on); } }   // 軽い間引き（60ms に1回）
+      clearTimeout(tm); tm = setTimeout(() => { const t = document.getElementById('pvToggle'); if (t && t.classList.contains('pv-dim')) t.classList.remove('pv-dim'); }, 300);
+    }, { passive: true }); }
+  if (window.ResizeObserver) { const ro2 = new ResizeObserver(() => allowFitLayout()); ['inAllowList', 'outAllowList', 'timeList'].forEach(id => { const e = document.getElementById(id); if (e) ro2.observe(e); }); }
+  allowFitLayout();
   if (window.ResizeObserver) { const ro = new ResizeObserver(() => layoutColumns()); ['header.appbar', '.tabbar', '#rosterBar'].forEach(s => { const e = document.querySelector(s); if (e) ro.observe(e); }); }
   layoutColumns();
   pvApplyWidth();
@@ -3072,6 +3243,9 @@ let RATE_OPEN_USER = false; // 割増率：利用者が「変更する」で開�
 // 負検証（N21）専用の差し替え口。SELFTEST_ACTIVE のときだけ効く
 const P3_HOOKS = { otKeepValues: false, otLegacyNullOnly: false };   // otLegacyNullOnly … N22 用（修正前の「null のときだけ戻す」挙動）
 
+// 値が同じなら書き換えない（入力中・変換中の欄の周りで DOM を動かさない。DOMTokenList.remove や setAttribute は同じ値でも変化を起こすため）
+function uiSetText(el, t){ if (el && el.textContent !== t) el.textContent = t; }
+function uiSetAttr(el, n, v){ if (el && el.getAttribute(n) !== v) el.setAttribute(n, v); }
 function uiEl(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; e.setAttribute('data-ui-only', ''); return e; }
 // 代理UIのボタン群：子は button＋aria-pressed なので、親は role="group"（radiogroup にしない）
 function uiGroup(el, label){ el.setAttribute('role', 'group'); if (label) el.setAttribute('aria-label', label); return el; }
@@ -3282,7 +3456,7 @@ function allowSuggest(name){
 function syncProxies(){
   const emp = radio('emp_category'), per = radio('period_type');
   // 働き方カード
-  document.querySelectorAll('#form .persona-card').forEach(b => b.setAttribute('aria-pressed', (b.dataset.emp === emp && b.dataset.per === per) ? 'true' : 'false'));
+  document.querySelectorAll('#form .persona-card').forEach(b => uiSetAttr(b, 'aria-pressed', (b.dataset.emp === emp && b.dataset.per === per) ? 'true' : 'false'));
   const eff = document.getElementById('personaEffect');
   if (eff) {
     const e1 = PERSONA.effects.emp[emp] || {}, e2 = PERSONA.effects.per[per] || {};
@@ -3297,7 +3471,7 @@ function syncProxies(){
   // 代理セグメント
   document.querySelectorAll('#form .seg-proxy[data-for]').forEach(g => {
     const sel = form.elements[g.dataset.for]; if (!sel) return;
-    g.querySelectorAll('.seg-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.value === sel.value ? 'true' : 'false'));
+    g.querySelectorAll('.seg-btn').forEach(b => uiSetAttr(b, 'aria-pressed', b.dataset.value === sel.value ? 'true' : 'false'));
     g.classList.toggle('is-empty', sel.value === '');
   });
   // 「変更なし」：日雇では出さない
@@ -3321,7 +3495,7 @@ function syncProxies(){
     // 値が入っている間は「支給する」を選んだものとして扱う（入力中に値を消しても欄が勝手に隠れないように）。
     if (otPayFromValues() && !(SELFTEST_ACTIVE && (P3_HOOKS.otLegacyNullOnly || P4_HOOKS.effectiveOtOnly))) OT_PAY = true;
     const pay = otPayEffective();
-    document.querySelectorAll('#otPaySeg .seg-btn').forEach(b => b.setAttribute('aria-pressed', (b.dataset.value === '1') === pay ? 'true' : 'false'));
+    document.querySelectorAll('#otPaySeg .seg-btn').forEach(b => uiSetAttr(b, 'aria-pressed', (b.dataset.value === '1') === pay ? 'true' : 'false'));
     [form.elements['ot_style'].closest('.row'), form.elements['round_unit'].closest('.row'), document.getElementById('otSplit'), document.getElementById('otUnified')]
       .forEach(e => { if (e) e.classList.toggle('ui-folded', !pay); });
   }
@@ -3341,9 +3515,9 @@ function syncProxies(){
       if (!kb) { kb = uiEl('button', 'a-kind'); kb.type = 'button'; r.insertBefore(kb, r.firstChild);
         kb.onclick = () => { const k = r.parentElement === allowListEl('in') ? 'out' : 'in'; r.dataset.uiTouched = '1'; allowMoveRow(r, k); }; }
       const now = r.parentElement === allowListEl('in') ? 'in' : 'out';
-      kb.textContent = now === 'in' ? '基準内' : '基準外'; kb.classList.toggle('k-out', now === 'out');
+      uiSetText(kb, now === 'in' ? '基準内' : '基準外'); kb.classList.toggle('k-out', now === 'out');
       r.classList.toggle('has-kind', !!r.querySelector(':scope > .a-kind'));   // CSS の列割り（.allow-row.has-kind）用。区分ボタンを外したら外す
-      kb.setAttribute('aria-label', '区分：' + kb.textContent + '（押すと' + (now === 'in' ? '基準外' : '基準内') + 'へ切り替え）');
+      uiSetAttr(kb, 'aria-label', '区分：' + kb.textContent + '（押すと' + (now === 'in' ? '基準外' : '基準内') + 'へ切り替え）');
       let sg = r.querySelector(':scope > .a-suggest');
       const isNew = r.dataset.uiNew === '1' && r.dataset.uiTouched !== '1';
       const s = isNew ? allowSuggest(r.querySelector('.a-name').value) : null;
@@ -3392,7 +3566,7 @@ function renderMinWageMeter(lc){
   else { m.classList.add('unk'); m.textContent = '？ この入力では時間額を確定できません（' + minTxt + '。理由は下の【要確認】）'; }
 }
 
-function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; window.print(); }
+function doPrint(){ render(); if(!BULK_MODE && !confirmGaps('印刷'))return; printNow(); }
 
 function download(filename, content, mime){
   const blob=new Blob(['﻿'+content],{type:mime});
@@ -3436,6 +3610,7 @@ function restoreState(s){
   Object.entries(s.radios||{}).forEach(([n,v])=>{ const g=form.elements[n]; if(!g)return; const list=g.length?[...g]:[g]; list.forEach(r=>{ if(r.type==='radio') r.checked=(r.value===v); }); });
   Object.entries(s.checks||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type==='checkbox') el.checked=!!v; });
   Object.entries(s.fields||{}).forEach(([n,v])=>{ const el=form.elements[n]; if(el&&el.type!=='radio'&&el.type!=='checkbox'&&!el.readOnly) el.value=v; });
+  minWageSyncYearSelect((s.fields||{}).minwage_year);   // 年度の選択肢は都道府県から作るため、県を入れた後で選択を戻す（旧データにキーが無ければ自動）
   setAllows('in', s.allowIn||[{}]); setAllows('out', s.allowOut||[{}]);
   setTimes(s.times||[{}]); setBreaks(s.breaks||[{}]); setOthers(s.others||[{}]);
   setDismissals(s.dismissals||['']);
@@ -3471,7 +3646,7 @@ function toggleHelp(){
 }
 function printGuide(){
   document.body.classList.add('print-guide');
-  window.print();
+  printNow();
   const done=()=>{ document.body.classList.remove('print-guide'); window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   setTimeout(done, 2000);
@@ -3804,13 +3979,14 @@ function bulkPrint(){
   if(!bulkGapReport())return;
   const backup=serializeState();
   const all=[];
+  BULK_PRINTING=true;   // 組み立て〜印刷の間は beforeprint が描き直さない（全員分のプレビューを守る）
   ROSTER.forEach(e=>{ restoreState(e.state); LAST_SHEETS.forEach(s=>all.push(s)); });
   switchMode('create');   // プレビュー領域を表示状態にして印刷対象にする
   const pv=document.getElementById('preview');
   pv.innerHTML=all.map(s=>`<div class="sheet">${s}</div>`).join('');
   updatePageIndicator();
-  window.print();
-  setTimeout(()=>{ restoreState(backup); switchMode('batch'); }, 300);
+  printNow();
+  setTimeout(()=>{ BULK_PRINTING=false; restoreState(backup); switchMode('batch'); }, 300);
 }
 function wordDocCss(headerRef){
   return `body{font-family:'ＭＳ Ｐ明朝',serif;font-size:10.5pt}
@@ -4004,55 +4180,61 @@ function calcImportAllows(){
    - 令和8年度: 厚生労働省「令和8年度 地域別最低賃金 答申状況」https://www.mhlw.go.jp/content/11302000/001745621.pdf （legal-research確認 2026-09-16）
      再確認 2026-09-28：同PDF（答申状況）を取得して機械抽出し、47都道府県すべての時間額・発効日が下の表と一致（値の変更なし）。
        全国一覧ページ（MIN_WAGE_SOURCE）には令和8年度分が未掲載（答申段階のまま）のため provisional:true は維持。
-     ★この年度は provisional:true ＝【答申段階】の数値。最終決定（各労働局の公示）が出た県から順に差し替え、
-       差し替え済みの県は provisional を false にし、MIN_WAGE_CHECKED を確認日で更新すること。
+     再確認 2026-10-21：厚生労働省「令和8年度 地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001753404.pdf を
+       統括側で pdf_reader.py によりテキスト化し、47都道府県の時間額・発効日を下の表と機械照合した結果、差異0件（値の変更なし）。
+       一覧の列見出しが「答申された改定額」のままのため全県一律の「確定」とはせず、発効日が 2026-10-21 以前の県（発効済み＝
+       決定・公示済み）だけ provisional:false にした。発効前の県は provisional:true（【答申段階】表示）のまま。
+       発効日を過ぎたら答申段階の表示を自動で消す仕組みは入れない（データで管理する。設計書 §8）。
+     ★この年度の provisional（2026-10-21 時点）：発効日が 2026-10-21 以前の32県＝false（発効済み）／発効前の15県
+       （青森・岩手・山形・山梨・京都・徳島・愛媛・高知・佐賀・長崎・熊本・大分・宮崎・鹿児島・沖縄）＝true（【答申段階】）。
+       true の県は、最終決定（各労働局の公示）または発効を一次資料で確認した県から false にし、MIN_WAGE_CHECKED を確認日で更新すること。
      ★発効日は県ごとに 2026-10-01〜2026-12-02 までばらつく。「10月に一斉に切り替わる」前提で書き換えないこと。
    - 令和7年度: 厚生労働省「令和7年度地域別最低賃金 全国一覧」https://www.mhlw.go.jp/content/11200000/001571192.pdf ／発効日は同一覧（legal-research確認 2026-07-05）
    - 令和6年度: 厚生労働省・兵庫労働局「地域別最低賃金全国一覧（令和6年）」ほか2ソースで相互照合（legal-research確認 2026-07-05）
    来年度改定時は、各県配列の先頭に {year,amount,eff} を1件足すだけで自動判定・年度選択がそのまま働く。 ===== */
-const MIN_WAGE_CHECKED='2026-09-28';   // 最低賃金テーブルを一次資料で確認した日（デッドマン表示の基準日）
+const MIN_WAGE_CHECKED='2026-10-21';   // 最低賃金テーブルを一次資料で確認した日（デッドマン表示の基準日）
 const MIN_WAGE_SOURCE='厚生労働省「地域別最低賃金の全国一覧」https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/';
 const MIN_WAGE_DATA={
- "北海道":[{year:"令和8年度",amount:1131,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
+ "北海道":[{year:"令和8年度",amount:1131,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1075,eff:"2025-10-04"},{year:"令和6年度",amount:1010,eff:"2024-10-01"}],
  "青森県":[{year:"令和8年度",amount:1090,eff:"2026-10-29",provisional:true},{year:"令和7年度",amount:1029,eff:"2025-11-21"},{year:"令和6年度",amount:953,eff:"2024-10-05"}],
  "岩手県":[{year:"令和8年度",amount:1090,eff:"2026-12-01",provisional:true},{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-27"}],
- "宮城県":[{year:"令和8年度",amount:1098,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1038,eff:"2025-10-04"},{year:"令和6年度",amount:973,eff:"2024-10-01"}],
- "秋田県":[{year:"令和8年度",amount:1090,eff:"2026-10-14",provisional:true},{year:"令和7年度",amount:1031,eff:"2026-03-31"},{year:"令和6年度",amount:951,eff:"2024-10-01"}],
+ "宮城県":[{year:"令和8年度",amount:1098,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1038,eff:"2025-10-04"},{year:"令和6年度",amount:973,eff:"2024-10-01"}],
+ "秋田県":[{year:"令和8年度",amount:1090,eff:"2026-10-14",provisional:false},{year:"令和7年度",amount:1031,eff:"2026-03-31"},{year:"令和6年度",amount:951,eff:"2024-10-01"}],
  "山形県":[{year:"令和8年度",amount:1092,eff:"2026-10-30",provisional:true},{year:"令和7年度",amount:1032,eff:"2025-12-23"},{year:"令和6年度",amount:955,eff:"2024-10-19"}],
- "福島県":[{year:"令和8年度",amount:1094,eff:"2026-10-16",provisional:true},{year:"令和7年度",amount:1033,eff:"2026-01-01"},{year:"令和6年度",amount:955,eff:"2024-10-05"}],
- "茨城県":[{year:"令和8年度",amount:1136,eff:"2026-10-18",provisional:true},{year:"令和7年度",amount:1074,eff:"2025-10-12"},{year:"令和6年度",amount:1005,eff:"2024-10-01"}],
- "栃木県":[{year:"令和8年度",amount:1125,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1068,eff:"2025-10-01"},{year:"令和6年度",amount:1004,eff:"2024-10-01"}],
- "群馬県":[{year:"令和8年度",amount:1120,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1063,eff:"2026-03-01"},{year:"令和6年度",amount:985,eff:"2024-10-04"}],
- "埼玉県":[{year:"令和8年度",amount:1196,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1141,eff:"2025-11-01"},{year:"令和6年度",amount:1078,eff:"2024-10-01"}],
- "千葉県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1140,eff:"2025-10-03"},{year:"令和6年度",amount:1076,eff:"2024-10-01"}],
- "東京都":[{year:"令和8年度",amount:1280,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1226,eff:"2025-10-03"},{year:"令和6年度",amount:1163,eff:"2024-10-01"}],
- "神奈川県":[{year:"令和8年度",amount:1279,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1225,eff:"2025-10-04"},{year:"令和6年度",amount:1162,eff:"2024-10-01"}],
- "新潟県":[{year:"令和8年度",amount:1108,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1050,eff:"2025-10-02"},{year:"令和6年度",amount:985,eff:"2024-10-01"}],
- "富山県":[{year:"令和8年度",amount:1119,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1062,eff:"2025-10-12"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
- "石川県":[{year:"令和8年度",amount:1113,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1054,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
- "福井県":[{year:"令和8年度",amount:1112,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1053,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "福島県":[{year:"令和8年度",amount:1094,eff:"2026-10-16",provisional:false},{year:"令和7年度",amount:1033,eff:"2026-01-01"},{year:"令和6年度",amount:955,eff:"2024-10-05"}],
+ "茨城県":[{year:"令和8年度",amount:1136,eff:"2026-10-18",provisional:false},{year:"令和7年度",amount:1074,eff:"2025-10-12"},{year:"令和6年度",amount:1005,eff:"2024-10-01"}],
+ "栃木県":[{year:"令和8年度",amount:1125,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1068,eff:"2025-10-01"},{year:"令和6年度",amount:1004,eff:"2024-10-01"}],
+ "群馬県":[{year:"令和8年度",amount:1120,eff:"2026-10-03",provisional:false},{year:"令和7年度",amount:1063,eff:"2026-03-01"},{year:"令和6年度",amount:985,eff:"2024-10-04"}],
+ "埼玉県":[{year:"令和8年度",amount:1196,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1141,eff:"2025-11-01"},{year:"令和6年度",amount:1078,eff:"2024-10-01"}],
+ "千葉県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1140,eff:"2025-10-03"},{year:"令和6年度",amount:1076,eff:"2024-10-01"}],
+ "東京都":[{year:"令和8年度",amount:1280,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1226,eff:"2025-10-03"},{year:"令和6年度",amount:1163,eff:"2024-10-01"}],
+ "神奈川県":[{year:"令和8年度",amount:1279,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1225,eff:"2025-10-04"},{year:"令和6年度",amount:1162,eff:"2024-10-01"}],
+ "新潟県":[{year:"令和8年度",amount:1108,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1050,eff:"2025-10-02"},{year:"令和6年度",amount:985,eff:"2024-10-01"}],
+ "富山県":[{year:"令和8年度",amount:1119,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1062,eff:"2025-10-12"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "石川県":[{year:"令和8年度",amount:1113,eff:"2026-10-03",provisional:false},{year:"令和7年度",amount:1054,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
+ "福井県":[{year:"令和8年度",amount:1112,eff:"2026-10-04",provisional:false},{year:"令和7年度",amount:1053,eff:"2025-10-08"},{year:"令和6年度",amount:984,eff:"2024-10-05"}],
  "山梨県":[{year:"令和8年度",amount:1113,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1052,eff:"2025-12-01"},{year:"令和6年度",amount:988,eff:"2024-10-01"}],
- "長野県":[{year:"令和8年度",amount:1117,eff:"2026-10-02",provisional:true},{year:"令和7年度",amount:1061,eff:"2025-10-03"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
- "岐阜県":[{year:"令和8年度",amount:1121,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1065,eff:"2025-10-18"},{year:"令和6年度",amount:1001,eff:"2024-10-01"}],
- "静岡県":[{year:"令和8年度",amount:1154,eff:"2026-10-15",provisional:true},{year:"令和7年度",amount:1097,eff:"2025-11-01"},{year:"令和6年度",amount:1034,eff:"2024-10-01"}],
- "愛知県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1140,eff:"2025-10-18"},{year:"令和6年度",amount:1077,eff:"2024-10-01"}],
- "三重県":[{year:"令和8年度",amount:1143,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1087,eff:"2025-11-21"},{year:"令和6年度",amount:1023,eff:"2024-10-01"}],
- "滋賀県":[{year:"令和8年度",amount:1136,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1080,eff:"2025-10-05"},{year:"令和6年度",amount:1017,eff:"2024-10-01"}],
+ "長野県":[{year:"令和8年度",amount:1117,eff:"2026-10-02",provisional:false},{year:"令和7年度",amount:1061,eff:"2025-10-03"},{year:"令和6年度",amount:998,eff:"2024-10-01"}],
+ "岐阜県":[{year:"令和8年度",amount:1121,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1065,eff:"2025-10-18"},{year:"令和6年度",amount:1001,eff:"2024-10-01"}],
+ "静岡県":[{year:"令和8年度",amount:1154,eff:"2026-10-15",provisional:false},{year:"令和7年度",amount:1097,eff:"2025-11-01"},{year:"令和6年度",amount:1034,eff:"2024-10-01"}],
+ "愛知県":[{year:"令和8年度",amount:1195,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1140,eff:"2025-10-18"},{year:"令和6年度",amount:1077,eff:"2024-10-01"}],
+ "三重県":[{year:"令和8年度",amount:1143,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1087,eff:"2025-11-21"},{year:"令和6年度",amount:1023,eff:"2024-10-01"}],
+ "滋賀県":[{year:"令和8年度",amount:1136,eff:"2026-10-03",provisional:false},{year:"令和7年度",amount:1080,eff:"2025-10-05"},{year:"令和6年度",amount:1017,eff:"2024-10-01"}],
  "京都府":[{year:"令和8年度",amount:1180,eff:"2026-11-16",provisional:true},{year:"令和7年度",amount:1122,eff:"2025-11-21"},{year:"令和6年度",amount:1058,eff:"2024-10-01"}],
- "大阪府":[{year:"令和8年度",amount:1231,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1177,eff:"2025-10-16"},{year:"令和6年度",amount:1114,eff:"2024-10-01"}],
- "兵庫県":[{year:"令和8年度",amount:1172,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1116,eff:"2025-10-04"},{year:"令和6年度",amount:1052,eff:"2024-10-01"}],
- "奈良県":[{year:"令和8年度",amount:1107,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1051,eff:"2025-11-16"},{year:"令和6年度",amount:986,eff:"2024-10-01"}],
- "和歌山県":[{year:"令和8年度",amount:1101,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1045,eff:"2025-11-01"},{year:"令和6年度",amount:980,eff:"2024-10-01"}],
- "鳥取県":[{year:"令和8年度",amount:1090,eff:"2026-10-03",provisional:true},{year:"令和7年度",amount:1030,eff:"2025-10-04"},{year:"令和6年度",amount:957,eff:"2024-10-05"}],
- "島根県":[{year:"令和8年度",amount:1092,eff:"2026-10-10",provisional:true},{year:"令和7年度",amount:1033,eff:"2025-11-17"},{year:"令和6年度",amount:962,eff:"2024-10-12"}],
- "岡山県":[{year:"令和8年度",amount:1104,eff:"2026-10-02",provisional:true},{year:"令和7年度",amount:1047,eff:"2025-12-01"},{year:"令和6年度",amount:982,eff:"2024-10-02"}],
- "広島県":[{year:"令和8年度",amount:1141,eff:"2026-10-11",provisional:true},{year:"令和7年度",amount:1085,eff:"2025-11-01"},{year:"令和6年度",amount:1020,eff:"2024-10-01"}],
- "山口県":[{year:"令和8年度",amount:1101,eff:"2026-10-08",provisional:true},{year:"令和7年度",amount:1043,eff:"2025-10-16"},{year:"令和6年度",amount:979,eff:"2024-10-01"}],
+ "大阪府":[{year:"令和8年度",amount:1231,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1177,eff:"2025-10-16"},{year:"令和6年度",amount:1114,eff:"2024-10-01"}],
+ "兵庫県":[{year:"令和8年度",amount:1172,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1116,eff:"2025-10-04"},{year:"令和6年度",amount:1052,eff:"2024-10-01"}],
+ "奈良県":[{year:"令和8年度",amount:1107,eff:"2026-10-04",provisional:false},{year:"令和7年度",amount:1051,eff:"2025-11-16"},{year:"令和6年度",amount:986,eff:"2024-10-01"}],
+ "和歌山県":[{year:"令和8年度",amount:1101,eff:"2026-10-03",provisional:false},{year:"令和7年度",amount:1045,eff:"2025-11-01"},{year:"令和6年度",amount:980,eff:"2024-10-01"}],
+ "鳥取県":[{year:"令和8年度",amount:1090,eff:"2026-10-03",provisional:false},{year:"令和7年度",amount:1030,eff:"2025-10-04"},{year:"令和6年度",amount:957,eff:"2024-10-05"}],
+ "島根県":[{year:"令和8年度",amount:1092,eff:"2026-10-10",provisional:false},{year:"令和7年度",amount:1033,eff:"2025-11-17"},{year:"令和6年度",amount:962,eff:"2024-10-12"}],
+ "岡山県":[{year:"令和8年度",amount:1104,eff:"2026-10-02",provisional:false},{year:"令和7年度",amount:1047,eff:"2025-12-01"},{year:"令和6年度",amount:982,eff:"2024-10-02"}],
+ "広島県":[{year:"令和8年度",amount:1141,eff:"2026-10-11",provisional:false},{year:"令和7年度",amount:1085,eff:"2025-11-01"},{year:"令和6年度",amount:1020,eff:"2024-10-01"}],
+ "山口県":[{year:"令和8年度",amount:1101,eff:"2026-10-08",provisional:false},{year:"令和7年度",amount:1043,eff:"2025-10-16"},{year:"令和6年度",amount:979,eff:"2024-10-01"}],
  "徳島県":[{year:"令和8年度",amount:1103,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1046,eff:"2026-01-01"},{year:"令和6年度",amount:980,eff:"2024-11-01"}],
- "香川県":[{year:"令和8年度",amount:1092,eff:"2026-10-01",provisional:true},{year:"令和7年度",amount:1036,eff:"2025-10-18"},{year:"令和6年度",amount:970,eff:"2024-10-02"}],
+ "香川県":[{year:"令和8年度",amount:1092,eff:"2026-10-01",provisional:false},{year:"令和7年度",amount:1036,eff:"2025-10-18"},{year:"令和6年度",amount:970,eff:"2024-10-02"}],
  "愛媛県":[{year:"令和8年度",amount:1093,eff:"2026-11-01",provisional:true},{year:"令和7年度",amount:1033,eff:"2025-12-01"},{year:"令和6年度",amount:956,eff:"2024-10-13"}],
  "高知県":[{year:"令和8年度",amount:1086,eff:"2026-10-29",provisional:true},{year:"令和7年度",amount:1023,eff:"2025-12-01"},{year:"令和6年度",amount:952,eff:"2024-10-09"}],
- "福岡県":[{year:"令和8年度",amount:1114,eff:"2026-10-04",provisional:true},{year:"令和7年度",amount:1057,eff:"2025-11-16"},{year:"令和6年度",amount:992,eff:"2024-10-05"}],
+ "福岡県":[{year:"令和8年度",amount:1114,eff:"2026-10-04",provisional:false},{year:"令和7年度",amount:1057,eff:"2025-11-16"},{year:"令和6年度",amount:992,eff:"2024-10-05"}],
  "佐賀県":[{year:"令和8年度",amount:1095,eff:"2026-11-15",provisional:true},{year:"令和7年度",amount:1030,eff:"2025-11-21"},{year:"令和6年度",amount:956,eff:"2024-10-17"}],
  "長崎県":[{year:"令和8年度",amount:1087,eff:"2026-11-02",provisional:true},{year:"令和7年度",amount:1031,eff:"2025-12-01"},{year:"令和6年度",amount:953,eff:"2024-10-12"}],
  "熊本県":[{year:"令和8年度",amount:1092,eff:"2026-12-01",provisional:true},{year:"令和7年度",amount:1034,eff:"2026-01-01"},{year:"令和6年度",amount:952,eff:"2024-10-05"}],
@@ -4109,7 +4291,8 @@ const MW_HOOKS = {
   roundHourly: null,     // 判定前に時間額へ丸めを挟む（N1）。本番は null＝丸めを挟まない
   noHoursLevel: 'yellow',// 分母（所定労働時間）が取れないときの判定。本番は常に黄（N4で改変）
   floatCompare: false,   // true で浮動小数の直接比較へ戻す（N7）。本番は整数比較
-  resolver: null         // 最低賃金の発効日解決を差し替える（N6）。本番は calcResolveMinWage
+  resolver: null,        // 最低賃金の発効日解決を差し替える（N6）。本番は calcResolveMinWage
+  today: null            // 作成タブ「判定に使う最低賃金」の本日（R5〜R8 を日付に依存させないため）。本番は null＝実際の本日
 };
 
 /* ---- 閾値・法定率のマスタ（コード内へのベタ打ちを禁止。直すのはここだけ） ---- */
@@ -4402,27 +4585,101 @@ function dailyWorkHoursList() {
   }).filter(v => v != null);
 }
 
-// 画面で選んだ都道府県・種類から、適用される最低賃金を1つに決める。
-// 地域別は MIN_WAGE_DATA（唯一のマスタ）を発効日ベースで解決する。
-// 特定（産業別）最低賃金はツールに内蔵していないため、入力された額と地域別の高い方を採る。
+/* ---- 作成タブ「判定に使う最低賃金」（minwage_year）。設計書_労働条件通知書ツール_最低賃金の改定後額の選択_2026-10-21 ----
+   'auto'（既定）＝発効前を含めて最新の改定額（MIN_WAGE_DATA の各県配列の先頭）。原さん決定 2026-10-21（最も厳しい側）。
+   年度を選んだとき＝その年度の額・発効日。選べるのは「本日時点で有効な年度」と「それより新しい年度」だけ（過去の年度は出さない）。
+   ★賃金試算タブの年度選択（calcMwYear・自動＝本日時点で有効）と calcResolveMinWage・mwResolve の動きは変えない。 */
+function mwTodayISO(){ return (SELFTEST_ACTIVE && MW_HOOKS.today) ? MW_HOOKS.today : calcTodayISO(); }
+// 選択肢に出す年度（新しい順）：先頭〜本日時点で有効な年度まで
+function mwSelectableEntries(pref){
+  const arr = MIN_WAGE_DATA[pref]; if (!arr || !arr.length) return [];
+  const cur = calcResolveMinWage(pref, mwTodayISO());
+  const i = arr.indexOf(cur);
+  return arr.slice(0, i < 0 ? arr.length : i + 1);
+}
+// 例：令和8年度 1,090円（令和8年12月1日発効予定・答申段階）／令和7年度 1,031円（現在有効）
+function mwYearOptionLabel(e, today){
+  const when = e.eff > today ? `${fmtDate(e.eff)}発効予定` : '現在有効';
+  return `${e.year} ${Math.round(e.amount).toLocaleString('ja-JP')}円（${when}${e.provisional ? '・答申段階' : ''}）`;
+}
+// 「判定に使う最低賃金」の選択肢を、都道府県（と本日）が変わったときだけ作り直す。
+// wanted＝戻したい値（restoreState から渡す。省略時は今の値）。その年度が選択肢に無ければ「自動」に戻す。
+function minWageSyncYearSelect(wanted){
+  const sel = document.getElementById('minwageYear'); if (!sel) return;
+  const pref = val('minwage_pref'), today = mwTodayISO();
+  const want = (wanted != null && wanted !== '') ? String(wanted) : sel.value;
+  const key = pref + '|' + today + '|' + dateMode();   // 日付の表示（和暦／西暦）を切り替えたら文言を作り直す
+  if (sel.dataset.key !== key) {
+    while (sel.options.length > 1) sel.remove(1);   // 先頭の「自動」だけ残す
+    mwSelectableEntries(pref).forEach(e => { const o = document.createElement('option'); o.value = e.year; o.textContent = mwYearOptionLabel(e, today); sel.appendChild(o); });
+    sel.dataset.key = key;
+  }
+  const v = [...sel.options].some(o => o.value === want) ? want : 'auto';
+  if (sel.value !== v) sel.value = v;
+}
+// 発効前の額で判定しているときの併記（画面の表示と判定メッセージで共通）。該当しなければ ''
+function mwPendingNote(applied){
+  if (!applied || !applied.pending) return '';
+  return '発効前の改定後の額で判定しています（本日時点は'
+    + (applied.todayYear ? `${applied.todayYear} ${Math.round(applied.todayAmount).toLocaleString('ja-JP')}円` : '有効な額がありません') + '）';
+}
+// 最新でない年度（本日時点の年度など）で判定していて、新しい改定額が控えているときの注記。該当しなければ ''
+function mwUpcomingNote(applied){
+  if (!applied || !applied.next) return '';
+  const n = applied.next;
+  return `${applied.isSpecial ? '地域別最低賃金は' : ''}${fmtDate(n.eff)}から${n.year} ${Math.round(n.amount).toLocaleString('ja-JP')}円に改定されます`;
+}
+// 適用額の出所の括弧書き（画面の表示と判定メッセージで共通）。
+// 特定（産業別）を採ったときは、年度・発効日が「比較した地域別」のものだと分かる書き方にする（入力額に年度・発効日は無い）
+function mwSourceText(applied){
+  if (!applied) return '';
+  const effTxt = fmtDate(applied.eff) + (applied.regionPending ? '発効予定' : '発効');   // 比較した地域別が発効前なら「発効予定」
+  if (applied.isSpecial) return `（特定最低賃金＝入力額。比較した地域別最低賃金は${applied.year} ${Math.round(applied.regionAmount).toLocaleString('ja-JP')}円・${effTxt}）`;
+  return `（${applied.year}・${effTxt}／${applied.kind}）`;
+}
+// 併記・注記・食い違いの警告をまとめる（画面の表示と判定メッセージで共通）
+function mwNotes(applied){
+  if (!applied) return [];
+  return [mwPendingNote(applied), mwUpcomingNote(applied),
+    applied.mismatch ? `⚠ 選んだ年度（${applied.year}）と発効日で解決した年度（${applied.mismatch}）が食い違ったため、選んだ年度の額で判定しています。めぐみ事務所へご連絡ください` : ''
+  ].filter(Boolean);
+}
+
+// 画面で選んだ都道府県・種類・「判定に使う最低賃金」から、適用される最低賃金を1つに決める。
+// 地域別は MIN_WAGE_DATA（唯一のマスタ）から、選んだ年度（自動＝最新の改定額）の行を使う。
+// 特定（産業別）最低賃金はツールに内蔵していないため、入力された額と地域別の高い方を採る（この規則は不変）。
 function resolveAppliedMinWage() {
   const pref = val('minwage_pref');
   if (!pref) return null;
-  const base = mwResolve(pref);
-  if (!base) return null;
+  const arr = MIN_WAGE_DATA[pref];
+  if (!arr || !arr.length) return null;
+  const today = mwTodayISO();
+  const ySel = val('minwage_year') || 'auto';
+  const chosen = (ySel !== 'auto') ? mwSelectableEntries(pref).find(e => e.year === ySel) : null;   // 選択肢に無い年度は「自動」扱い
+  const pick = chosen || arr[0];
+  // 選んだ年度の発効日を基準日として発効日ベースで解決する（＝その年度の行）。
+  // mwResolve を通すのは、答申段階の差し替え（MW_HOOKS.resolver）と負検証N6 を作成タブの判定にも効かせるため。
+  // 解決した年度が選んだ年度と違うとき（データの発効日の並びの誤り等）は、黙って別の年度で判定しない：
+  // 選んだ行（pick）をそのまま採り、食い違いを mismatch に残して画面と判定メッセージで警告する。
+  let base = mwResolve(pref, pick.eff), mismatch = '';
+  if (!base || base.year !== pick.year) { mismatch = base ? base.year : '（解決できず）'; base = pick; }
+  const cur = mwResolve(pref, today);   // 本日時点で有効な額（発効前の額で判定しているときの参考表示）
+  const ix = arr.indexOf(pick), next = ix > 0 ? arr[ix - 1] : null;   // 選んだ年度より1つ新しい改定額（控えている改定）
+  const meta = { sel: chosen ? ySel : 'auto', todayYear: cur ? cur.year : '', todayAmount: cur ? cur.amount : null, next, mismatch, regionAmount: base.amount, regionPending: base.eff > today };
+  const pending = base.eff > today;
   const kind = val('minwage_kind') || '地域別';
   const special = parseYen(val('minwage_special_amount'));
   if (kind === '特定' && special != null && special > 0) {
     // 地域別と特定のうち高い方が適用される
     if (special > base.amount) {
-      return { amount: special, year: base.year, eff: base.eff, pref,
-        provisional: false, kind: '特定（産業別・入力額）', name: val('minwage_special_name') };
+      return Object.assign({ amount: special, year: base.year, eff: base.eff, pref,
+        provisional: false, kind: '特定（産業別・入力額）', name: val('minwage_special_name'), pending: false, isSpecial: true }, meta);
     }
-    return { amount: base.amount, year: base.year, eff: base.eff, pref,
-      provisional: !!base.provisional, kind: '地域別（入力された特定最低賃金より高いため地域別を適用）' };
+    return Object.assign({ amount: base.amount, year: base.year, eff: base.eff, pref,
+      provisional: !!base.provisional, kind: special === base.amount ? '地域別（入力された特定最低賃金と同額のため地域別を適用）' : '地域別（入力された特定最低賃金より高いため地域別を適用）', pending }, meta);
   }
-  return { amount: base.amount, year: base.year, eff: base.eff, pref,
-    provisional: !!base.provisional, kind: kind === '特定' ? '特定を選択（額が未入力のため地域別で判定）' : '地域別' };
+  return Object.assign({ amount: base.amount, year: base.year, eff: base.eff, pref,
+    provisional: !!base.provisional, kind: kind === '特定' ? '特定を選択（額が未入力のため地域別で判定）' : '地域別', pending }, meta);
 }
 
 function collectMinWageInput() {
@@ -4977,7 +5234,8 @@ function legalChecks(st) {
   const mw = minWageCheck(mwInput);
   const applied = mw.minWage;
   const appliedText = applied
-    ? `${applied.pref}の最低賃金 ${Math.round(applied.amount).toLocaleString('ja-JP')}円（${applied.year}・${fmtDate(applied.eff)}発効／${applied.kind}）`
+    ? `${applied.pref}の最低賃金 ${Math.round(applied.amount).toLocaleString('ja-JP')}円${mwSourceText(applied)}`
+      + mwNotes(applied).map(t => `［${t}］`).join('')   // 発効前の併記・控えている改定の注記・年度の食い違いの警告
     : '';
   // 時間額の表示。下限推定と上限推定が同じなら1つ、違えば幅で示す。
   const hourlyText = (mw.hourlyLow === mw.hourlyHigh)
@@ -4997,6 +5255,10 @@ function legalChecks(st) {
   // 最低賃金の判定に共通する限界（ツール未対応の事項）を常に添える
   if (applied) {
     yellows.push('この確認は地域別最低賃金（および入力された特定最低賃金）との比較のみです。減額の特例許可（最低賃金法7条）や、入力されていない産業別最低賃金には対応していません');
+  }
+  // 作成タブ「判定に使う最低賃金」：選んだ年度と発効日で解決した年度が食い違った（黙って別の年度で判定しない）
+  if (applied && applied.mismatch) {
+    yellows.push(`最低賃金の年度が食い違いました（選んだ年度：${applied.year}／発効日で解決した年度：${applied.mismatch}）。選んだ年度の額で判定しています。めぐみ事務所へご連絡ください`);
   }
   // 答申段階の数値を使っている場合の明示（原さん決定B-3）
   if (applied && applied.provisional) {
@@ -5075,8 +5337,9 @@ function renderMinWageApplied() {
   const applied = resolveAppliedMinWage();
   if (!applied) { el.textContent = '都道府県を選ぶと、適用される最低賃金額と発効日を表示します。'; return; }
   el.textContent = `適用：${applied.pref}　時間額 ${Math.round(applied.amount).toLocaleString('ja-JP')}円`
-    + `（${applied.year}・${fmtDate(applied.eff)}発効／${applied.kind}）`
-    + (applied.provisional ? '　※答申段階の数値（最終決定前）' : '')
+    + mwSourceText(applied)
+    + (applied.provisional ? '　※答申段階（最終決定前）' : '')
+    + mwNotes(applied).map(t => `　※${t}`).join('')
     + `　［表の確認日 ${MIN_WAGE_CHECKED}］`;
   // 特定（産業別）を選んだときだけ名称欄を出す
   const nameRow = document.getElementById('grpMinWageSpecialName');
@@ -5400,7 +5663,7 @@ function printChecklist() {
   if (!box) return;
   box.innerHTML = buildChecklistHTML();
   document.body.classList.add('print-checklist');
-  window.print();
+  printNow();
   // 印刷が終わったら用紙の中身を消す（氏名を画面の裏に残したままにしない）
   const done = () => { document.body.classList.remove('print-checklist'); box.innerHTML = ''; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
@@ -5828,6 +6091,17 @@ function stSupportCases() {
         const bad = prefs.filter(p => { const e = MIN_WAGE_DATA[p][0]; return !(e && e.year === '令和8年度' && e.amount > 0 && /^2026-(1[0-2])-\d{2}$/.test(e.eff)); });
         return { ok: prefs.length === 47 && bad.length === 0, detail: `県数=${prefs.length} 不備=${bad.join(',') || 'なし'}` };
       } },
+    { id: 'R5', title: '［判定に使う最低賃金］岩手県（本日=2026-10-21と仮定）：自動＝発効前の令和8年度 1,090円／令和7年度を選ぶと本日時点の 1,031円／令和8年度を選ぶと 1,090円', run: () => stMwYearCase('R5') },
+    { id: 'R6', title: '［判定に使う最低賃金］都道府県を変えると選択肢を作り直し、選んでいた年度が無ければ「自動」に戻る（岩手県 令和7年度 → 宮城県）', run: () => stMwYearCase('R6') },
+    { id: 'R7', title: '［判定に使う最低賃金］保存した選択（令和7年度）が復元で戻る・旧データ（キー無し）は「自動」（旧データの既定＝自動へ戻す処理の改変は R7 では落ちず、R6② で代替して検出）', run: () => stMwYearCase('R7') },
+    { id: 'R8', title: '［判定に使う最低賃金］発効前の額で判定しているとき「発効前の改定後の額で判定しています（本日時点は令和7年度 1,031円）」を画面と判定メッセージに併記し、年度・発効日（発効予定）は判定に使った年度', run: () => stMwYearCase('R8') },
+    { id: 'R9', title: '［判定に使う最低賃金］本日＝発効日の前日（2026-11-30）と当日（2026-12-01）で、岩手の選択肢・判定額・発効前の印が切り替わる（当日は令和7年度の選択が「自動」に戻る）', run: () => stMwYearCase('R9') },
+    { id: 'R10', title: '［判定に使う最低賃金］特定（産業別）×自動（発効前）：令和7と令和8の間＝地域別1,090円／令和8超＝特定（比較した地域別の年度・発効日と分かる表示）／未入力＝地域別', run: () => stMwYearCase('R10') },
+    { id: 'R11', title: '［判定に使う最低賃金］本日時点の年度を選んでいて改定が控えているとき「…から令和8年度 1,090円に改定されます」を画面と判定メッセージに注記', run: () => stMwYearCase('R11') },
+    { id: 'R12', title: '［判定に使う最低賃金］発効日で解決した年度が選んだ年度と食い違ったら、選んだ年度の額で判定し警告を出す（黙って別の年度で判定しない）', run: () => stMwYearCase('R12') },
+    { id: 'R13', title: '［判定に使う最低賃金］2人目以降モード：前の人の選択は引き継がれ、⑦の引き継ぎ一覧に出る', run: () => stMwYearCase('R13') },
+    { id: 'R14', title: '［判定に使う最低賃金］特定（産業別）が地域別と同額（1,090円）×自動：地域別を適用し「同額のため」と表示（「高いため」と出さない）', run: () => stMwYearCase('R14') },
+    { id: 'R15', title: '［判定に使う最低賃金］選択欄のラベル・aria・選択肢の文言（自動／令和8年度…発効予定・答申段階／令和7年度…現在有効）が所内版・顧問先版で同じ', run: () => stMwYearCase('R15') },
     { id: 'C1', title: '［休憩の下限］労働360分→0分／361分→45分／480分→45分／481分→60分', run: () => {
         const ok = breakRequiredMinutes(360) === 0 && breakRequiredMinutes(361) === 45
           && breakRequiredMinutes(480) === 45 && breakRequiredMinutes(481) === 60;
@@ -5868,7 +6142,7 @@ function stSupportCases() {
    U2 … requiredGaps／legalChecks の全メッセージが STEP_MAP のどれかの行に当たる（黙って捨てない）
    U3 … 画面専用の部品（data-ui-only）や _ui 始まりの name を持つ要素が無い（設計書 I-2） */
 // 改修前の版（2026-09-26 採取・固定点）の #form 内 name:type をソートして '|' で連結したもの（151要素）
-const UI_BASELINE_NAME_TYPES = 'annual_days:text|annual_wage:text|base_wage_name:text|bonus_flag:select-one|bonus_note:text|break_mode:radio|break_mode:radio|break_total:text|change_basis:text|change_date:date|change_reason:text|consecutive_days:text|consent_flag:select-one|consult_contact:text|consult_dept:text|consult_person:text|contract_end:date|contract_start:date|core_time:text|daily_wage:text|dateMode:radio|dateMode:radio|deemed_hours2:text|deemed_hours:text|display_category:text|docType:radio|docType:radio|docType:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_ins:select-one|employee_name:text|employer:text|fixed_night_amount:text|fixed_night_auto:checkbox|fixed_night_hours:text|fixed_night_name:text|fixed_ot60_show:checkbox|fixed_ot_amount:text|fixed_ot_auto:checkbox|fixed_ot_hours:text|fixed_ot_name:text|flex_time:text|guaranteed_wage:text|haken_kujo:text|haken_kyotei:select-one|haken_kyotei_end:date|haken_moto:text|haken_saki:text|has_work_rules:checkbox|health_measure:text|henkei_start:text|hol_legal:text|hol_nonlegal:text|holiday:text|hourly_wage:text|issue_date:date|job_now:textarea|job_scope:text|kenpo:select-one|kenpo_name:text|kigyou_nenkin:select-one|kigyou_nenkin_name:text|kikyo:text|kounen:select-one|mandatory_age:text|minwage_kind:select-one|minwage_pref:select-one|minwage_special_amount:text|minwage_special_name:text|monthly_scheduled_hours:text|monthly_wage:text|muki_flag:radio|muki_flag:radio|muki_start:date|night_pct:text|normal_weekly_hours:text|office_addr:text|office_name:text|ot_60over:text|ot_60under:text|ot_shotei:text|ot_style:select-one|other_leave:text|overtime:select-one|paid_leave:text|pay_deduction:select-one|pay_method:select-one|pay_method_note:text|period_type:radio|period_type:radio|period_type:radio|probation_flag:radio|probation_flag:radio|probation_text:text|raise_flag:select-one|raise_note:text|reemployment:text|remarks:text|renewal:select-one|renewal_cap:text|renewal_criteria:text|retire_flag:select-one|retire_note:text|round_unit:select-one|rousai:select-one|rules_place:text|self_retire:text|setsumei_contact:text|setsumei_dept:text|setsumei_person:text|settle_period:text|settle_total:text|shaho_kubun:select-one|shakai_riyuu:text|show_breakdown:checkbox|show_setsumei:checkbox|specific_period:text|std_daily:text|target_period:text|target_work:text|tokki_jiko:textarea|tsusan_start:date|uni_h_hol:text|uni_h_night:text|uni_h_ot:text|uni_mode:radio|uni_mode:radio|uni_name:text|uni_note_clause:checkbox|uni_r_hol:text|uni_r_night:text|uni_r_ot:text|uni_target:text|unit_price:text|wage_closing:text|wage_payday:text|wage_type:select-one|weekly_hours_flag:checkbox|weekly_hours_note:text|work_days:text|worker_kind:radio|worker_kind:radio|worker_weekly_hours:text|workplace_now:text|workplace_scope:text|worktime_note:textarea|worktime_system:select-one';
+const UI_BASELINE_NAME_TYPES = 'annual_days:text|annual_wage:text|base_wage_name:text|bonus_flag:select-one|bonus_note:text|break_mode:radio|break_mode:radio|break_total:text|change_basis:text|change_date:date|change_reason:text|consecutive_days:text|consent_flag:select-one|consult_contact:text|consult_dept:text|consult_person:text|contract_end:date|contract_start:date|core_time:text|daily_wage:text|dateMode:radio|dateMode:radio|deemed_hours2:text|deemed_hours:text|display_category:text|docType:radio|docType:radio|docType:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_category:radio|emp_ins:select-one|employee_name:text|employer:text|fixed_night_amount:text|fixed_night_auto:checkbox|fixed_night_hours:text|fixed_night_name:text|fixed_ot60_show:checkbox|fixed_ot_amount:text|fixed_ot_auto:checkbox|fixed_ot_hours:text|fixed_ot_name:text|flex_time:text|guaranteed_wage:text|haken_kujo:text|haken_kyotei:select-one|haken_kyotei_end:date|haken_moto:text|haken_saki:text|has_work_rules:checkbox|health_measure:text|henkei_start:text|hol_legal:text|hol_nonlegal:text|holiday:text|hourly_wage:text|issue_date:date|job_now:textarea|job_scope:text|kenpo:select-one|kenpo_name:text|kigyou_nenkin:select-one|kigyou_nenkin_name:text|kikyo:text|kounen:select-one|mandatory_age:text|minwage_kind:select-one|minwage_pref:select-one|minwage_special_amount:text|minwage_special_name:text|minwage_year:select-one|monthly_scheduled_hours:text|monthly_wage:text|muki_flag:radio|muki_flag:radio|muki_start:date|night_pct:text|normal_weekly_hours:text|office_addr:text|office_name:text|ot_60over:text|ot_60under:text|ot_shotei:text|ot_style:select-one|other_leave:text|overtime:select-one|paid_leave:text|pay_deduction:select-one|pay_method:select-one|pay_method_note:text|period_type:radio|period_type:radio|period_type:radio|probation_flag:radio|probation_flag:radio|probation_text:text|raise_flag:select-one|raise_note:text|reemployment:text|remarks:text|renewal:select-one|renewal_cap:text|renewal_criteria:text|retire_flag:select-one|retire_note:text|round_unit:select-one|rousai:select-one|rules_place:text|self_retire:text|setsumei_contact:text|setsumei_dept:text|setsumei_person:text|settle_period:text|settle_total:text|shaho_kubun:select-one|shakai_riyuu:text|show_breakdown:checkbox|show_setsumei:checkbox|specific_period:text|std_daily:text|target_period:text|target_work:text|tokki_jiko:textarea|tsusan_start:date|uni_h_hol:text|uni_h_night:text|uni_h_ot:text|uni_mode:radio|uni_mode:radio|uni_name:text|uni_note_clause:checkbox|uni_r_hol:text|uni_r_night:text|uni_r_ot:text|uni_target:text|unit_price:text|wage_closing:text|wage_payday:text|wage_type:select-one|weekly_hours_flag:checkbox|weekly_hours_note:text|work_days:text|worker_kind:radio|worker_kind:radio|worker_weekly_hours:text|workplace_now:text|workplace_scope:text|worktime_note:textarea|worktime_system:select-one';
 function stFormNameTypes(){ return [...form.elements].filter(e => e.name).map(e => e.name + ':' + e.type).sort(); }
 /* U2 の期待値表（実装の STEP_MAP とは別に、設計書 §4 と requiredGaps／legalChecks の文言を読んで手で決めた固定点）。
    STEP_MAP の行の順番・step を書き換えたら、ここと一致しなくなって U2 が落ちる。 */
@@ -5952,14 +6226,151 @@ function stStepMapCoverage(){
   const lawMiss = msgs.filter(t => !stepMapLaw(t));
   return { labels, gapMiss, gapWrong, msgs, lawMiss, expectFail };
 }
+// R5〜R8：作成タブ「判定に使う最低賃金」。本日は MW_HOOKS.today で 2026-10-21 に固定（実際の日付に依存させない）。
+// 岩手県：令和8年度 1,090円（2026-12-01発効＝この本日では発効前）／令和7年度 1,031円（本日時点で有効）
+function stMwYearCase(id){
+  const saveToday = MW_HOOKS.today, saveAct = SELFTEST_ACTIVE;
+  // 実行前の2人目以降モード（記入例の読込 clearFormAll がモードと引き継ぎの印を消すため、最後に戻す）
+  const saveNpAll = NEXT_PERSON_MODE, saveOpenAll = NP_OPEN, saveInhAll = NP_OT_INHERIT;
+  SELFTEST_ACTIVE = true; MW_HOOKS.today = '2026-10-21';
+  const sel = document.getElementById('minwageYear');
+  const setPref = p => { form.elements['minwage_pref'].value = p; render(); };
+  const setYear = y => { sel.value = y; render(); };
+  const opts = () => [...sel.options].map(o => o.value);
+  try {
+    loadSample(); form.elements['minwage_kind'].value = '地域別'; form.elements['minwage_special_amount'].value = '';
+    setPref('岩手県');
+    if (id === 'R5') {
+      setYear('auto'); const a = resolveAppliedMinWage();
+      setYear('令和7年度'); const b = resolveAppliedMinWage();
+      setYear('令和8年度'); const c = resolveAppliedMinWage();
+      const o = opts();
+      const ok = !!a && !!b && !!c && a.amount === 1090 && a.year === '令和8年度' && a.pending === true
+        && b.amount === 1031 && b.year === '令和7年度' && b.pending === false && c.amount === 1090 && c.sel === '令和8年度'
+        && o.join(',') === 'auto,令和8年度,令和7年度'
+        && a.mismatch === '' && b.mismatch === '' && c.mismatch === '';   // 発効日で解決した年度＝選んだ年度（N6：解決を先頭固定にすると令和7年度で食い違う）
+      return { ok, detail: `自動=${a && a.year} ${a && a.amount}円 発効前=${a && a.pending}／令和7年度=${b && b.amount}円／令和8年度=${c && c.amount}円／選択肢=${o.join(',')}／食い違い=${[a, b, c].map(x => x ? JSON.stringify(x.mismatch) : '-').join(',')}` };
+    }
+    if (id === 'R6') {
+      // (i) 岩手 令和7年度 → 沖縄（同じ年度が選択肢にある）：作り直した後も令和7年度のまま（作り直しでブラウザが先頭を選ぶのを戻す処理を見る）
+      setYear('令和7年度'); const before = sel.value;
+      setPref('沖縄県'); const keep = sel.value, oO = opts(), aO = resolveAppliedMinWage();
+      // (ii) 沖縄 令和7年度 → 宮城（令和7年度が選択肢に無い）：値が厳密に 'auto'（先頭）。無い値をそのまま入れると '' になる
+      setPref('宮城県'); const after = sel.value, idx = sel.selectedIndex, o = opts(), a = resolveAppliedMinWage();
+      const ok = before === '令和7年度' && keep === '令和7年度' && oO.join(',') === 'auto,令和8年度,令和7年度' && !!aO && aO.amount === 1023
+        && after === 'auto' && idx === 0 && o.join(',') === 'auto,令和8年度' && !!a && a.amount === 1098 && a.pending === false;
+      return { ok, detail: `岩手=${before}→沖縄=${keep}（${aO && aO.amount}円・選択肢=${oO.join(',')}）→宮城=${JSON.stringify(after)}・index=${idx}（選択肢=${o.join(',')}・${a && a.amount}円）` };
+    }
+    if (id === 'R9') {
+      // 本日＝発効日の前日（2026-11-30）と当日（2026-12-01）：岩手 令和8年度 1,090円（2026-12-01発効）
+      MW_HOOKS.today = '2026-11-30'; setPref('岩手県'); setYear('令和7年度');
+      const o1 = opts(), a1 = resolveAppliedMinWage(); setYear('auto'); const b1 = resolveAppliedMinWage();
+      setYear('令和7年度'); MW_HOOKS.today = '2026-12-01'; render();
+      const v2 = sel.value, o2 = opts(), b2 = resolveAppliedMinWage();
+      const ok = o1.join(',') === 'auto,令和8年度,令和7年度' && !!a1 && a1.amount === 1031 && a1.pending === false && !!a1.next && a1.next.year === '令和8年度'
+        && !!b1 && b1.amount === 1090 && b1.pending === true
+        && v2 === 'auto' && o2.join(',') === 'auto,令和8年度' && !!b2 && b2.amount === 1090 && b2.pending === false && b2.todayYear === '令和8年度' && !b2.next;
+      return { ok, detail: `11/30：選択肢=${o1.join(',')} 令和7=${a1 && a1.amount}円 自動=${b1 && b1.amount}円・発効前=${b1 && b1.pending}／12/01：選択=${v2} 選択肢=${o2.join(',')} 自動=${b2 && b2.amount}円・発効前=${b2 && b2.pending}・本日=${b2 && b2.todayYear}` };
+    }
+    if (id === 'R10') {
+      // 特定（産業別）× 自動（発効前の令和8年度 1,090円）：令和7(1,031)と令和8の間・令和8超・未入力
+      form.elements['minwage_kind'].value = '特定'; setYear('auto');
+      const sp = v => { form.elements['minwage_special_amount'].value = v; render(); return resolveAppliedMinWage(); };
+      const mid = sp('1050'), hi = sp('1100'), none = sp('');
+      form.elements['minwage_special_amount'].value = '1100'; render();
+      const shown = (document.getElementById('minWageApplied') || {}).textContent || '';
+      setYear('令和7年度'); const mid7 = sp('1050');
+      const ok = !!mid && mid.amount === 1090 && !mid.isSpecial && mid.pending === true && /地域別（入力された特定最低賃金より高いため/.test(mid.kind)
+        && !!hi && hi.amount === 1100 && hi.isSpecial === true && hi.pending === false && hi.regionAmount === 1090
+        && shown.indexOf('（特定最低賃金＝入力額。比較した地域別最低賃金は令和8年度 1,090円・' + fmtDate('2026-12-01') + '発効予定）') >= 0 && shown.indexOf('（令和8年度・') < 0
+        && !!none && none.amount === 1090 && none.pending === true && /額が未入力/.test(none.kind)
+        && !!mid7 && mid7.amount === 1050 && mid7.isSpecial === true && mid7.regionAmount === 1031 && mwUpcomingNote(mid7).indexOf('地域別最低賃金は') === 0;
+      return { ok, detail: `1,050円→${mid && mid.amount}円（${mid && mid.kind}）／1,100円→${hi && hi.amount}円（特定=${hi && hi.isSpecial}）／未入力→${none && none.amount}円／令和7年度選択で1,050円→${mid7 && mid7.amount}円／表示=${shown.slice(0, 90)}…` };
+    }
+    if (id === 'R11') {
+      // 本日時点の年度（令和7年度）を選んでいて新しい改定額が控えているとき：画面と判定メッセージの両方に「…から令和8年度 1,090円に改定されます」
+      setYear('令和7年度');
+      const note = fmtDate('2026-12-01') + 'から令和8年度 1,090円に改定されます';
+      const shown = (document.getElementById('minWageApplied') || {}).textContent || '';
+      const lc = legalChecks(updateVisibility()), mwMsg = [].concat(lc.reds, lc.yellows, lc.oks).find(t => t.indexOf('岩手県の最低賃金') >= 0) || '';
+      setYear('auto'); const shownAuto = (document.getElementById('minWageApplied') || {}).textContent || '';
+      const ok = shown.indexOf(note) >= 0 && mwMsg.indexOf(note) >= 0 && mwMsg.indexOf('1,031円（令和7年度・') >= 0 && shownAuto.indexOf('に改定されます') < 0;
+      return { ok, detail: `画面に注記=${shown.indexOf(note) >= 0}／判定に注記=${mwMsg.indexOf(note) >= 0}／自動では注記なし=${shownAuto.indexOf('に改定されます') < 0}／判定=${mwMsg.slice(0, 140)}…` };
+    }
+    if (id === 'R12') {
+      // 発効日で解決した年度が選んだ年度と食い違ったとき（解決を先頭固定に差し替えて再現）：選んだ年度の額で判定し、警告を出す
+      setYear('令和7年度');
+      const saveR = MW_HOOKS.resolver; MW_HOOKS.resolver = pref => MIN_WAGE_DATA[pref] ? MIN_WAGE_DATA[pref][0] : null;
+      let a, shown, lc;
+      try { render(); a = resolveAppliedMinWage(); shown = (document.getElementById('minWageApplied') || {}).textContent || ''; lc = legalChecks(updateVisibility()); }
+      finally { MW_HOOKS.resolver = saveR; }
+      const warn = (lc.yellows || []).find(t => /^最低賃金の年度が食い違いました（選んだ年度：令和7年度／発効日で解決した年度：令和8年度）/.test(t)) || '';
+      render(); const clean = resolveAppliedMinWage();
+      const ok = !!a && a.amount === 1031 && a.year === '令和7年度' && a.mismatch === '令和8年度' && shown.indexOf('食い違ったため、選んだ年度の額で判定しています') >= 0 && !!warn
+        && !!clean && clean.mismatch === '' && clean.amount === 1031;
+      return { ok, detail: `差し替え中：${a && a.year} ${a && a.amount}円・食い違い=${a && a.mismatch}・警告=${!!warn}／戻した後：食い違い=${JSON.stringify(clean && clean.mismatch)}` };
+    }
+    if (id === 'R14') {
+      // 特定（産業別）＝地域別と同額（1,090円）×自動：地域別を適用し「同額のため」と出す（「高いため」と出さない）
+      form.elements['minwage_kind'].value = '特定'; form.elements['minwage_special_amount'].value = '1090'; setYear('auto');
+      const a = resolveAppliedMinWage(), shown = (document.getElementById('minWageApplied') || {}).textContent || '';
+      const ok = !!a && a.amount === 1090 && !a.isSpecial && a.kind === '地域別（入力された特定最低賃金と同額のため地域別を適用）' && shown.indexOf('高いため') < 0 && shown.indexOf('同額のため') >= 0;
+      return { ok, detail: `${a && a.amount}円／${a && a.kind}／画面に「高いため」=${shown.indexOf('高いため') >= 0}` };
+    }
+    if (id === 'R15') {
+      // 選択欄・文言（所内版・顧問先版 ?public=1 の両方で同じ。PUBLIC_MODE で消したり変えたりしない）
+      setYear('auto');
+      const lab = document.querySelector('label[for="minwageYear"]'), o = opts(), t0 = sel.options[0].textContent, t1 = sel.options[1] ? sel.options[1].textContent : '', t2 = sel.options[2] ? sel.options[2].textContent : '';
+      const ok = !!lab && lab.textContent === '判定に使う最低賃金' && !sel.disabled && !sel.closest('.hidden') && sel.getAttribute('aria-describedby') === 'minWageApplied'
+        && document.getElementById('minWageApplied').getAttribute('aria-live') === 'polite'
+        && o.join(',') === 'auto,令和8年度,令和7年度' && t0 === '自動（発効前を含む最新の改定額で判定）'
+        && t1 === '令和8年度 1,090円（' + fmtDate('2026-12-01') + '発効予定・答申段階）' && t2 === '令和7年度 1,031円（現在有効）';
+      return { ok, detail: `PUBLIC_MODE=${PUBLIC_MODE}／ラベル=${lab && lab.textContent}／選択肢=${[t0, t1, t2].join('｜')}` };
+    }
+    if (id === 'R13') {
+      // 2人目以降モード：「➡ 追加して次の人へ」は minwage_year をクリアしない（クリア対象の一覧に無い）＝前の人の選択が残る。
+      // ⑦の引き継ぎ一覧に「判定に使う最低賃金」として出ることを見る（名簿・確認ダイアログを動かさないため、モードだけを入れる）
+      setYear('令和7年度'); const saveNp = NEXT_PERSON_MODE, saveOpen = NP_OPEN;
+      try {
+        npSetMode(true, 'テスト'); render(); const v = sel.value;
+        const li = [...document.querySelectorAll('#npCheck .np-list li')].find(x => /^判定に使う最低賃金：/.test(x.textContent));
+        const t = li ? li.textContent : '';
+        const clearsYear = /'minwage_year'/.test(String(rosterAddNext));
+        const ok = v === '令和7年度' && t.indexOf('岩手県・令和7年度 1,031円') >= 0 && !clearsYear;
+        return { ok, detail: `選択=${v}／⑦の行=${t.slice(0, 80) || 'なし'}／次の人へで消す欄に含む=${clearsYear}` };
+      } finally { npSetMode(false); NEXT_PERSON_MODE = saveNp; NP_OPEN = saveOpen; }   // 先にモードを切り、そのあと実行前のモード（2人目以降なら ON のまま）を戻す
+    }
+    if (id === 'R7') {
+      setYear('令和7年度'); const st = serializeState();
+      setPref('宮城県'); setYear('auto');
+      restoreState(st); const back = sel.value, a = resolveAppliedMinWage();
+      const old = serializeState(); delete old.fields.minwage_year; restoreState(old); const legacy = sel.value;
+      const ok = st.fields.minwage_year === '令和7年度' && back === '令和7年度' && !!a && a.amount === 1031 && legacy === 'auto';
+      return { ok, detail: `保存値=${st.fields.minwage_year} 復元後=${back}（${a && a.amount}円） 旧データ=${legacy}` };
+    }
+    if (id === 'R8') {
+      setYear('auto');
+      const shown = (document.getElementById('minWageApplied') || {}).textContent || '';
+      const msgs = [].concat(...['reds', 'yellows', 'oks'].map(k => (legalChecks(updateVisibility())[k] || [])));
+      const note = '発効前の改定後の額で判定しています（本日時点は令和7年度 1,031円）';
+      const mwMsg = msgs.find(t => t.indexOf('岩手県の最低賃金') >= 0) || '';
+      setYear('令和7年度');
+      const shown7 = (document.getElementById('minWageApplied') || {}).textContent || '';
+      const ok = shown.indexOf(note) >= 0 && shown.indexOf('令和8年度') >= 0 && mwMsg.indexOf(note) >= 0
+        && mwMsg.indexOf('1,090円（令和8年度・' + fmtDate('2026-12-01') + '発効予定／') >= 0 && shown7.indexOf('発効前') < 0;
+      return { ok, detail: `画面=${shown.slice(0, 120)}…／判定=${mwMsg.slice(0, 160)}…／令和7年度選択時に併記なし=${shown7.indexOf('発効前') < 0}` };
+    }
+    return { ok: false, detail: '未定義のケース' };
+  } finally { MW_HOOKS.today = saveToday; SELFTEST_ACTIVE = saveAct; loadSample(); NEXT_PERSON_MODE = saveNpAll; NP_OPEN = saveOpenAll; NP_OT_INHERIT = saveInhAll; render(); }
+}
 function stUiCases() {
   return [
-    { id: 'U1', title: '［ステップ化］#form 内の name 集合と type が改修前（固定点151要素）と同じ＝保存JSONの互換', run: () => {
+    { id: 'U1', title: '［ステップ化］#form 内の name 集合と type が固定点（152要素。2026-10-21 に minwage_year を追加）と同じ＝保存JSONの互換', run: () => {
         const now = stFormNameTypes(), base = UI_BASELINE_NAME_TYPES.split('|');
         const cnt = a => a.reduce((m, x) => (m[x] = (m[x] || 0) + 1, m), {});
         const cn = cnt(now), cb = cnt(base);
         const added = Object.keys(cn).filter(k => (cn[k] || 0) > (cb[k] || 0)), removed = Object.keys(cb).filter(k => (cb[k] || 0) > (cn[k] || 0));
-        return { ok: now.join('|') === UI_BASELINE_NAME_TYPES && base.length === 151,
+        return { ok: now.join('|') === UI_BASELINE_NAME_TYPES && base.length === 152,
                  detail: `現在=${now.length}要素 改修前=${base.length}要素 増=${added.join(',') || 'なし'} 減=${removed.join(',') || 'なし'}` };
       } },
     { id: 'U2', title: '［ステップ化］requiredGaps の全ラベル（27件）と legalChecks の全メッセージが STEP_MAP に対応し、振り分け先の手順が期待値表と一致', run: () => {
@@ -5973,10 +6384,20 @@ function stUiCases() {
     { id: 'U3', title: '［ステップ化］画面専用の部品（data-ui-only・手順レール）に name が無く、_ui 始まりの name も無い', run: () => {
         const bad = [...form.elements].filter(e => e.name && (/^_ui/.test(e.name) || e.closest('[data-ui-only]')));
         const outside = [...document.querySelectorAll('[data-ui-only][name], [data-ui-only] [name]')];
-        const rail = document.getElementById('stepRail'), foot = document.querySelector('#form .step-foot');
+        const rail = document.getElementById('stepRail'), foot = document.getElementById('stepFoot');
         const ui = document.querySelectorAll('[data-ui-only]').length;
         return { ok: bad.length === 0 && outside.length === 0 && !!rail && !rail.closest('#form') && !!foot && ui > 0,
                  detail: `name付き画面専用部品=${bad.length + outside.length}件（${bad.concat(outside).map(e => e.name).join(',') || 'なし'}）／画面専用部品=${ui}箇所／レールは#formの外=${!!rail && !rail.closest('#form')}` };
+      } },
+    { id: 'U14', title: '［帯の補正］他のタブを表示中（帯が非表示）は、フォーカスしても帯の裏から出すスクロールをしない（狭い画面の固定配置を再現して確認）', run: () => {
+        const f = document.getElementById('stepFoot'), orig = window.scrollBy, savePos = f.style.position; let calls = 0;
+        try {
+          switchMode('calc'); f.style.position = 'fixed';   // 狭い画面と同じ固定配置にする（どの画面幅で実行しても同じ条件で確かめる）
+          window.scrollBy = function(){ calls++; return orig.apply(window, arguments); };
+          const t = document.getElementById('calcPref'); t.focus(); t.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+          const hidden = f.getClientRects().length === 0;
+          return { ok: hidden && calls === 0, detail: `帯が非表示=${hidden} 補正のスクロール=${calls}回` };
+        } finally { window.scrollBy = orig; f.style.position = savePos; switchMode('create'); }
       } },
     { id: 'U4', title: '［ステップ化P3］顧問先版では派遣・日雇のカードと出来高・年俸のボタンを作らず、押されても入らない（所内版は全部出る）', run: () => stPublicProxyCheck() },
     { id: 'U5', title: '［ステップ化P3］固定残業「支給しない」で4欄が空・ot_style=split・自動計算OFFになり、書面に固定残業が出ない（区分別・一体型）', run: () => stOtPayCheck() },
@@ -5985,6 +6406,7 @@ function stUiCases() {
     { id: 'U9', title: '［ステップ化P5］書面の行をクリック／Enter → 対応する手順・欄へ移動（期待値表16件）・入力中の欄の行をハイライト・書面HTMLは不変', run: () => stPreviewNavCheck() },
     { id: 'U10', title: '［ステップ化P5］狭い画面のドロワーを閉じても estimatePages が変わらない・印刷CSSで開閉ボタンとハイライトが消え #preview が出る', run: () => stDrawerCheck() },
     { id: 'U11', title: '［ステップ化P5］①の並び（書類の種類→働き方カード→🔰使い方）と、使い方の折りたたみが初期は閉じていること', run: () => stUsageGuideCheck() },
+    { id: 'U13', title: '［入力の安定］変換中（IME）はその行の DOM を変えない（作成・試算）・同じ値で書き換えない・金額の全角→半角は blur・空の手当で行が消えない／変換中でも出力は最新（MF-1）・全角の金額でも計算は半角（MF-2）', run: () => stImeCheck() },
     { id: 'U12', title: '［整列］1440px 相当の入力列で ①〜⑦ の横並び行（2列・3列・手当・始業終業・休憩・解雇/その他・本人カードの日付）の top 差・高さ差が 2px 以下／プレビュー縮小で estimatePages 不変・印刷で解除', run: () => stAlignCheck() },
     { id: 'U8', title: '［I-6 画面状態台帳］前の人が支給していた2人目：一括出力6経路・全部見直すの直後も 5-3 が開き⑦に赤字／誤検知なし／名簿内の整合チェック', run: () => stI6Check() }
   ];
@@ -6082,10 +6504,50 @@ function stDrawerCheck(){
     setCls(true, false); const closed = estimatePages(); const hdrClosed = !!document.getElementById('mpHeader') === (closed >= 2);
     setCls(true, true); const open = estimatePages();
     L.eq('ドロワー閉・開でも estimatePages が広い画面と同じ（2枚以上の書面）', [sheets >= 2, wide >= 2, closed, open, hdrClosed], [true, true, wide, wide, true], R4);
-    // 広い画面でも狭い画面でも、手順フッター（次へ・戻る）がスクロールなしで画面内に収まる
-    setCls(false, false); pvApplyWidth(); window.scrollTo(0, 0); goStep(1, { focus: false });
-    { const nb = document.getElementById('stepNext').getBoundingClientRect(), pb = document.getElementById('stepPrev').getBoundingClientRect();
-      L.eq('スクロールなしで「次へ」「戻る」の下端が画面の高さ以下', [nb.height > 0, nb.bottom <= window.innerHeight, pb.bottom <= window.innerHeight], [true, true, true], '統括指示（1440px で次へが画面外に出る件）'); }
+    // 手順の帯は入力欄（#form）の外に置き、常に画面内に見えて、入力欄と重ならない
+    //（広い画面＝入力列の最下部・#form の見える範囲より下／狭い画面＝画面の下端に固定＋帯の高さ分の下余白）。見出しの横の小さな戻る・次へはスクロールなしで画面内
+    setCls(false, false); pvApplyWidth();
+    { const SRC2 = '統括指示（帯を常に一番下に固定・入力欄と重ねない件・2026-10-21／帯が入力欄に被る件・2026-09-30）', foot = [], mini = [];
+      const narrowMq = !!(window.matchMedia && window.matchMedia('(max-width:900px)').matches);
+      for (let n = 1; n <= STEP_COUNT; n++) {
+        window.scrollTo(0, document.documentElement.scrollHeight); goStep(n);   // 利用者の操作（下の帯などから移動）と同じ呼び方で、移動した直後の画面を測る
+        const f = document.getElementById('stepFoot'), sec = document.getElementById('step' + n);
+        const h = sec.querySelector('.step-head'), bs = [...h.querySelectorAll('.step-mini')].filter(b => !b.classList.contains('hidden'));
+        mini.push(bs.length >= 1 && bs.every(b => { const r = b.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.bottom <= window.innerHeight; }));
+        pvFootHeight();
+        // ① 帯が画面内に見えている
+        const r0 = f.getBoundingClientRect(), pos = getComputedStyle(f).position;
+        const vis = r0.width > 0 && r0.height > 0 && r0.top >= 0 && r0.bottom <= window.innerHeight + 1;
+        // ② 置き方：広い画面＝固定配置でなく #form の外・#form の見える範囲の下端が帯の上端より上／狭い画面＝画面の下端に固定
+        const place = narrowMq ? (pos === 'fixed' && Math.abs(r0.bottom - window.innerHeight) <= 1 && !f.closest('#form'))
+                               : (pos === 'static' && !f.closest('#form') && form.getBoundingClientRect().bottom <= r0.top + 1);
+        // ③ 入力欄の最後までスクロールすると、表示中の手順の内容の末尾が帯より上に出る（帯の裏に残らない）
+        if (narrowMq) window.scrollTo(0, document.documentElement.scrollHeight); else form.scrollTop = form.scrollHeight;
+        const endOk = sec.getBoundingClientRect().bottom <= f.getBoundingClientRect().top + 1;
+        // ④ 先頭に戻してから最後の欄へフォーカス（Tab で移動したのと同じ）しても、その欄が帯の裏に隠れない
+        window.scrollTo(0, 0); form.scrollTop = 0;
+        const fe = [...sec.querySelectorAll('input:not([type=hidden]),select,textarea,button')].filter(e => !e.disabled && e.tabIndex >= 0 && e.getClientRects().length);   // Tab で届く欄だけ（tabindex=-1 の代理 select 等は除く）
+        const lastEl = fe[fe.length - 1]; let tabOk = !!lastEl;
+        if (lastEl) { lastEl.focus(); if (!document.hasFocus()) lastEl.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));   // 画面が裏にあるとfocusin イベントが起きないため、利用者の Tab と同じイベントを起こす
+          const lr = lastEl.getBoundingClientRect(); tabOk = document.activeElement === lastEl && lr.top >= 0 && lr.bottom <= f.getBoundingClientRect().top + 1; }
+        foot.push([vis, place, endOk, tabOk]);
+      }
+      window.scrollTo(0, 0); form.scrollTop = 0;
+      L.eq('手順の帯は常に画面内・#form の外（広い画面＝入力列の最下部／狭い画面＝下端に固定）で、最後までスクロール・最後の欄へのフォーカスでも内容が帯の裏に残らない（①〜⑦。[見える, 置き方, 末尾, フォーカス]）', foot, foot.map(() => [true, true, true, true]), SRC2);
+      L.eq('手順を移動した直後、見出しの横の「← 戻る／次へ →」が画面内（①〜⑦）', mini, mini.map(() => true), SRC2);
+      // 行き先：通常と2人目モード（②⑤⑦）で、見出しの横と下の帯が同じ
+      const saveNp = NEXT_PERSON_MODE, saveOpen = NP_OPEN, same = [];
+      const tgt = n => { goStep(n, { focus: false }); const h = document.querySelector('#step' + n + ' .step-head');
+        const mp = h.querySelector('.step-mini-prev'), mn = h.querySelector('.step-mini-next'), fp = document.getElementById('stepPrev'), fn = document.getElementById('stepNext');
+        const lab = t => { const m = /（(.+)）/.exec(t || ''); return m ? m[1] : null; };
+        return [n, lab(mp.disabled ? '' : mp.title), lab(fp.disabled ? '' : fp.title), lab(mn.classList.contains('hidden') ? '' : mn.title), lab(fn.classList.contains('hidden') ? '' : fn.textContent)]; };
+      try {
+        [1, 4, 7].forEach(n => { const t = tgt(n); same.push(t[1] === t[2] && t[3] === t[4]); });
+        npSetMode(true, 'テスト');
+        [2, 5, 7].forEach(n => { const t = tgt(n); same.push(t[1] === t[2] && t[3] === t[4]); });
+        goStep(2, { focus: false }); document.querySelector('#step2 .step-mini-next').click(); same.push(CUR_STEP === 5);
+      } finally { NEXT_PERSON_MODE = saveNp; NP_OPEN = saveOpen; }
+      L.eq('行き先（title）が見出しの横と下の帯で同じ（通常①④⑦・2人目②⑤⑦）・2人目で②の「次へ →」→⑤', same, same.map(() => true), SRC2); }
     // 印刷CSSを画面に写して確かめる（ドロワー閉のまま）
     setCls(true, false); form.elements['job_now'].focus(); pvHighlight();
     const rules = []; [...document.styleSheets].forEach(ss => { try { [...ss.cssRules].forEach(r => { if (r instanceof CSSMediaRule && /print/.test(r.conditionText || r.media.mediaText)) [...r.cssRules].forEach(x => { if (x.selectorText) rules.push(x.cssText); }); }); } catch (e) {} });
@@ -6095,11 +6557,11 @@ function stDrawerCheck(){
     L.eq('印刷時：ドロワー閉でも #preview が出る（visibility・transform・position）', [cs2.visibility, cs2.transform, cs2.position, cs2.display !== 'none'], ['visible', 'none', 'static', true], R4);
     L.eq('印刷時：開閉ボタンは出ない・ハイライトは消える', [tg ? getComputedStyle(tg).display : 'none', hlTd ? getComputedStyle(hlTd).boxShadow : 'none'], ['none', 'none'], '設計書 §5 P5');
     sim.remove(); sim = null;
-    // 開閉ボタンと「次へ」が重ならない（この画面の幅で、ドロワー表示にして実測）
-    setCls(true, false); goStep(1, { focus: false }); pvFootHeight();
-    const a = document.getElementById('pvToggle').getBoundingClientRect(), n = document.getElementById('stepNext').getBoundingClientRect();
+    // 開閉ボタンと見出しの横の「次へ →」が重ならない（この画面の幅で、ドロワー表示にして実測）
+    setCls(true, false); window.scrollTo(0, 0); goStep(1); pvFootHeight();   // 利用者が手順を移動した直後の画面で測る
+    const a = document.getElementById('pvToggle').getBoundingClientRect(), n = document.querySelector('#step1 .step-mini-next').getBoundingClientRect();
     const overlap = !(a.right <= n.left || n.right <= a.left || a.bottom <= n.top || n.bottom <= a.top);
-    L.eq('ドロワー閉：「📄 プレビュー」と「次へ」の矩形が重ならない', [a.width > 0, n.width > 0, overlap], [true, true, false], 'ui Must fix（P5）');
+    L.eq('ドロワー閉：「📄 プレビュー」と見出しの横の「次へ →」の矩形が重ならない', [a.width > 0, n.width > 0, overlap], [true, true, false], 'ui Must fix（P5）');
     // 開いたら外側を inert・閉じるボタンにフォーカス／閉じたら inert を外す
     pvDrawer(true);
     const inertOpen = PV_INERT_SEL.map(s => !!document.querySelector(s) && document.querySelector(s).hasAttribute('inert'));
@@ -6129,7 +6591,7 @@ function stUsageGuideCheck(){
   return stLedgerResult(L);
 }
 // U12：横並び行の整列（同じ行に並ぶ入力欄の top の差・高さの差が 2px 以下）。入力列を 1440px 幅のときの幅（ST_ALIGN_W）にして ①〜⑦ を実測する
-const ST_ALIGN_W = 546;   // 1440px 幅での入力列の実測幅（.wrap の 196px minmax(460px,1fr) minmax(0,1.25fr)）
+const ST_ALIGN_W = 559;   // 1440px 幅での入力列の実測幅（.wrap の 196px minmax(460px,1fr) minmax(0,1.2fr)）
 const ALIGN_HOOKS = { noAlign: false };   // 負検証（N31）専用：2列・3列の行のサブグリッドを外す（改修前の「ラベルが折り返すと入力欄がずれる」状態）
 function stAlignScan(){
   const CTRL = 'input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select:not(.ui-vh-select),textarea,button.mini,button.a-kind,.seg-proxy .seg-btn';
@@ -6162,7 +6624,7 @@ function stAlignCheck(){
   let inj = null;
   try {
     if (SELFTEST_ACTIVE && ALIGN_HOOKS.noAlign) { inj = document.createElement('style'); inj.setAttribute('data-st-inject', ''); inj.textContent = '#form .row.two>*,#form .row.three>*{display:block !important}'; document.head.appendChild(inj); }
-    form.style.width = ST_ALIGN_W + 'px'; form.style.maxWidth = 'none';
+    form.style.width = ST_ALIGN_W + 'px'; form.style.maxWidth = 'none'; allowFitLayout();
     const set = (n, v) => { const el = form.elements[n]; if (el.length && el[0] && el[0].type === 'radio') { const r = [...el].find(x => x.value === v); if (r && !r.disabled) [...el].forEach(x => x.checked = (x === r)); } else el.value = v; };
     const emps = ['一般', '短時間', '派遣', '建設', '林業'], wages = ['月給', '時給', '日給', '出来高', '年俸'];
     const all = {}; let k = 0;
@@ -6201,8 +6663,229 @@ function stAlignCheck(){
     L.eq('縮小は @media screen の中だけ・@media print で transform:none !important', [media.some(m => /screen/.test(m[0]) && /scale/.test(m[1])), media.some(m => /print/.test(m[0]) && m[1] === 'none' && m[2] === 'important'), media.filter(m => /print/.test(m[0]) && /scale/.test(m[1])).length], [true, true, 0], '統括指示（印刷時は縮小を解除）');
   } finally {
     if (inj) inj.remove();
-    form.style.width = fw; form.style.maxWidth = fm;
+    form.style.width = fw; form.style.maxWidth = fm; allowFitLayout();
     restoreState(backup); goStep(cs, { focus: false }); pvApplyScale();
+  }
+  return stLedgerResult(L);
+}
+// U13：入力中の DOM の安定（統括指示 2026-09-30「手当の欄で文字がうまく入力できない」）
+//   変換中（compositionstart〜compositionend）にその行の DOM が変わらない／同じ値の描き直しで書き換えが起きない／
+//   金額の全角→半角は blur のとき／空の手当に1文字目を入れても行が消えずフォーカスが残る（container query の不具合の再発防止）
+const ST_DOM_ROW = '.row, .allow-row, .time-row, .break-row, .other-row, .pd-cell';
+function stDomRelevant(root){   // 入力欄そのもの・入力欄を含む行とその中・入力欄を含む祖先に起きた変化だけを数える
+  const CTL = 'input:not([type=hidden]),select,textarea';
+  return m => { const t = m.target.nodeType === 1 ? m.target : m.target.parentElement; if (!t || !root.contains(t)) return false;
+    if (t.matches(CTL)) return true; const r = t.closest(ST_DOM_ROW); if (r && r.querySelector(CTL)) return true; return !!t.querySelector(CTL); };
+}
+function stDomDesc(m){ const t = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+  return m.type + ':' + (m.attributeName || '') + ':' + (t.id ? '#' + t.id : t.tagName + '.' + String(t.className).split(' ').slice(0, 2).join('.')); }
+function stImeCheck(){
+  const L = stLedger(), SRC = '統括指示（手当の欄で文字がうまく入力できない・2026-09-30）';
+  const backup = serializeState(), cs = CUR_STEP;
+  const vis = e => !!(e && e.getClientRects().length);
+  const comp = (el, type, data) => el.dispatchEvent(new CompositionEvent(type, { bubbles: true, data: data || '' }));
+  const cinput = (el, v, d) => { el.value = v; el.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true, data: d, inputType: 'insertCompositionText' })); };
+  try {
+    // 1) 変換中は、その欄の行の DOM が変わらない（①〜⑦ の表示中の文字入力欄すべて）・欄は見えたままでフォーカスも残る
+    loadSample(); render();
+    const bad = []; let tested = 0;
+    for (let n = 1; n <= 7; n++) {
+      goStep(n, { focus: false });
+      const els = [...form.querySelectorAll('section.step:not(.step-off) input[type=text], section.step:not(.step-off) textarea')].filter(e => vis(e) && !e.readOnly && !e.disabled);
+      els.forEach(el => {
+        const row = el.closest(ST_DOM_ROW) || el.parentElement, v0 = el.value;
+        el.focus();
+        const mo = new MutationObserver(() => {}); mo.observe(row, { subtree: true, childList: true, attributes: true, characterData: true });
+        comp(el, 'compositionstart'); cinput(el, v0 + 'ｔ', 'ｔ'); cinput(el, v0 + 'テ', 'テ');
+        const recs = mo.takeRecords(); mo.disconnect();
+        const ok = recs.length === 0 && vis(row) && document.activeElement === el;
+        comp(el, 'compositionend', 'テ');
+        if (!ok) bad.push('手順' + n + ' ' + (el.name || el.className) + '（変化' + recs.length + '件' + (recs.length ? '：' + stDomDesc(recs[0]) : '') + (document.activeElement === el ? '' : '・フォーカスが外れた') + '）');
+        el.value = v0; render(); tested++;
+      });
+    }
+    L.eq('変換中にその行の DOM が変わった欄（①〜⑦ の文字入力欄すべて）', [bad, tested >= 60], [[], true], SRC);
+    // 2) 変換中は描き直しを止め、compositionend で1回だけ描き直す（書面に確定後の値が出る）
+    {
+      goStep(2, { focus: false }); const el = form.elements['employee_name'], v0 = el.value; el.focus();
+      let calls = 0; const _r = window.render; window.render = function () { calls++; return _r.apply(this, arguments); };
+      try {
+        comp(el, 'compositionstart'); cinput(el, v0 + '変換中', '変換中');
+        const during = LAST_SHEETS.join('').indexOf(v0 + '変換中') >= 0;
+        comp(el, 'compositionend', '変換中');
+        const after = LAST_SHEETS.join('').indexOf(v0 + '変換中') >= 0;
+        L.eq('変換中は書面を描き直さず、compositionend で1回だけ描き直す', [during, after, calls, IME_COMPOSING], [false, true, 1, false], SRC);   // calls＝compositionend の1回だけ（input は入口 renderFromInput で保留し render を呼ばない）
+      } finally { window.render = _r; el.value = v0; render(); }
+    }
+    // 3) 同じ値で描き直しても、入力欄のまわり（行・その中・祖先）の文字・属性を書き換えない
+    {
+      const out = [];
+      [['記入例', () => loadSample()], ['空', () => clearFormAll()]].forEach(([nm, f]) => { f(); render();
+        for (let n = 1; n <= 7; n++) { goStep(n, { focus: false });
+          const mo = new MutationObserver(() => {}); mo.observe(form, { subtree: true, childList: true, attributes: true, characterData: true });
+          render(); const recs = mo.takeRecords().filter(stDomRelevant(form)); mo.disconnect();
+          recs.forEach(m => out.push(nm + ' 手順' + n + ' ' + stDomDesc(m))); } });
+      L.eq('同じ値の render で、入力欄のまわりに起きた書き換え（記入例・空 × ①〜⑦）', [...new Set(out)].slice(0, 12), [], SRC);
+    }
+    // 4) 金額の全角→半角は入力中は行わず（値もカーソルも動かない）、blur で半角にする
+    {
+      loadSample(); render(); goStep(5, { focus: false });
+      const res = [];
+      [document.querySelector('#inAllowList .allow-row .a-amt'), form.elements['monthly_wage']].forEach(a => {
+        const r = a.closest('.allow-row'); if (r) r.querySelector('.a-unit').value = 'month';
+        a.focus(); a.value = '１２３'; a.setSelectionRange(1, 1); a.dispatchEvent(new InputEvent('input', { bubbles: true, data: '１', inputType: 'insertText' }));
+        const during = [a.value, a.selectionStart];
+        a.blur(); if (!document.hasFocus()) a.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));   // 画面にフォーカスが無い実行環境では blur のイベントが出ないため
+        res.push([during[0], during[1], a.value]);
+      });
+      L.eq('金額欄（手当・月額）に全角「１２３」：入力中は値・カーソルそのまま、blur で「123」', res, [['１２３', 1, '123'], ['１２３', 1, '123']], SRC);
+    }
+    // 5) 空の手当に1文字目を入れても、その行が消えずフォーカスが残る（container query の不具合の再発防止）
+    {
+      clearFormAll(); goStep(5, { focus: false });
+      const n = document.querySelector('#inAllowList .a-name'), row = n.closest('.allow-row'); n.focus();
+      n.value = 'y'; n.dispatchEvent(new InputEvent('input', { bubbles: true, data: 'y', inputType: 'insertText' }));
+      const cq = ['inAllowList', 'outAllowList', 'timeList'].map(id => getComputedStyle(document.getElementById(id)).containerType);
+      L.eq('空の手当に1文字目：行のレイアウトが残り、フォーカスも手当名のまま／リストに container-type なし', [vis(row), document.activeElement === n, cq], [true, true, ['normal', 'normal', 'normal']], SRC);
+      n.blur();
+    }
+    // 6) 賃金試算タブ：同じ値の calcRender で、入力欄のまわりの書き換えが起きない
+    {
+      const cf = document.getElementById('calcForm'); calcRender();
+      const mo = new MutationObserver(() => {}); mo.observe(cf, { subtree: true, childList: true, attributes: true, characterData: true });
+      calcRender(); const recs = mo.takeRecords().filter(stDomRelevant(cf)); mo.disconnect();
+      L.eq('賃金試算タブ：同じ値の calcRender で入力欄のまわりの書き換え', [...new Set(recs.map(stDomDesc))].slice(0, 12), [], SRC);
+    }
+    // 7) MF-1：変換中の状態が残っていても、プログラムから呼ぶ描き直し（restoreState・Word 出力・一括の個別出力）は必ずその人の書面になる
+    stWithRosterSandbox(() => {
+      const _st = window.setTimeout; const docs = [];
+      download = (fn, content) => { docs.push(String(content)); };
+      loadSample(); render(); rosterCommit();
+      form.elements['employee_name'].value = '乙野　花子'; form.elements['monthly_wage'].value = '230000'; render(); rosterCommit();
+      const stA = ROSTER[0].state, stB = ROSTER[1].state;
+      restoreState(stA); const refA = LAST_SHEETS.join('|'); restoreState(stB); const refB = LAST_SHEETS.join('|');
+      const runBulk = () => { docs.length = 0; window.setTimeout = fn => { fn(); return 0; }; try { bulkExportEach('doc'); } finally { window.setTimeout = _st; } return docs.slice(); };
+      const refDocs = runBulk();
+      const el = form.elements['office_name']; comp(el, 'compositionstart');   // 変換中（compositionend が来ない）
+      try {
+        restoreState(stA); const gotA = LAST_SHEETS.join('|');
+        restoreState(stB); const gotB = LAST_SHEETS.join('|');
+        docs.length = 0; exportWord(); const w = docs[0] || '';
+        const gotDocs = runBulk();
+        L.eq('変換中の状態が残っていても：restoreState の書面・Word 出力・一括の個別出力（2人分）が、その人の書面と一致', [gotA === refA, gotB === refB, w.indexOf('乙野') >= 0, gotDocs.length === 2 && gotDocs[0] === refDocs[0] && gotDocs[1] === refDocs[1], gotDocs[1] ? gotDocs[1].indexOf('乙野') >= 0 && gotDocs[1].indexOf('田中') < 0 : false], [true, true, true, true, true], '統括指示（correctness MF-1）');
+      } finally { comp(el, 'compositionend'); }
+    });
+    // 8) MF-1：compositionend が来ないまま変換中の印が残っても、focusout で解いて保留分を描き直す（作成タブ・試算タブ）
+    {
+      loadSample(); render(); goStep(2, { focus: false });
+      const el = form.elements['employee_name']; el.focus();
+      comp(el, 'compositionstart'); cinput(el, '丙山　一郎', '丙山');
+      const held = LAST_SHEETS.join('').indexOf('丙山') >= 0;
+      form.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));   // 別の欄へ移る／画面を離れる
+      const after = LAST_SHEETS.join('').indexOf('丙山') >= 0;
+      switchMode('calc'); const cf = document.getElementById('calcForm'), cb = cf.elements['calc_base'];
+      cb.value = '210000'; calcRender(); const lc0 = LAST_CALC.base;
+      comp(cb, 'compositionstart'); cb.value = '250000'; cb.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true, data: '5', inputType: 'insertCompositionText' }));
+      const cHeld = LAST_CALC.base;
+      cf.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+      const cAfter = LAST_CALC.base;
+      comp(cb, 'compositionstart'); cb.value = '260000'; cb.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true, data: '6', inputType: 'insertCompositionText' }));
+      const fresh = (() => { const _t = window.alert, _c = window.confirm; let base = null; window.alert = () => {}; window.confirm = () => false; const _p = window.print; window.print = () => {}; try { printCalcSheet(); base = LAST_CALC.base; } finally { window.print = _p; window.alert = _t; window.confirm = _c; window.dispatchEvent(new Event('afterprint')); } return base; })();
+      comp(cb, 'compositionend'); cb.value = ''; calcRender(); switchMode('create');
+      L.eq('focusout で変換中の印を解き保留分を描き直す（作成・試算）・試算書は使う直前に計算し直す', [held, after, IME_COMPOSING, lc0, cHeld, cAfter, fresh], [false, true, false, 210000, 210000, 250000, 260000], '統括指示（correctness MF-1）');
+      el.value = ''; render();
+    }
+    // 9) MF-2：金額に全角を確定してフォーカスしたままでも、書面・合計・ブロックは半角で入れたときと同じ。beforeprint の後は欄も半角
+    {
+      const setAll = (z, focusSel) => { loadSample(); form.elements['wage_type'].value = '月給'; form.elements['fixed_ot_auto'].checked = true; render(); goStep(5, { focus: false });
+        const a = document.querySelector('#inAllowList .allow-row .a-amt'); a.closest('.allow-row').querySelector('.a-unit').value = 'month';
+        const fe = focusSel === 'amt' ? a : form.elements['monthly_wage']; if (focusSel) fe.focus();
+        form.elements['monthly_wage'].value = z ? '２０００００' : '200000'; form.elements['fixed_ot_hours'].value = z ? '２０' : '20'; a.value = z ? '１５０００' : '15000';
+        render(); return fe; };
+      setAll(false, null); const refS = LAST_SHEETS.join('|'), refT = JSON.stringify(wageTotals()), refB = JSON.stringify(buildBlocks(updateVisibility()));
+      const got = [];
+      ['wage', 'amt'].forEach(k => {
+        const fe = setAll(true, k);
+        got.push([LAST_SHEETS.join('|') === refS, JSON.stringify(wageTotals()) === refT, JSON.stringify(buildBlocks(updateVisibility())) === refB, fe.value]);
+        window.dispatchEvent(new Event('beforeprint'));
+        got.push([fe.value, LAST_SHEETS.join('|') === refS]);
+        fe.blur();
+      });
+      L.eq('全角の金額でフォーカスしたまま（月額・手当の金額）：書面・合計・ブロックが半角と同じ（欄はまだ全角）／beforeprint で欄も半角・書面は同じ', got,
+        [[true, true, true, '２０００００'], ['200000', true], [true, true, true, '１５０００'], ['15000', true]], '統括指示（correctness MF-2）');
+    }
+    // 10) 試算タブ：手当名・金額・変更シミュレーションの欄も、変換中はその行の DOM が変わらない（qa）
+    {
+      switchMode('calc'); const cf = document.getElementById('calcForm');
+      if (!cf.querySelector('#calcAllowList .allow-row')) { try { calcAddAllowRow(); } catch (e) {} }
+      const modeEl = [...cf.elements['calc_mode']].find(r => r.value === 'diff');
+      const sweep = () => { const out = []; let n = 0;
+        [...cf.querySelectorAll('input[type=text]')].filter(e => vis(e) && !e.readOnly && !e.disabled).forEach(el => {
+          const row = el.closest('.allow-row') || el.parentElement, v0 = el.value; el.focus();
+          const mo = new MutationObserver(() => {}); mo.observe(row, { subtree: true, childList: true, attributes: true, characterData: true });
+          comp(el, 'compositionstart'); el.value = v0 + 'テ'; el.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true, data: 'テ', inputType: 'insertCompositionText' }));
+          const recs = mo.takeRecords(); mo.disconnect(); comp(el, 'compositionend', 'テ');
+          if (recs.length || document.activeElement !== el) out.push((el.name || el.className) + '（' + recs.length + '件）');
+          el.value = v0; el.dispatchEvent(new Event('input', { bubbles: true })); n++; });
+        return [out, n]; };
+      const dets = [...cf.querySelectorAll('details')].map(d => [d, d.open]); dets.forEach(([d]) => { d.open = true; });   // 折りたたみの中の欄も測る
+      const [b1, n1] = sweep();
+      let b2 = [], n2 = 0;
+      if (modeEl) { modeEl.checked = true; calcRender(); { const _c = window.confirm; window.confirm = () => true; try { calcDiffCopy(); } catch (e) {} finally { window.confirm = _c; } } calcRender(); [b2, n2] = sweep(); [...cf.elements['calc_mode']].find(r => r.value === 'forward').checked = true; calcRender(); }
+      dets.forEach(([d, o]) => { d.open = o; }); switchMode('create');
+      L.eq('試算タブ（手当名・金額・変更シミュレーション）：変換中にその行の DOM が変わった欄', [b1, b2, n1 >= 3, n2 >= 3], [[], [], true, true], 'qa（テストの漏れ）');
+    }
+    // 11) Ctrl+P の beforeprint は、ツールの印刷中（printNow）・一括印刷の組み立て中は何もしない（qa）
+    {
+      const _pr = window.print, _n = window.normalizeAllNumeric, _r = window.render; let nN = 0, nR = 0;
+      window.normalizeAllNumeric = function () { nN++; return _n.apply(this, arguments); }; window.render = function () { nR++; return _r.apply(this, arguments); };
+      let res1;
+      try {
+        window.print = () => { window.dispatchEvent(new Event('beforeprint')); };   // ブラウザが印刷の直前に beforeprint を出す
+        printNow(); const during = [nN, nR, PRINT_BY_TOOL];
+        window.dispatchEvent(new Event('afterprint'));
+        res1 = [during, PRINT_BY_TOOL];
+      } finally { window.print = _pr; window.normalizeAllNumeric = _n; window.render = _r; printByToolReset(); }
+      const res2 = stWithRosterSandbox(() => {
+        const _st = window.setTimeout; let at = null;
+        loadSample(); render(); rosterCommit(); form.elements['employee_name'].value = '乙野　花子'; render(); rosterCommit();
+        let want = 0; ROSTER.forEach(e => { restoreState(e.state); want += LAST_SHEETS.length; });
+        window.print = () => { const before = document.querySelectorAll('#preview .sheet').length;
+          PRINT_BY_TOOL = false;   // 印の戻りが早いブラウザを想定（BULK_PRINTING だけで守れること）
+          window.dispatchEvent(new Event('beforeprint'));
+          at = [before, document.querySelectorAll('#preview .sheet').length, BULK_PRINTING]; };
+        window.setTimeout = fn => { fn(); return 0; };
+        try { bulkPrint(); } finally { window.setTimeout = _st; window.print = _pr; printByToolReset(); }
+        return [want >= 2, at && at[0] === want, at && at[1] === want, at && at[2], BULK_PRINTING];
+      });
+      L.eq('printNow 中の beforeprint で normalizeAllNumeric・render が0回／afterprint で印が戻る／一括印刷の組み立て中（印が早く戻っても）#preview の書面は全員分のまま',
+        [res1, res2], [[[0, 0, true], false], [true, true, true, true, false]], 'qa（再レビュー）・correctness Should fix');
+    }
+    // 12) 代表的な数値の欄：全角で入れても（その欄にいるままでも）半角と同じ結果（作成タブ・試算タブ・変更シミュレーション）
+    {
+      const Z = s => s.replace(/[0-9]/g, c => String.fromCharCode(c.charCodeAt(0) + 0xFEE0)).replace(/\./g, '．');
+      const snap = () => JSON.stringify([LAST_SHEETS, wageTotals(), (() => { const lc = legalChecks(updateVisibility()); return [lc.blocks, lc.reds, lc.yellows, lc.oks]; })()]);
+      const cases = [['月給', 'monthly_scheduled_hours', '173.75'], ['月給', 'ot_60under', '130'], ['月給', 'night_pct', '30'], ['月給', 'fixed_ot_hours', '25'],
+        ['月給', 'fixed_night_amount', '12000'], ['時給', 'hourly_wage', '1250'], ['月給', 'minwage_special_amount', '1200'], ['月給', 'normal_weekly_hours', '38.5']];
+      const bad = [];
+      cases.forEach(([wt, n, v]) => {
+        const prep = () => { loadSample(); form.elements['wage_type'].value = wt; if (n === 'minwage_special_amount') form.elements['minwage_kind'].value = '特定'; render(); goStep(stepOfEl(form.elements[n]) || 5, { focus: false }); };
+        prep(); form.elements[n].value = v; render(); const ref = snap();
+        prep(); const el = form.elements[n]; el.focus(); el.value = Z(v); render(); const got = snap(); el.blur();
+        if (got !== ref) bad.push(n);
+      });
+      switchMode('calc'); const cf = document.getElementById('calcForm');
+      const cset = (n, v) => { cf.elements[n].value = v; };
+      const calcSnap = z => { cset('calc_base', z ? Z('210000') : '210000'); cset('calc_sched', z ? Z('160.5') : '160.5'); cset('calc_ot_hours', z ? Z('15') : '15'); calcRender(); return JSON.stringify(LAST_CALC); };
+      const cRef = calcSnap(false), cGot = calcSnap(true);
+      cset('calc_base', ''); cset('calc_sched', ''); cset('calc_ot_hours', ''); calcRender(); switchMode('create');
+      const d = [calcDiffParseDelta('＋１０００', '200000') === calcDiffParseDelta('+1000', '200000'), calcDiffParseDelta('－５００', '200000') === calcDiffParseDelta('-500', '200000'), calcDiffParseDelta('+1000', '200000')];
+      L.eq('全角と半角で結果が同じ（作成タブ8欄：書面・合計・法令チェック／試算タブ：試算結果／変更シミュレーション：＋・－の差分）', [bad, cGot === cRef, d], [[], true, [true, true, '201000']], 'qa（数値の読み取りの棚卸し）');
+    }
+  } finally {
+    IME_COMPOSING = false; IME_PENDING.create = false; IME_PENDING.calc = false;
+    if (document.activeElement && form.contains(document.activeElement)) document.activeElement.blur();
+    restoreState(backup); goStep(cs, { focus: false });
   }
   return stLedgerResult(L);
 }
@@ -6211,7 +6894,7 @@ function stI6Check(){
     const L = stLedger(), LED = '設計書 I-6・§2-2-2', ORG = '原さん決定（2026-09-27）';
     const _st = window.setTimeout, _pr = window.print;
     const syncTimers = () => { window.setTimeout = (fn) => { fn(); return 0; }; window.print = () => {}; };   // bulkPrint・bulkExportEach の遅延処理をその場で走らせる
-    const realTimers = () => { window.setTimeout = _st; window.print = _pr; };
+    const realTimers = () => { window.setTimeout = _st; window.print = _pr; window.dispatchEvent(new Event('afterprint')); };
     download = () => {};
     const otRow = () => [...document.querySelectorAll('#npCheck .np-list li')].find(x => /^固定残業：/.test(x.textContent));
     const shown = () => ({ eff: otPayEffective(), splitOpen: !stFolded(document.getElementById('otSplit')),
@@ -6325,7 +7008,7 @@ function stNextPersonCheck(){
     L.eq('⑥の自己都合退職を空→未入力1', stRailText(6), '未入力1', ORG);
     form.elements['self_retire'].value = sr; fireChange(form.elements['self_retire']); L.eq('⑥を戻す→【引継】', stRailText(6), '【引継】', ORG);
     // ⑦の引き継ぎ一覧（記入例＝無期・固定残業あり（区分別・自動計算））
-    L.eq('⑦の一覧（無期）', stNpList(), ['入社日', '業務の内容（雇入れ直後）', '特記事項', '社会保険の被保険者区分', '固定残業'], S3 + '・' + ORG);
+    L.eq('⑦の一覧（無期）', stNpList(), ['入社日', '業務の内容（雇入れ直後）', '特記事項', '社会保険の被保険者区分', '判定に使う最低賃金', '固定残業'], S3 + '・' + ORG + '・correctness Should fix 3（2026-10-21）');
     L.eq('社保区分は「クリア済み（任意）」', /クリア済み（任意）/.test(document.querySelectorAll('#npCheck .np-list li')[3].textContent), true, S3);
     // 2) 2人目を有期にする：⑦が契約期間・通算起算日に切り替わる／②の日付代理で元の欄に入る
     const snapNp = () => ({ list: stNpList(), rail: [3, 4, 6].map(stRailText) });
@@ -6535,10 +7218,10 @@ function stNegativeCases() {
       } },
     { id: 'N6', title: 'calcResolveMinWage を arr[0] 固定に（発効日を無視する）',
       guards: '発効日判定の生存確認（県ごとに発効日がR8.10.1〜R8.12.2までばらつくため特に重要）',
-      breaks: ['R1', 'R3'],
+      breaks: ['R1', 'R3', 'R5'],   // R5＝作成タブで「本日時点の年度」を選んだときも発効日ベースで解決していること
       run: () => {
         MW_HOOKS.resolver = pref => MIN_WAGE_DATA[pref] ? MIN_WAGE_DATA[pref][0] : null;
-        const r = [{ id: 'R1', r: stRunOne('R1') }, { id: 'R3', r: stRunOne('R3') }];
+        const r = [{ id: 'R1', r: stRunOne('R1') }, { id: 'R3', r: stRunOne('R3') }, { id: 'R5', r: stRunOne('R5') }];
         MW_HOOKS.resolver = null;
         return r;
       } },
@@ -6727,7 +7410,19 @@ function stNegativeCases() {
     { id: 'N31', title: '［整列］2列・3列の行のセルをサブグリッドにしない（改修前：片方のラベルが2行に折り返すと入力欄が約22px下にずれる）',
       guards: '同じ行に並ぶ入力欄の高さがガタガタになり、どの欄がどのラベルか読み違えること（統括指示）',
       breaks: ['U12'],
-      run: () => { ALIGN_HOOKS.noAlign = true; const r = [{ id: 'U12', r: stRunOne('U12') }]; ALIGN_HOOKS.noAlign = false; return r; } }
+      run: () => { ALIGN_HOOKS.noAlign = true; const r = [{ id: 'U12', r: stRunOne('U12') }]; ALIGN_HOOKS.noAlign = false; return r; } },
+    { id: 'N32', title: '［入力の安定］変換中（IME）も render の描き直しを止めない（修正前の挙動）',
+      guards: '日本語の変換中に同じ行の DOM・値が書き換わり、変換が途中で確定・中断されて文字がうまく入らないこと（統括指示 2026-09-30）',
+      breaks: ['U13'],
+      run: () => { IME_HOOKS.noGuard = true; const r = [{ id: 'U13', r: stRunOne('U13') }]; IME_HOOKS.noGuard = false; return r; } },
+    { id: 'N33', title: '［MF-1］変換中の保留を render／calcRender の本体で行う（修正前の実装）',
+      guards: '一括出力・読込・名簿の編集・Word出力の途中で日本語入力を始めると、前の人の書面（古い LAST_SHEETS）のまま出力されること（correctness MF-1）',
+      breaks: ['U13'],
+      run: () => { IME_HOOKS.holdInBody = true; const r = [{ id: 'U13', r: stRunOne('U13') }]; IME_HOOKS.holdInBody = false; return r; } },
+    { id: 'N34', title: '［MF-2］金額・時間数を全角のまま読む（toHalf を通さない）',
+      guards: '金額欄にいるまま印刷・出力すると、基本給が「２０００００」（円なし）・固定残業が誤った額のまま書面に出ること（correctness MF-2）',
+      breaks: ['U13'],
+      run: () => { NUM_HOOKS.rawRead = true; const r = [{ id: 'U13', r: stRunOne('U13') }]; NUM_HOOKS.rawRead = false; return r; } }
   ];
 }
 
@@ -6770,7 +7465,7 @@ function runSelfTest() {
 
   // 改変が残っていないことの確認（後始末の検査）
   const clean = MW_HOOKS.allowMode === 'minwage' && MW_HOOKS.roundHourly === null
-    && MW_HOOKS.noHoursLevel === 'yellow' && MW_HOOKS.floatCompare === false && MW_HOOKS.resolver === null
+    && MW_HOOKS.noHoursLevel === 'yellow' && MW_HOOKS.floatCompare === false && MW_HOOKS.resolver === null && MW_HOOKS.today === null
     && MIN_WAGE_DATA['宮城県'][0].amount === 1098
     && L2_HOOKS.yumuRequired === true && L2_HOOKS.setsumeiBlankGuard === true
     && L2_HOOKS.actBaseDate === 'hire' && L2_HOOKS.shortByLabelOnly === false
@@ -6781,7 +7476,7 @@ function runSelfTest() {
     && LAST_SHEETS.join('\n').indexOf('ご利用にあたって') < 0   // 書面に免責文が残っていない
     && STEP_MAP.law.length === STEP_MAP_LAW_ROWS && !!STEP_MAP.gaps['解雇の事由'] && !document.querySelector('[data-st-inject]')
     && STEP_MAP.gaps['休日'].step === 4 && STEP_MAP.law.find(x => x.anchor === '#wageSub4').step === 5   // N18・N19・N20 の後始末
-    && P3_HOOKS.otKeepValues === false && P3_HOOKS.otLegacyNullOnly === false && P4_HOOKS.offOnReset === false && P4_HOOKS.otNullOnNext === false && P4_HOOKS.effectiveOtOnly === false && P4_HOOKS.clearInheritOnModeOff === false && P4_HOOKS.keepInheritOnSwitch === false && P4_HOOKS.clearInheritOnInput === false && P5_HOOKS.drawerDisplayNone === false && P5_HOOKS.noNpOpen === false && ALIGN_HOOKS.noAlign === false && MW_HOOKS.resolver === null && calcTodayISO === ST_TODAY_ORIGINAL;   // N21・U2 の差し替え口の後始末
+    && P3_HOOKS.otKeepValues === false && P3_HOOKS.otLegacyNullOnly === false && P4_HOOKS.offOnReset === false && P4_HOOKS.otNullOnNext === false && P4_HOOKS.effectiveOtOnly === false && P4_HOOKS.clearInheritOnModeOff === false && P4_HOOKS.keepInheritOnSwitch === false && P4_HOOKS.clearInheritOnInput === false && P5_HOOKS.drawerDisplayNone === false && P5_HOOKS.noNpOpen === false && ALIGN_HOOKS.noAlign === false && IME_HOOKS.noGuard === false && IME_HOOKS.holdInBody === false && NUM_HOOKS.rawRead === false && IME_COMPOSING === false && PRINT_BY_TOOL === false && BULK_PRINTING === false && MW_HOOKS.resolver === null && calcTodayISO === ST_TODAY_ORIGINAL;   // N21・U2 の差し替え口の後始末
   addRow('後始末', 'Z1', '負検証の改変がすべて元に戻っている（MW_HOOKS・L2_HOOKS・L3_HOOKS・L4_HOOKS・L5_HOOKS・MIN_WAGE_DATA・書面・STEP_MAP・注入した部品）', clean,
     `allowMode=${MW_HOOKS.allowMode} roundHourly=${MW_HOOKS.roundHourly} noHoursLevel=${MW_HOOKS.noHoursLevel} floatCompare=${MW_HOOKS.floatCompare} resolver=${MW_HOOKS.resolver} 宮城=${MIN_WAGE_DATA['宮城県'][0].amount}`
     + ` / yumuRequired=${L2_HOOKS.yumuRequired} setsumeiBlankGuard=${L2_HOOKS.setsumeiBlankGuard} actBaseDate=${L2_HOOKS.actBaseDate} shortByLabelOnly=${L2_HOOKS.shortByLabelOnly}`
@@ -6941,7 +7636,7 @@ function calcResolveRounding(){
   const cf=document.getElementById('calcForm');
   const pattern=cf.elements['calc_rnd_pattern']?cf.elements['calc_rnd_pattern'].value:'standard';
   const isCustom=pattern==='custom';
-  ['calc_rnd_s1','calc_rnd_s2','calc_rnd_s3_unit','calc_rnd_s3_dir'].forEach(n=>{ if(cf.elements[n]) cf.elements[n].disabled=!isCustom; });
+  ['calc_rnd_s1','calc_rnd_s2','calc_rnd_s3_unit','calc_rnd_s3_dir'].forEach(n=>{ const e=cf.elements[n]; if(e && e.disabled!==!isCustom) e.disabled=!isCustom; });
   if(isCustom){
     return {pattern, s1:cf.elements['calc_rnd_s1'].value||'none', s2:cf.elements['calc_rnd_s2'].value||'none',
       s3unit:parseInt(cf.elements['calc_rnd_s3_unit'].value||'0',10), s3dir:cf.elements['calc_rnd_s3_dir'].value||'ceil'};
@@ -7008,9 +7703,12 @@ function calcMarkEmpty(){
   const cf=document.getElementById('calcForm'); if(!cf) return;
   const CAND=['calc_sched','calc_base','calc_target','calc_ot_hours',
     'calc_uni_target','calc_uni_h_ot','calc_uni_h_hol','calc_uni_h_night'];
-  CAND.forEach(n=>{ const el=cf.elements[n]; if(el) el.classList.remove('empty-field'); });
+  // 付ける欄を先に決めてから、変わる欄だけ付け外しする（同じ値で class を書き換えない）
+  const want=new Set();
+  const apply=()=>CAND.concat([...want].filter(n=>CAND.indexOf(n)<0)).forEach(n=>{ const el=cf.elements[n]; if(!el) return;
+    const on=want.has(n); if(el.classList.contains('empty-field')!==on) el.classList.toggle('empty-field', on); });
   const mode=(cf.elements['calc_mode']&&cf.elements['calc_mode'].value)||'forward';
-  if(mode==='diff') return;   // 変更シミュレーションは2カラム専用UI（コピー前は右をグレー表示して区別済み）
+  if(mode==='diff'){ apply(); return; }   // 変更シミュレーションは2カラム専用UI（コピー前は右をグレー表示して区別済み）
   const style=(cf.elements['calc_ot_style']&&cf.elements['calc_ot_style'].value)||'split';
   const req=['calc_sched'];
   if(mode==='forward') req.push('calc_base');
@@ -7026,7 +7724,8 @@ function calcMarkEmpty(){
     req.push('calc_ot_hours');
   }
   req.forEach(n=>{ const el=cf.elements[n]; if(!el) return;
-    if(el.offsetParent!==null && String(el.value||'').trim()==='') el.classList.add('empty-field'); });
+    if(el.offsetParent!==null && String(el.value||'').trim()==='') want.add(n); });
+  apply();
 }
 function calcUnifiedWarnings(otHoursEq, nightHoursEq){
   let html='';
@@ -7160,7 +7859,9 @@ function calcDiffRenderInputs(side){
   body.innerHTML=html;
 }
 function calcDiffParseDelta(inputStr, curValue){
-  const s=String(inputStr==null?'':inputStr).trim();
+  // 全角の数字・＋・－（ー・−）も半角と同じに読む（「＋１０００」＝+1000 の差分。qa の棚卸し）
+  const s0=String(inputStr==null?'':inputStr).trim(), s=(SELFTEST_ACTIVE && NUM_HOOKS.rawRead) ? s0 : toHalf(s0).replace(/^[＋]/,'+').replace(/^[－ー−]/,'-');
+  if(s!==s0 && !/^[+-]/.test(s)) return s0;   // 符号の無い値は、これまでどおり入力のまま返す（表示の書き換えは blur 時の正規化に任せる）
   if(/^[+-]/.test(s)){
     const d=parseYen(s.slice(1));
     if(d==null) return s;
@@ -7171,7 +7872,7 @@ function calcDiffParseDelta(inputStr, curValue){
   }
   return s;
 }
-function calcDiffFieldInput(side, field, value){ calcDiffSideObj(side)[field]=value; calcRender(); }
+function calcDiffFieldInput(side, field, value){ calcDiffSideObj(side)[field]=value; calcRenderFromInput(window.event); }
 function calcDiffFieldBlur(side, field, el){
   const parsed=calcDiffParseDelta(el.value, CALC_CUR[field]);
   if(parsed!==el.value){ el.value=parsed; }
@@ -7182,7 +7883,7 @@ function calcDiffStyleChange(side, value){ calcDiffSideObj(side).otStyle=value; 
 function calcDiffUniModeChange(side, value){ calcDiffSideObj(side).uniMode=value; calcDiffRenderInputs(side); calcRender(); }
 function calcDiffAllowInput(side, idx, field, value){
   const st=calcDiffSideObj(side); if(!st.allowRows[idx]) st.allowRows[idx]={cat:'in'};
-  st.allowRows[idx][field]=value; calcRender();
+  st.allowRows[idx][field]=value; calcRenderFromInput(window.event);
 }
 function calcDiffAllowKindChange(side, idx, kind){
   const st=calcDiffSideObj(side); if(!st.allowRows[idx]) st.allowRows[idx]={cat:'in'};
@@ -7402,8 +8103,9 @@ function loadCalc(input){
 }
 
 function calcRender(){
+  if (SELFTEST_ACTIVE && IME_HOOKS.holdInBody && imeHold('calc')) return;   // N33 専用
   const cf=document.getElementById('calcForm');
-  cf.querySelectorAll('.calc-modes label').forEach(l=>{ const i=l.querySelector('input'); l.classList.toggle('is-checked', !!(i && i.checked)); });   // 選択中のモードを強調（:has を使わない）
+  cf.querySelectorAll('.calc-modes label').forEach(l=>{ const i=l.querySelector('input'); const on=!!(i && i.checked); if(l.classList.contains('is-checked')!==on) l.classList.toggle('is-checked', on); });   // 選択中のモードを強調（:has を使わない）
   const cget=n=>{ const el=cf.elements[n]; return el?el.value:''; };
   const cnum=n=>numH(cget(n));
   const mode=cget('calc_mode')||'forward';
@@ -7666,6 +8368,7 @@ function calcRender(){
 
 /* ===== 賃金試算タブ：作成タブへ反映（D4） ===== */
 function calcTransferToCreate(){
+  calcRender();   // 入力中に保留された描き直しがあっても、最新の入力で計算し直してから使う（MF-1）
   const lc=LAST_CALC;
   if(!lc || !lc.ready){ alert('試算結果がありません。'); return; }
   if(lc.base<0){ alert('基本給がマイナスになっています。条件を見直してから反映してください。'); return; }
@@ -7801,11 +8504,11 @@ function calcBuildSheet(){
   sheet.innerHTML=html;
 }
 function printCalcSheet(){
-  calcBuildSheet();
+  calcRender();   // 最新の入力で計算し直してから試算書を作る（calcRender の中で calcBuildSheet も呼ぶ。MF-1）
   const hasRedWarning = /calc-warn-r/.test(document.getElementById('calcResult').innerHTML);
   if(hasRedWarning && !confirm('切捨てによる法定額割れ、または最低賃金割れの警告が出ています。このまま出力しますか？')) return;
   document.body.classList.add('print-calc');
-  window.print();
+  printNow();
   const done=()=>{ document.body.classList.remove('print-calc'); window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   setTimeout(done, 2000);
@@ -7962,10 +8665,12 @@ calcPopulatePrefSelect();
 calcLoadSettings();
 minWagePopulatePrefSelect();   // 作成タブ「最低賃金の確認」の都道府県セレクトを MIN_WAGE_DATA から生成
 minWageAutoSuggestPref();      // 事業場所在地・就業の場所から都道府県を推測して初期選択
+minWageSyncYearSelect();       // 「判定に使う最低賃金」の選択肢（自動／本日時点の年度とそれより新しい年度）
 applyPublicMode();             // 顧問先版（公開ホスト）のときだけ表示面を閉じる（計算ロジックは分岐しない）
 renderStaticNotices();         // §H 版表示・様式の注記・免責・ダウンロード注意を画面へ描く（書面には出さない）
 renderLot5Notes();             // §F-3 無期転換の説明（MF-08）・社会保険の区分ヘルプ（MF-16）を画面へ描く（書面には出さない）
 buildRail();                   // 手順レール（#form の外・name なし）
+buildStepMiniNav();            // 見出しの横の小さな戻る・次へ（name なし）
 buildProxies();                // P3 代理UI（applyPublicMode の後に作る＝閉じた選択肢は作らない）
 // 引き継ぎの印は、固定残業の値を入力しただけでは消さない（値を入れて消した後の一括出力で安全側が外れるため。値があれば otInheritGap は出ない）。
 // N28 専用：値の入力で印を消す誤り（修正前の挙動）を再現する差し替え口
