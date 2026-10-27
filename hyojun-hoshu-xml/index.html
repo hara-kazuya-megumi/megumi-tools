@@ -7,6 +7,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
 <title>標準報酬決定通知書XML変換ツール（社内用）</title>
+<!--
+  標準報酬決定通知書XML変換ツール（社内用・単一HTML・完全ローカル・外部送信なし）
+  作成者: 統括AI（めぐみ事務所 社労士AIシステム）
+  最終改修: 2026-10-27（「様式どおりに印刷・PDF保存」を追加し、同日レビュー4体の指摘を反映。
+            Excel（TSV/CSV）出力の値は変更なし。変更点は (1) DOCTYPE入りXMLをパース前に拒否（原さん決定 D3）
+            (2) 1ファイル20MBを超えるファイルを読み込まない (3) 検証用の公開口は URL 末尾 #verify のときだけ）
+  検査台帳: tools/_golden/hyojun-hoshu-xml/README.md（I-01〜）
+  様式の定数（1ページの人数・列幅・固定文言・元XSLのファイル名とSHA-256・取得日）はスクリプト内の FORM_DEFS に集約。
+  設計書: tools/_設計/設計書_標準報酬XML変換ツール_様式印刷PDF_2026-10-27.md ／ ゴールデン: tools/_golden/hyojun-hoshu-xml/
+-->
 <style>
   :root{
     --bg:#f5f3f8; --panel:#ffffff; --ink:#241c2c; --sub:#5c5468;
@@ -76,6 +86,66 @@
   details.help h3{font-size:13.5px;color:var(--accent);margin:14px 0 4px}
   details.help table{border-collapse:collapse;font-size:12.5px;margin:6px 0}
   details.help table td, details.help table th{border:1px solid var(--line);padding:4px 8px}
+
+  /* ---------- 様式どおりに印刷・PDF保存（2026-10-27 追加） ---------- */
+  .btn:focus-visible{outline:3px solid #1a5fb4;outline-offset:2px}
+  /* 選んでいる様式のボタンは配色を反転し、文字でも「✔ 表示中」と出す（色だけに頼らない） */
+  #printSection .btn[aria-pressed="true"]{background:#fff;color:var(--accent);border:2px solid var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+  /* 押せないボタンも文字が読める配色にする */
+  #printSection .btn:disabled{background:#ece8f1;color:#4a4256;border:1.5px dashed #8a8299}
+  #printBtnHint{font-size:13px;color:#4a4256}
+  .print-row{margin-top:14px}
+  .print-steps-box{margin-top:12px;background:var(--accent-soft);border-radius:8px;padding:10px 14px;font-size:13.5px}
+  .print-steps-box .must{font-weight:700;color:var(--warn)}
+  .print-steps-box .browser{font-weight:700;color:var(--accent);margin-top:8px}
+  .print-steps-box ol{margin:4px 0 0;padding-left:22px}
+  .preview-note{font-size:12.5px;color:var(--sub);margin-top:12px}
+  #printStatus{font-size:15px;font-weight:700;color:var(--accent);margin-top:14px}
+  #printStatus.err{color:var(--warn)}   /* 描画に失敗したときは警告色で目立たせる */
+  #printOrder{font-size:13px;margin-top:8px}
+  #printOrder .print-order-cap{font-weight:700;color:var(--sub)}
+  #printOrder ol{margin:4px 0 0;padding-left:24px}
+  #printOrder li.skip{color:var(--warn)}
+  #printWarn{display:none;background:#fff4e5;border:1px solid #f0d2a8;border-radius:8px;padding:10px 14px;color:#7a4a00;font-size:13px;margin-top:10px}
+  #printWarn ul{margin:6px 0 0;padding-left:20px}
+  #printWarn li.strong{font-weight:700;color:var(--warn);background:var(--warn-bg);border:2px solid var(--warn);border-radius:6px;padding:6px 8px;margin:4px 0;list-style-position:inside}
+  #printPreview{margin-top:4px;background:#8c8796;border-radius:8px;padding:12px;overflow:auto;max-height:900px}
+  #printPreview:focus-visible{outline:3px solid #1a5fb4;outline-offset:2px}
+  #printPreview:empty{display:none}
+  /* 用紙1枚（A4）。様式の外側の余白はシートの内側で取る */
+  /* シートの中の改ページは禁止しない（禁止すると、お知らせが長く1枚に収まらないシートが次のページへ押し出され、
+     罫線だけの白いページが1枚できるため。2026-10-27 PDF化の検査で確認） */
+  .hp-sheet{position:relative;box-sizing:border-box;background:#fff;margin:0 auto 12px;box-shadow:0 1px 4px rgba(0,0,0,.35);break-after:page;page-break-after:always}
+  .hp-sheet.hp-last{break-after:auto;page-break-after:auto}
+  /* 印刷で罫線や文字の色が薄くならないように、色をそのまま出す */
+  .hp-sheet, .hp-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* 様式の中だけ、ツール画面の書式を打ち消して公式XSLの表示（ブラウザ既定・互換モード）に近づける */
+  .hp-body, .hp-body *{box-sizing:content-box}
+  /* 公式の出力は互換モード（DOCTYPEなし）で表示される。互換モードでは表と表のセルの高さに内側の余白と罫線が含まれるので、それに合わせる */
+  .hp-body table, .hp-body td, .hp-body th{box-sizing:border-box}
+  /* 互換モードでは、セルの中の最初の要素の上余白と最後の要素の下余白が無視される（お知らせの pre など） */
+  .hp-body td > :first-child{margin-top:0}
+  .hp-body td > :last-child{margin-bottom:0}
+  .hp-body{font-size:16px;line-height:normal;color:#000;font-family:serif;text-align:start}
+  .hp-body table{font-size:medium;line-height:normal;font-weight:normal;font-style:normal;white-space:normal;text-align:start}
+  /* お知らせ欄は、長い1行を枠の幅で折り返す。公式XSLは Chrome/Edge では折り返さず（pre の既定）、改行のないお知らせが
+     枠と用紙の右へはみ出すため、公式XSLが Safari 向けに指定している折り返し（break-spaces）を全ブラウザに当てる。
+     元の改行と空白はそのまま残る。2026-10-27 原さんの実物確認で、右へのはみ出しを確認して追加 */
+  .hp-body pre.oshirase{white-space:break-spaces}
+  /* 用紙の余白は0（余白はシートの内側で取る）。この設定はツール画面全体の印刷にも効くので、
+     画面の手順では「印刷は必ず『印刷・PDF保存』ボタンから」と案内している */
+  @page{size:A4 portrait;margin:0}
+  @media print{
+    body.hp-print-ready{background:#fff}
+    body.hp-print-ready header.appbar,
+    body.hp-print-ready .wrap > section:not(#printSection),
+    body.hp-print-ready #printSection > :not(#printPreview){display:none !important}
+    body.hp-print-ready .wrap{max-width:none;margin:0;padding:0}
+    body.hp-print-ready #printSection{border:0;border-radius:0;box-shadow:none;margin:0;padding:0;background:none}
+    body.hp-print-ready #printPreview{overflow:visible;max-height:none;padding:0;margin:0;background:none;border-radius:0}
+    .hp-area{zoom:1 !important}
+    .hp-sheet{margin:0 !important;box-shadow:none !important}
+  }
 </style>
 </head>
 <body>
@@ -146,6 +216,43 @@
       </div>
     </div>
     <div id="copyStatus" role="status" aria-live="polite"></div>
+    <div class="hint">年金機構の通知書と同じ形で印刷・PDF保存したいときは、下の「5 様式どおりに印刷・PDF保存」を使ってください。</div>
+  </section>
+
+  <section class="card" id="printSection">
+    <h2><span class="step-badge">5</span>様式どおりに印刷・PDF保存</h2>
+    <div class="hint" style="margin-top:0">読み込んだXMLを、日本年金機構の通知書と同じ形で「様式プレビュー」に出し、印刷やPDF保存ができます。算定と月変はファイルごとに自動で見分けます。選ぶのは「連記式（一覧表）」か「個別（1人1枚）」かだけです。</div>
+    <div class="btn-row" style="margin-top:12px">
+      <button type="button" class="btn" id="showRenkiBtn" aria-pressed="false">連記式（一覧表）で表示</button>
+      <button type="button" class="btn" id="showKobetsuBtn" aria-pressed="false">個別（1人1枚）で表示</button>
+    </div>
+    <div id="printStatus" role="status" aria-live="polite"></div>
+    <div id="printOrder"></div>
+    <div id="printWarn" role="status" aria-live="polite"></div>
+    <div class="preview-note">様式プレビュー（縮小表示です。実際の大きさは印刷結果で確認してください）。原本は電子公文書（XML）です。印刷物には「写し」の表記が入りませんが、原本ではありません（人に渡すときは、XMLから作った写しであることを伝えてください）。</div>
+    <div id="printPreview" role="region" tabindex="0" aria-label="様式プレビュー"></div>
+    <div class="btn-row print-row">
+      <button type="button" class="btn" id="printBtn" disabled>印刷・PDF保存</button>
+      <span id="printBtnHint">（様式を選ぶと押せます）</span>
+    </div>
+    <div class="print-steps-box">
+      <div class="must">印刷は必ずこの「印刷・PDF保存」ボタンから行ってください（ほかの方法で印刷すると、余白などが正しく出ません）。</div>
+      <div>ボタンを押すと印刷画面が開きます。次のとおり設定してください。余白は既定のままで大丈夫です。「倍率」は「既定」（100）のままにしてください（「ページに合わせる」などにすると、さらに小さく印刷されます）。</div>
+      <div class="browser">Google Chrome のとき</div>
+      <ol>
+        <li>「送信先」で「PDFに保存」を選ぶ（紙に印刷するときはプリンターを選ぶ）</li>
+        <li>「レイアウト」を「縦」にする</li>
+        <li>「詳細設定」（「その他の設定」と表示されることもあります）を開き、「用紙サイズ」を「A4」にする</li>
+        <li>同じ所の「ヘッダーとフッター」のチェックを外し、「保存」を押す（紙に印刷するときは「印刷」を押す）</li>
+      </ol>
+      <div class="browser">Microsoft Edge のとき</div>
+      <ol>
+        <li>「プリンター」で「PDF として保存」を選ぶ（紙に印刷するときはプリンターを選ぶ）</li>
+        <li>「レイアウト」を「縦」にする</li>
+        <li>「その他の設定」を開き、「用紙サイズ」を「A4」にする</li>
+        <li>同じ所の「ヘッダーとフッター」のチェックを外し、「保存」を押す（紙に印刷するときは「印刷」を押す）</li>
+      </ol>
+    </div>
   </section>
 
   <section class="card" id="errorSection">
@@ -394,6 +501,14 @@
   function parseXmlText(xmlString, fileName){
     var result = { fileName: fileName, ok:true, fatalError:null, rows:[], counts:{ "算定":0, "月変":0, "不明":0 } };
     var doc;
+    // 文書型の宣言（<!DOCTYPE）を含むXMLは、パースする前に拒否する（XXE・実体膨張への備え。2026-10-27 原さん決定 D3）。
+    // 年金機構の通知書XMLには通常入っていない。Excel出力・様式プレビューのどちらにも使わない。
+    if(/<!DOCTYPE/i.test(xmlString)){
+      result.ok = false;
+      result.fatalError = FORM_DEFS.common.messages.doctype;
+      result.print = { formCode: null, supported: false, reason: FORM_DEFS.common.messages.doctype, persons: [] };
+      return result;
+    }
     try{
       var parser = new DOMParser();
       doc = parser.parseFromString(xmlString, "application/xml");
@@ -406,6 +521,12 @@
       result.ok = false;
       result.fatalError = "XMLとして読めませんでした。ファイルが壊れているか、XML以外の可能性があります";
       return result;
+    }
+    // 様式表示用の値も、同じ DOM から取り出しておく（2026-10-27 追加。Excel用の rows には影響しない）
+    try{
+      result.print = extractPrintDoc(doc, xmlString);
+    }catch(ePrint){
+      result.print = { formCode: null, supported: false, reason: FORM_DEFS.common.messages.extractError, persons: [] };
     }
     var list = doc.getElementsByTagName("_被保険者");
     if(!list || list.length === 0){
@@ -420,7 +541,8 @@
     }
     return result;
   }
-  window.parseXmlText = parseXmlText;
+  // 検証用の公開は、URL の末尾が #verify のときだけにする（2026-10-27 セキュリティレビュー反映）
+  if(location.hash === "#verify") window.parseXmlText = parseXmlText;
 
   // ===================================================================
   // ここから画面側（UI）
@@ -493,10 +615,17 @@
       pasteMsg.style.display = "block";
       return;
     }
+    // 大きすぎるデータは読み込まない（1ファイル20MBまで）
+    if(new Blob([text]).size > FORM_DEFS.common.limits.maxFileBytes){
+      pasteMsg.textContent = FORM_DEFS.common.messages.tooLargeFile;
+      pasteMsg.style.display = "block";
+      return;
+    }
     pasteMsg.textContent = "";
     pasteMsg.style.display = "none";
     var name = fullTrim(pasteName.value) || ("貼り付けデータ" + (state.entries.length + 1));
     var result = parseXmlText(text, name);
+    result.sourceKey = sourceKeyOf(name, text);   // 同じものを2回読み込んだかの判定用（中身は持たない）
     state.entries.push({ fileName: name, result: result });
     pasteText.value = "";
     pasteName.value = "";
@@ -511,7 +640,11 @@
     state.entries = [];
     copyStatus.textContent = "";
     copyStatus.className = "";
-    render();
+    pasteText.value = "";                        // 貼り付け欄に残った内容も消す
+    pasteName.value = "";
+    pasteMsg.textContent = "";
+    pasteMsg.style.display = "none";
+    render();                                    // 様式プレビューもここで消える（refreshPrintArea）
   });
 
   var ZIP_MESSAGE = "zipファイルはそのままでは読めません。右クリック→「すべて展開」で解凍し、中の.xmlファイルを読み込んでください。";
@@ -538,8 +671,16 @@
         finalizeIfDone();
         return;
       }
+      // 大きすぎるファイルは読み込まない（1ファイル20MBまで。2026-10-27 追加）
+      if(file.size > FORM_DEFS.common.limits.maxFileBytes){
+        results[idx] = { fileName: file.name, result: { fileName:file.name, ok:false, fatalError: FORM_DEFS.common.messages.tooLargeFile, rows:[], counts:{} } };
+        finalizeIfDone();
+        return;
+      }
       readFileAsText(file).then(function(res){
         var result = parseXmlText(res.text, file.name);
+        result.sourceKey = sourceKeyOf(file.name, res.text);   // 同じファイルを2回選んだかの判定用（中身は持たない）
+        result.readWarning = res.warning;                      // 文字化けの警告を様式プレビュー側でも出す
         if(res.warning){
           if(result.ok){
             result.rows.forEach(function(r){ r._notes.push(res.warning); });
@@ -743,6 +884,9 @@
       });
       errorBox.appendChild(ul);
     }
+
+    // --- 様式どおりの印刷エリア（読み込み内容が変わったら描き直す／クリアなら消す） ---
+    refreshPrintArea();
   }
 
   // ---------- 出力：TSV（Excel用コピー） ----------
@@ -835,6 +979,921 @@
     document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
   });
+
+  // ===================================================================
+  // ここから「様式どおりに印刷・PDF保存」（2026-10-27 追加・同日レビュー反映）
+  //   設計書: tools/_設計/設計書_標準報酬XML変換ツール_様式印刷PDF_2026-10-27.md（方式(b)）
+  //   公式XSLを見本にして、同じ表の構造を DOM で組み立てる。XSLは実行時に読み込まない。
+  //   XMLの値は textContent（文字ノード）でだけ入れる。データに innerHTML は使わない。
+  //   上の Excel 出力（buildRow・buildTSV・buildCSV など）には手を付けていない。
+  // ===================================================================
+
+  // ---------- 様式の定数（ここ1か所にまとめる） ----------
+  // forms の中身（css・fragments など）は開発用スクリプト tools/_golden/hyojun-hoshu-xml/gen_form_defs.py が
+  // 公式XSLから作ったもの。fragments は「データが入らない骨組みのHTML（定数）」で、値の入る場所は次の目印になっている。
+  //   <span data-v="タグ名">   … その値をそのまま文字として入れる（xsl:value-of）
+  //   <span data-z="タグ名">   … 前ゼロを取って入れる（公式の zero-padding = number()）
+  //   <span data-z2="タグ名">  … 前ゼロを取って後ろに「.」を付ける（公式の zero-padding2）
+  //   <span data-zb="タグ名">  … 公式が空欄のとき「0」を出す場所。決定により空欄のまま出し、警告する
+  //   <template data-if="ne|eq" data-f="タグ名"> … 公式の xsl:if（値が空でない／空のときだけ出す）
+  //   <template data-slot="…"> … 被保険者ごとの部品を差し込む場所
+  // 公式XSLが更新されたら、gen_form_defs.py で作り直して forms を差し替え、ゴールデン照合（compare_render.html）をやり直す。
+  var FORM_DEFS = {
+    // 元にした公式XSL（日本年金機構のスタイルシート）の情報
+    source: {
+      publisher: "日本年金機構",
+      obtainedOn: "2025-12-15",         // 公式XSLの取得日
+      portedOn: "2026-10-27",           // 移植日
+      generator: "tools/_golden/hyojun-hoshu-xml/gen_form_defs.py（開発用・ツール本体には含めない）"
+    },
+    // 全様式に共通の設定
+    common: {
+      renkiPersonsPerPage: 15,          // 連記式の1ページの人数（公式: ceiling(人数 div 15)）
+      oshiraseField: "機構からのお知らせ",
+      oshiraseMaxHeightPx: 185,         // お知らせ欄の高さ（公式は185px固定。超えると枠からはみ出す）
+      sheet: {                          // 印刷用紙1枚分（A4縦・用紙の余白0・余白はシートの内側で取る）
+        widthMm: 210,
+        minHeightMm: 296,               // 297mmちょうどだと端数で白紙ページが出ることがあるため1mm小さくする
+        paddingTopMm: 12,
+        paddingBottomMm: 14,            // 下端の余白（もとは「写し」の表記の場所。表記をやめた後も、検証済みの配置と倍率を変えないため値は残す）
+        // ---- 高いシート（お知らせが長いなどで、上の余白のままでは用紙1枚に入らないシート）の扱い（原さん承認 I-22）----
+        // 余白を詰めたうえで、1枚に入る倍率まで縮小する（設計書「はみ出したときだけ zoom 補正」）。縮小しないと、
+        // ブラウザが様式の表を次のページへ押し出し、罫線だけのページができる（Chrome/Edge で確認）。
+        // お知らせが枠からはみ出す表示そのものは公式どおり（決定事項3）。
+        // 余白は、ふつうのプリンターの印刷できない帯（用紙の端から約5mm）に罫線がかからない値にする。
+        tallPaddingTopMm: 5,            // 外枠の上の罫線を、用紙の上端から5mm以上離す
+        tallPaddingBottomMm: 9.5,       // 下端の余白（同上。罫線が用紙の下端から5mm以上離れる）
+        minZoom: 0.7,                   // 縮小の下限（原さん決定）。これより小さくしないと入らないときは縮小せず、
+                                        // はみ出したまま印刷し（2ページ以上に分かれる）、画面に【要確認】の警告を出す
+        zoom: 1.0                       // ふつうのシートの倍率（既定1.0＝拡大縮小しない）
+                                        // ※1.0以外に変えるときは、edge・o50・o100 のケースで縮小の判定（tallFit/scaled/belowFloor）と
+                                        //   PDFのページ数を実機で確かめること（2026-10-27時点では1.0でしか確認していない）
+      },
+      limits: {
+        maxFileBytes: 20 * 1024 * 1024, // 1ファイルの上限（20MB）。超えたら分割を案内する
+        maxTotalPersons: 2000,          // 様式表示する合計人数の上限
+        maxWarningsShown: 50            // 画面に並べる警告の件数（残りは「他○件」）
+      },
+      printTitlePrefix: "標準報酬決定通知書",   // PDF保存時の既定のファイル名（事業所名は入れない）
+      styleLabels: { renki: "連記式", kobetsu: "個別" },         // 画面の表示用
+      titleLabels: { renki: "連記", kobetsu: "個別" },           // PDFの既定のファイル名用
+      messages: {
+        unsupported: "この様式は印刷に未対応です（Excel出力はできます）。印刷に対応しているのは、算定（定時決定）と月額変更の通知書だけです",
+        doctype: "このファイルは安全のため読み込みません。年金機構の通知書XMLにはふつう入っていない特別な宣言（文書型の宣言）が含まれています。年金機構から受け取った元のファイルか確認してください",
+        notXml: "XMLとして読めなかったため、様式プレビューに出せません。ファイルが壊れていないか確認してください",
+        noPersons: "被保険者が0人のため、印刷するページはありません",
+        extractError: "様式プレビュー用の読み取りでエラーが起きました。ファイルを確認してください",
+        tooLargeFile: "このファイルは大きすぎて読み込めません（1ファイル20MBまで）。年金機構から受け取ったファイルか確認し、それでも読めないときは担当者に相談してください",
+        tooManyPersons: "人数が多すぎるため様式プレビューに出せません（読み込んだファイルの合計で2,000人まで）。いったん「クリア」し、ファイルを何回かに分けて読み込んで、回ごとに印刷してください",
+        renderError: "様式プレビューを作れませんでした。いったん「クリア」してから読み込み直してください。直らないときは、ファイル名と表示されたメッセージを担当者に伝えてください"
+      }
+    },
+    // 様式ごとの定義（キー＝XMLのルート要素名）
+    forms: {
+      "N7130001": {
+        "label": "算定（標準報酬決定通知書）",
+        "renki": {
+          "xslFile": "RenkiStylesheet/7130001.xsl",
+          "xslSha256": "f69fcd93d1d542e7a947119cedd899e265d559d48a1316e6deb49d909a4dcdc0",
+          "docTitle": "健康保険・厚生年金保険被保険者標準報酬決定一覧表",
+          "callsKyoji": false,
+          "zeroPaddingEmptyText": "",
+          "zeroPadding2EmptyText": null,
+          "scope": "hpf-renki-7130001",
+          "bodyStyle": "word-break:break-all;",
+          "css": ".hpf-renki-7130001 table.outline{border:1px solid #000000;width:640px;height:940px;}.hpf-renki-7130001 table.detail{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-renki-7130001 table.hihokensha{border-collapse:collapse;width:640px;height:310px;table-layout:fixed;}.hpf-renki-7130001 td.outline{vertical-align:top;text-align:center;}.hpf-renki-7130001 td.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linetlb{border-top:1px solid #000000;border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linetlr{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;}.hpf-renki-7130001 td.linetrb{border-top:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linetb{border-top:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linelb{border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linelrb{border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 td.linerb{border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7130001 table.Lterritory{width:320px;table-layout:fixed;}.hpf-renki-7130001 table.Rterritory{width:320px;table-layout:fixed;}.hpf-renki-7130001 td.lineb{border-bottom:1px solid #000000;}.hpf-renki-7130001 .title{font-family:YuGothic, Yu Gothic;font-size:11pt;font-weight:bold;text-align:center;}.hpf-renki-7130001 .oshirase{font-family:YuMincho, Yu Mincho;font-size:7pt;line-height:11px;vertical-align:top;text-align:left;}.hpf-renki-7130001 .midashiS_C{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:center;}.hpf-renki-7130001 .midashiS_L{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:left;}.hpf-renki-7130001 .midashiS_L2{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:left;}.hpf-renki-7130001 .midashiS_R{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:right;}.hpf-renki-7130001 .midashiM_L{font-family:YuGothic, Yu Gothic;font-size:8pt;text-align:left;}.hpf-renki-7130001 .midashiM_R{font-family:YuGothic, Yu Gothic;font-size:8pt;text-align:right;}.hpf-renki-7130001 .midashiL_L{font-family:YuGothic, Yu Gothic;font-size:9pt;text-align:left;}.hpf-renki-7130001 .midashiL_R{font-family:YuGothic, Yu Gothic;font-size:9pt;text-align:right;}.hpf-renki-7130001 .normalS_C{font-family:YuMincho, Yu Mincho;font-size:7pt;text-align:center;}.hpf-renki-7130001 .normalS_R{font-family:YuMincho, Yu Mincho;font-size:7pt;text-align:right;}.hpf-renki-7130001 .normalS_RG{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:right;}.hpf-renki-7130001 .normalS_L{font-family:YuMincho, Yu Mincho;font-size:7pt;text-align:left;}.hpf-renki-7130001 .normalS_LG{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:left;}.hpf-renki-7130001 .normalS_TL{font-family:YuMincho, Yu Mincho;font-size:7pt;vertical-align:top;text-align:left;}.hpf-renki-7130001 .normalM_R{font-family:YuMincho, Yu Mincho;font-size:8pt;text-align:right;}.hpf-renki-7130001 .normalM_L{font-family:YuMincho, Yu Mincho;font-size:8pt;text-align:left;}.hpf-renki-7130001 .normalM_TL{font-family:YuMincho, Yu Mincho;font-size:8pt;vertical-align:top;text-align:left;}.hpf-renki-7130001 .normalL_C{font-family:YuMincho, Yu Mincho;font-size:9pt;text-align:center;}.hpf-renki-7130001 .normalL_R{font-family:YuMincho, Yu Mincho;font-size:9pt;text-align:right;}.hpf-renki-7130001 .normalL_R2{font-family:YuMincho, Yu Mincho;font-size:8.5pt;text-align:right;}.hpf-renki-7130001 .normalL_L{font-family:YuMincho, Yu Mincho;font-size:9pt;text-align:left;}.hpf-renki-7130001 .normalL_TL{font-family:YuMincho, Yu Mincho;font-size:9pt;vertical-align:top;text-align:left;}.hpf-renki-7130001 br.kaipage{font-family:YuGothic, Yu Gothic;font-size:10px;}.hpf-renki-7130001 pre.oshirase{word-wrap:break-word;font-family:YuMincho, Yu Mincho;font-size:7pt;}",
+          "fragments": {
+            "root": "<table border=\"0\" width=\"100%\" style=\"center\"><td align=\"center\" style=\"vertical-align:top;\"><template data-slot=\"root\"></template></td></table>",
+            "page": "<table class=\"outline\" cellpadding=\"20px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"header\"></template><table class=\"hihokensha\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><template data-slot=\"hihokensha\"></template></table></td></table><template data-slot=\"footer\"></template></td></tr></table><br class=\"kaipage\">",
+            "header": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"245px\"><col width=\"45px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:40px\"><br></td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"事業所郵便番号_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_TL\" style=\"height:12px;\"><span data-v=\"事業所所在地_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_TL\" style=\"height:12px;\"><span data-v=\"事業所所在地_送付先1\"></span></td><td></td></tr><tr><td></td><td class=\"normalL_TL\" style=\"height:30px;line-height:14px;\"><span data-v=\"事業所名称_送付先\"></span></td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"160px\"><col width=\"10px\"><col width=\"15px\"><col width=\"105px\"></colgroup><tr><td></td><td class=\"normalL_L\" style=\"height:20px\"><span data-v=\"事業主氏名_送付先\"></span></td><td></td><td class=\"normalL_L\" style=\"height:20px\">様</td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"145px\"><col width=\"100px\"><col width=\"0px\"><col width=\"35px\"><col width=\"40px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table></td><td style=\"vertical-align:top;\"><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"234px\"><col width=\"39px\"><col width=\"6px\"><col width=\"5px\"><col width=\"36px\"></colgroup><tr><td class=\"normalS_L\" style=\"height:25px\"><br></td></tr><tr><td></td><td class=\"normalS_LG\" style=\"height:10px\"><span data-v=\"外字表示_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"外字表示_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"133px\"><col width=\"39px\"><col width=\"7px\"><col width=\"120px\"><col width=\"21px\"></colgroup><tr><td></td><td class=\"normalS_LG\" style=\"height:10px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"55px\"><col width=\"30px\"><col width=\"3px\"><col width=\"30px\"><col width=\"202px\"></colgroup><tr><td></td><td class=\"normalS_RG\" style=\"height:10px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_R\" style=\"height:10px\"><span data-v=\"SC\"></span></td><td></td></tr><tr><td class=\"normalS_L\" style=\"height:5px\"><br></td></tr></table><table class=\"Rterritory\" cellpadding=\"3\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"250px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"normalS_TL allline\" style=\"height:185px;line-height:11px;\"><pre class=\"oshirase\"><span data-v=\"機構からのお知らせ\"></span></pre></td><td></td></tr></table></td></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:50px; padding-top:10px;\">健康保険・厚生年金保険被保険者標準報酬決定一覧表</td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"85px\"><col width=\"10px\"><col width=\"60px\"><col width=\"445px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:15px\">事業所整理記号</td><td></td><td class=\"normalM_L\" style=\"height:15px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"80px\"><col width=\"15px\"><col width=\"45px\"><col width=\"470px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:15px\">事業所番号</td><td></td><td class=\"normalM_R\" style=\"height:15px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table></td></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"25px\"><col width=\"45px\"><col width=\"150px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"66px\"><col width=\"66px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"60px\"><col width=\"25px\"></colgroup><tr><td></td><td class=\"midashiS_C allline\" style=\"height:30px;\" rowspan=\"2\">被保険者<br>整理番号</td><td class=\"midashiS_C allline\" rowspan=\"2\">被保険者氏名</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\" colspan=\"4\">※1</td><td class=\"midashiS_C linetrb\" colspan=\"2\">決定後の標準報酬月額</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\" colspan=\"6\">※1</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\">※2</td><td></td></tr><tr><td></td><td class=\"midashiS_C linelrb\" colspan=\"4\">適用年月</td><td class=\"midashiS_C allline\">（健保）</td><td class=\"midashiS_C allline\">（厚年）</td><td class=\"midashiS_C linelrb\" colspan=\"6\">生年月日</td><td class=\"midashiS_C linelrb\">種別</td><td></td></tr></table></td></table>",
+            "hihokensha": "<colgroup><col width=\"25px\"><col width=\"45px\"><col width=\"150px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"66px\"><col width=\"66px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"60px\"><col width=\"25px\"></colgroup><tr><td></td><template data-if=\"ne\" data-f=\"被保険者整理番号\"><td class=\"normalL_R2 linelrb\" style=\"height:20px; padding-right:6px;\"><span data-z=\"被保険者整理番号\"></span></td></template><template data-if=\"eq\" data-f=\"被保険者整理番号\"><td class=\"normalL_R2 linelrb\" style=\"height:20px; padding-right:6px;\"><span data-zb=\"被保険者整理番号\"></span></td></template><td class=\"normalM_L linelrb\" style=\"padding-left:12px;\"><span data-v=\"被保険者氏名\"></span></td><td class=\"normalL_L linelb\" style=\"padding-left:6px;\"><span data-v=\"適用年月_元号\"></span></td><template data-if=\"ne\" data-f=\"適用年月_年\"><td class=\"normalL_R lineb\"><span data-z=\"適用年月_年\"></span></td></template><template data-if=\"eq\" data-f=\"適用年月_年\"><td class=\"normalL_R lineb\"><span data-zb=\"適用年月_年\"></span></td></template><td class=\"midashiL_L lineb\">．</td><template data-if=\"ne\" data-f=\"適用年月_月\"><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-z=\"適用年月_月\"></span></td></template><template data-if=\"eq\" data-f=\"適用年月_月\"><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-zb=\"適用年月_月\"></span></td></template><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_健保\"></span></td><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_厚年\"></span></td><td class=\"normalL_L linelb\" style=\"padding-left:6px;\"><span data-v=\"生年月日_元号\"></span></td><template data-if=\"ne\" data-f=\"生年月日_年\"><td class=\"normalL_R lineb\"><span data-z=\"生年月日_年\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_年\"><td class=\"normalL_R lineb\"><span data-zb=\"生年月日_年\"></span></td></template><td class=\"midashiL_L lineb\">．</td><template data-if=\"ne\" data-f=\"生年月日_月\"><td class=\"normalL_R lineb\"><span data-z=\"生年月日_月\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_月\"><td class=\"normalL_R lineb\"><span data-zb=\"生年月日_月\"></span></td></template><td class=\"midashiL_L lineb\">．</td><template data-if=\"ne\" data-f=\"生年月日_日\"><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-z=\"生年月日_日\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_日\"><td class=\"normalL_R linerb\" style=\"padding-right:6px;\"><span data-zb=\"生年月日_日\"></span></td></template><td class=\"normalM_L linelrb\" style=\"padding-left:6px;\"><span data-v=\"種別\"></span></td><td></td></tr>",
+            "footer": "<table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\"><colgroup><col width=\"25px\"><col width=\"605px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:20px\">※1　元号　S：昭和　H：平成　R：令和</td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:25px\">※2　種別　第一種：男性　第二種：女性　第三種：坑内員　特例第一種：男性（基金加入）　特例第二種：女性（基金加入）<br>　　　　　 特例第三種：坑内員（基金加入）</td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:30px;padding-left:15px;\"></td></tr></table></td></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\"><colgroup><col width=\"367px\"><col width=\"270px\"></colgroup><tr><td></td><template data-if=\"ne\" data-f=\"通知年月日\"><td class=\"normalM_L\" style=\"height:18px\"><span data-v=\"通知年月日\"></span></td></template><template data-if=\"eq\" data-f=\"通知年月日\"><td class=\"normalM_L\" style=\"height:18px\">      年  月  日</td></template></tr></table><table class=\"detail\"><colgroup><col width=\"350px\"><col width=\"287px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:18px\"><span data-v=\"初回発行年月日\"></span></td></tr></table><table class=\"detail\"><colgroup><col width=\"367px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:18px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:18px\">（<span data-v=\"年金事務所名\"></span>年金事務所）</td></tr></table></td></table>"
+          }
+        },
+        "kobetsu": {
+          "xslFile": "個別決定通知書Stylesheet/7130001.xsl",
+          "xslSha256": "5ff7411a2bee63959ff399ec0ebfc9399e26f5e01b486a49892df04ca1cfa5c5",
+          "docTitle": "健康保険・厚生年金保険被保険者標準報酬決定通知書",
+          "callsKyoji": true,
+          "zeroPaddingEmptyText": "",
+          "zeroPadding2EmptyText": null,
+          "scope": "hpf-kobetsu-7130001",
+          "bodyStyle": "word-break:break-all;",
+          "css": ".hpf-kobetsu-7130001 table.outline{border:1px solid #000000;width:640px;height:940px;}.hpf-kobetsu-7130001 table.detail{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-kobetsu-7130001 td.outline{vertical-align:top;text-align:center;}.hpf-kobetsu-7130001 td.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7130001 td.linetb{border-top:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7130001 td.linetrb{border-top:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7130001 td.linetlb{border-top:1px solid #000000;border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7130001 td.linetlr{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;}.hpf-kobetsu-7130001 td.linelrb{border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7130001 table.Lterritory{width:320px;table-layout:fixed;}.hpf-kobetsu-7130001 table.Rterritory{width:320px;table-layout:fixed;}.hpf-kobetsu-7130001{font-family:YuMincho, 'Yu Mincho';}.hpf-kobetsu-7130001 pre{font-family:YuMincho, 'Yu Mincho';}.hpf-kobetsu-7130001 div{white-space:pre;font-family:\"Yu Mincho\", serif;}.hpf-kobetsu-7130001 .title{font-family:YuGothic, 'Yu Gothic';font-size:11pt;font-weight:bold;text-align:center;}.hpf-kobetsu-7130001 .oshirase{font-family:YuMincho, 'Yu Mincho';font-size:7pt;line-height:11px;vertical-align:top;text-align:left;}.hpf-kobetsu-7130001 .midashiS_C{font-family:\"Yu Gothic\", serif;font-size:7pt;text-align:center;}.hpf-kobetsu-7130001 .midashiS_L{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:left;}.hpf-kobetsu-7130001 .midashiS_L2{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:left;}.hpf-kobetsu-7130001 .midashiS_R{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:right;}.hpf-kobetsu-7130001 .midashiM_L{font-family:YuGothic, 'Yu Gothic';font-size:8pt;text-align:left;}.hpf-kobetsu-7130001 .midashiM_R{font-family:YuGothic, 'Yu Gothic';font-size:8pt;text-align:right;}.hpf-kobetsu-7130001 .midashiL_L{font-family:YuGothic, 'Yu Gothic';font-size:9pt;text-align:left;}.hpf-kobetsu-7130001 .midashiL_R{font-family:YuGothic, 'Yu Gothic';font-size:9pt;text-align:right;}.hpf-kobetsu-7130001 .normalS_C{font-family:YuMincho, 'Yu Mincho';font-size:7pt;text-align:center;}.hpf-kobetsu-7130001 .normalS_R{font-family:YuMincho, 'Yu Mincho';font-size:7pt;text-align:right;}.hpf-kobetsu-7130001 .normalS_RG{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:right;}.hpf-kobetsu-7130001 .normalS_L{font-family:YuMincho, 'Yu Mincho';font-size:7pt;text-align:left;}.hpf-kobetsu-7130001 .normalS_LG{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:left;}.hpf-kobetsu-7130001 .normalS_TL{font-family:YuMincho, 'Yu Mincho';font-size:7pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7130001 .normalM_R{font-family:YuMincho, 'Yu Mincho';font-size:8pt;text-align:right;}.hpf-kobetsu-7130001 .normalM_L{font-family:YuMincho, 'Yu Mincho';font-size:8pt;text-align:left;}.hpf-kobetsu-7130001 .normalM_TL{font-family:YuMincho, 'Yu Mincho';font-size:8pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7130001 .normalL_C{font-family:YuMincho, 'Yu Mincho';font-size:9pt;text-align:center;}.hpf-kobetsu-7130001 .normalL_R{font-family:YuMincho, 'Yu Mincho';font-size:9pt;text-align:right;}.hpf-kobetsu-7130001 .normalL_R2{font-family:YuMincho, 'Yu Mincho';font-size:8.5pt;text-align:right;}.hpf-kobetsu-7130001 .normalL_L{font-family:YuMincho, 'Yu Mincho';font-size:9pt;text-align:left;}.hpf-kobetsu-7130001 .normalL_TL{font-family:YuMincho, 'Yu Mincho';font-size:9pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7130001 br{font-family:YuGothic, 'Yu Gothic';font-size:10px;}.hpf-kobetsu-7130001 pre.oshirase{font-family:YuMincho, 'Yu Mincho';line-break:anywhere;word-wrap:break-word;overflow-wrap:break-word;font-size:7pt;}",
+          "fragments": {
+            "root": "<table border=\"0\" width=\"100%\" style=\"center\"><td align=\"center\" style=\"vertical-align:top;\"><template data-slot=\"root\"></template></td></table>",
+            "page": "<table class=\"outline\" cellpadding=\"20px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"hihokensha\"></template></td></tr></table><br class=\"kaipage\">",
+            "hihokensha": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"245px\"><col width=\"45px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:40px\"><br></td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"事業所郵便番号_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_TL\" style=\"height:12px;\"><span data-v=\"事業所所在地_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_TL\" style=\"height:12px;\"><span data-v=\"事業所所在地_送付先1\"></span></td><td></td></tr><tr><td></td><td class=\"normalL_TL\" style=\"height:30px;line-height:14px;\"><span data-v=\"事業所名称_送付先\"></span></td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"160px\"><col width=\"10px\"><col width=\"15px\"><col width=\"105px\"></colgroup><tr><td></td><td class=\"normalL_L\" style=\"height:20px\"><span data-v=\"事業主氏名_送付先\"></span></td><td></td><td class=\"normalL_L\" style=\"height:20px\">様</td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"140px\"><col width=\"100px\"><col width=\"0px\"><col width=\"32px\"><col width=\"48px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table></td><td style=\"vertical-align:top;\"><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"234px\"><col width=\"39px\"><col width=\"6px\"><col width=\"5px\"><col width=\"36px\"></colgroup><tr><td class=\"normalS_L\" style=\"height:25px\"><br></td></tr><tr><td></td><td class=\"normalS_LG\" style=\"height:10px\"><span data-v=\"外字表示_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"外字表示_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"123px\"><col width=\"39px\"><col width=\"7px\"><col width=\"116px\"><col width=\"35px\"></colgroup><tr><td></td><td class=\"normalS_LG\" style=\"height:10px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"55px\"><col width=\"25px\"><col width=\"3px\"><col width=\"35px\"><col width=\"202px\"></colgroup><tr><td></td><td class=\"normalS_RG\" style=\"height:10px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_R\" style=\"height:10px\"><span data-v=\"SC\"></span></td><td></td></tr><tr><td class=\"normalS_L\" style=\"height:5px\"><br></td></tr></table><table class=\"Rterritory\" cellpadding=\"3\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"250px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"normalS_TL allline\" style=\"height:185px;line-height:11px;\"><pre class=\"oshirase\"><span data-v=\"機構からのお知らせ\"></span></pre></td><td></td></tr></table></td></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:50px; padding-top:10px;\">健康保険・厚生年金保険被保険者標準報酬決定通知書</td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"80px\"><col width=\"15px\"><col width=\"55px\"><col width=\"450px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:15px\">事業所整理記号</td><td></td><td class=\"normalM_L\" style=\"height:15px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"80px\"><col width=\"15px\"><col width=\"40px\"><col width=\"475px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:15px\">事業所番号</td><td></td><td class=\"normalM_R\" style=\"height:15px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table></td></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"25px\"><col width=\"45px\"><col width=\"150px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"60px\"><col width=\"60px\"><col width=\"15px\"><col width=\"15px\"><col width=\"5px\"><col width=\"15px\"><col width=\"5px\"><col width=\"21px\"><col width=\"60px\"><col width=\"37px\"></colgroup><tr><td></td><td class=\"midashiS_C allline\" style=\"height:30px;\" rowspan=\"2\">被保険者<br>整理番号</td><td class=\"midashiS_C allline\" rowspan=\"2\">被保険者氏名</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\" colspan=\"4\">※1</td><td class=\"midashiS_C linetrb\" colspan=\"2\">決定後の標準報酬月額</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\" colspan=\"6\">※1</td><td class=\"midashiS_L linetlr\" style=\"padding-left:6px;\">※2</td><td></td></tr><tr><td></td><td class=\"midashiS_C linelrb\" colspan=\"4\">適用年月</td><td class=\"midashiS_C allline\">（健保）</td><td class=\"midashiS_C allline\">（厚年）</td><td class=\"midashiS_C linelrb\" colspan=\"6\">生年月日</td><td class=\"midashiS_C linelrb\">種別</td><td></td></tr><tr><td></td><template data-if=\"ne\" data-f=\"被保険者整理番号\"><td class=\"normalL_R2 allline\" style=\"height:30px; padding-right:6px;\"><span data-z=\"被保険者整理番号\"></span></td></template><template data-if=\"eq\" data-f=\"被保険者整理番号\"><td class=\"normalL_R2 allline\" style=\"height:30px; padding-right:6px;\"><span data-zb=\"被保険者整理番号\"></span></td></template><td class=\"normalM_L allline\" style=\"padding-left:12px;\"><span data-v=\"被保険者氏名\"></span></td><td class=\"normalL_L linetlb\" style=\"padding-left:6px;\"><span data-v=\"適用年月_元号\"></span></td><template data-if=\"ne\" data-f=\"適用年月_年\"><td class=\"normalL_R linetb\"><span data-z=\"適用年月_年\"></span></td></template><template data-if=\"eq\" data-f=\"適用年月_年\"><td class=\"normalL_R linetb\"><span data-zb=\"適用年月_年\"></span></td></template><td class=\"midashiL_L linetb\">．</td><template data-if=\"ne\" data-f=\"適用年月_月\"><td class=\"normalL_R linetrb\" style=\"padding-right:6px;\"><span data-z=\"適用年月_月\"></span></td></template><template data-if=\"eq\" data-f=\"適用年月_月\"><td class=\"normalL_R linetrb\" style=\"padding-right:6px;\"><span data-zb=\"適用年月_月\"></span></td></template><td class=\"normalL_R linetrb\" style=\"padding-right:0px;\"><span data-v=\"決定後の標準報酬月額_健保\"></span></td><td class=\"normalL_R linetrb\" style=\"padding-right:0px;\"><span data-v=\"決定後の標準報酬月額_厚年\"></span></td><td class=\"normalL_L linetlb\" style=\"padding-left:6px;\"><span data-v=\"生年月日_元号\"></span></td><template data-if=\"ne\" data-f=\"生年月日_年\"><td class=\"normalL_R linetb\"><span data-z=\"生年月日_年\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_年\"><td class=\"normalL_R linetb\"><span data-zb=\"生年月日_年\"></span></td></template><td class=\"midashiL_L linetb\">．</td><template data-if=\"ne\" data-f=\"生年月日_月\"><td class=\"normalL_R linetb\"><span data-z=\"生年月日_月\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_月\"><td class=\"normalL_R linetb\"><span data-zb=\"生年月日_月\"></span></td></template><td class=\"midashiL_L linetb\">．</td><template data-if=\"ne\" data-f=\"生年月日_日\"><td class=\"normalL_R linetrb\" style=\"padding-right:6px;\"><span data-z=\"生年月日_日\"></span></td></template><template data-if=\"eq\" data-f=\"生年月日_日\"><td class=\"normalL_R linetrb\" style=\"padding-right:6px;\"><span data-zb=\"生年月日_日\"></span></td></template><td class=\"normalM_L allline\" style=\"padding-left:6px;\"><span data-v=\"種別\"></span></td><td></td></tr></table></td></table><table class=\"detail\"><tr><td style=\"height:265px\"></td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\"><colgroup><col width=\"25px\"><col width=\"605px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:20px\">※1　元号　S：昭和　H：平成　R：令和</td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:25px\">※2　種別　第一種：男性　第二種：女性　第三種：坑内員　特例第一種：男性（基金加入）　特例第二種：女性（基金加入）<br>　　　　　 特例第三種：坑内員（基金加入）</td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:30px;padding-left:15px;\"> 上記のとおり標準報酬が決定されたので通知します。</td></tr></table></td></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\"><colgroup><col width=\"367px\"><col width=\"270px\"></colgroup><tr><td></td><template data-if=\"ne\" data-f=\"通知年月日\"><td class=\"normalM_L\" style=\"height:18px\"><span data-v=\"通知年月日\"></span></td></template><template data-if=\"eq\" data-f=\"通知年月日\"><td class=\"normalM_L\" style=\"height:18px\">      年  月  日</td></template></tr></table><table class=\"detail\"><colgroup><col width=\"350px\"><col width=\"287px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:18px\"><span data-v=\"初回発行年月日\"></span></td></tr></table><table class=\"detail\"><colgroup><col width=\"367px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:18px\">日　本　年　金　機　構　理　事　長</td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:18px\">（<span data-v=\"年金事務所名\"></span>年金事務所）</td></tr></table></td></table>",
+            "kyojiPage": "<table class=\"outline\" cellpadding=\"22px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"kyouji\"></template></td></tr></table>",
+            "kyouji": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"426px\"><col width=\"39px\"><col width=\"5px\"><col width=\"116px\"><col width=\"54px\"></colgroup><tr><td style=\"height:25px\"><br></td></tr><tr><td></td><td class=\"normalS_LG\" style=\"height:15px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"515px\"><col width=\"20px\"><col width=\"20px\"><col width=\"30px\"><col width=\"55px\"></colgroup><tr><td></td><td class=\"normalS_RG\" style=\"height:15px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_R\" style=\"height:15px\"><span data-v=\"SC\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"90px\"><col width=\"85px\"><col width=\"10px\"><col width=\"65px\"><col width=\"390px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:15px\">事業所整理記号</td><td></td><td class=\"normalM_L\" style=\"height:15px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"90px\"><col width=\"85px\"><col width=\"10px\"><col width=\"45px\"><col width=\"410px\"></colgroup><tr><td></td><td class=\"midashiM_L\" style=\"height:20px\">事業所番号</td><td></td><td class=\"normalM_R\" style=\"height:20px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"180px\"><col width=\"100px\"><col width=\"0px\"><col width=\"35px\"><col width=\"325px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:15px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:25px\">健康保険・厚生年金保険被保険者標準報酬決定通知書</td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:75px\"><br></td></tr></table><table class=\"detail\"><colgroup><col width=\"80px\"><col width=\"560px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:40px\">＊＊＊＊＊　付記　＊＊＊＊＊</td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">１．この通知書の決定に不服があるときは、この決定があったことを知った日の翌日から起算して３か月<br>　　以内に文書又は口頭で、社会保険審査官（地方厚生局内）に審査請求できます。また、その決定に不<br>　　服があるときは、決定書の謄本が送付された日の翌日から起算して２か月以内に社会保険審査会（厚<br>　　生労働省内）に再審査請求できます。なお、この決定の取消の訴えは、審査請求の決定（以下「決定<br>　　」という。）を経た後でないと、提起できませんが、審査請求があった日から２か月を経過しても決<br>　　定がないときや、この通知書の決定の執行等による著しい損害を避けるため緊急の必要があるとき、<br>　　その他正当な理由があるときは、決定を経なくても提起できます。この訴えは、決定（再審査請求を<br>　　した場合には、当該決定又は社会保険審査会の裁決。以下同じ。）があったことを知った日から６か<br>　　月以内に、日本年金機構を被告として提起できます。ただし、原則として、決定の日から１年を経過<br>　　すると訴えを提起できません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">２．この通知書を受け取ったら、すみやかに決定された標準報酬などを、それぞれの被保険者に通知しな<br>　　ければなりません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">３．この通知書は完結となった日から起算して２カ年間は、事業主が整理保存しておかなければなりませ<br>　　ん。</td></tr></table>"
+          }
+        }
+      },
+      "N7140001": {
+        "label": "月変（標準報酬改定通知書）",
+        "renki": {
+          "xslFile": "RenkiStylesheet/7140001.xsl",
+          "xslSha256": "3e2b69f26bcc0fd4b9cee9308892fb43172b718147f2d3234d5c2e8df5e0e89e",
+          "docTitle": "健康保険・厚生年金保険被保険者標準報酬改定一覧表",
+          "callsKyoji": false,
+          "zeroPaddingEmptyText": "0",
+          "zeroPadding2EmptyText": "0.",
+          "scope": "hpf-renki-7140001",
+          "bodyStyle": "word-break:break-all;",
+          "css": ".hpf-renki-7140001 table.outline{border:1px solid #000000;width:640px;height:940px;}.hpf-renki-7140001 table.detail{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-renki-7140001 table.hihokensha{border-collapse:collapse;width:640px;height:380px;table-layout:fixed;}.hpf-renki-7140001 table.Lterritory{width:320px;table-layout:fixed;}.hpf-renki-7140001 table.Rterritory{width:320px;table-layout:fixed;}.hpf-renki-7140001 td.outline{vertical-align:top;text-align:center;}.hpf-renki-7140001 td.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linetlb{border-top:1px solid #000000;border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linetrb{border-top:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linetb{border-top:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linelrb{border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linelb{border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.linerb{border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-renki-7140001 td.lineb{border-bottom:1px solid #000000;}.hpf-renki-7140001 .title{font-family:YuGothic, Yu Gothic;font-size:11pt;font-weight:bold;text-align:center;}.hpf-renki-7140001 .midashiS_C{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:center;}.hpf-renki-7140001 .midashiS_L{font-family:YuGothic, Yu Gothic;font-size:7pt;text-align:left;}.hpf-renki-7140001 .hmidashiS_C{font-family:YuGothic, Yu Gothic;font-size:7.1pt;text-align:center;}.hpf-renki-7140001 .hmidashiS_L{font-family:YuGothic, Yu Gothic;font-size:7.1pt;text-align:left;}.hpf-renki-7140001 .midashiM_L{font-family:YuGothic, Yu Gothic;font-size:8pt;text-align:left;}.hpf-renki-7140001 .normalS_L{font-family:YuMincho, Yu Mincho;font-size:7pt;text-align:left;}.hpf-renki-7140001 .normalS_TL{font-family:YuMincho, Yu Mincho;font-size:7pt;vertical-align:top;text-align:left;}.hpf-renki-7140001 .normalS_R{font-family:YuMincho, Yu Mincho;font-size:7pt;text-align:right;}.hpf-renki-7140001 .normalM_R{font-family:YuMincho, Yu Mincho;font-size:8pt;text-align:right;}.hpf-renki-7140001 .normalM_L{font-family:YuMincho, Yu Mincho;font-size:8pt;text-align:left;}.hpf-renki-7140001 .normalM_TL{font-family:YuMincho, Yu Mincho;font-size:8pt;vertical-align:top;text-align:left;}.hpf-renki-7140001 .normalL_L{font-family:YuMincho, Yu Mincho;font-size:9pt;text-align:left;}.hpf-renki-7140001 .normalL_TL{font-family:YuMincho, Yu Mincho;font-size:9pt;vertical-align:top;text-align:left;}.hpf-renki-7140001 .normalL_R{font-family:YuMincho, Yu Mincho;font-size:9pt;text-align:right;}.hpf-renki-7140001 .oshirase{font-family:YuMincho, Yu Mincho;font-size:7pt;line-height:11px;vertical-align:top;text-align:left;}.hpf-renki-7140001 .kyouji{font-family:YuMincho, Yu Mincho;font-size:8.8pt;vertical-align:top;text-align:left;}.hpf-renki-7140001 br.kaipage{font-family:YuGothic, Yu Gothic;font-size:10px;}.hpf-renki-7140001 pre.oshirase{word-wrap:break-word;font-family:YuMincho, Yu Mincho;font-size:7pt;}",
+          "fragments": {
+            "root": "<table border=\"0\" width=\"100%\" style=\"text-align:center\"><tr><td align=\"center\" style=\"vertical-align:top;\"><template data-slot=\"root\"></template></td></tr></table>",
+            "page": "<table class=\"outline\" cellpadding=\"20px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"header\"></template><table class=\"hihokensha\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><template data-slot=\"hihokensha\"></template></table></td></table><template data-slot=\"footer\"></template></td></tr></table><br class=\"kaipage\">",
+            "header": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"245px\"><col width=\"45px\"></colgroup><tr><td style=\"height:30px;\"></td></tr><tr><td></td><td class=\"normalS_L\" style=\"height:25px\"><span data-v=\"事業所郵便番号_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:15px;\"><span data-v=\"事業所所在地_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:15px;\"><span data-v=\"事業所所在地_送付先1\"></span></td><td></td></tr><tr><td></td><td class=\"normalL_TL\" style=\"height:34px;line-height:15px;\"><span data-v=\"事業所名称_送付先\"></span></td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"160px\"><col width=\"10px\"><col width=\"15px\"><col width=\"105px\"></colgroup><tr><td></td><td class=\"normalL_L\" style=\"height:20px\"><span data-v=\"事業主氏名_送付先\"></span></td><td></td><td class=\"normalL_L\" style=\"height:20px\">様</td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"145px\"><col width=\"100px\"><col width=\"0px\"><col width=\"35px\"><col width=\"40px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table></td><td style=\"vertical-align:top;\"><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"237px\"><col width=\"40px\"><col width=\"7px\"><col width=\"1px\"><col width=\"45px\"></colgroup><tr><td class=\"normalS_L\" style=\"height:25px\"></td></tr><tr><td></td><td class=\"midashiS_L\" style=\"height:10px\"><span data-v=\"外字表示_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"外字表示_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"132px\"><col width=\"50px\"><col width=\"3px\"><col width=\"120px\"><col width=\"35px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:10px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"55px\"><col width=\"30px\"><col width=\"5px\"><col width=\"30px\"><col width=\"230px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"SC\"></span></td><td></td></tr><tr><td style=\"height:5px\"></td></tr></table><table class=\"Rterritory\" cellpadding=\"3\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"250px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"oshirase allline\" style=\"height:185px;line-height:11px;\"><pre class=\"oshirase\"><span data-v=\"機構からのお知らせ\"></span></pre></td><td></td></tr><tr><td></td><td style=\"height:10px;\"></td><td></td></tr></table></td></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:33px\">健康保険・厚生年金保険被保険者標準報酬改定一覧表</td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"70px\"><col width=\"15px\"><col width=\"50px\"><col width=\"470px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\">事業所整理記号</td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"70px\"><col width=\"14px\"><col width=\"40px\"><col width=\"480px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\">事業所番号</td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table></td></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"47px\"><col width=\"170px\"><col width=\"18px\"><col width=\"22px\"><col width=\"25px\"><col width=\"73px\"><col width=\"73px\"><col width=\"15px\"><col width=\"20px\"><col width=\"20px\"><col width=\"25px\"><col width=\"62px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"hmidashiS_C allline\" style=\"height:40px\" rowspan=\"2\">被保険者<br>整理番号</td><td class=\"hmidashiS_C allline\" rowspan=\"2\">被保険者氏名</td><td class=\"hmidashiS_L allline\" style=\"padding-left:3px;\" rowspan=\"2\" colspan=\"3\">※1<br>　改定年月</td><td class=\"hmidashiS_C allline\" colspan=\"2\">決定後の標準報酬月額</td><td class=\"hmidashiS_L allline\" style=\"padding-left:3px;\" rowspan=\"2\" colspan=\"4\">※1<br>　 生年月日</td><td class=\"hmidashiS_L allline\" style=\"padding-left:3px;\" rowspan=\"2\">※2<br>　　種別</td><td></td></tr><tr><td></td><td class=\"hmidashiS_C allline\">（健保）</td><td class=\"hmidashiS_C allline\">（厚年）</td><td></td></tr></table></td></table>",
+            "hihokensha": "<colgroup><col width=\"30px\"><col width=\"47px\"><col width=\"170px\"><col width=\"18px\"><col width=\"22px\"><col width=\"25px\"><col width=\"73px\"><col width=\"73px\"><col width=\"15px\"><col width=\"20px\"><col width=\"20px\"><col width=\"25px\"><col width=\"62px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"normalL_R linelrb\" style=\"padding-right:5px;\"><span data-z=\"被保険者整理番号\"></span></td><td class=\"normalL_L linelrb\" style=\"padding-left:8px;\"><span data-v=\"被保険者氏名\"></span></td><td class=\"normalL_L lineb\" style=\"padding-left:13px;\"><span data-v=\"改定年月_元号\"></span></td><td class=\"normalL_R lineb\" style=\"height:25px;\"><span data-z2=\"改定年月_年\"></span></td><td class=\"normalL_R linerb\" style=\"padding-right:10px;\"><span data-z=\"改定年月_月\"></span></td><td class=\"normalL_R linelrb\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_健保\"></span></td><td class=\"normalL_R linelrb\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_厚年\"></span></td><td class=\"normalL_L linelb\" style=\"padding-left:10px;\"><span data-v=\"生年月日_元号\"></span></td><td class=\"normalL_R lineb\"><span data-z2=\"生年月日_年\"></span></td><td class=\"normalL_R lineb\"><span data-z2=\"生年月日_月\"></span></td><td class=\"normalL_R linerb\" style=\"padding-right:7px;\"><span data-z=\"生年月日_日\"></span></td><td class=\"normalM_L linelrb\" style=\"padding-left:5px;\"><span data-v=\"種別\"></span></td><td></td></tr>",
+            "footer": "<table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"555px\"><col width=\"50px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:15px\">※1　元号　　S：昭和　H：平成　R：令和</td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"line-height:12px;\">※2　種別　　第一種：男性　第二種：女性　第三種：坑内員　特例第一種：男性（基金加入）　特例第二種：女性（基金加入）<br>　　　　　　 特例第三種：坑内員（基金加入）</td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"padding-left:11px;\"></td><td></td></tr></table><table class=\"detail\"><colgroup><col width=\"365px\"><col width=\"275px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\"><template data-if=\"ne\" data-f=\"通知年月日\"><span data-v=\"通知年月日\"></span></template><template data-if=\"eq\" data-f=\"通知年月日\">\n\t\t\t\t\t\t\t\t\t      年　月　日\n\t\t\t\t\t\t\t\t</template></td></tr></table><table class=\"detail\"><colgroup><col width=\"353px\"><col width=\"287px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\"><span data-v=\"初回発行年月日\"></span></td></tr></table><table class=\"detail\"><colgroup><col width=\"370px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:25px\"></td></tr></table><table class=\"detail\"><colgroup><col width=\"370px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\">（<span data-v=\"年金事務所名\"></span>年金事務所）</td></tr></table></td></table>"
+          }
+        },
+        "kobetsu": {
+          "xslFile": "個別決定通知書Stylesheet/7140001.xsl",
+          "xslSha256": "2297808a58efede90c2554ac03a885049f1ba4d0c42333a1828ad4f7720e186f",
+          "docTitle": "健康保険・厚生年金保険被保険者標準報酬改定通知書",
+          "callsKyoji": true,
+          "zeroPaddingEmptyText": "0",
+          "zeroPadding2EmptyText": "0.",
+          "scope": "hpf-kobetsu-7140001",
+          "bodyStyle": "word-break:break-all;",
+          "css": ".hpf-kobetsu-7140001 table.outline{border:1px solid #000000;width:640px;height:940px;}.hpf-kobetsu-7140001 table.detail{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-kobetsu-7140001 table.Lterritory{width:320px;table-layout:fixed;}.hpf-kobetsu-7140001 table.Rterritory{width:320px;table-layout:fixed;}.hpf-kobetsu-7140001 td.outline{vertical-align:top;text-align:center;}.hpf-kobetsu-7140001 td.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7140001 td.linetb{border-top:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7140001 td.linetlb{border-top:1px solid #000000;border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7140001 td.linetrb{border-top:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7140001 td.linelrb{border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-kobetsu-7140001 td.linetlr{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;}.hpf-kobetsu-7140001{font-family:\"Yu Mincho\", serif;}.hpf-kobetsu-7140001 pre{font-family:\"YuMincho\", \"Yu Mincho\";}.hpf-kobetsu-7140001 div{white-space:pre;font-family:\"Yu Mincho\", serif;}.hpf-kobetsu-7140001 .title{font-family:YuGothic, 'Yu Gothic';font-size:11pt;font-weight:bold;text-align:center;}.hpf-kobetsu-7140001 .midashiS_C{font-family:'Yu Gothic', serif;font-size:7pt;text-align:center;}.hpf-kobetsu-7140001 .midashiS_L{font-family:YuGothic, 'Yu Gothic';font-size:7pt;text-align:left;}.hpf-kobetsu-7140001 .midashiM_L{font-family:YuGothic, 'Yu Gothic';font-size:8pt;text-align:left;}.hpf-kobetsu-7140001 .normalS_L{font-family:YuMincho, 'Yu Mincho';font-size:7pt;text-align:left;}.hpf-kobetsu-7140001 .normalS_TL{font-family:YuMincho, 'Yu Mincho';font-size:7pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7140001 .normalS_R{font-family:YuMincho, 'Yu Mincho';font-size:7pt;text-align:right;}.hpf-kobetsu-7140001 .normalM_R{font-family:YuMincho, 'Yu Mincho';font-size:8pt;text-align:right;}.hpf-kobetsu-7140001 .normalM_L{font-family:YuMincho, 'Yu Mincho';font-size:8pt;text-align:left;}.hpf-kobetsu-7140001 .normalM_TL{font-family:YuMincho, 'Yu Mincho';font-size:8pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7140001 .normalL_L{font-family:YuMincho, 'Yu Mincho';font-size:9pt;text-align:left;}.hpf-kobetsu-7140001 .normalL_TL{font-family:YuMincho, 'Yu Mincho';font-size:9pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7140001 .normalL_R{font-family:YuMincho, 'Yu Mincho';font-size:9pt;text-align:right;}.hpf-kobetsu-7140001 .oshirase{font-family:YuMincho, 'Yu Mincho';font-size:7pt;line-height:11px;vertical-align:top;text-align:left;}.hpf-kobetsu-7140001 .kyouji{font-family:YuMincho, 'Yu Mincho';font-size:8.8pt;vertical-align:top;text-align:left;}.hpf-kobetsu-7140001 br{font-family:YuGothic, 'Yu Gothic';font-size:10px;}.hpf-kobetsu-7140001 pre.oshirase{font-family:YuMincho, 'Yu Mincho';line-break:anywhere;word-wrap:break-word;overflow-wrap:break-word;font-size:7pt;}",
+          "fragments": {
+            "root": "<table border=\"0\" width=\"100%\" style=\"text-align:center\"><tr><td align=\"center\" style=\"vertical-align:top;\"><template data-slot=\"root\"></template></td></tr></table>",
+            "page": "<table class=\"outline\" cellpadding=\"20px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"hihokensha\"></template></td></tr></table><br class=\"kaipage\">",
+            "hihokensha": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"245px\"><col width=\"45px\"></colgroup><tr><td style=\"height:30px;\"></td></tr><tr><td></td><td class=\"normalS_L\" style=\"height:25px\"><span data-v=\"事業所郵便番号_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:15px;\"><span data-v=\"事業所所在地_送付先\"></span></td><td></td></tr><tr><td></td><td class=\"normalM_L\" style=\"height:15px;\"><span data-v=\"事業所所在地_送付先1\"></span></td><td></td></tr><tr><td></td><td class=\"normalL_TL\" style=\"height:34px;line-height:15px;\"><span data-v=\"事業所名称_送付先\"></span></td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"160px\"><col width=\"10px\"><col width=\"15px\"><col width=\"105px\"></colgroup><tr><td></td><td class=\"normalL_L\" style=\"height:20px\"><span data-v=\"事業主氏名_送付先\"></span></td><td></td><td class=\"normalL_L\" style=\"height:20px\">様</td><td></td></tr></table><table class=\"Lterritory\"><colgroup><col width=\"140px\"><col width=\"100px\"><col width=\"0px\"><col width=\"32px\"><col width=\"48px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table></td><td style=\"vertical-align:top;\"><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"234px\"><col width=\"39px\"><col width=\"6px\"><col width=\"5px\"><col width=\"36px\"></colgroup><tr><td class=\"normalS_L\" style=\"height:25px\"></td></tr><tr><td></td><td class=\"midashiS_L\" style=\"height:10px\"><span data-v=\"外字表示_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"外字表示_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"123px\"><col width=\"39px\"><col width=\"7px\"><col width=\"116px\"><col width=\"35px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:10px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:10px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"Rterritory\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"55px\"><col width=\"25px\"><col width=\"3px\"><col width=\"35px\"><col width=\"202px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"SC\"></span></td><td></td></tr><tr><td style=\"height:5px\"></td></tr></table><table class=\"Rterritory\" cellpadding=\"3\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"250px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"oshirase allline\" style=\"height:185px;line-height:11px;\"><pre class=\"oshirase\"><span data-v=\"機構からのお知らせ\"></span></pre></td><td></td></tr><tr><td></td><td style=\"height:10px;\"></td><td></td></tr></table></td></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:33px\">健康保険・厚生年金保険被保険者標準報酬改定通知書</td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"70px\"><col width=\"15px\"><col width=\"50px\"><col width=\"470px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\">事業所整理記号</td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"70px\"><col width=\"15px\"><col width=\"30px\"><col width=\"490px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\">事業所番号</td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table></td></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"47px\"><col width=\"170px\"><col width=\"18px\"><col width=\"22px\"><col width=\"23px\"><col width=\"73px\"><col width=\"73px\"><col width=\"15px\"><col width=\"20px\"><col width=\"20px\"><col width=\"20px\"><col width=\"62px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"midashiS_C allline\" style=\"height:30px\" rowspan=\"2\">被保険者<br>整理番号</td><td class=\"midashiS_C allline\" rowspan=\"2\">被保険者氏名</td><td class=\"midashiS_L linetlr\" style=\"padding-left:3px;\" rowspan=\"1\" colspan=\"3\">※1</td><td class=\"midashiS_C allline\" colspan=\"2\">決定後の標準報酬月額</td><td class=\"midashiS_L linetlr\" style=\"padding-left:3px;\" rowspan=\"1\" colspan=\"4\">※1</td><td class=\"midashiS_L linetlr\" style=\"padding-left:3px;\" rowspan=\"1\">※2</td><td></td></tr><tr><td></td><td class=\"midashiS_C linelrb\" colspan=\"3\">改定年月</td><td class=\"midashiS_C allline\">（健保）</td><td class=\"midashiS_C allline\">（厚年）</td><td class=\"midashiS_C linelrb\" colspan=\"4\">生年月日</td><td class=\"midashiS_C linelrb\">種別</td><td></td></tr><tr><td></td><td class=\"normalL_R linelrb\" style=\"padding-right:5px;\"><span data-z=\"被保険者整理番号\"></span></td><td class=\"normalL_L allline\" style=\"padding-left:8px;\"><span data-v=\"被保険者氏名\"></span></td><td class=\"normalL_L linetb\" style=\"padding-left:10px;\"><span data-v=\"改定年月_元号\"></span></td><td class=\"normalL_R linetb\" style=\"height:25px;\"><span data-z2=\"改定年月_年\"></span></td><td class=\"normalL_R linetrb\" style=\"padding-right:6px;\"><span data-z=\"改定年月_月\"></span></td><td class=\"normalL_R allline\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_健保\"></span></td><td class=\"normalL_R allline\" style=\"padding-right:6px;\"><span data-v=\"決定後の標準報酬月額_厚年\"></span></td><td class=\"normalL_L linetlb\" style=\"padding-left:10px;\"><span data-v=\"生年月日_元号\"></span></td><td class=\"normalL_R linetb\"><span data-z2=\"生年月日_年\"></span></td><td class=\"normalL_R linetb\"><span data-z2=\"生年月日_月\"></span></td><td class=\"normalL_R linetrb\" style=\"padding-right:5px;\"><span data-z=\"生年月日_日\"></span></td><td class=\"normalM_L allline\" style=\"padding-left:5px;\"><span data-v=\"種別\"></span></td><td></td></tr></table></td></table><table class=\"detail\" cellpadding=\"1\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"70px\"><col width=\"570px\"></colgroup><tr><td style=\"height:335px;\"></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"35px\"><col width=\"555px\"><col width=\"50px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:15px\">※1　元号　　S：昭和　H：平成　R：令和</td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"line-height:12px;\">※2　種別　　第一種：男性　第二種：女性　第三種：坑内員　特例第一種：男性（基金加入）　特例第二種：女性（基金加入）<br>　　　　　　 特例第三種：坑内員（基金加入）</td><td></td></tr><tr><td></td><td class=\"normalS_L\" style=\"padding-left:11px;\">上記のとおり標準報酬が決定されたので通知します。</td><td></td></tr></table><table class=\"detail\"><colgroup><col width=\"365px\"><col width=\"275px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\"><template data-if=\"ne\" data-f=\"通知年月日\"><span data-v=\"通知年月日\"></span></template><template data-if=\"eq\" data-f=\"通知年月日\">\n\t\t\t\t\t\t\t\t\t      年　月　日\n\t\t\t\t\t\t\t\t</template></td></tr></table><table class=\"detail\"><colgroup><col width=\"353px\"><col width=\"287px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\"><span data-v=\"初回発行年月日\"></span></td></tr></table><table class=\"detail\"><colgroup><col width=\"370px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:25px\">日　本　年　金　機　構　理　事　長</td></tr></table><table class=\"detail\"><colgroup><col width=\"370px\"><col width=\"270px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:15px\">（<span data-v=\"年金事務所名\"></span>年金事務所）</td></tr></table></td></table>",
+            "kyojiPage": "<table class=\"outline\" cellpadding=\"20px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"kyouji\"></template></td></tr></table>",
+            "kyouji": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"426px\"><col width=\"39px\"><col width=\"5px\"><col width=\"116px\"><col width=\"54px\"></colgroup><tr><td style=\"height:25px\"><br></td></tr><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"515px\"><col width=\"20px\"><col width=\"20px\"><col width=\"30px\"><col width=\"55px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"SC\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"80px\"><col width=\"75px\"><col width=\"5px\"><col width=\"60px\"><col width=\"420px\"></colgroup><tr><td></td><td class=\"midashiS_L \" style=\"height:20px\">事業所整理記号</td><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"80px\"><col width=\"75px\"><col width=\"5px\"><col width=\"40px\"><col width=\"440px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\">事業所番号</td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"150px\"><col width=\"100px\"><col width=\"0px\"><col width=\"35px\"><col width=\"355px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:15px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:33px\">健康保険・厚生年金保険被保険者標準報酬改定通知書</td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:75px\"><br></td></tr></table><table class=\"detail\"><colgroup><col width=\"80px\"><col width=\"560px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:40px\">＊＊＊＊＊　付記　＊＊＊＊＊</td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">１．この通知書の決定に不服があるときは、この決定があったことを知った日の翌日から起算して３か月<br>　　以内に文書又は口頭で、社会保険審査官（地方厚生局内）に審査請求できます。また、その決定に不<br>　　服があるときは、決定書の謄本が送付された日の翌日から起算して２か月以内に社会保険審査会（厚<br>　　生労働省内）に再審査請求できます。なお、この決定の取消の訴えは、審査請求の決定（以下「決定<br>　　」という。）を経た後でないと、提起できませんが、審査請求があった日から２か月を経過しても決<br>　　定がないときや、この通知書の決定の執行等による著しい損害を避けるため緊急の必要があるとき、<br>　　その他正当な理由があるときは、決定を経なくても提起できます。この訴えは、決定（再審査請求を<br>　　した場合には、当該決定又は社会保険審査会の裁決。以下同じ。）があったことを知った日から６か<br>　　月以内に、日本年金機構を被告として提起できます。ただし、原則として、決定の日から１年を経過<br>　　すると訴えを提起できません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">２．この通知書を受け取ったら、すみやかに決定された標準報酬などを、それぞれの被保険者に通知しな<br>　　ければなりません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">３．この通知書は完結となった日から起算して２カ年間は、事業主が整理保存しておかなければなりませ<br>　　ん。</td></tr></table>"
+          }
+        }
+      }
+    }
+  };
+
+  // ---------- 様式表示用の読み取り（共通パース層に足したもの） ----------
+  // parseXmlText で1回だけ読んだ XML の DOM から、様式の描画に使う値を取り出す。
+  // 戻り値: { formCode, supported, reason, persons:[ {タグ名: [値の文字列…]} ] }
+  // 公式XSLと同じく、ルート要素の直下の _被保険者、その直下の項目だけを見る（名前空間付きは対象外）。
+  function extractPrintDoc(doc, xmlString){
+    var info = { formCode: null, supported: false, reason: null, persons: [] };
+    var msgs = FORM_DEFS.common.messages;
+    if(/<!DOCTYPE/i.test(xmlString)){
+      info.reason = msgs.doctype;                // XXE・実体膨張への多重防御（parseXmlText の冒頭でも拒否している）
+      return info;
+    }
+    var rootEl = doc.documentElement;
+    info.formCode = rootEl ? rootEl.localName : null;
+    if(!rootEl || rootEl.namespaceURI || !Object.prototype.hasOwnProperty.call(FORM_DEFS.forms, rootEl.localName)){
+      info.reason = msgs.unsupported;
+      return info;
+    }
+    info.supported = true;
+    for(var c = rootEl.firstElementChild; c; c = c.nextElementSibling){
+      if(c.namespaceURI || c.localName !== "_被保険者") continue;
+      var record = Object.create(null);         // 項目名がそのままキーになるので、継承のない入れ物にする
+      for(var f = c.firstElementChild; f; f = f.nextElementSibling){
+        if(f.namespaceURI) continue;
+        if(!record[f.localName]) record[f.localName] = [];
+        record[f.localName].push(f.textContent);  // XPathの文字列値（子孫の文字をつなげたもの）と同じ
+      }
+      info.persons.push(record);
+    }
+    return info;
+  }
+
+  // XMLの文字列から様式表示用の値を取り出す（検証用の renderDocs から使う。DOCTYPE はパースの前に拒否）
+  function extractPrintDocFromText(xmlString){
+    var msgs = FORM_DEFS.common.messages;
+    if(/<!DOCTYPE/i.test(xmlString)) return { formCode: null, supported: false, reason: msgs.doctype, persons: [] };
+    var doc;
+    try{
+      doc = new DOMParser().parseFromString(xmlString, "application/xml");
+    }catch(e){
+      return { formCode: null, supported: false, reason: msgs.notXml, persons: [] };
+    }
+    if(hasParserError(doc)) return { formCode: null, supported: false, reason: msgs.notXml, persons: [] };
+    return extractPrintDoc(doc, xmlString);
+  }
+
+  // ---------- 公式XSLの number()（libxslt）の再現 ----------
+  // libxslt の実測（2026-10-27・lxml 6.1.1 / libxslt 1.1.45。golden_extra で確認）:
+  //   '1e3'→'1000'、'5e'→'5'、'1234567890'→'1234567890'、'9999999999'→'9.999999999e+09'、
+  //   '12345678901'→'1.2345678901e+10'、'0.000001'→'1e-06'、'123456789.123456789'→'123456789.123457'、
+  //   '-'→NaN、'+5'→NaN、' 5 '→'5'、'-0'→'0'、'.5'→'0.5'
+  // XPath 1.0 の決まりと違い、libxslt は指数（e）を受け付け、大きい数や小さい数を指数表記で書く。
+  // 前後の空白として無視するのは 半角スペース・タブ・CR・LF だけ（全角スペースは数字にならない）。
+  var XPATH_BLANKS = " \t\r\n";
+  function isDigitChar(ch){ return ch >= "0" && ch <= "9"; }
+  // 文字列 → 数値（libxml2 の xmlXPathStringEvalNumber と同じ読み方。読めなければ NaN）
+  function libxsltParseNumber(raw){
+    var s = String(raw), i = 0, n = s.length;
+    while(i < n && XPATH_BLANKS.indexOf(s.charAt(i)) >= 0) i++;
+    var negative = false;
+    if(s.charAt(i) === "-"){ negative = true; i++; }
+    if(s.charAt(i) !== "." && !isDigitChar(s.charAt(i))) return NaN;
+    var start = i, hasInt = false;
+    while(i < n && isDigitChar(s.charAt(i))){ i++; hasInt = true; }
+    if(s.charAt(i) === "."){
+      i++;
+      if(!isDigitChar(s.charAt(i)) && !hasInt) return NaN;
+      while(i < n && isDigitChar(s.charAt(i))) i++;
+    }
+    var mantissa = s.slice(start, i);
+    var exponent = 0;
+    if(s.charAt(i) === "e" || s.charAt(i) === "E"){
+      i++;
+      var expNegative = false;
+      if(s.charAt(i) === "-"){ expNegative = true; i++; } else if(s.charAt(i) === "+"){ i++; }
+      var expStart = i;
+      while(i < n && isDigitChar(s.charAt(i))) i++;
+      exponent = expStart < i ? parseInt(s.slice(expStart, i), 10) : 0;   // 「5e」のように数字がなければ 0
+      if(expNegative) exponent = -exponent;
+    }
+    while(i < n && XPATH_BLANKS.indexOf(s.charAt(i)) >= 0) i++;
+    if(i !== n) return NaN;
+    var value = parseFloat(mantissa + "e" + exponent);
+    return negative ? -value : value;
+  }
+  // 小数部の末尾の0（と、残った「.」）を取る
+  function stripFractionZeros(t){
+    if(t.indexOf(".") < 0) return t;
+    t = t.replace(/0+$/, "");
+    return t.replace(/\.$/, "");
+  }
+  // 数値 → 文字列（libxml2 の xmlXPathFormatNumber と同じ書き方）
+  function libxsltFormatNumber(v){
+    if(isNaN(v)) return "NaN";
+    if(v === Infinity) return "Infinity";
+    if(v === -Infinity) return "-Infinity";
+    if(v > -2147483648 && v < 2147483647 && v === Math.trunc(v)) return String(v === 0 ? 0 : v); // 整数（-0 は 0）
+    var abs = Math.abs(v);
+    if((abs > 1e9 || abs < 1e-5) && abs !== 0){
+      // 指数表記（C の %.14e と同じ。指数は2桁以上）
+      var m = /^(-?\d(?:\.\d+)?)e([+-])(\d+)$/.exec(v.toExponential(14));
+      var expDigits = m[3].length < 2 ? "0" + m[3] : m[3];
+      return stripFractionZeros(m[1]) + "e" + m[2] + expDigits;
+    }
+    var integerPlace = Math.trunc(Math.log10(abs));
+    var fractionPlace = integerPlace > 0 ? 15 - integerPlace - 1 : 15 - integerPlace;
+    return stripFractionZeros(v.toFixed(fractionPlace));
+  }
+  function libxsltNumberText(raw){ return libxsltFormatNumber(libxsltParseNumber(raw)); }
+
+  // 画面・印刷に出す前ゼロ除去。公式と同じ結果になる「素直な数字」だけ数字として出す。
+  // 次のときは null を返す（呼び出し側で XML の値をそのまま出して警告する＝意図した差分1）:
+  //   数字として読めない（全角数字・英字・「+」付き・「-」だけ など）／指数の「e」を含む／整数部が10桁以上／
+  //   公式の書き方が指数表記になる（0.000001 など）
+  function displayNumberText(raw){
+    var s = String(raw).replace(/^[\x20\x09\x0D\x0A]+|[\x20\x09\x0D\x0A]+$/g, "");
+    if(!/^-?(\d+(\.\d*)?|\.\d+)$/.test(s)) return null;
+    var intDigits = s.replace(/^-/, "").split(".")[0].replace(/^0+/, "");
+    if(intDigits.length > 9) return null;
+    var t = libxsltNumberText(raw);
+    if(t === "NaN" || /e/.test(t)) return null;
+    return t;
+  }
+
+  // ---------- 骨組みHTML（定数）を DOM の部品にする ----------
+  // 様式ごとの骨組みは1回だけ解析して取っておき、使うたびに複製する（XMLの値は取っておかない）。
+  var fragmentCache = Object.create(null);
+  function cloneFragment(formCode, style, part){
+    var key = formCode + "|" + style + "|" + part;
+    if(!fragmentCache[key]){
+      var tpl = document.createElement("template");
+      tpl.innerHTML = FORM_DEFS.forms[formCode][style].fragments[part]; // 定数のみ（XMLの値は入っていない）
+      fragmentCache[key] = tpl;
+    }
+    return document.importNode(fragmentCache[key].content, true);
+  }
+
+  // 被保険者1人分の値の取り出し
+  function fieldValues(record, tag){ return record[tag] || []; }
+
+  // 同じ項目の要素が2つ以上あるときの扱い。
+  //   公式は1つ目の値を使う（1つ目が空欄なら空欄・NaN になる）。作り直し版は、1つ目が空欄で2つ目以降に値があれば
+  //   値のあるものを「／」でつないで出し、どの場合も警告する（S2）。公式互換モードでは公式と同じ扱いにする。
+  function effectiveValues(record, tag, ctx){
+    var vals = fieldValues(record, tag);
+    if(ctx.officialCompat || vals.length <= 1) return vals;
+    var allSame = vals.every(function(v){ return v === vals[0]; });
+    var shown = vals[0];
+    if(vals[0] === ""){
+      var filled = vals.filter(function(v){ return v !== ""; });
+      if(filled.length > 0) shown = filled.join("／");
+    }
+    if(!allSame) addPrintWarning(ctx, "dup", tag, vals.join("／"), "", shown);
+    return [shown];
+  }
+
+  // 公式の xsl:if（test="タグ!=''" / test="タグ=''"）を評価して、残すか消すかを決める。
+  // XPath の比較と同じく、タグが無いときはどちらも偽（その欄ごと出ない）。値が複数あれば「どれか1つ」で判定する。
+  function resolveConditions(frag, record, ctx){
+    var tpl;
+    while((tpl = frag.querySelector("template[data-if]"))){
+      var vals = effectiveValues(record, tpl.getAttribute("data-f"), ctx);
+      var keep;
+      if(tpl.getAttribute("data-if") === "ne") keep = vals.some(function(v){ return v !== ""; });
+      else keep = vals.some(function(v){ return v === ""; });
+      if(keep) tpl.replaceWith(document.importNode(tpl.content, true));
+      else tpl.remove();
+    }
+  }
+
+  // 値の目印（span）を文字ノードに置き換える。意図した差分は ctx.warnings に記録する。
+  //   ctx = { officialCompat: 検証用に公式（libxslt）と同じ表示を出すか, formDef, warnings: [], seen: {}, where: {…} }
+  function fillValues(frag, record, ctx){
+    var spans = frag.querySelectorAll("span[data-v],span[data-z],span[data-z2],span[data-zb]");
+    Array.prototype.forEach.call(spans, function(span){
+      var text = "";
+      var tag, vals;
+      if(span.hasAttribute("data-v")){
+        tag = span.getAttribute("data-v");
+        vals = effectiveValues(record, tag, ctx);
+        text = vals.length ? vals[0] : "";
+      } else if(span.hasAttribute("data-zb")){
+        // 公式が「0」と出す場所（値が空欄）。決定により空欄のまま出す＝意図した差分2
+        tag = span.getAttribute("data-zb");
+        text = ctx.officialCompat ? "0" : "";
+        addPrintWarning(ctx, "blank", tag, "", "0", text);
+      } else {
+        var withDot = span.hasAttribute("data-z2");
+        tag = span.getAttribute(withDot ? "data-z2" : "data-z");
+        vals = effectiveValues(record, tag, ctx);
+        var emptyText = withDot ? ctx.formDef.zeroPadding2EmptyText : ctx.formDef.zeroPaddingEmptyText;
+        var suffix = withDot ? "." : "";
+        var anyFilled = vals.some(function(v){ return v !== ""; });
+        var anyEmpty = vals.some(function(v){ return v === ""; });
+        if(vals.length === 0){
+          text = "";                            // タグが無い: 公式も何も出さない
+        } else if(anyFilled){
+          // 公式: number(1つ目の値)。公式互換モードはそのまま、通常は素直な数字だけ数字として出す
+          var compatText = libxsltNumberText(vals[0]) + suffix;
+          if(ctx.officialCompat){
+            text = compatText;
+          } else {
+            var num = displayNumberText(vals[0]);
+            if(num === null){
+              // 数字として素直に読めない値: XMLの値をそのまま出して警告（意図した差分1）。区切りの「.」は公式どおり付ける
+              text = vals[0] + suffix;
+              addPrintWarning(ctx, "nan", tag, vals[0], compatText, text);
+            } else {
+              text = num + suffix;
+            }
+          }
+        } else if(anyEmpty){
+          // 空欄: 公式は zero-padding「0」／zero-padding2「0.」（様式による）。決定により「.」も出さず空欄＋警告（意図した差分2）
+          text = ctx.officialCompat ? (emptyText || "") : "";
+          if(emptyText) addPrintWarning(ctx, "blank", tag, "", emptyText, text);
+        }
+      }
+      span.replaceWith(document.createTextNode(text));
+    });
+  }
+
+  // 警告を足す。同じ文書・同じ人・同じ項目・同じ種類の警告は1回だけにする（見出し部分が毎ページ出るため）。
+  function addPrintWarning(ctx, kind, tag, raw, compatText, shownText){
+    var key = [kind, ctx.where.docIndex, ctx.where.personIndex, tag].join("|");
+    if(ctx.seen[key]) return;
+    ctx.seen[key] = true;
+    ctx.warnings.push({
+      kind: kind, docIndex: ctx.where.docIndex, fileName: ctx.where.fileName,
+      personIndex: ctx.where.personIndex, field: tag, raw: raw,
+      compatText: compatText, shownText: shownText
+    });
+  }
+
+  // 被保険者1人分の部品（header / hihokensha / footer / kyouji）を作る
+  function buildPart(formCode, style, part, record, ctx, personIndex){
+    var frag = cloneFragment(formCode, style, part);
+    var saved = ctx.where.personIndex;
+    ctx.where.personIndex = personIndex;
+    resolveConditions(frag, record, ctx);
+    fillValues(frag, record, ctx);
+    ctx.where.personIndex = saved;
+    return frag;
+  }
+
+  // 骨組みの差し込み口（template[data-slot]）に部品を入れる。見つからなければ骨組みの誤りなので止める。
+  function fillSlot(frag, slotName, content){
+    var slot = frag.querySelector('template[data-slot="' + slotName + '"]');
+    if(!slot) throw new Error("様式の骨組みに差し込み口「" + slotName + "」がありません");
+    slot.replaceWith(content);
+  }
+
+  // 用紙1枚分のシートを作る。公式の body と外側の表（中央寄せ）もそのまま再現する。
+  function makeSheet(formCode, style, pageContent){
+    var def = FORM_DEFS.forms[formCode][style];
+    var sheetDef = FORM_DEFS.common.sheet;
+    var sheet = document.createElement("div");
+    sheet.className = "hp-sheet";
+    sheet.style.width = sheetDef.widthMm + "mm";
+    sheet.style.minHeight = sheetDef.minHeightMm + "mm";
+    sheet.style.paddingTop = sheetDef.paddingTopMm + "mm";
+    sheet.style.paddingBottom = sheetDef.paddingBottomMm + "mm";
+    var body = document.createElement("div");
+    body.className = "hp-body " + def.scope;     // 様式ごとのCSSはこのクラスの中だけに効く
+    body.setAttribute("style", def.bodyStyle);   // 公式の <body style="…">（定数）
+    // 倍率（設定の zoom と、高いシートの縮小）は、ここではかけない。measureSheets で高さを測ってから1回だけかける
+    var rootFrag = cloneFragment(formCode, style, "root");
+    fillSlot(rootFrag, "root", pageContent);
+    // 公式がページとページの間に入れる空行（<br class="kaipage">）は、シートごとに改ページする作りでは不要なので除く（文字はない）
+    Array.prototype.forEach.call(rootFrag.querySelectorAll("br.kaipage"), function(br){ br.remove(); });
+    body.appendChild(rootFrag);
+    // 下端の「電子公文書（XML）から作成した写し」の表記は入れない（2026-10-27 原さん指示）
+    sheet.appendChild(body);
+    return sheet;
+  }
+
+  // 連記式: 15人ずつ1ページ。header/footer は文書の1人目の値（公式どおり）。教示文はない（公式どおり）。
+  function buildRenkiSheets(formCode, persons, ctx){
+    var sheets = [];
+    var perPage = FORM_DEFS.common.renkiPersonsPerPage;
+    var pageCount = Math.ceil(persons.length / perPage);
+    for(var p = 0; p < pageCount; p++){
+      var page = cloneFragment(formCode, "renki", "page");
+      fillSlot(page, "header", buildPart(formCode, "renki", "header", persons[0], ctx, 1));
+      var rows = document.createDocumentFragment();
+      for(var i = p * perPage; i < Math.min(persons.length, (p + 1) * perPage); i++){
+        var rowFrag = buildPart(formCode, "renki", "hihokensha", persons[i], ctx, i + 1);
+        // 【意図した差分（原さん決定 D1）】公式XSLは1人ごとに同じ列幅の colgroup を出すため、今のChromeでは
+        // 2人目以降の分だけ列が増え、表の幅が数千px（実測 8,535px）に広がって列がつぶれる（1人だけのときは正しく出る）。
+        // 1人のときと同じ見た目にするため、列幅の定義（colgroup）は各ページの1人目の分だけ残す。文字は変わらない。
+        if(i > p * perPage){
+          Array.prototype.forEach.call(rowFrag.querySelectorAll("colgroup"), function(cg){ cg.remove(); });
+        }
+        rows.appendChild(rowFrag);
+      }
+      fillSlot(page, "hihokensha", rows);
+      fillSlot(page, "footer", buildPart(formCode, "renki", "footer", persons[0], ctx, 1));
+      var renkiSheet = makeSheet(formCode, "renki", page);
+      var firstNo = p * perPage + 1, lastNo = Math.min(persons.length, (p + 1) * perPage);
+      renkiSheet.hpLabel = "一覧表の" + (p + 1) + "枚目（ファイル内の" + (firstNo === lastNo ? firstNo : firstNo + "〜" + lastNo) + "人目）";
+      sheets.push(renkiSheet);
+    }
+    return sheets;
+  }
+
+  // 個別: 1人1ページ（各ページはその人の値）＋最後に教示文（付記）1ページ（文書の1人目の値）
+  function buildKobetsuSheets(formCode, persons, ctx){
+    var sheets = [];
+    persons.forEach(function(rec, i){
+      var page = cloneFragment(formCode, "kobetsu", "page");
+      fillSlot(page, "hihokensha", buildPart(formCode, "kobetsu", "hihokensha", rec, ctx, i + 1));
+      var kobetsuSheet = makeSheet(formCode, "kobetsu", page);
+      kobetsuSheet.hpLabel = "ファイル内の" + (i + 1) + "人目の通知書";
+      sheets.push(kobetsuSheet);
+    });
+    // 0人のとき: 公式の個別は、教示文の呼び出しが人数の判定の外にあるため、文字のない空の外枠が1つ出る
+    //（連記式は何も出ない）。作り直し版は、空の枠を印刷しても意味がないので何も出さない（文字の照合結果は同じ）。
+    if(persons.length > 0){
+      var kyoji = cloneFragment(formCode, "kobetsu", "kyojiPage");
+      fillSlot(kyoji, "kyouji", buildPart(formCode, "kobetsu", "kyouji", persons[0], ctx, 1));
+      var kyojiSheet = makeSheet(formCode, "kobetsu", kyoji);
+      kyojiSheet.hpLabel = "最後の付記（教示文）のページ";
+      sheets.push(kyojiSheet);
+    }
+    return sheets;
+  }
+
+  // 様式ごとのCSSを1回だけ <style> として入れる（中身は FORM_DEFS の定数）
+  var formCssInjected = false;
+  function ensureFormCss(){
+    if(formCssInjected) return;
+    var css = "";
+    Object.keys(FORM_DEFS.forms).forEach(function(code){
+      ["renki", "kobetsu"].forEach(function(style){ css += FORM_DEFS.forms[code][style].css; });
+    });
+    var el = document.createElement("style");
+    el.textContent = css;
+    document.head.appendChild(el);
+    formCssInjected = true;
+  }
+
+  // シートを実際に画面に置いて測り、お知らせのはみ出しと、高いシートの余白・倍率を決める。
+  // 順番（correctness 2巡目の指摘）:
+  //   1. どのシートにも倍率をかけていない状態で、お知らせ欄（pre）の高さを測る（倍率の影響を受けない値）
+  //   2. 同じく倍率なしで様式の高さ（naturalHeight）を測る
+  //   3. 設定の倍率（sheet.zoom）をかけた高さが、ふつうの余白で1枚に入るか判定する
+  //   4. 入らないシートだけ余白を詰め、使える高さ ÷ naturalHeight で「1枚に入る倍率」を出す。
+  //      最終の倍率 = min(設定の倍率, 1枚に入る倍率)。設定の倍率をかけるのはここの1回だけ
+  //   5. 最終の倍率が下限（minZoom）を下回るなら縮小せず（設定の倍率のまま）、はみ出しとして記録する
+  // 結果はシートごとに docsInfo[].sheetResults へ記録する（警告とページ数の目安に使う）。
+  // 計測用の置き場（host）は、途中で失敗しても必ず消す。
+  var MM_TO_PX = 96 / 25.4;
+  function measureSheets(area, docsInfo){
+    var sheetDef = FORM_DEFS.common.sheet;
+    var limit = FORM_DEFS.common.oshiraseMaxHeightPx;
+    var normalCapacity = (sheetDef.minHeightMm - sheetDef.paddingTopMm - sheetDef.paddingBottomMm) * MM_TO_PX;
+    var tallUsable = (sheetDef.minHeightMm - sheetDef.tallPaddingTopMm - sheetDef.tallPaddingBottomMm) * MM_TO_PX - 2; // 端数で2枚目に出ないよう2px余裕
+    var pageHeightPx = 297 * MM_TO_PX;
+    var host = document.createElement("div");
+    host.style.cssText = "position:absolute;left:-20000px;top:0;visibility:hidden;";
+    document.body.appendChild(host);
+    try{
+      host.appendChild(area);
+      docsInfo.forEach(function(d){
+        d.sheetResults = d.sheetEls.map(function(sheet){
+          var body = sheet.querySelector(".hp-body");
+          body.style.zoom = "";                    // 1・2: 倍率なしで測る
+          var oshiraseOver = false;
+          Array.prototype.forEach.call(sheet.querySelectorAll("pre.oshirase"), function(pre){
+            var cs = window.getComputedStyle(pre);
+            var h = pre.offsetHeight + parseFloat(cs.marginTop || "0") + parseFloat(cs.marginBottom || "0");
+            if(h > limit + 0.5) oshiraseOver = true;
+          });
+          var naturalHeight = body.offsetHeight;
+          var result = { label: sheet.hpLabel || "", oshiraseOver: oshiraseOver, naturalHeight: naturalHeight,
+                         status: "normal", zoom: sheetDef.zoom, estimatedPages: 1 };
+          if(naturalHeight * sheetDef.zoom > normalCapacity){
+            // 4: 高いシート。余白を詰める（罫線は用紙の端から5mm以上）
+            sheet.classList.add("hp-tall");
+            sheet.style.paddingTop = sheetDef.tallPaddingTopMm + "mm";
+            sheet.style.paddingBottom = sheetDef.tallPaddingBottomMm + "mm";
+            // 小数2桁で切り捨てる。ちょうど0.70のような値が浮動小数の誤差で0.69に落ちないよう、ごく小さい値を足してから切り捨てる
+            var fit = Math.floor(tallUsable / naturalHeight * 100 + 1e-9) / 100;
+            var finalZoom = Math.min(sheetDef.zoom, fit);
+            if(finalZoom >= sheetDef.zoom){
+              result.status = "tallFit";             // 余白を詰めただけで1枚に入る（縮小なし）
+            } else if(finalZoom >= sheetDef.minZoom){
+              result.status = "scaled";              // 縮小して1枚に入れる
+              result.zoom = finalZoom;
+            } else {
+              result.status = "belowFloor";          // 5: 下限より小さくしないと入らない → 縮小しない
+              result.estimatedPages = Math.max(2, Math.ceil((naturalHeight * sheetDef.zoom + (sheetDef.tallPaddingTopMm + sheetDef.tallPaddingBottomMm) * MM_TO_PX) / pageHeightPx));
+            }
+          }
+          if(result.zoom !== 1) body.style.zoom = String(result.zoom);   // 倍率をかけるのはここの1回だけ
+          return result;
+        });
+      });
+    } finally {
+      if(area.parentNode === host) host.removeChild(area);
+      if(host.parentNode) host.parentNode.removeChild(host);
+    }
+  }
+
+  // シートごとの計測結果から、文書ごとの警告を作る（お知らせのはみ出し・縮小・下限を下回るはみ出し）
+  function sheetWarnings(docsInfo, warnings){
+    docsInfo.forEach(function(d){
+      if(!d.sheetResults) return;
+      var groups = { belowFloor: [], scaled: [], oshirase: [] };
+      d.sheetResults.forEach(function(r){
+        if(r.status === "belowFloor") groups.belowFloor.push(r);
+        else if(r.status === "scaled") groups.scaled.push(r);
+        else if(r.oshiraseOver) groups.oshirase.push(r);   // はみ出したが縮小なし（ふつう・余白を詰めただけ）
+      });
+      ["belowFloor", "scaled", "oshirase"].forEach(function(kind){
+        if(groups[kind].length === 0) return;
+        warnings.push({ kind: kind, docIndex: d.docIndex, fileName: d.fileName, personIndex: null,
+          field: FORM_DEFS.common.oshiraseField, raw: "", compatText: "", shownText: "",
+          sheets: groups[kind].length, sheetResults: groups[kind] });
+      });
+    });
+  }
+
+  // 警告の並び: 文書ごとの警告（はみ出し・縮小・同じファイル・文字化け）を先に、欄ごとの警告をあとに並べる。
+  // 画面には先頭50件しか出さないので、文書ごとの大事な警告が「他○件」に埋もれないようにする（同じ順位の中は元の順）。
+  var WARNING_RANK = { belowFloor: 0, scaled: 1, oshirase: 2, sameFile: 3, encoding: 4 };
+  function sortWarnings(warnings){
+    return warnings.map(function(w, i){ return { w: w, i: i }; }).sort(function(a, b){
+      var ra = WARNING_RANK.hasOwnProperty(a.w.kind) ? WARNING_RANK[a.w.kind] : 10;
+      var rb = WARNING_RANK.hasOwnProperty(b.w.kind) ? WARNING_RANK[b.w.kind] : 10;
+      return ra !== rb ? ra - rb : a.i - b.i;
+    }).map(function(x){ return x.w; });
+  }
+
+  // 文書（ファイル）の並び全体から印刷エリアのDOMを作る。
+  //   docs: [{ fileName, print: extractPrintDoc の戻り値, fatalError, readWarning, sourceKey }]、style: "renki" | "kobetsu"
+  //   戻り値: { area, docsInfo, warnings, sheetCount, personCount, printedFileCount, skippedFileCount, limitError }
+  function buildPrintArea(docs, style, options){
+    ensureFormCss();
+    var opts = options || {};
+    var msgs = FORM_DEFS.common.messages;
+    var area = document.createElement("div");
+    area.className = "hp-area";
+    var warnings = [];
+    var seen = Object.create(null);
+    var docsInfo = [];
+    var allSheets = [];
+    // 合計人数の上限（超えたら1枚も作らない）
+    var totalPersons = 0;
+    docs.forEach(function(d){ if(d.print && d.print.supported) totalPersons += d.print.persons.length; });
+    var limitError = totalPersons > FORM_DEFS.common.limits.maxTotalPersons ? msgs.tooManyPersons + "（今回は合計" + totalPersons + "人）" : null;
+    // 同じファイル（同じ名前で同じ内容）を2回以上選んだときの目印
+    var firstIndexByKey = Object.create(null);
+    docs.forEach(function(d, idx){
+      var info = { docIndex: idx + 1, fileName: d.fileName, formCode: null, label: "", persons: 0, sheets: 0,
+                   firstPage: 0, lastPage: 0, pagesApprox: false, overflow: false, reason: null,
+                   readWarning: d.readWarning || null, duplicateOf: null, sheetEls: [], sheetResults: null };
+      var pd = d.print;
+      if(!pd){
+        info.reason = d.fatalError || msgs.notXml;
+      } else if(!pd.supported){
+        info.formCode = pd.formCode;
+        info.reason = pd.reason;
+      } else {
+        info.formCode = pd.formCode;
+        info.label = FORM_DEFS.forms[pd.formCode].label;
+        info.persons = pd.persons.length;
+        if(limitError){
+          info.reason = limitError;
+        } else if(pd.persons.length === 0){
+          info.reason = msgs.noPersons;
+        } else {
+          var ctx = { officialCompat: !!opts.officialCompat, formDef: FORM_DEFS.forms[pd.formCode][style],
+                      warnings: warnings, seen: seen, where: { docIndex: idx + 1, fileName: d.fileName, personIndex: null } };
+          var sheets = style === "renki" ? buildRenkiSheets(pd.formCode, pd.persons, ctx) : buildKobetsuSheets(pd.formCode, pd.persons, ctx);
+          var docEl = document.createElement("div");
+          docEl.className = "hp-doc";                           // 文書ごとに新しいページから始める
+          sheets.forEach(function(s){ docEl.appendChild(s); allSheets.push(s); });
+          area.appendChild(docEl);
+          info.sheets = sheets.length;
+          info.sheetEls = sheets;
+        }
+      }
+      // 同じファイル（同じ名前で同じ内容）の判定は、印刷する文書どうしだけで行う（印刷しないファイルには出さない）
+      if(d.sourceKey && info.sheets > 0){
+        if(firstIndexByKey[d.sourceKey]) info.duplicateOf = firstIndexByKey[d.sourceKey];
+        else firstIndexByKey[d.sourceKey] = idx + 1;
+      }
+      if(info.readWarning) warnings.push({ kind: "encoding", docIndex: idx + 1, fileName: d.fileName, personIndex: null, field: "", raw: info.readWarning, compatText: "", shownText: "" });
+      if(info.duplicateOf) warnings.push({ kind: "sameFile", docIndex: idx + 1, fileName: d.fileName, personIndex: null, field: "", raw: String(info.duplicateOf), compatText: "", shownText: "" });
+      docsInfo.push(info);
+    });
+    // 最後のシートの後ろには改ページを入れない（白紙のページを出さない）
+    if(allSheets.length > 0) allSheets[allSheets.length - 1].classList.add("hp-last");
+    measureSheets(area, docsInfo);
+    sheetWarnings(docsInfo, warnings);
+    // ページ番号（印刷全体の中で何ページ目か）。下限を下回って2ページ以上に分かれるシートは目安の枚数で数え、
+    // そのシートを含む文書から後ろは「目安」と表示する（ブラウザの改ページ次第で前後するため）
+    var pageNo = 0, approx = false, pageTotal = 0;
+    docsInfo.forEach(function(i){
+      if(!i.sheetResults || i.sheets === 0) return;
+      i.firstPage = pageNo + 1;
+      i.sheetResults.forEach(function(r){ pageNo += r.estimatedPages; if(r.status === "belowFloor") i.overflow = true; });
+      if(i.overflow) approx = true;
+      i.pagesApprox = approx;
+      i.lastPage = pageNo;
+    });
+    pageTotal = pageNo;
+    var personCount = 0, printedFileCount = 0;
+    docsInfo.forEach(function(i){ if(i.sheets > 0){ personCount += i.persons; printedFileCount++; } });
+    return { area: area, docsInfo: docsInfo, warnings: sortWarnings(warnings), sheetCount: allSheets.length,
+             pageCount: pageTotal, pagesApprox: approx,
+             personCount: personCount, printedFileCount: printedFileCount,
+             skippedFileCount: docsInfo.length - printedFileCount, limitError: limitError };
+  }
+
+  // 検証用の公開口（ゴールデン照合ページ compare_render.html から使う）。
+  // URL の末尾が #verify のときだけ有効にする（ふだんの画面では外から呼べない）。グローバルにはデータを残さない。
+  //   renderDocs(XMLの文字列の配列, "renki"|"kobetsu", {officialCompat:true で公式（libxslt）と同じ表示を出す})
+  //   戻り値は印刷エリアと同じDOM。警告は戻り値の hpWarnings、文書ごとの結果は hpDocsInfo に付ける。
+  if(location.hash === "#verify"){
+    window.__hyojunPrint = {
+      renderDocs: function(xmlTexts, style, options){
+        var docs = xmlTexts.map(function(t, i){ return { fileName: "doc" + (i + 1), print: extractPrintDocFromText(t) }; });
+        var built = buildPrintArea(docs, style, options);
+        built.area.hpWarnings = built.warnings;
+        built.area.hpDocsInfo = built.docsInfo.map(function(i){
+          return { docIndex: i.docIndex, formCode: i.formCode, persons: i.persons, sheets: i.sheets, reason: i.reason,
+                   firstPage: i.firstPage, lastPage: i.lastPage, pagesApprox: i.pagesApprox, overflow: i.overflow,
+                   duplicateOf: i.duplicateOf,
+                   sheetResults: (i.sheetResults || []).map(function(r){ return { label: r.label, status: r.status, zoom: r.zoom, oshiraseOver: r.oshiraseOver, estimatedPages: r.estimatedPages }; }) };
+        });
+        return built.area;
+      }
+    };
+  }
+
+  // ---------- 画面側（様式どおりに印刷・PDF保存） ----------
+  var printState = { style: null, built: null };
+  var showRenkiBtn = document.getElementById("showRenkiBtn");
+  var showKobetsuBtn = document.getElementById("showKobetsuBtn");
+  var printBtn = document.getElementById("printBtn");
+  var printBtnHint = document.getElementById("printBtnHint");
+  var printStatus = document.getElementById("printStatus");
+  var printOrder = document.getElementById("printOrder");
+  var printWarn = document.getElementById("printWarn");
+  var printPreview = document.getElementById("printPreview");
+  var originalTitle = document.title;
+
+  showRenkiBtn.addEventListener("click", function(){ showPrint("renki"); });
+  showKobetsuBtn.addEventListener("click", function(){ showPrint("kobetsu"); });
+  printBtn.addEventListener("click", function(){ startPrint(); });
+  window.addEventListener("resize", function(){ fitPreview(); });
+
+  // 読み込み済みのファイルを、選んだ順のまま様式の文書の並びにする
+  function printDocsFromState(){
+    return state.entries.map(function(e){
+      return { fileName: e.fileName, print: e.result.print || null, fatalError: e.result.fatalError,
+               readWarning: e.result.readWarning || null, sourceKey: e.result.sourceKey || null };
+    });
+  }
+
+  // 警告を新人向けの文にする（内部の用語は出さない。何をすればよいかまで書く）
+  function warningText(w){
+    var where = "「" + w.fileName + "」" + (w.personIndex ? "（ファイル内の" + w.personIndex + "人目）" : "");
+    if(w.kind === "nan") return where + "の「" + w.field + "」は、数字として読み取れない値（または桁の多い値）なので、XMLに書かれた「" + w.raw + "」をそのまま表示しています。原本の通知書と見比べてください。";
+    if(w.kind === "blank") return where + "の「" + w.field + "」は空欄なので、空欄のまま表示しています。原本の通知書でも空欄か確認してください。";
+    if(w.kind === "dup") return where + "の「" + w.field + "」が、同じ人の中に2つ以上書かれています（" + w.raw + "）。値のある「" + w.shownText + "」を使って表示しています。原本の通知書と見比べてください。";
+    if(w.kind === "encoding") return where + ": " + w.raw;
+    if(w.kind === "sameFile") return where + "は、" + w.raw + "番目のファイルと同じ内容です。このまま印刷すると同じページが2回出ます。不要なら「クリア」してから選び直してください。";
+    var labels = (w.sheetResults || []).map(function(r){ return r.label; });
+    var labelText = labels.slice(0, 5).join("、") + (labels.length > 5 ? " ほか" + (labels.length - 5) + "枚" : "");
+    if(w.kind === "belowFloor"){
+      // 原因の書き方は、縮小の警告と同じく、お知らせが枠からはみ出しているかどうかで変える
+      var floorCause = (w.sheetResults || []).some(function(r){ return r.oshiraseOver; }) ? "お知らせの文章がとても長いため" : "内容がとても多いため";
+      return "【要確認】" + where + "の" + labelText + "は、" + floorCause + "1枚に収まりません。縮小すると文字が小さくなりすぎるので、そのまま印刷します（2ページ以上に分かれます）。下の様式プレビューで確認してから印刷してください。";
+    }
+    if(w.kind === "scaled"){
+      var pct = (w.sheetResults || []).map(function(r){ return Math.round(r.zoom * 100); });
+      var pctText = Math.min.apply(null, pct) === Math.max.apply(null, pct) ? pct[0] + "％" : Math.min.apply(null, pct) + "〜" + Math.max.apply(null, pct) + "％";
+      var cause = (w.sheetResults || []).some(function(r){ return r.oshiraseOver; }) ? "お知らせの文章が長いなどで" : "内容が多く";
+      return where + "の" + labelText + "は、" + cause + "用紙1枚に収まらないため、" + pctText + "に縮小して印刷します。印刷したあと、文字が読めるか確認してください。";
+    }
+    return where + "の" + labelText + "は、「" + w.field + "」の文章が長く、お知らせの枠からはみ出して表示されます（年金機構の様式どおりの表示です。縮小はしていません）。印刷したあと、お知らせの文章が欠けずに読めるか確認してください。";
+  }
+
+  // 様式ボタンの「選んでいる」表示（色だけに頼らず、文字でも示す）
+  function markStyleButtons(style){
+    [[showRenkiBtn, "renki", "連記式（一覧表）で表示"], [showKobetsuBtn, "kobetsu", "個別（1人1枚）で表示"]].forEach(function(b){
+      var on = style === b[1];
+      b[0].setAttribute("aria-pressed", String(on));
+      b[0].textContent = "";
+      if(on){
+        var mark = document.createElement("span");
+        mark.setAttribute("aria-hidden", "true");   // 読み上げは aria-pressed（押されている）に任せ、二重に読ませない
+        mark.textContent = "✔ 表示中: ";
+        b[0].appendChild(mark);
+      }
+      b[0].appendChild(document.createTextNode(b[2]));
+    });
+  }
+
+  // 印刷ボタンの有効・無効と、その横の案内。
+  // reason="noPages" は、様式を選んだのに印刷できるページが0のとき（理由は上の「印刷する順番」に出る）
+  function setPrintButton(enabled, reason){
+    printBtn.disabled = !enabled;
+    if(enabled){
+      printBtnHint.textContent = "（押す前に、下の設定手順を読んでください）";
+    } else if(reason === "noPages"){
+      printBtnHint.textContent = "（印刷できるページがありません。上の一覧で理由を確認してください）";
+    } else {
+      printBtnHint.textContent = "（様式を選ぶと押せます）";
+    }
+  }
+
+  // 様式を表示する（連記式 / 個別）。データが変わったときも、この関数で描き直す。
+  // 描画に失敗したら、表示を消して印刷できない状態にし、メッセージを出す。
+  function showPrint(style){
+    var built;
+    try{
+      built = buildPrintArea(printDocsFromState(), style, {});
+    }catch(e){
+      resetPrintArea();
+      printStatus.className = "err";
+      printStatus.textContent = FORM_DEFS.common.messages.renderError + "（" + (e && e.message ? e.message : "不明なエラー") + "）";
+      return;
+    }
+    printStatus.className = "";                  // 前回のエラー表示の色を戻す
+    printState.style = style;
+    printState.built = built;
+    printPreview.innerHTML = "";                 // 前の表示（XMLの値を含むDOM）を捨てる
+    printPreview.appendChild(built.area);
+    document.body.classList.toggle("hp-print-ready", built.sheetCount > 0);
+    setPrintButton(built.sheetCount > 0, "noPages");
+    markStyleButtons(style);
+
+    // 表示中の状態
+    var label = FORM_DEFS.common.styleLabels[style];
+    var skipped = built.skippedFileCount > 0 ? "（印刷しないファイル" + built.skippedFileCount + "件）" : "";
+    if(built.sheetCount > 0){
+      var pageText = built.pagesApprox ? "約" + built.pageCount + "ページ（はみ出しあり・ページ数は目安）" : built.pageCount + "ページ";
+      printStatus.textContent = "表示中: " + label + "／" + built.printedFileCount + "ファイル " + built.personCount + "人 " + pageText + skipped;
+    } else {
+      printStatus.textContent = "表示中: " + label + "／印刷できるページがありません" + skipped + "。下の一覧で理由を確認してください。";
+    }
+
+    // 印刷する順番（選んだ順）
+    printOrder.innerHTML = "";
+    if(built.docsInfo.length > 0){
+      var cap = document.createElement("div");
+      cap.className = "print-order-cap";
+      cap.textContent = "印刷する順番（ファイルを選んだ順）";
+      printOrder.appendChild(cap);
+      var ol = document.createElement("ol");
+      built.docsInfo.forEach(function(i){
+        var li = document.createElement("li");
+        // 印刷全体の中で何ページ目にあたるか（枚数ではなく位置）
+        var pages = (i.pagesApprox ? "約" : "") + (i.firstPage === i.lastPage ? i.firstPage + "ページ目" : i.firstPage + "〜" + i.lastPage + "ページ目");
+        var notes = "";
+        if(i.overflow) notes += "（はみ出しあり・ページ数は目安）";
+        if(i.duplicateOf) notes += "（" + i.duplicateOf + "番目と同じファイル）";
+        if(i.readWarning) notes += "（文字化けの可能性あり）";
+        if(i.sheets > 0){
+          li.textContent = i.fileName + " — " + i.label + "・" + i.persons + "人・" + pages + notes;
+        } else {
+          li.className = "skip";
+          li.textContent = i.fileName + " — 印刷しません: " + i.reason + notes;
+        }
+        ol.appendChild(li);
+      });
+      printOrder.appendChild(ol);
+    }
+
+    // 印刷前に確認してほしいこと（先頭50件まで並べ、残りは件数だけ出す）
+    printWarn.innerHTML = "";
+    if(built.warnings.length > 0){
+      var t = document.createElement("div");
+      var hasStrong = built.warnings.some(function(w){ return w.kind === "belowFloor"; });
+      t.textContent = "印刷の前に確認してほしいことが " + built.warnings.length + " 件あります" +
+        (hasStrong ? "。【要確認】があるときは、印刷する前に必ず下の様式プレビューを見てください" : "（このまま印刷はできます）");
+      printWarn.appendChild(t);
+      var ul = document.createElement("ul");
+      var maxShown = FORM_DEFS.common.limits.maxWarningsShown;
+      built.warnings.slice(0, maxShown).forEach(function(w){
+        var li = document.createElement("li");
+        if(w.kind === "belowFloor") li.className = "strong";   // 文字の【要確認】に加えて、太字・枠で目立たせる
+        li.textContent = warningText(w);
+        ul.appendChild(li);
+      });
+      if(built.warnings.length > maxShown){
+        var more = document.createElement("li");
+        more.textContent = "他 " + (built.warnings.length - maxShown) + " 件";
+        ul.appendChild(more);
+      }
+      printWarn.appendChild(ul);
+      printWarn.style.display = "block";
+    } else {
+      printWarn.style.display = "none";
+    }
+    fitPreview();
+  }
+
+  // 画面のプレビューだけ、枠の幅に合わせて縮小する（印刷時は CSS で倍率1に戻す）
+  function fitPreview(){
+    var area = printPreview.querySelector(".hp-area");
+    if(!area) return;
+    area.style.zoom = "";
+    var sheet = area.querySelector(".hp-sheet");
+    if(!sheet) return;
+    var avail = printPreview.clientWidth - 24;
+    var need = sheet.offsetWidth;
+    if(need > 0 && avail > 0 && avail < need) area.style.zoom = String(Math.floor(avail / need * 100) / 100);
+  }
+
+  // 表示を消す（クリア時・描画失敗時）
+  function resetPrintArea(){
+    printState.style = null;
+    printState.built = null;
+    printPreview.innerHTML = "";
+    printOrder.innerHTML = "";
+    printWarn.innerHTML = "";
+    printWarn.style.display = "none";
+    printStatus.className = "";                  // エラー表示の色も戻す（描画失敗時は呼び出し元が直後に付け直す）
+    setPrintButton(false);
+    document.body.classList.remove("hp-print-ready");
+    markStyleButtons(null);
+    var hasEntries = state.entries.length > 0;
+    showRenkiBtn.disabled = !hasEntries;        // XMLが無いうちは押せない
+    showKobetsuBtn.disabled = !hasEntries;
+    printStatus.textContent = hasEntries
+      ? "XMLを読み込みました。上のボタンで「連記式」か「個別」を選んでください。"
+      : "まだ表示していません。XMLを読み込んでから、上のボタンで様式を選んでください。";
+  }
+
+  // 読み込み内容が変わったときに呼ぶ（表示中なら同じ様式で描き直す。まだ選んでいなければ案内を出す）
+  function refreshPrintArea(){
+    if(state.entries.length === 0 || !printState.style){ resetPrintArea(); return; }
+    // 印刷できるファイルが無くても押せるようにして、押したら一覧で「印刷しない理由」を見せる
+    showRenkiBtn.disabled = false;
+    showKobetsuBtn.disabled = false;
+    showPrint(printState.style);
+  }
+
+  // 印刷・PDF保存。PDFの既定のファイル名は中立な名前にし、終わったら元に戻す。
+  function startPrint(){
+    if(!printState.built || printState.built.sheetCount === 0) return;
+    var d = new Date();
+    var ymd = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
+    document.title = FORM_DEFS.common.printTitlePrefix + "_" + FORM_DEFS.common.titleLabels[printState.style] + "_" + ymd;
+    var restore = function(){
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
+    window.print();
+  }
+
+  // 同じファイルを2回選んだかの判定に使う目印（名前＋長さ＋中身の簡易ハッシュ。中身そのものは持たない）
+  function sourceKeyOf(name, text){
+    var h = 0x811c9dc5;
+    for(var i = 0; i < text.length; i++){ h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return name + "|" + text.length + "|" + h.toString(16);
+  }
+
+  resetPrintArea();
 
   render();
 })();
