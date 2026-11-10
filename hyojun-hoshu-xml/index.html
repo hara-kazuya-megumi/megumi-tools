@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>標準報酬決定通知書XML変換ツール（社内用）</title>
 <!--
   標準報酬決定通知書XML変換ツール（社内用・単一HTML・完全ローカル・外部送信なし）
@@ -16,6 +16,11 @@
   検査台帳: tools/_golden/hyojun-hoshu-xml/README.md（I-01〜）
   様式の定数（1ページの人数・列幅・固定文言・元XSLのファイル名とSHA-256・取得日）はスクリプト内の FORM_DEFS に集約。
   設計書: tools/_設計/設計書_標準報酬XML変換ツール_様式印刷PDF_2026-10-27.md ／ ゴールデン: tools/_golden/hyojun-hoshu-xml/
+  最終改修: 2026-11-10（「返戻のお知らせ」（返戻票＋送付書）に対応。作成者: 統括AI／実装: サブエージェント）
+            返戻票の様式表示・印刷、返戻一覧（TSV/CSV）、フォルダごとのドロップ、スタイルシート（.xsl）の読み飛ばし、
+            送付書だけのファイルを「送付書（一覧対象外）」と案内（原さん決定 D9）。標準報酬の一覧・様式出力は変更なし。
+  設計書: tools/_設計/設計書_標準報酬XML変換ツール_返戻票対応_2026-11-10.md（承認 2026-11-10 D1〜D11）
+  検査台帳・ゴールデン: tools/_golden/henrei-xml/README.md
 -->
 <style>
   :root{
@@ -60,6 +65,20 @@
   #fileList li.ok .status{color:var(--ok);font-weight:700}
   #fileList li.err .status{color:var(--warn);font-weight:700}
   #emptyState{color:var(--sub);font-size:13.5px}
+  /* 返戻のお知らせ対応（2026-11-10）: 送付書・スタイルシートなど一覧の対象外のファイルは灰色で示す */
+  #fileList li.info .status, #fileList li.skip .status{color:#5c5468;font-weight:700}
+  #fileList li.skip{color:#6b6478}
+  /* 返戻一覧: 再提出期限は見落とさないよう太字・警告色（色だけに頼らず見出しにも「必ず確認」と書く） */
+  table.preview th.deadline{text-decoration:underline}
+  table.preview td.deadline{font-weight:700;color:var(--warn)}
+  table.preview td.multiline{white-space:pre-wrap;min-width:280px;max-width:480px}
+  table.preview td.blank-deadline{background:var(--warn-bg) !important;border:2px solid var(--warn)}
+  table.preview td.flag{white-space:nowrap}
+  #henreiSummary{font-size:14px;font-weight:700;color:var(--accent);margin-top:8px}
+  #henreiCopyStatus{font-size:13px;margin-top:6px;font-weight:700}
+  #henreiCopyStatus.ok{color:var(--ok)}
+  #henreiCopyStatus.err{color:var(--warn)}
+  .henrei-kagami-opt{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;margin-left:4px}
 
   .table-scroll{overflow-x:auto;max-height:480px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
   table.preview{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}
@@ -159,11 +178,12 @@
   <section class="card" id="inputSection">
     <h2><span class="step-badge">1</span>XMLファイルを読み込む</h2>
     <div class="dropzone" id="dropzone">
-      <p>ここにXMLファイルをドラッグ＆ドロップ<br>（複数ファイルまとめてドロップできます）</p>
+      <p>ここにXMLファイルをドラッグ＆ドロップ<br>（複数ファイルまとめて、または展開したフォルダごとドロップできます）</p>
       <button type="button" class="btn" id="pickFileBtn">ファイルを選ぶ</button>
-      <input type="file" id="fileInput" accept=".xml" multiple style="display:none">
+      <input type="file" id="fileInput" accept=".xml,.xsl" multiple style="display:none">
     </div>
     <div class="hint">対応形式: 日本年金機構の標準報酬決定通知書・月額変更通知書のXML（.xml）。複数まとめて選択できます。zipファイルはそのままでは読めません。右クリック→「すべて展開」で解凍し、中の.xmlファイルを読み込んでください。</div>
+    <div class="hint">「返戻のお知らせ」（返戻票）にも対応しています。zipを展開したフォルダごと、または中のファイルをまとめてドロップしてください（送付書と返戻票は同じフォルダのまま読み込みます。スタイルシート .xsl は読み飛ばします）。<strong>「ファイルを選ぶ」ボタンで選ぶ場合は、展開したフォルダの中のファイルを全部まとめて選んでください。</strong>zipのままでは読めないので、展開してからドロップしてください。</div>
 
     <details class="paste-area">
       <summary>XMLの中身を直接貼り付けて読み込む（テスト・代替手段用）</summary>
@@ -219,13 +239,40 @@
     <div class="hint">年金機構の通知書と同じ形で印刷・PDF保存したいときは、下の「5 様式どおりに印刷・PDF保存」を使ってください。</div>
   </section>
 
+  <!-- 返戻一覧（2026-11-10 追加・原さん決定 D2: 標準報酬の一覧とは別の欄。返戻が0件のときは欄ごと隠す） -->
+  <section class="card" id="henreiSection" style="display:none">
+    <h2><span class="step-badge">返</span>返戻一覧（返戻のお知らせ）</h2>
+    <div class="hint" style="margin-top:0">返戻票1枚を1行にしています。<strong>「再提出期限」は必ず確認してください</strong>（空欄のときは原本の返戻票で確認してください）。「⚠要確認」の行は、下の「<a href="#errorSection">エラー・注意</a>」欄に理由が出ています。送付先の住所・郵便番号は一覧に出しません。</div>
+    <div id="henreiSummary" role="status" aria-live="polite"></div>
+    <div class="table-scroll" style="margin-top:8px">
+      <table class="preview" id="henreiTable">
+        <thead><tr id="henreiHeaderRow"></tr></thead>
+        <tbody id="henreiBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:12px">
+      <div>
+        <button type="button" class="btn" id="copyHenreiTsvBtn">返戻一覧をExcel用にコピー</button>
+        <div class="hint">通信欄の改行は「／」に置き換わります。到達番号などの番号の列は、貼り付け先を「セルの書式設定→文字列」にしてから貼ってください。</div>
+      </div>
+      <div>
+        <button type="button" class="btn secondary" id="saveHenreiCsvBtn">返戻一覧をCSVで保存</button>
+        <div class="hint">「返戻一覧_YYYYMMDD.csv」の名前で保存されます。通信欄の改行はセルの中の改行になり、番号の先頭0や日付化の対策は自動で行われます。</div>
+      </div>
+    </div>
+    <div id="henreiCopyStatus" role="status" aria-live="polite"></div>
+  </section>
+
   <section class="card" id="printSection">
     <h2><span class="step-badge">5</span>様式どおりに印刷・PDF保存</h2>
     <div class="hint" style="margin-top:0">読み込んだXMLを、日本年金機構の通知書と同じ形で「様式プレビュー」に出し、印刷やPDF保存ができます。算定と月変はファイルごとに自動で見分けます。選ぶのは「連記式（一覧表）」か「個別（1人1枚）」かだけです。</div>
     <div class="btn-row" style="margin-top:12px">
       <button type="button" class="btn" id="showRenkiBtn" aria-pressed="false">連記式（一覧表）で表示</button>
       <button type="button" class="btn" id="showKobetsuBtn" aria-pressed="false">個別（1人1枚）で表示</button>
+      <button type="button" class="btn" id="showHenreiBtn" aria-pressed="false" disabled>返戻のお知らせ（返戻票）を表示</button>
+      <label class="henrei-kagami-opt" for="henreiWithKagami"><input type="checkbox" id="henreiWithKagami" checked disabled>送付書も印刷する（返戻票の前に1枚）</label>
     </div>
+    <div class="hint">「返戻のお知らせ（返戻票）を表示」は、返戻票（henrei.xml）を読み込んだときに押せます。返戻のお知らせは、標準報酬の通知書とは別に印刷・PDF保存します。</div>
     <div id="printStatus" role="status" aria-live="polite"></div>
     <div id="printOrder"></div>
     <div id="printWarn" role="status" aria-live="polite"></div>
@@ -280,6 +327,17 @@
 
         <h3 id="help-excel-paste">Excelに貼り付けるときの注意</h3>
         <p>「Excel用にコピー」で貼り付けると、整理番号や日付のような列がExcelに数値・日付として解釈され、先頭の0が消えたり日付表示に変わったりすることがあります。気になる場合は、貼り付け先の列をあらかじめ「セルの書式設定」→「文字列」にしてから貼り付けてください。「CSVで保存」を使う場合は、この対策を自動で行っています。</p>
+
+        <h3>返戻のお知らせ（返戻票）を読み込むとき</h3>
+        <ol>
+          <li>年金機構から届いた返戻のzipを、右クリック→「すべて展開」で展開します。中には、送付書のXML（数字の名前。画面では「送付書（一覧対象外）」と表示）・返戻票（henrei.xml。画面では「返戻票 ○枚」と表示）・スタイルシート（.xsl）2本が入っています。</li>
+          <li>展開したフォルダごと、上の枠にドロップします（「ファイルを選ぶ」で選ぶ場合は、フォルダの中のファイルを全部まとめて選びます）。スタイルシートは読み飛ばします。</li>
+          <li>「返戻一覧（返戻のお知らせ）」の欄で、<strong>再提出期限</strong>と「確認」の列を見ます。「⚠要確認」の行は、下の「エラー・注意」欄に理由が出ています。</li>
+          <li>印刷・PDF保存は、「5」の「返戻のお知らせ（返戻票）を表示」を押してから「印刷・PDF保存」を押します（送付書も1枚目に入ります。不要ならチェックを外します）。</li>
+        </ol>
+        <p>送付書と返戻票は「同じフォルダにあり、送付書の中の添付ファイル名が返戻票の名前と同じ」ものを組にします（フォルダの情報がないときは、同じ回に選んだもの同士だけを組にします）。組にならない返戻票は、到達番号を空欄にして注意を出します。複数の返戻を読み込むときは、展開したフォルダごとドロップしてください。</p>
+        <p>「Excel用にコピー」で貼り付けると、電話番号などの先頭に「'」が付くことがあります（数式として動かないようにするための印です。Excelでは表示されません）。</p>
+        <p>安全のため、返戻票の中のHTMLの書式（タグ）は書式にせず文字のまま表示し、送付書のリンクはクリックできない文字（アドレス）で表示します。返戻票にPDFが入っている場合は、PDFを直接開いて確認してください。</p>
 
         <h3>データの取り扱いについて</h3>
         <p>このツールはブラウザの中だけで動作し、読み込んだXMLの内容をサーバーや外部に送信することは一切ありません。ブラウザの保存領域（localStorage等）にも保存しません。画面を閉じる、または「クリア」を押すとデータは消えます。</p>
@@ -522,6 +580,10 @@
       result.fatalError = "XMLとして読めませんでした。ファイルが壊れているか、XML以外の可能性があります";
       return result;
     }
+    // 返戻のお知らせ（返戻票・送付書）は、ルート要素の名前でここで先に振り分ける（2026-11-10 追加）。
+    // 標準報酬の通知書はこの分岐を通らず、下の既存の処理をそのまま通る（rows・print は変わらない）。
+    var henreiKind = classifyHenreiRoot(doc);
+    if(henreiKind) return parseHenreiDoc(doc, henreiKind, result);
     // 様式表示用の値も、同じ DOM から取り出しておく（2026-10-27 追加。Excel用の rows には影響しない）
     try{
       result.print = extractPrintDoc(doc, xmlString);
@@ -604,6 +666,20 @@
   dropzone.addEventListener("drop", function(e){
     e.preventDefault();
     dropzone.classList.remove("dragover");
+    // フォルダごとのドロップ（返戻のお知らせ対応・2026-11-10・原さん決定 D1）。
+    // フォルダが含まれるときだけ中をたどる（webkitGetAsEntry はドロップの処理の中ですぐに呼ぶ必要がある）。
+    var droppedEntries = [];
+    var dtItems = e.dataTransfer && e.dataTransfer.items;
+    if(dtItems && dtItems.length){
+      for(var di = 0; di < dtItems.length; di++){
+        var en = typeof dtItems[di].webkitGetAsEntry === "function" ? dtItems[di].webkitGetAsEntry() : null;
+        if(en) droppedEntries.push(en);
+      }
+    }
+    if(droppedEntries.some(function(x){ return x.isDirectory; })){
+      collectDroppedEntries(droppedEntries).then(function(res){ handleFiles(res.files, res.meta, res.notes); });
+      return;
+    }
     if(!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return; // ファイル以外のドロップは無視
     handleFiles(e.dataTransfer.files);
   });
@@ -626,7 +702,7 @@
     var name = fullTrim(pasteName.value) || ("貼り付けデータ" + (state.entries.length + 1));
     var result = parseXmlText(text, name);
     result.sourceKey = sourceKeyOf(name, text);   // 同じものを2回読み込んだかの判定用（中身は持たない）
-    state.entries.push({ fileName: name, result: result });
+    state.entries.push({ fileName: name, result: result, batch: ++loadBatchCounter });   // 貼り付けは1回ごとに別の回
     pasteText.value = "";
     pasteName.value = "";
     render();
@@ -647,11 +723,21 @@
     render();                                    // 様式プレビューもここで消える（refreshPrintArea）
   });
 
+  var loadBatchCounter = 0;   // 読み込みの回の番号（返戻の組み合わせ用。2026-11-10）
   var ZIP_MESSAGE = "zipファイルはそのままでは読めません。右クリック→「すべて展開」で解凍し、中の.xmlファイルを読み込んでください。";
 
-  function handleFiles(fileListObj){
+  // fileListObj: 選んだ／ドロップしたファイル。metaList（任意）: フォルダごとのドロップのとき、ファイルごとの
+  //   { folder: フォルダのパス, displayName: フォルダからのパス, fromFolder: true }。notes（任意）: フォルダをたどったときの注意
+  function handleFiles(fileListObj, metaList, notes){
     var files = Array.prototype.slice.call(fileListObj);
     var total = files.length;
+    if(notes && notes.length){
+      // フォルダが深すぎる・ファイルが多すぎるなどの注意は、一覧に灰色の1行として出す（件数には数えない）
+      notes.forEach(function(n){
+        state.entries.push({ fileName: "（フォルダの読み込み）", folder: "", baseName: "", result: { fileName: "（フォルダの読み込み）", ok: true, kind: "skipped", fatalError: null, rows: [], counts: {}, skipText: n } });
+      });
+      if(total === 0){ render(); return; }
+    }
     if(total === 0) return;
     // 非同期処理の完了順は選択順と一致しないことがあるため、選択時のindexで結果を並べ直してから追加する
     var results = new Array(total);
@@ -660,12 +746,39 @@
     function finalizeIfDone(){
       pending--;
       if(pending === 0){
+        // 送付書と返戻票の組み合わせ用に、フォルダとファイル名（パスなし）を付ける。フォルダごとのドロップでは
+        // 表示名をフォルダからのパスにする（それ以外は従来どおりファイル名のまま。2026-11-10）
+        var batch = ++loadBatchCounter;   // 同じ回に読み込んだもの（フォルダの情報がないときの組み合わせの単位）
+        results.forEach(function(r, i){
+          r.batch = batch;
+          var m = (metaList && metaList[i]) || null;
+          r.folder = m ? (m.folder || "") : "";
+          r.baseName = files[i].name;
+          if(m && m.displayName){ r.fileName = m.displayName; r.result.fileName = m.displayName; }
+        });
         state.entries = state.entries.concat(results);
         render();
       }
     }
 
     files.forEach(function(file, idx){
+      // フォルダごとのドロップでは、表示名をフォルダからのパスにし、送付書と返戻票の組み合わせ用にフォルダを覚える
+      //（表示名とフォルダは、全部読み終わったときに finalizeIfDone で付ける）
+      var meta = (metaList && metaList[idx]) || null;
+      // スタイルシート（.xsl）は読み飛ばす。件数には数えない（2026-11-10・設計 7）。版の照合だけ行う（中身は持たない）
+      if(/\.xsl$/i.test(file.name)){
+        readStylesheetInfo(file).then(function(info){
+          results[idx] = { fileName: file.name, result: { fileName: file.name, ok: true, kind: "stylesheet", fatalError: null, rows: [], counts: {}, stylesheet: info } };
+          finalizeIfDone();
+        });
+        return;
+      }
+      // フォルダの中の XML 以外（PDF など）は読まずに灰色で示す
+      if(meta && meta.fromFolder && !/\.(xml|zip)$/i.test(file.name)){
+        results[idx] = { fileName: file.name, result: { fileName: file.name, ok: true, kind: "skipped", fatalError: null, rows: [], counts: {}, skipText: FORM_DEFS.common.messages.notXmlSkip } };
+        finalizeIfDone();
+        return;
+      }
       if(/\.zip$/i.test(file.name)){
         results[idx] = { fileName: file.name, result: { fileName:file.name, ok:false, fatalError: ZIP_MESSAGE, rows:[], counts:{} } };
         finalizeIfDone();
@@ -771,10 +884,15 @@
   function render(){
     var rows = allRows();
     var messages = buildMessages(rows);
+    // 返戻のお知らせ（2026-11-10 追加）: 返戻票と送付書の組・返戻一覧の行・注意を作る（返戻が無ければ何も足さない）
+    var henreiModel = buildHenreiModel(state.entries);
+    messages = messages.concat(henreiMessages(henreiModel));
 
     // 新しいデータの読み込み・クリア時は、前回の「コピーしました」表示を残さない
     copyStatus.textContent = "";
     copyStatus.className = "";
+    henreiCopyStatus.textContent = "";
+    henreiCopyStatus.className = "";
 
     // --- 読込結果バー ---
     if(state.entries.length === 0){
@@ -789,9 +907,16 @@
       var breakdown = "算定 " + counts["算定"] + "名／月変 " + counts["月変"] + "名";
       if(counts["不明"] > 0) breakdown += "／不明 " + counts["不明"] + "名";
       var errorFileCount = state.entries.filter(function(e){ return !e.result.ok; }).length;
-      var fileCountText = "XML " + state.entries.length + "件";
+      // スタイルシート・読み飛ばしたファイルは件数に数えない（2026-11-10。無いときは従来の件数と同じ）
+      var xmlEntryCount = state.entries.filter(function(e){ return !isAuxEntry(e); }).length;
+      var fileCountText = "XML " + xmlEntryCount + "件";
       if(errorFileCount > 0) fileCountText += "（うちエラー " + errorFileCount + "件）";
-      summaryBar.textContent = fileCountText + "・被保険者 " + rows.length + "名を読み込みました（内訳: " + breakdown + "）";
+      var henreiText = henreiModel.rows.length > 0 ? "返戻 " + henreiModel.rows.length + "件（" + henreiModel.docs.length + "ファイル）" : "";
+      if(rows.length === 0 && henreiText){
+        summaryBar.textContent = fileCountText + "・" + henreiText + "を読み込みました";
+      } else {
+        summaryBar.textContent = fileCountText + "・被保険者 " + rows.length + "名を読み込みました（内訳: " + breakdown + "）" + (henreiText ? "・" + henreiText : "");
+      }
 
       fileListEl.innerHTML = "";
       state.entries.forEach(function(e){
@@ -800,7 +925,11 @@
         nameSpan.textContent = e.fileName;
         var statusSpan = document.createElement("span");
         statusSpan.className = "status";
-        if(e.result.ok){
+        var henreiStatus = henreiEntryStatus(e);   // 返戻票・送付書・スタイルシートなど（標準報酬なら null）
+        if(henreiStatus){
+          li.className = henreiStatus.className;
+          statusSpan.textContent = henreiStatus.text;
+        } else if(e.result.ok){
           li.className = "ok";
           statusSpan.textContent = "OK（" + e.result.rows.length + "名）";
         } else {
@@ -884,6 +1013,9 @@
       });
       errorBox.appendChild(ul);
     }
+
+    // --- 返戻一覧（返戻が0件なら欄ごと隠す。原さん決定 D2） ---
+    renderHenreiList(henreiModel);
 
     // --- 様式どおりの印刷エリア（読み込み内容が変わったら描き直す／クリアなら消す） ---
     refreshPrintArea();
@@ -1004,7 +1136,15 @@
       publisher: "日本年金機構",
       obtainedOn: "2025-12-15",         // 公式XSLの取得日
       portedOn: "2026-10-27",           // 移植日
-      generator: "tools/_golden/hyojun-hoshu-xml/gen_form_defs.py（開発用・ツール本体には含めない）"
+      generator: "tools/_golden/hyojun-hoshu-xml/gen_form_defs.py（開発用・ツール本体には含めない）",
+      // 返戻のお知らせ（henrei.xsl・kagami.xsl）。原さんが受け取った返戻zipを展開したもの（実物XMLは使っていない）
+      henrei: {
+        obtainedOn: "2026-11-10",       // 作業用コピーの取得日（返戻zipを受け取った日は要確認）
+        portedOn: "2026-11-10",
+        generator: "tools/_golden/hyojun-hoshu-xml/gen_form_defs.py henrei（開発用・ツール本体には含めない）",
+        author: "統括AI（めぐみ事務所 社労士AIシステム）",
+        lastModified: "2026-11-10"
+      }
     },
     // 全様式に共通の設定
     common: {
@@ -1032,10 +1172,26 @@
       limits: {
         maxFileBytes: 20 * 1024 * 1024, // 1ファイルの上限（20MB）。超えたら分割を案内する
         maxTotalPersons: 2000,          // 様式表示する合計人数の上限
-        maxWarningsShown: 50            // 画面に並べる警告の件数（残りは「他○件」）
+        maxWarningsShown: 50,           // 画面に並べる警告の件数（残りは「他○件」）
+        // ---- 返戻のお知らせ（2026-11-10 追加）----
+        maxHenreiPages: 500,            // 様式表示する返戻票の合計枚数の上限（超えたら1枚も作らず、分けて読み込むよう案内）
+        maxFolderDepth: 5,              // フォルダごとドロップしたとき、たどるフォルダの深さ（ドロップしたフォルダ＝1）
+        maxFolderFiles: 200,            // フォルダごとドロップしたとき、読み込むファイルの数の上限
+        maxHenreiRows: 2000             // 返戻一覧に読み込む返戻票の合計枚数の上限（超えたら一覧を作らず、分けて読み込むよう案内）
+      },
+      // 返戻のお知らせ（返戻票＋送付書）の設定（2026-11-10 追加）
+      henrei: {
+        brFields: ["表示内容1", "表示内容2", "通信欄"],   // 公式XSLが loop テンプレート（文字列「<br/>」で改行）を通す項目
+        brToken: "<br/>",                                  // 改行にする文字列（これ以外のタグは文字のまま出して警告する。原さん決定 D6）
+        // 元の文字に戻す文字参照（固定の表。D6）。数値参照（&#12354; &#x3042;）は有効な文字だけ戻す。ほかは文字のまま出して警告する
+        namedEntities: { amp: "&", lt: "<", gt: ">", quot: "\"", apos: "'", nbsp: " " },
+        trustedOrigin: "https://www.nenkin.go.jp",        // 送付書のアドレスのオリジンがこれと違うときは警告する（どのアドレスもリンクにはしない。D5）
+        tsvLineBreak: "／",                                // TSVでは通信欄の改行をこの文字に置き換える（CSVはセルの中の改行。D7）
+        printTitle: "返戻のお知らせ",                      // PDF保存時の既定のファイル名（事業所名は入れない）
+        csvFilePrefix: "返戻一覧"                          // CSVのファイル名（返戻一覧_YYYYMMDD.csv）
       },
       printTitlePrefix: "標準報酬決定通知書",   // PDF保存時の既定のファイル名（事業所名は入れない）
-      styleLabels: { renki: "連記式", kobetsu: "個別" },         // 画面の表示用
+      styleLabels: { renki: "連記式", kobetsu: "個別", henrei: "返戻のお知らせ" },   // 画面の表示用
       titleLabels: { renki: "連記", kobetsu: "個別" },           // PDFの既定のファイル名用
       messages: {
         unsupported: "この様式は印刷に未対応です（Excel出力はできます）。印刷に対応しているのは、算定（定時決定）と月額変更の通知書だけです",
@@ -1045,7 +1201,15 @@
         extractError: "様式プレビュー用の読み取りでエラーが起きました。ファイルを確認してください",
         tooLargeFile: "このファイルは大きすぎて読み込めません（1ファイル20MBまで）。年金機構から受け取ったファイルか確認し、それでも読めないときは担当者に相談してください",
         tooManyPersons: "人数が多すぎるため様式プレビューに出せません（読み込んだファイルの合計で2,000人まで）。いったん「クリア」し、ファイルを何回かに分けて読み込んで、回ごとに印刷してください",
-        renderError: "様式プレビューを作れませんでした。いったん「クリア」してから読み込み直してください。直らないときは、ファイル名と表示されたメッセージを担当者に伝えてください"
+        renderError: "様式プレビューを作れませんでした。いったん「クリア」してから読み込み直してください。直らないときは、ファイル名と表示されたメッセージを担当者に伝えてください",
+        // ---- 返戻のお知らせ（2026-11-10 追加）----
+        noHenreiPages: "返戻票が0枚のため、印刷するページはありません",
+        tooManyHenreiPages: "返戻票の枚数が多すぎるため様式プレビューに出せません（読み込んだファイルの合計で500枚まで）。いったん「クリア」し、何回かに分けて読み込んでください",
+        kagamiInfo: "送付書（一覧対象外）",
+        stylesheetSkip: "スタイルシート（読み飛ばし）",
+        stylesheetUnknownVersion: "スタイルシート（読み飛ばし）・未対応の版: 表示を原本と見比べ、担当者に知らせてください",
+        tooManyHenreiRows: "返戻票が合計2,000枚を超えたため、返戻一覧と返戻の様式表示を作りませんでした。いったん「クリア」し、何回かに分けて読み込んでください",
+        notXmlSkip: "読み飛ばし（XMLではありません。PDFなどは直接開いて確認してください）"
       }
     },
     // 様式ごとの定義（キー＝XMLのルート要素名）
@@ -1127,6 +1291,46 @@
             "kyouji": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"426px\"><col width=\"39px\"><col width=\"5px\"><col width=\"116px\"><col width=\"54px\"></colgroup><tr><td style=\"height:25px\"><br></td></tr><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\"><span data-v=\"到達番号_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"到達番号_項目\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"515px\"><col width=\"20px\"><col width=\"20px\"><col width=\"30px\"><col width=\"55px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:15px\"><span data-v=\"SC_固定文字\"></span></td><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"SC\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"80px\"><col width=\"75px\"><col width=\"5px\"><col width=\"60px\"><col width=\"420px\"></colgroup><tr><td></td><td class=\"midashiS_L \" style=\"height:20px\">事業所整理記号</td><td></td><td class=\"normalS_L\" style=\"height:20px\"><span data-v=\"事業所整理記号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"4\" cellspacing=\"0\"><colgroup><col width=\"80px\"><col width=\"75px\"><col width=\"5px\"><col width=\"40px\"><col width=\"440px\"></colgroup><tr><td></td><td class=\"midashiS_L\" style=\"height:20px\">事業所番号</td><td></td><td class=\"normalS_R\" style=\"height:20px\"><span data-v=\"事業所番号\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"150px\"><col width=\"100px\"><col width=\"0px\"><col width=\"35px\"><col width=\"355px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:15px\"><span data-v=\"通知管理番号\"></span></td><td></td><td class=\"normalS_R\" style=\"height:15px\"><span data-v=\"通知管理番号枝番\"></span></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:45px\"><br></td></tr></table><table class=\"detail\"><tr><td class=\"title\" style=\"height:33px\">健康保険・厚生年金保険被保険者標準報酬改定通知書</td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"height:75px\"><br></td></tr></table><table class=\"detail\"><colgroup><col width=\"80px\"><col width=\"560px\"></colgroup><tr><td></td><td class=\"normalM_L\" style=\"height:40px\">＊＊＊＊＊　付記　＊＊＊＊＊</td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">１．この通知書の決定に不服があるときは、この決定があったことを知った日の翌日から起算して３か月<br>　　以内に文書又は口頭で、社会保険審査官（地方厚生局内）に審査請求できます。また、その決定に不<br>　　服があるときは、決定書の謄本が送付された日の翌日から起算して２か月以内に社会保険審査会（厚<br>　　生労働省内）に再審査請求できます。なお、この決定の取消の訴えは、審査請求の決定（以下「決定<br>　　」という。）を経た後でないと、提起できませんが、審査請求があった日から２か月を経過しても決<br>　　定がないときや、この通知書の決定の執行等による著しい損害を避けるため緊急の必要があるとき、<br>　　その他正当な理由があるときは、決定を経なくても提起できます。この訴えは、決定（再審査請求を<br>　　した場合には、当該決定又は社会保険審査会の裁決。以下同じ。）があったことを知った日から６か<br>　　月以内に、日本年金機構を被告として提起できます。ただし、原則として、決定の日から１年を経過<br>　　すると訴えを提起できません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">２．この通知書を受け取ったら、すみやかに決定された標準報酬などを、それぞれの被保険者に通知しな<br>　　ければなりません。</td></tr><tr><td style=\"height:12px\"></td></tr><tr><td></td><td class=\"normalM_L\" style=\"line-height:14px;\">３．この通知書は完結となった日から起算して２カ年間は、事業主が整理保存しておかなければなりませ<br>　　ん。</td></tr></table>"
           }
         }
+      },
+      // ---- 返戻のお知らせ（2026-11-10 追加）----
+      // 返戻票: henrei.xsl から gen_form_defs.py henrei で作った骨組み。<span data-br="タグ名"> は公式の loop テンプレート
+      //   （文字列「<br/>」で区切って改行を入れる）の場所。公式は区切った値を HTML としてそのまま出す（DOE）が、本ツールは文字で入れる。
+      //   pxFixes は、公式の単位のない長さ（互換モードでだけ px として効く）に px を補った所（意図した差分）。
+      "_返戻票": {
+        "label": "返戻票（返戻のお知らせ）",
+        "henrei": {
+          "xslFile": "henrei.xsl",
+          "xslSha256": "5ad64d34b4b674500d7a893555fc1362a732d0533909fc1ec527208256b941d6",
+          "docTitle": "返戻票",
+          "scope": "hpf-henrei",
+          "bodyStyle": "word-break:break-all;",
+          "pxFixes": [
+            "padding-right:80",
+            "padding-right:160"
+          ],
+          "css": ".hpf-henrei table.outline{border:1px solid #000000;width:640px;height:940px;}.hpf-henrei table.detail{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-henrei table.detail2{border-collapse:collapse;width:640px;table-layout:fixed;}.hpf-henrei table.Lterritory{width:320px;table-layout:fixed;}.hpf-henrei table.Lterritory2{width:40px;}.hpf-henrei table.Rterritory{width:320px;table-layout:fixed;}.hpf-henrei table.Rterritory2{width:320px;table-layout:fixed;}.hpf-henrei table.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-henrei td.outline{vertical-align:top;text-align:center;}.hpf-henrei td.allline{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-henrei td.allline2{border-top:1px solid #000000;border-left:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;border-radius:30px;}.hpf-henrei td.linetb{border-top:1px solid #000000;border-bottom:1px solid #000000;}.hpf-henrei td.linetrb{border-top:1px solid #000000;border-right:1px solid #000000;border-bottom:1px solid #000000;}.hpf-henrei td.linetlb{border-top:1px solid #000000;border-left:1px solid #000000;border-bottom:1px solid #000000;}.hpf-henrei td.linetlr{border-left:1px solid #000000;border-right:1px solid #000000;border-top:1px solid #000000;}.hpf-henrei .gothic{font-family:\"YuGothic\", \"Yu Gothic\";}.hpf-henrei .mincho{font-family:\"YuMincho\", \"Yu Mincho\";}.hpf-henrei{font-family:\"Yu Mincho\", serif;}.hpf-henrei pre{font-family:\"YuMincho\", \"Yu Mincho\";}.hpf-henrei div{font-family:\"Yu Mincho\", serif;}.hpf-henrei div{letter-spacing:0px;}.hpf-henrei div.kyouji{white-space:break-spaces;}.hpf-henrei .title{font-size:10pt;font-weight:bold;text-align:center;}.hpf-henrei .logo{font-size:10pt;text-align:right;font-weight:bold;}.hpf-henrei .oshirase{font-size:7pt;line-height:11px;vertical-align:top;text-align:left;}.hpf-henrei .midashiS_C{font-size:7pt;text-align:center;}.hpf-henrei .midashiS_L{font-size:7pt;text-align:left;}.hpf-henrei .midashiS_L2{font-size:7pt;text-align:left;}.hpf-henrei .midashiS_R{font-size:7pt;text-align:right;}.hpf-henrei .midashiM_L{font-size:8pt;text-align:left;}.hpf-henrei .midashiM_R{font-size:8pt;text-align:right;}.hpf-henrei .midashiM_C{font-size:8pt;text-align:center;}.hpf-henrei .midashiL_L{font-size:9pt;text-align:left;}.hpf-henrei .midashiL_R{font-size:9pt;text-align:right;}.hpf-henrei .normalS_C{font-size:7pt;text-align:center;}.hpf-henrei .normalS_R{font-size:7pt;text-align:right;}.hpf-henrei .normalS_L{font-size:7pt;text-align:left;}.hpf-henrei .normalS_TL{font-size:7pt;vertical-align:top;text-align:left;}.hpf-henrei .normalM_R{font-size:8pt;text-align:right;}.hpf-henrei .normalM_L{font-size:8pt;text-align:left;}.hpf-henrei .normalM_C{font-size:8pt;text-align:center;}.hpf-henrei .normalTitleM_L{text-align:justify;text-align-last:justify;text-justify:inter-ideograph;text-justify:inter-character;padding-left:10px;padding-right:10px;font-size:8pt;}.hpf-henrei .normalTitleS_L{text-align:justify;text-align-last:justify;text-justify:inter-ideograph;text-justify:inter-character;padding-left:10px;padding-right:10px;font-size:7pt;}.hpf-henrei .normalTitleM_L2{text-align:justify;text-align-last:justify;text-justify:inter-ideograph;padding-left:10px;padding-right:10px;font-size:8pt;}.hpf-henrei .normalTitleM_L3{text-align:justify;text-align-last:justify;text-justify:inter-ideograph;padding-left:10px;padding-right:10px;font-size:8pt;background-color:lightgray;}.hpf-henrei .normalTitleL_L3{text-align:justify;text-align-last:justify;text-justify:inter-ideograph;padding-left:10px;padding-right:10px;font-size:9pt;background-color:lightgray;}.hpf-henrei .normalM_TL{font-size:8pt;vertical-align:top;text-align:left;}.hpf-henrei .normalL_C{font-size:9pt;text-align:center;}.hpf-henrei .normalL_R{font-size:9pt;text-align:right;}.hpf-henrei .normalL_R2{font-size:8.5pt;text-align:right;}.hpf-henrei .normalL_L{font-size:9pt;text-align:left;}.hpf-henrei .normalL2_L{font-size:10pt;text-align:left;}.hpf-henrei .normalL_TL{font-size:9pt;vertical-align:top;text-align:left;}.hpf-henrei br{font-family:\"YuGothic\", \"Yu Gothic\";font-size:10px;}.hpf-henrei pre.oshirase{line-break:anywhere;word-wrap:break-word;overflow-wrap:break-word;font-size:7pt;}.hpf-henrei div.kyouji{line-break:anywhere;word-wrap:break-word;overflow-wrap:break-word;font-size:8pt;}.hpf-henrei .equality{display:flex;justify-content:space-between;}",
+          "fragments": {
+            "root": "<table border=\"0\" width=\"100%\" style=\"text-align:center\"><tr><td align=\"center\" style=\"vertical-align:top\"><template data-slot=\"root\"></template></td></tr></table>",
+            "page": "<table class=\"outline\" cellpadding=\"0px\" cellspacing=\"0\"><tr><td class=\"outline\"><template data-slot=\"henreiPage\"></template></td></tr></table>",
+            "henreiPage": "<table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><td style=\"vertical-align:top;\"><br><table class=\"Lterritory\"><colgroup><col width=\"30px\"><col width=\"100px\"><col width=\"190px\"></colgroup><tr><td></td><td class=\"normalS_L\" style=\"height:20px\"><template data-if=\"ne\" data-f=\"送付先郵便番号\"><span data-v=\"送付先郵便番号\"></span></template></td><td></td></tr><tr><td></td><td class=\"normalM_L prewrap\" style=\"height:20px; padding-right:80px; line-height:14px;\" colspan=\"2\"><span data-v=\"送付先住所\"></span></td></tr><tr><td style=\"height:4px;\"></td><td></td></tr><tr><td></td><td><table class=\"Lterritory prewrap\" cellpadding=\"0\" cellspacing=\"0\"><tr><td class=\"normalM_L\" style=\"height:20px; padding-right:160px; line-height:14px;\"><span data-v=\"送付先氏名_名称\"></span></td></tr></table><table class=\"Lterritory\" cellpadding=\"0\" cellspacing=\"0\" style=\"position:relative; top:-18px; left:140px;\"><tr><td class=\"normalL_L\" style=\"height:20px;\"><span data-v=\"敬称\"></span></td></tr></table></td></tr><tr><td></td><td></td><td><table class=\"Lterritory\" cellpadding=\"0\" cellspacing=\"0\" style=\"position:relative; top:-26px; left:-5px;\"><tr><td class=\"normalS_L\" style=\"height:20px;\">　<span data-v=\"通知管理番号\"></span> <span data-v=\"通知管理番号枝番\"></span></td></tr></table></td></tr></table><br><table class=\"detail2\" style=\"border-collapse:separate;\"><colgroup><col width=\"30px\"><col width=\"70px\"><col width=\"540px\"></colgroup><tr><template data-if=\"ne\" data-f=\"帳票名称\"><td></td><td class=\"normalM_C allline2\" style=\"height:15px; padding-top: 4px;\"><span data-v=\"帳票名称\"></span></td><td></td></template></tr></table></td><td style=\"vertical-align:top;\"><table class=\"Rterritory\" cellpadding=\"3\" cellspacing=\"0\"><colgroup><col width=\"30px\"><col width=\"250px\"><col width=\"40px\"></colgroup><tr><td></td><td style=\"height:11px\"></td><td></td></tr><tr><td></td><td class=\"normalS_TL allline\" style=\"height:185px;line-height:11px;\"><pre class=\"oshirase\"><span data-v=\"機構からのお知らせ\"></span></pre></td><td></td></tr></table></td></table><br><table class=\"detail\"><tr><td class=\"title gothic\" style=\"height:25px\"><span data-v=\"帳票タイトル\"></span></td></tr><tr><td style=\"height:4px;\"></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"32px\"><col width=\"608px\"></colgroup><tr><td></td><td class=\"normalL_L prewrap\" style=\"vertical-align:top; height:28px; padding-right:30px; line-height:14px;\"><span data-br=\"表示内容1\"></span></td></tr><tr><td style=\"height:6px;\"></td><td></td></tr><tr><td></td><td class=\"normalM_L prewrap letspace\" style=\"vertical-align:top; height:84px; padding-right:30px; line-height:14px;\"><span data-br=\"表示内容2\"></span></td></tr><tr><td style=\"height:8px;\"></td><td></td></tr></table><table class=\"detail2\"><colgroup><col width=\"35px\"><col width=\"140px\"><col width=\"430px\"><col width=\"35px\"></colgroup><tr><td></td><td class=\"normalTitleM_L3 allline gothic\" style=\"height:25px\">照　 会 　 番　 号</td><td class=\"normalM_L allline\" style=\"height:25px;padding-left:5px;\"><span data-v=\"照会番号\"></span></td><td></td></tr><tr><template data-if=\"ne\" data-f=\"再提出期限\"><td></td><td class=\"normalTitleM_L3 allline gothic\" style=\"height:25px\">再　提　出　期　限</td><td class=\"normalL_L allline\" style=\"height:25px;padding-left:5px;\"><span data-v=\"再提出期限\"></span></td><td></td></template><template data-if=\"eq\" data-f=\"再提出期限\"><td></td><td style=\"height:25px\"></td><td style=\"height:25px\"></td><td></td></template></tr></table><table class=\"detail2\"><colgroup><col width=\"35px\"><col width=\"140px\"><col width=\"430px\"><col width=\"35px\"></colgroup><tr><td style=\"height:10px;\"></td></tr><tr><td></td><td class=\"normalTitleM_L3 allline\" style=\"padding-top: 4px;\"><div class=\"equality gothic\"><span>届</span><span>書</span><span>名</span></div></td><td class=\"normalL_L allline prewrap\" style=\"vertical-align:top; padding-left:11px; padding-top:3px; height:60px; line-height:14px; padding-top: 3px;\"><span data-v=\"届書名\"></span></td><td></td></tr><tr><td></td><td class=\"normalTitleM_L3 allline\" style=\"padding-top: 4px;\"><div class=\"equality gothic\"><span>理</span><span>由</span></div></td><td class=\"normalL_L allline prewrap\" style=\"padding-left:11px; padding-top: 3px; height:24px; \"><span data-v=\"理由\"></span></td><td></td></tr><tr><td></td><td class=\"normalTitleM_L3 allline\" style=\"padding-top: 4px;\"><div class=\"equality gothic\"><span>通</span><span>信</span><span>欄</span></div></td><td class=\"normalL_L allline prewrap\" style=\"vertical-align:top; padding-left:11px; padding-top: 3px; height:216px; line-height:14px;\"><span data-br=\"通信欄\"></span></td><td></td></tr></table><table class=\"detail\"><colgroup><col width=\"35px\"><col width=\"130px\"><col width=\"350px\"><col width=\"90px\"><col width=\"35px\"></colgroup><tr><td></td><td class=\"normalL_L\" style=\"padding:5px;height:25px;\"><span data-v=\"通知年月日\"></span></td><td></td><td class=\"logo gothic\" style=\"padding:5px;\">日本年金機構</td><td></td></tr></table><br><table class=\"detail\" style=\"border-collapse:collapse;\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"420px\"><col width=\"150px\"><col width=\"30px\"></colgroup><tr><td></td><td class=\"normalTitleL_L3 linetlr\" style=\"padding:5px;\">※ ご不明な点がありましたら、以下の連絡先にお問い合わせください。</td><td></td><td></td></tr></table><table class=\"detail\" cellpadding=\"0\" cellspacing=\"0\"><colgroup><col width=\"40px\"><col width=\"600px\"></colgroup><tr><td style=\"vertical-align:top\"><table class=\"Lterritory2\"></table></td><td><table class=\"Rterritory2 allline\" cellpadding=\"2\" cellspacing=\"0\"><colgroup><col width=\"400px\"><col width=\"170px\"></colgroup><tr><td class=\"normalL_L\" colspan=\"2\" style=\"height:15px;\">〒 <span data-v=\"返戻元郵便番号\"></span></td></tr><tr><td class=\"normalL_L\" colspan=\"2\" style=\"height:16px;\"><span data-v=\"返戻元住所\"></span></td></tr><tr><td class=\"normalL_L\" colspan=\"2\" style=\"height:35px;line-height:15px;\"><span data-v=\"返戻元名称\"></span></td></tr><tr><td></td><td class=\"normalL_L\">TEL <span data-v=\"返戻元問合せ先電話番号\"></span></td></tr></table></td></tr></table>"
+          }
+        }
+      },
+      // 送付書: kagami.xsl は骨組みに直せない作り（要素をまるごと写す copy-of など）なので、buildKagamiSheet で手作業で移植した。
+      //   css・fragments は本ツール独自の最小限の枠（左右の余白）だけ。kagami.xsl が変わったら gen_form_defs.py henrei がハッシュで止まる。
+      "DOC": {
+        "label": "送付書（日本年金機構からのお知らせ）",
+        "kagami": {
+          "xslFile": "kagami.xsl",
+          "xslSha256": "d9d01a8abda0f081d51ab29e7ce361d0edb98a49d90af2534844e209ef01371c",
+          "docTitle": "日本年金機構からのお知らせ",
+          "scope": "hpf-kagami",
+          "bodyStyle": "",
+          "css": ".hpf-kagami .hpk-page{padding:0 18mm;text-align:left}",
+          "fragments": {
+            "root": "<div class=\"hpk-page\"><template data-slot=\"root\"></template></div>"
+          }
+        }
       }
     }
   };
@@ -1144,7 +1348,8 @@
     }
     var rootEl = doc.documentElement;
     info.formCode = rootEl ? rootEl.localName : null;
-    if(!rootEl || rootEl.namespaceURI || !Object.prototype.hasOwnProperty.call(FORM_DEFS.forms, rootEl.localName)){
+    // 連記式・個別の定義がある様式（標準報酬）だけを対象にする（返戻票・送付書の定義は別の経路で使う。2026-11-10）
+    if(!rootEl || rootEl.namespaceURI || !Object.prototype.hasOwnProperty.call(FORM_DEFS.forms, rootEl.localName) || !FORM_DEFS.forms[rootEl.localName].renki){
       info.reason = msgs.unsupported;
       return info;
     }
@@ -1461,8 +1666,12 @@
   function ensureFormCss(){
     if(formCssInjected) return;
     var css = "";
+    // 標準報酬は連記式→個別の順（従来と同じ並び）。返戻票・送付書は henrei・kagami（2026-11-10 追加）
     Object.keys(FORM_DEFS.forms).forEach(function(code){
-      ["renki", "kobetsu"].forEach(function(style){ css += FORM_DEFS.forms[code][style].css; });
+      var form = FORM_DEFS.forms[code];
+      Object.keys(form).forEach(function(style){
+        if(form[style] && typeof form[style].css === "string") css += form[style].css;
+      });
     });
     var el = document.createElement("style");
     el.textContent = css;
@@ -1554,7 +1763,7 @@
 
   // 警告の並び: 文書ごとの警告（はみ出し・縮小・同じファイル・文字化け）を先に、欄ごとの警告をあとに並べる。
   // 画面には先頭50件しか出さないので、文書ごとの大事な警告が「他○件」に埋もれないようにする（同じ順位の中は元の順）。
-  var WARNING_RANK = { belowFloor: 0, scaled: 1, oshirase: 2, sameFile: 3, encoding: 4 };
+  var WARNING_RANK = { belowFloor: 0, henreiStrong: 0, scaled: 1, oshirase: 2, sameFile: 3, encoding: 4 };
   function sortWarnings(warnings){
     return warnings.map(function(w, i){ return { w: w, i: i }; }).sort(function(a, b){
       var ra = WARNING_RANK.hasOwnProperty(a.w.kind) ? WARNING_RANK[a.w.kind] : 10;
@@ -1652,7 +1861,10 @@
   if(location.hash === "#verify"){
     window.__hyojunPrint = {
       renderDocs: function(xmlTexts, style, options){
-        var docs = xmlTexts.map(function(t, i){ return { fileName: "doc" + (i + 1), print: extractPrintDocFromText(t) }; });
+        // 返戻のお知らせ（2026-11-10 追加）: xmlTexts の要素は文字列か { name, folder, text }。
+        //   戻り値には hpWarnings・hpDocsInfo に加えて、返戻一覧の行（hpHenreiRows）と注意（hpHenreiMessages）を付ける
+        if(style === "henrei") return renderHenreiForVerify(xmlTexts, options);
+        var docs =xmlTexts.map(function(t, i){ return { fileName: "doc" + (i + 1), print: extractPrintDocFromText(t) }; });
         var built = buildPrintArea(docs, style, options);
         built.area.hpWarnings = built.warnings;
         built.area.hpDocsInfo = built.docsInfo.map(function(i){
@@ -1684,8 +1896,9 @@
   window.addEventListener("resize", function(){ fitPreview(); });
 
   // 読み込み済みのファイルを、選んだ順のまま様式の文書の並びにする
+  // （返戻票・送付書・スタイルシートなどは、標準報酬の様式（連記式・個別）には並べない。2026-11-10）
   function printDocsFromState(){
-    return state.entries.map(function(e){
+    return state.entries.filter(function(e){ return !e.result.kind; }).map(function(e){
       return { fileName: e.fileName, print: e.result.print || null, fatalError: e.result.fatalError,
                readWarning: e.result.readWarning || null, sourceKey: e.result.sourceKey || null };
     });
@@ -1693,6 +1906,7 @@
 
   // 警告を新人向けの文にする（内部の用語は出さない。何をすればよいかまで書く）
   function warningText(w){
+    if(w.kind === "henreiNote" || w.kind === "henreiStrong") return w.text;   // 返戻のお知らせの注意は、作るときに文にしてある（2026-11-10）
     var where = "「" + w.fileName + "」" + (w.personIndex ? "（ファイル内の" + w.personIndex + "人目）" : "");
     if(w.kind === "nan") return where + "の「" + w.field + "」は、数字として読み取れない値（または桁の多い値）なので、XMLに書かれた「" + w.raw + "」をそのまま表示しています。原本の通知書と見比べてください。";
     if(w.kind === "blank") return where + "の「" + w.field + "」は空欄なので、空欄のまま表示しています。原本の通知書でも空欄か確認してください。";
@@ -1717,7 +1931,7 @@
 
   // 様式ボタンの「選んでいる」表示（色だけに頼らず、文字でも示す）
   function markStyleButtons(style){
-    [[showRenkiBtn, "renki", "連記式（一覧表）で表示"], [showKobetsuBtn, "kobetsu", "個別（1人1枚）で表示"]].forEach(function(b){
+    [[showRenkiBtn, "renki", "連記式（一覧表）で表示"], [showKobetsuBtn, "kobetsu", "個別（1人1枚）で表示"], [showHenreiBtn, "henrei", "返戻のお知らせ（返戻票）を表示"]].forEach(function(b){
       var on = style === b[1];
       b[0].setAttribute("aria-pressed", String(on));
       b[0].textContent = "";
@@ -1749,7 +1963,10 @@
   function showPrint(style){
     var built;
     try{
-      built = buildPrintArea(printDocsFromState(), style, {});
+      // 返戻のお知らせは別の作り方（送付書→返戻票の順。2026-11-10・原さん決定 D3・D4）
+      built = style === "henrei"
+        ? buildHenreiPrintArea(buildHenreiModel(state.entries), { withKagami: henreiWithKagami.checked })
+        : buildPrintArea(printDocsFromState(), style, {});
     }catch(e){
       resetPrintArea();
       printStatus.className = "err";
@@ -1770,7 +1987,11 @@
     var skipped = built.skippedFileCount > 0 ? "（印刷しないファイル" + built.skippedFileCount + "件）" : "";
     if(built.sheetCount > 0){
       var pageText = built.pagesApprox ? "約" + built.pageCount + "ページ（はみ出しあり・ページ数は目安）" : built.pageCount + "ページ";
-      printStatus.textContent = "表示中: " + label + "／" + built.printedFileCount + "ファイル " + built.personCount + "人 " + pageText + skipped;
+      if(style === "henrei"){
+        printStatus.textContent = "表示中: " + (built.kagamiCount > 0 ? "送付書" + built.kagamiCount + "枚＋" : "") + "返戻票" + built.henreiCount + "枚（" + pageText + "）" + skipped;
+      } else {
+        printStatus.textContent = "表示中: " + label + "／" + built.printedFileCount + "ファイル " + built.personCount + "人 " + pageText + skipped;
+      }
     } else {
       printStatus.textContent = "表示中: " + label + "／印刷できるページがありません" + skipped + "。下の一覧で理由を確認してください。";
     }
@@ -1791,7 +2012,9 @@
         if(i.overflow) notes += "（はみ出しあり・ページ数は目安）";
         if(i.duplicateOf) notes += "（" + i.duplicateOf + "番目と同じファイル）";
         if(i.readWarning) notes += "（文字化けの可能性あり）";
-        if(i.sheets > 0){
+        if(i.sheets > 0 && style === "henrei"){
+          li.textContent = i.fileName + " — 返戻票" + i.persons + "枚" + (i.withKagami ? "（送付書つき）" : "") + "・" + pages + notes;
+        } else if(i.sheets > 0){
           li.textContent = i.fileName + " — " + i.label + "・" + i.persons + "人・" + pages + notes;
         } else {
           li.className = "skip";
@@ -1806,7 +2029,7 @@
     printWarn.innerHTML = "";
     if(built.warnings.length > 0){
       var t = document.createElement("div");
-      var hasStrong = built.warnings.some(function(w){ return w.kind === "belowFloor"; });
+      var hasStrong = built.warnings.some(function(w){ return w.kind === "belowFloor" || w.kind === "henreiStrong"; });
       t.textContent = "印刷の前に確認してほしいことが " + built.warnings.length + " 件あります" +
         (hasStrong ? "。【要確認】があるときは、印刷する前に必ず下の様式プレビューを見てください" : "（このまま印刷はできます）");
       printWarn.appendChild(t);
@@ -1814,7 +2037,7 @@
       var maxShown = FORM_DEFS.common.limits.maxWarningsShown;
       built.warnings.slice(0, maxShown).forEach(function(w){
         var li = document.createElement("li");
-        if(w.kind === "belowFloor") li.className = "strong";   // 文字の【要確認】に加えて、太字・枠で目立たせる
+        if(w.kind === "belowFloor" || w.kind === "henreiStrong") li.className = "strong";   // 文字の【要確認】に加えて、太字・枠で目立たせる
         li.textContent = warningText(w);
         ul.appendChild(li);
       });
@@ -1856,19 +2079,36 @@
     document.body.classList.remove("hp-print-ready");
     markStyleButtons(null);
     var hasEntries = state.entries.length > 0;
-    showRenkiBtn.disabled = !hasEntries;        // XMLが無いうちは押せない
-    showKobetsuBtn.disabled = !hasEntries;
-    printStatus.textContent = hasEntries
-      ? "XMLを読み込みました。上のボタンで「連記式」か「個別」を選んでください。"
-      : "まだ表示していません。XMLを読み込んでから、上のボタンで様式を選んでください。";
+    // 標準報酬のボタンは、標準報酬として読んだファイル（読めなかったものを含む）があるときだけ押せる。
+    // 返戻のボタンは返戻票があるときだけ押せる（2026-11-10。返戻を読んでいなければ従来どおり）
+    var hasHyojun = state.entries.some(function(e){ return !e.result.kind; });
+    var hasHenrei = state.entries.some(function(e){ return e.result.kind === "henrei"; });
+    showRenkiBtn.disabled = !hasHyojun;         // XMLが無いうちは押せない
+    showKobetsuBtn.disabled = !hasHyojun;
+    showHenreiBtn.disabled = !hasHenrei;
+    henreiWithKagami.disabled = !hasHenrei;
+    if(!hasEntries){
+      printStatus.textContent = "まだ表示していません。XMLを読み込んでから、上のボタンで様式を選んでください。";
+    } else if(hasHenrei && !hasHyojun){
+      printStatus.textContent = "返戻のお知らせを読み込みました。上の「返戻のお知らせ（返戻票）を表示」を押してください。";
+    } else {
+      printStatus.textContent = "XMLを読み込みました。上のボタンで「連記式」か「個別」を選んでください。" +
+        (hasHenrei ? "返戻のお知らせは「返戻のお知らせ（返戻票）を表示」を押してください。" : "");
+    }
   }
 
   // 読み込み内容が変わったときに呼ぶ（表示中なら同じ様式で描き直す。まだ選んでいなければ案内を出す）
   function refreshPrintArea(){
     if(state.entries.length === 0 || !printState.style){ resetPrintArea(); return; }
     // 印刷できるファイルが無くても押せるようにして、押したら一覧で「印刷しない理由」を見せる
-    showRenkiBtn.disabled = false;
-    showKobetsuBtn.disabled = false;
+    var hasHyojun = state.entries.some(function(e){ return !e.result.kind; });
+    var hasHenrei = state.entries.some(function(e){ return e.result.kind === "henrei"; });
+    showRenkiBtn.disabled = !hasHyojun;
+    showKobetsuBtn.disabled = !hasHyojun;
+    showHenreiBtn.disabled = !hasHenrei;
+    henreiWithKagami.disabled = !hasHenrei;
+    // 表示中の種類の文書が無くなったときは、表示を消して案内に戻す（例: 返戻を表示中に標準報酬だけになった）
+    if((printState.style === "henrei" && !hasHenrei) || (printState.style !== "henrei" && !hasHyojun)){ resetPrintArea(); return; }
     showPrint(printState.style);
   }
 
@@ -1877,7 +2117,9 @@
     if(!printState.built || printState.built.sheetCount === 0) return;
     var d = new Date();
     var ymd = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
-    document.title = FORM_DEFS.common.printTitlePrefix + "_" + FORM_DEFS.common.titleLabels[printState.style] + "_" + ymd;
+    document.title = printState.style === "henrei"
+      ? FORM_DEFS.common.henrei.printTitle + "_" + ymd            // 返戻のお知らせ_YYYYMMDD（事業所名は入れない）
+      : FORM_DEFS.common.printTitlePrefix + "_" + FORM_DEFS.common.titleLabels[printState.style] + "_" + ymd;
     var restore = function(){
       document.title = originalTitle;
       window.removeEventListener("afterprint", restore);
@@ -1892,6 +2134,759 @@
     for(var i = 0; i < text.length; i++){ h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
     return name + "|" + text.length + "|" + h.toString(16);
   }
+
+  // ===================================================================
+  // ここから「返戻のお知らせ」（返戻票 henrei.xml ＋ 送付書）への対応（2026-11-10 追加）
+  //   設計書: tools/_設計/設計書_標準報酬XML変換ツール_返戻票対応_2026-11-10.md（承認済み D1〜D11）
+  //   ゴールデン・検査台帳: tools/_golden/henrei-xml/
+  //   ・標準報酬の一覧（COLUMNS・buildTSV・buildCSV）と様式（連記式・個別）の出力には手を付けていない
+  //   ・公式XSLは表示内容1・2・通信欄を「<br/>」で区切り、区切った値を HTML としてそのまま出す（DOE）。
+  //     本ツールは DOE を再現しない。値は文字ノードでだけ入れ、文字列「<br/>」だけを改行（<br>要素）にする。
+  //     ほかのタグに見える文字は文字のまま出して警告し、文字参照は固定の表のものだけ元の文字に戻す（原さん決定 D6）
+  //   ・送付書（kagami.xsl）は要素をまるごと写す作り（copy-of）なので、許可した形（文字・改行・リンク）だけをたどって作り直す。
+  //     リンクはリンクにせず、文字とアドレスを文字で出す（D5）。ほかの要素は中の文字だけ残し、属性はすべて捨てる
+  //   ・innerHTML にはデータを入れない（骨組みの定数だけ。cloneFragment）
+  // ===================================================================
+
+  var HENREI_FORM = "_返戻票";      // FORM_DEFS.forms のキー（返戻票のルート要素名）
+  var KAGAMI_FORM = "DOC";          // FORM_DEFS.forms のキー（送付書のルート要素名）
+
+  // 返戻一覧の列（原さん決定 D8・D11: 送付先の住所・郵便番号は出さない）
+  //   forceText: CSVで ="…" にして先頭0・日付化を防ぐ列／numeric: 数式対策の対象外／multiline: 改行を持つ列（D7）
+  var HENREI_COLUMNS = [
+    // 並び（2026-11-10 レビュー反映 ui M1・S1）: 確認を No の直後、再提出期限を届書名の直後へ。D8 の列の中身は変えていない
+    { key:"no",         label:"No", numeric:true },
+    { key:"check",      label:"確認" },
+    { key:"arrivalNo",  label:"到達番号", forceText:true },
+    { key:"noticeDate", label:"通知年月日", forceText:true },
+    { key:"formName",   label:"届書名" },
+    { key:"deadline",   label:"再提出期限", forceText:true, emphasis:true },
+    { key:"reason",     label:"理由" },
+    { key:"inquiryNo",  label:"照会番号", forceText:true },
+    { key:"message",    label:"通信欄", multiline:true },
+    { key:"title",      label:"帳票タイトル" },
+    { key:"sendTo",     label:"送付先（氏名・名称）" },
+    { key:"fromName",   label:"返戻元名称" },
+    { key:"fromTel",    label:"返戻元電話", forceText:true },
+    { key:"controlNo",  label:"通知管理番号＋枝番", forceText:true },
+    { key:"file",       label:"ファイル" }
+  ];
+
+  // ---------- 読み取り（parseXmlText から呼ぶ） ----------
+  // ルート要素で返戻のお知らせか見分ける（名前空間付きは対象外）。返戻票="henrei"／送付書="kagami"（BODY がある DOC）／それ以外=null
+  function classifyHenreiRoot(doc){
+    var root = doc && doc.documentElement;
+    if(!root || root.namespaceURI) return null;
+    if(root.localName === HENREI_FORM) return "henrei";
+    if(root.localName === KAGAMI_FORM && childElements(root, "BODY").length > 0) return "kagami";
+    return null;
+  }
+
+  // 直下の子要素のうち、名前空間なしで名前が name のものだけ
+  function childElements(el, name){
+    var out = [];
+    for(var c = el.firstElementChild; c; c = c.nextElementSibling){
+      if(!c.namespaceURI && c.localName === name) out.push(c);
+    }
+    return out;
+  }
+  // 子要素の値を {項目名: [値…]} にする（直下の子だけ。値は XPath の文字列値＝子孫の文字をつなげたもの）
+  function collectChildValues(el){
+    var rec = Object.create(null);
+    for(var f = el.firstElementChild; f; f = f.nextElementSibling){
+      if(f.namespaceURI) continue;
+      if(!rec[f.localName]) rec[f.localName] = [];
+      rec[f.localName].push(f.textContent);
+    }
+    return rec;
+  }
+  function firstValue(rec, tag){ return rec[tag] && rec[tag].length ? rec[tag][0] : ""; }
+  // XPath の「項目!=''」と同じ（どれか1つでも空でなければ真。項目が無ければ偽）
+  function anyNonEmpty(rec, tag){ return !!rec[tag] && rec[tag].some(function(v){ return v !== ""; }); }
+
+  // 返戻票・送付書を読んだ結果を result に入れる。標準報酬の一覧（rows）と様式（print）には出さない
+  function parseHenreiDoc(doc, kind, result){
+    result.kind = kind;
+    result.print = null;
+    if(kind === "henrei") result.henrei = extractHenrei(doc);
+    else result.kagami = extractKagami(doc);
+    return result;
+  }
+
+  // 返戻票: ルート直下の _ページ ごとに1レコード（_非表示項目 は読まない＝公式も表示しない）
+  function extractHenrei(doc){
+    return { pages: childElements(doc.documentElement, "_ページ").map(collectChildValues) };
+  }
+
+  // 送付書: kagami.xsl が表示する項目だけを、文字の情報（要素は作らない）として取り出す
+  function extractKagami(doc){
+    var info = { bodies: [], refs: [], links: [], unknownTags: [] };
+    childElements(doc.documentElement, "BODY").forEach(function(body){
+      var rec = collectChildValues(body);
+      var b = {
+        docNo: firstValue(rec, "DOCNO"),
+        hasDate: anyNonEmpty(rec, "DATE"), date: firstValue(rec, "DATE"),
+        title: firstValue(rec, "TITLE"),
+        to: childElements(body, "TO").map(function(t){ var r = collectChildValues(t); return {
+          affShown: anyNonEmpty(r, "AFF") && anyNonEmpty(r, "NAME"), aff: firstValue(r, "AFF"),
+          nameShown: anyNonEmpty(r, "NAME"), name: firstValue(r, "NAME"),
+          honShown: anyNonEmpty(r, "HONORIFC") && anyNonEmpty(r, "NAME"), hon: firstValue(r, "HONORIFC") }; }),
+        author: childElements(body, "AUTHOR").map(function(a){ var r = collectChildValues(a); return {
+          aff: firstValue(r, "AFF"), nameShown: anyNonEmpty(r, "NAME"), name: firstValue(r, "NAME") }; }),
+        blocks: []
+      };
+      // BODY テンプレートと同じ順: MAINTXT → MAINTXT2 → REFERENC → APPENDIX → MAINTXT3
+      ["MAINTXT", "MAINTXT2", "REFERENC", "APPENDIX", "MAINTXT3"].forEach(function(nm){
+        childElements(body, nm).forEach(function(el){ applyKagamiTemplates(el, b.blocks, info); });
+      });
+      b.dateShown = formatKagamiDate(b.date, false);
+      info.bodies.push(b);
+    });
+    return info;
+  }
+
+  // kagami.xsl のテンプレートの当てはめ方を、許可した形だけでたどる（結果は {type,…} の並び）
+  //   P → 文字と改行とリンク（文字）だけを写す／MT2TITLE → 中央寄せの段落／APPENDIX → DOCLINK（文字）と改行
+  //   DOCLINK → 「題名 ( ファイル名 )」の文字／link → 文字（アドレス）／それ以外 → XSLの既定どおり子をたどり、文字を出す
+  function applyKagamiTemplates(node, out, info){
+    if(node.nodeType === 3 || node.nodeType === 4){ out.push({ type: "text", text: node.nodeValue }); return; }
+    if(node.nodeType !== 1) return;            // コメント・処理命令は出さない（XSLの既定どおり）
+    var name = node.namespaceURI ? "" : node.localName;
+    if(name === "P"){ out.push({ type: "p", align: "", parts: sanitizeKagamiP(node, info) }); return; }
+    if(name === "MT2TITLE"){ out.push({ type: "p", align: "center", parts: [{ text: node.textContent }] }); return; }
+    if(name === "APPENDIX"){
+      childElements(node, "DOCLINK").forEach(function(d){ out.push(doclinkItem(d, info)); });
+      out.push({ type: "br" });
+      return;
+    }
+    if(name === "DOCLINK"){ out.push(doclinkItem(node, info)); return; }
+    if(name === "link"){ out.push({ type: "text", text: linkAsText(node.textContent, node.getAttribute("uri"), info) }); return; }
+    for(var c = node.firstChild; c; c = c.nextSibling) applyKagamiTemplates(c, out, info);
+  }
+  // DOCLINK は公式ではリンク（返戻票のファイル名）。本ツールは文字にする（D5）。REF は返戻票との組み合わせに使う
+  function doclinkItem(d, info){
+    var ref = d.getAttribute("REF") || "";
+    info.refs.push(ref);
+    var parent = d.parentNode && d.parentNode.nodeType === 1 ? collectChildValues(d.parentNode) : Object.create(null);
+    return { type: "text", text: firstValue(parent, "APPTITLE") + " ( " + ref + " )" };
+  }
+  // 送付書の P の中身を、許可リストで1つずつたどる（文字はそのまま・BR は改行・a は文字（アドレス）・ほかは中の文字だけ）
+  function sanitizeKagamiP(p, info){
+    var parts = [];
+    for(var c = p.firstChild; c; c = c.nextSibling){
+      if(c.nodeType === 3 || c.nodeType === 4){ parts.push({ text: c.nodeValue }); continue; }
+      if(c.nodeType !== 1) continue;           // コメントなどは表示されない
+      var nm = c.namespaceURI ? "" : c.localName.toLowerCase();
+      if(nm === "br"){ parts.push({ br: true }); continue; }
+      if(nm === "a"){ parts.push({ text: linkAsText(c.textContent, c.getAttribute("href"), info) }); continue; }
+      if(info.unknownTags.indexOf(c.localName) < 0) info.unknownTags.push(c.localName);
+      parts.push({ text: c.textContent });      // 知らない要素は中の文字だけ（属性は捨てる）
+    }
+    return parts;
+  }
+  // リンクを文字にする。文字とアドレスが同じなら文字だけ、違えば「文字（アドレス）」。年金機構以外のアドレスは注意に記録する
+  function linkAsText(text, href, info){
+    var shown = String(text || "");
+    var url = fullTrim(href || "");
+    if(!url) return shown;
+    var plain = shown.replace(/\s+/g, " ").replace(/^ | $/g, "");
+    // オリジン（https://ホスト名）が年金機構と同じときだけ信頼する。読めないアドレスは信頼しない
+    var trusted = false;
+    try{ trusted = new URL(url).origin === FORM_DEFS.common.henrei.trustedOrigin; }catch(eUrl){ trusted = false; }
+    if(!trusted || plain !== url) info.links.push({ text: plain, url: url, trusted: trusted });
+    return plain === url ? shown : shown + "（" + url + "）";
+  }
+
+  // 送付書の日付（kagami.xsl: 1〜2文字目（元号）＋3〜4文字目を format-number(…,'##')＋5文字目＋6〜7文字目（同）＋8文字目＋9〜10文字目（同）＋11文字目。
+  //   区切りの「年」「月」「日」は固定の文字ではなく、DATE の5・8・11文字目をそのまま使う）
+  //   素直な数字でない所は、公式は「NaN」と出す。本ツールはXMLの文字をそのまま出して警告する（標準報酬の決定事項4と同じ扱い）。
+  //   compat=true は検証用（公式と同じ表示）
+  function formatKagamiDate(date, compat){
+    var chars = Array.from(String(date));   // XPath の substring は文字単位
+    function sub(start, len){ return chars.slice(start - 1, start - 1 + len).join(""); }
+    var bad = false;
+    function num2(s){
+      if(/^\s*[0-9]+\s*$/.test(s)) return String(parseInt(s, 10));
+      bad = true;
+      if(!compat) return s;
+      var v = libxsltParseNumber(s);
+      return isNaN(v) ? "NaN" : String(Math.round(v));
+    }
+    var text = sub(1, 2) + num2(sub(3, 2)) + sub(5, 1) + num2(sub(6, 2)) + sub(8, 1) + num2(sub(9, 2)) + sub(11, 1);
+    return { text: text, bad: bad };
+  }
+
+  // ---------- 表示内容1・2・通信欄（公式の loop テンプレート）の扱い ----------
+  // 文字列「<br/>」で区切り、区切った各部分は文字として出す。タグに見える文字（<b> など）は警告用に集める
+  var HENREI_TAG_RE = /<\/?[A-Za-z][^<>]*>|<![^<>]*>/g;
+  function analyzeBrField(raw){
+    var segs = String(raw).split(FORM_DEFS.common.henrei.brToken);
+    var markup = [];
+    var shown = segs.map(function(seg){
+      var tags = seg.match(HENREI_TAG_RE);
+      if(tags) markup = markup.concat(tags);
+      var dec = decodeFixedEntities(seg);
+      markup = markup.concat(dec.unknown);
+      return dec.text;
+    });
+    return { segments: shown, markup: markup };
+  }
+  // 文字参照を固定の表のものだけ元の文字に戻す（数値参照は有効な文字だけ）。戻さなかったものは unknown に入れる
+  function decodeFixedEntities(s){
+    var table = FORM_DEFS.common.henrei.namedEntities;
+    var unknown = [];
+    var text = String(s).replace(/&(#[0-9]+|#[xX][0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]*);/g, function(all, body){
+      if(body.charAt(0) === "#"){
+        var cp = /^#[xX]/.test(body) ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+        if(cp > 0 && cp <= 0x10FFFF && !(cp >= 0xD800 && cp <= 0xDFFF)) return String.fromCodePoint(cp);
+        unknown.push(all);
+        return all;
+      }
+      if(Object.prototype.hasOwnProperty.call(table, body)) return table[body];
+      unknown.push(all);
+      return all;
+    });
+    return { text: text, unknown: unknown };
+  }
+
+  // ---------- 送付書と返戻票の組み合わせ・返戻一覧の行 ----------
+  function entryFolder(e){ return e.folder || ""; }
+  // 組み合わせの単位: フォルダがあればフォルダ、なければ「同じ回に読み込んだもの」（ファイル選択1回・貼り付け1回）
+  function pairGroupOf(e){ return e.folder ? "f:" + e.folder : "b:" + (e.batch || 0); }
+  function entryBaseName(e){ return e.baseName || e.fileName || ""; }
+  function baseNameOf(path){ var parts = String(path).split(/[\\\/]/); return parts[parts.length - 1]; }
+  function isAuxEntry(e){ return e.result.kind === "stylesheet" || e.result.kind === "skipped"; }
+
+  // 読み込んだもの全体から、返戻票の文書（送付書との組を含む）と一覧の行を作る。
+  //   組にする条件（設計 3）: 同じフォルダにあり、送付書の DOCLINK の REF（ファイル名）が返戻票のファイル名と同じ（大文字小文字は区別しない）。
+  //   候補が2つ以上・同じ送付書が2つ以上の返戻票に当たる場合は、組を決めない（到達番号を空欄にして注意）
+  function buildHenreiModel(entries){
+    var henreiEntries = entries.filter(function(e){ return e.result.kind === "henrei"; });
+    var kagamiEntries = entries.filter(function(e){ return e.result.kind === "kagami"; });
+    function sameName(a, b){ return a.toLowerCase() === b.toLowerCase(); }
+    function matches(k, h){
+      return pairGroupOf(k) === pairGroupOf(h) && k.result.kagami.refs.some(function(ref){ return sameName(baseNameOf(ref), entryBaseName(h)); });
+    }
+    var model = { docs: [], rows: [], kagamiNotes: [], stylesheetNotes: [], infoNotes: [], limitNote: null };
+    // 返戻票の合計枚数の上限（security S1）。超えたら一覧も様式も作らない
+    var totalRows = 0;
+    henreiEntries.forEach(function(h){ totalRows += h.result.henrei.pages.length; });
+    if(totalRows > FORM_DEFS.common.limits.maxHenreiRows){
+      model.limitNote = FORM_DEFS.common.messages.tooManyHenreiRows + "（今回は合計" + totalRows + "枚）";
+      return model;
+    }
+    henreiEntries.forEach(function(h, di){
+      var cands = kagamiEntries.filter(function(k){ return matches(k, h); });
+      var pair = null, pairNote = null;
+      if(cands.length === 1){
+        var rivals = henreiEntries.filter(function(h2){ return h2 !== h && matches(cands[0], h2); });
+        if(rivals.length === 0) pair = cands[0]; else pairNote = "ambiguous";
+      } else {
+        pairNote = cands.length === 0 ? "unpaired" : "ambiguous";
+      }
+      var arrivalNo = pair && pair.result.kagami.bodies.length ? fullTrim(pair.result.kagami.bodies[0].docNo) : "";
+      var doc = { entry: h, fileName: h.fileName, readWarning: h.result.readWarning || null, kagami: pair, pairNote: pairNote,
+                  pages: [], printNotes: [], strongNotes: [] };
+      var where = "「" + h.fileName + "」";
+      // 注意の文は、するべきことを先に書く（ui S4）
+      if(pairNote === "unpaired") doc.printNotes.push(where + "の送付書が見つかりません。zipを展開したフォルダごとドロップし直してください（今は到達番号を空欄にし、送付書を付けずに表示しています）。");
+      if(pairNote === "ambiguous") doc.printNotes.push(where + "と組になる送付書を1つに決められません。返戻のお知らせごとに、展開したフォルダごとドロップし直してください（今は到達番号を空欄にし、送付書を付けずに表示しています）。");
+      if(pair && !h.folder){
+        var noFolder = "組が正しいか、原本の送付書の到達番号で確認してください。" + where + "はフォルダの情報がないため、同じ回に選んだ送付書「" + pair.fileName + "」と組にしました。";
+        doc.printNotes.push(noFolder);
+        model.infoNotes.push(noFolder);
+      }
+      if(pair && pair.result.kagami.bodies.length > 1){
+        var multiBody = "原本と見比べてください。組にした送付書「" + pair.fileName + "」に本文（BODY）が" + pair.result.kagami.bodies.length + "つあり、到達番号は1つ目のものを使っています。";
+        doc.printNotes.push(multiBody);
+        model.infoNotes.push(multiBody);
+      }
+      h.result.henrei.pages.forEach(function(rec, pi){
+        var page = { rec: rec, br: Object.create(null), notes: [] };
+        FORM_DEFS.common.henrei.brFields.forEach(function(tag){
+          var an = analyzeBrField(firstValue(rec, tag));
+          page.br[tag] = an;
+          if(an.markup.length){
+            var sample = an.markup.slice(0, 3).join(" ") + (an.markup.length > 3 ? " ほか" : "");
+            page.notes.push("原本の返戻票と見比べてください。「" + tag + "」に、HTMLの書式や記号の書き方（" + sample + "）があり、安全のため書式にせず文字のまま表示しています");
+          }
+        });
+        Object.keys(rec).forEach(function(tag){
+          if(rec[tag].length > 1 && rec[tag].some(function(v){ return v !== rec[tag][0]; })){
+            page.notes.push("原本の返戻票と見比べてください。「" + tag + "」が2つ以上書かれていて、年金機構の様式と同じく1つ目の値を使っています");
+          }
+        });
+        var pairRowNote = pairNote === "unpaired" ? "送付書が見つかりません。zipを展開したフォルダごとドロップし直してください（到達番号は空欄）"
+                        : pairNote === "ambiguous" ? "組になる送付書を1つに決められません。フォルダごとドロップし直してください（到達番号は空欄）" : null;
+        if(pairRowNote) page.notes.push(pairRowNote);
+        var strongNotes = [];
+        // 照会番号の中に「到達番号:…」があり、送付書の到達番号と違うときは確認を促す（照会番号の写し間違いは期限切れの事故につながるため）
+        var inq = /到達番号[:：]\s*([0-9]+)/.exec(firstValue(rec, "照会番号"));
+        if(inq && arrivalNo && inq[1] !== arrivalNo){
+          var mismatch = "【要確認】どちらが正しいか担当者に確認してください。照会番号の中の到達番号（" + inq[1] + "）が、送付書の到達番号（" + arrivalNo + "）と違います";
+          page.notes.push(mismatch);
+          strongNotes.push(mismatch);
+        }
+        // 印刷の注意には、組の注意（文書ごとに1回出している）を除いて出す。到達番号の食い違いは強い注意（枠・太字）にする
+        page.notes.forEach(function(n){
+          if(n === pairRowNote) return;
+          var t = where + "（返戻票の" + (pi + 1) + "枚目）: " + n + "。";
+          if(strongNotes.indexOf(n) >= 0) doc.strongNotes.push(t); else doc.printNotes.push(t);
+        });
+        doc.pages.push(page);
+        // 返戻一覧の1行（通信欄は「<br/>」と元の改行をどちらも改行「\n」にする）
+        var message = an2text(page.br["通信欄"]);
+        var controlNo = fullTrim(firstValue(rec, "通知管理番号")) + " " + fullTrim(firstValue(rec, "通知管理番号枝番"));
+        model.rows.push({
+          no: model.rows.length + 1,
+          arrivalNo: arrivalNo,
+          noticeDate: fullTrim(firstValue(rec, "通知年月日")),
+          formName: fullTrim(firstValue(rec, "届書名")),
+          reason: fullTrim(firstValue(rec, "理由")),
+          deadline: fullTrim(firstValue(rec, "再提出期限")),
+          inquiryNo: fullTrim(firstValue(rec, "照会番号")),
+          message: message,
+          title: fullTrim(firstValue(rec, "帳票タイトル")),
+          sendTo: fullTrim(firstValue(rec, "送付先氏名_名称")),
+          fromName: fullTrim(firstValue(rec, "返戻元名称")),
+          fromTel: fullTrim(firstValue(rec, "返戻元問合せ先電話番号")),
+          controlNo: fullTrim(controlNo),
+          file: h.fileName,
+          check: page.notes.length ? "要確認" : "",
+          _notes: page.notes, _fileName: h.fileName, _pageIndex: pi + 1
+        });
+      });
+      model.docs.push(doc);
+    });
+    function an2text(an){ return fullTrim(an.segments.join("\n").replace(/\r\n?/g, "\n")); }
+    // 送付書の注意（年金機構以外のアドレス・知らない書式・日付）。返戻票と組になっていない送付書も対象にする
+    kagamiEntries.forEach(function(k){
+      var kg = k.result.kagami, where = "「" + k.fileName + "」（送付書）";
+      kg.links.forEach(function(l){
+        model.kagamiNotes.push({ entry: k, text: l.trusted
+          ? where + "の「" + (l.text || "（文字なし）") + "」は、リンクにせずアドレスを文字で表示しています（" + l.url + "）。"
+          : "開く前に担当者に確認してください。" + where + "の「" + (l.text || "（文字なし）") + "」は日本年金機構以外のアドレスです（" + l.url + "）。リンクにせず文字で表示しています。" });
+      });
+      if(kg.unknownTags.length) model.kagamiNotes.push({ entry: k, text: "原本と見比べてください。" + where + "に見慣れない書式（" + kg.unknownTags.slice(0, 5).join("・") + "）があり、中の文字だけを表示しています。" });
+      kg.bodies.forEach(function(b){
+        if(b.hasDate && b.dateShown.bad) model.kagamiNotes.push({ entry: k, text: "原本と見比べてください。" + where + "の日付「" + b.date + "」の一部を数字として読み取れないため、書かれたとおりに表示しています。" });
+      });
+    });
+    // 返戻票と組になった送付書の注意は、その返戻票の印刷の注意にも出す
+    model.docs.forEach(function(d){
+      if(!d.kagami) return;
+      model.kagamiNotes.forEach(function(n){ if(n.entry === d.kagami) d.printNotes.push(n.text); });
+    });
+    // スタイルシートの版の照合（版が違うときは注意。印刷は止めない）
+    entries.forEach(function(e){
+      if(e.result.kind === "stylesheet" && e.result.stylesheet && e.result.stylesheet.unknownVersion){
+        model.stylesheetNotes.push("表示を原本と見比べ、担当者に知らせてください。「" + e.fileName + "」は、このツールが対応している版と違うスタイルシートです（年金機構の様式が変わった可能性があります）。");
+      }
+    });
+    if(model.stylesheetNotes.length) model.docs.forEach(function(d){ d.printNotes = d.printNotes.concat(model.stylesheetNotes); });
+    return model;
+  }
+
+  // 「エラー・注意」欄に出す文（返戻一覧の行の注意・送付書の注意・スタイルシートの版）
+  function henreiMessages(model){
+    var msgs = [];
+    model.rows.forEach(function(r){
+      r._notes.forEach(function(n){
+        msgs.push({ level: "warn", text: r._fileName + " 返戻票の" + r._pageIndex + "枚目（照会番号: " + (r.inquiryNo || "不明") + "）: " + n });
+      });
+    });
+    model.kagamiNotes.forEach(function(n){ msgs.push({ level: "warn", text: n.text }); });
+    model.stylesheetNotes.forEach(function(t){ msgs.push({ level: "warn", text: t }); });
+    model.infoNotes.forEach(function(t){ msgs.push({ level: "warn", text: t }); });
+    if(model.limitNote) msgs.push({ level: "error", text: model.limitNote });
+    return msgs;
+  }
+
+  // 読込結果の一覧に出す状態（返戻票・送付書・スタイルシート・読み飛ばし）。標準報酬のファイルなら null
+  function henreiEntryStatus(e){
+    var msgs = FORM_DEFS.common.messages, k = e.result.kind;
+    if(k === "henrei") return { className: "ok", text: "返戻票 " + e.result.henrei.pages.length + "枚" };
+    if(k === "kagami") return { className: "info", text: msgs.kagamiInfo };      // 原さん決定 D9
+    if(k === "stylesheet") return { className: "skip", text: e.result.stylesheet && e.result.stylesheet.unknownVersion ? msgs.stylesheetUnknownVersion : msgs.stylesheetSkip };
+    if(k === "skipped") return { className: "skip", text: e.result.skipText || msgs.notXmlSkip };
+    return null;
+  }
+
+  // スタイルシートの版を照合する（SHA-256 を、ツールが移植した版と比べる。中身は持たない）。
+  //   henrei.xsl・kagami.xsl という名前なのに知らない版なら unknownVersion。ハッシュが計算できない環境では照合しない
+  function readStylesheetInfo(file){
+    var info = { checked: false, known: false, unknownVersion: false };
+    if(file.size > FORM_DEFS.common.limits.maxFileBytes || !(window.crypto && window.crypto.subtle && file.arrayBuffer)) return Promise.resolve(info);
+    return file.arrayBuffer().then(function(buf){ return window.crypto.subtle.digest("SHA-256", buf); }).then(function(dig){
+      var hex = Array.prototype.map.call(new Uint8Array(dig), function(b){ return (b < 16 ? "0" : "") + b.toString(16); }).join("");
+      var knownHashes = [];
+      Object.keys(FORM_DEFS.forms).forEach(function(code){
+        var form = FORM_DEFS.forms[code];
+        Object.keys(form).forEach(function(st){ if(form[st] && form[st].xslSha256) knownHashes.push(form[st].xslSha256); });
+      });
+      info.checked = true;
+      info.known = knownHashes.indexOf(hex) >= 0;
+      info.unknownVersion = !info.known && /^(henrei|kagami)\.xsl$/i.test(file.name);
+      return info;
+    }).catch(function(){ return info; });
+  }
+
+  // フォルダごとのドロップ: 中のファイルを集める（深さ・数に上限。並びはパスの順）
+  function collectDroppedEntries(topEntries){
+    var limits = FORM_DEFS.common.limits;
+    var out = { files: [], meta: [], notes: [] };
+    var tooDeep = false, tooMany = false;
+    function dirOf(fullPath){ var p = String(fullPath || ""); var i = p.lastIndexOf("/"); return i > 0 ? p.slice(1, i) : ""; }
+    function addFile(entry){
+      return new Promise(function(resolve){
+        if(out.files.length >= limits.maxFolderFiles){ tooMany = true; resolve(); return; }
+        entry.file(function(f){
+          if(out.files.length >= limits.maxFolderFiles){ tooMany = true; }
+          else {
+            out.files.push(f);
+            out.meta.push({ folder: dirOf(entry.fullPath), displayName: String(entry.fullPath || f.name).replace(/^\//, ""), fromFolder: true });
+          }
+          resolve();
+        }, function(){ resolve(); });
+      });
+    }
+    function readAll(dirEntry){
+      var reader = dirEntry.createReader(), all = [];
+      return new Promise(function(resolve){
+        (function next(){
+          reader.readEntries(function(batch){
+            if(!batch.length){ resolve(all); return; }
+            all = all.concat(Array.prototype.slice.call(batch));
+            next();
+          }, function(){ resolve(all); });
+        })();
+      });
+    }
+    function walk(entry, depth){
+      if(entry.isFile) return addFile(entry);
+      if(!entry.isDirectory) return Promise.resolve();
+      if(depth > limits.maxFolderDepth){ tooDeep = true; return Promise.resolve(); }
+      return readAll(entry).then(function(children){
+        children.sort(function(a, b){ return a.fullPath < b.fullPath ? -1 : a.fullPath > b.fullPath ? 1 : 0; });
+        return children.reduce(function(p, ch){ return p.then(function(){ return walk(ch, depth + 1); }); }, Promise.resolve());
+      });
+    }
+    return topEntries.reduce(function(p, en){ return p.then(function(){ return walk(en, 1); }); }, Promise.resolve()).then(function(){
+      if(tooDeep) out.notes.push("フォルダが深すぎるため、" + limits.maxFolderDepth + "階層より下のフォルダは読み込んでいません");
+      if(tooMany) out.notes.push("ファイルが多すぎるため、" + limits.maxFolderFiles + "個を超えた分は読み込んでいません。フォルダを分けて読み込んでください");
+      return out;
+    });
+  }
+
+  // ---------- 様式の描画（返戻票・送付書） ----------
+  // 公式の xsl:if（項目!='' / 項目=''）。どれか1つの値で判定する（XPath と同じ。項目が無ければどちらも偽）
+  function resolveHenreiConditions(frag, rec){
+    var tpl;
+    while((tpl = frag.querySelector("template[data-if]"))){
+      var vals = rec[tpl.getAttribute("data-f")] || [];
+      var keep = tpl.getAttribute("data-if") === "ne"
+        ? vals.some(function(v){ return v !== ""; })
+        : vals.some(function(v){ return v === ""; });
+      if(keep) tpl.replaceWith(document.importNode(tpl.content, true));
+      else tpl.remove();
+    }
+  }
+  // 値の目印を文字ノードにする。data-v は1つ目の値（公式どおり）。data-br は区切った部分を文字で入れ、間に <br> を入れる
+  function fillHenreiValues(frag, page){
+    Array.prototype.forEach.call(frag.querySelectorAll("span[data-v],span[data-br]"), function(span){
+      if(span.hasAttribute("data-v")){
+        span.replaceWith(document.createTextNode(firstValue(page.rec, span.getAttribute("data-v"))));
+        return;
+      }
+      var tag = span.getAttribute("data-br");
+      var an = page.br[tag] || analyzeBrField(firstValue(page.rec, tag));
+      var out = document.createDocumentFragment();
+      an.segments.forEach(function(seg, i){
+        if(i > 0) out.appendChild(document.createElement("br"));
+        out.appendChild(document.createTextNode(seg));
+      });
+      span.replaceWith(out);
+    });
+  }
+  // 返戻票1枚分のシート（公式の body・外側の表・外枠の表の中に、1ページ分を入れる）
+  function buildHenreiPageSheet(page){
+    var frag = cloneFragment(HENREI_FORM, "henrei", "henreiPage");
+    resolveHenreiConditions(frag, page.rec);
+    fillHenreiValues(frag, page);
+    var pageFrag = cloneFragment(HENREI_FORM, "henrei", "page");
+    fillSlot(pageFrag, "henreiPage", frag);
+    return makeSheet(HENREI_FORM, "henrei", pageFrag);
+  }
+  // 段落1つ（parts: {text} か {br}）。揃えは style で指定する（データの属性は使わない）
+  function kagamiParagraph(align, parts){
+    var p = document.createElement("p");
+    if(align) p.style.textAlign = align;
+    parts.forEach(function(pt){ p.appendChild(pt.br ? document.createElement("br") : document.createTextNode(pt.text)); });
+    return p;
+  }
+  // 送付書のシート（kagami.xsl の BODY・TO・AUTHOR・APPENDIX テンプレートと同じ並び・同じ条件）
+  function buildKagamiSheet(kagami, compat){
+    var content = document.createDocumentFragment();
+    kagami.bodies.forEach(function(b){
+      content.appendChild(kagamiParagraph("right", [{ text: b.docNo }]));
+      if(b.hasDate) content.appendChild(kagamiParagraph("right", [{ text: compat ? formatKagamiDate(b.date, true).text : b.dateShown.text }]));
+      b.to.forEach(function(t){
+        if(t.affShown) content.appendChild(kagamiParagraph("", [{ text: t.aff }]));
+        if(t.nameShown) content.appendChild(kagamiParagraph("", [{ text: t.name + (t.honShown ? "　" + t.hon : "") }]));
+      });
+      b.author.forEach(function(a){
+        content.appendChild(kagamiParagraph("right", [{ text: a.aff }]));
+        if(a.nameShown) content.appendChild(kagamiParagraph("right", [{ text: a.name }]));
+      });
+      content.appendChild(kagamiParagraph("center", [{ text: b.title }]));
+      b.blocks.forEach(function(item){
+        if(item.type === "p") content.appendChild(kagamiParagraph(item.align, item.parts));
+        else if(item.type === "br") content.appendChild(document.createElement("br"));
+        else content.appendChild(document.createTextNode(item.text));
+      });
+    });
+    var sheet = makeSheet(KAGAMI_FORM, "kagami", content);
+    sheet.hpLabel = "送付書";
+    return sheet;
+  }
+
+  // 返戻のお知らせの印刷エリアを作る（返戻票の文書ごとに「送付書1枚 → 返戻票」の順。原さん決定 D4）
+  //   options: { withKagami: 送付書も入れるか（既定 true）, officialCompat: 検証用に公式と同じ日付表示にするか }
+  //   戻り値は buildPrintArea と同じ形に、送付書・返戻票の枚数（kagamiCount・henreiCount）を足したもの
+  function buildHenreiPrintArea(model, options){
+    ensureFormCss();
+    var opts = options || {};
+    var withKagami = opts.withKagami !== false;
+    var msgs = FORM_DEFS.common.messages;
+    var area = document.createElement("div");
+    area.className = "hp-area";
+    var warnings = [], docsInfo = [], allSheets = [];
+    var kagamiCount = 0, henreiCount = 0;
+    var totalPages = 0;
+    model.docs.forEach(function(d){ totalPages += d.pages.length; });
+    var limitError = totalPages > FORM_DEFS.common.limits.maxHenreiPages ? msgs.tooManyHenreiPages + "（今回は合計" + totalPages + "枚）" : null;
+    model.docs.forEach(function(d, idx){
+      var info = { docIndex: idx + 1, fileName: d.fileName, formCode: HENREI_FORM, label: FORM_DEFS.forms[HENREI_FORM].label,
+                   persons: d.pages.length, sheets: 0, firstPage: 0, lastPage: 0, pagesApprox: false, overflow: false, reason: null,
+                   readWarning: d.readWarning, duplicateOf: null, sheetEls: [], sheetResults: null, withKagami: false };
+      if(limitError){
+        info.reason = limitError;
+      } else if(d.pages.length === 0){
+        info.reason = msgs.noHenreiPages;
+      } else {
+        var sheets = [];
+        if(withKagami && d.kagami){
+          sheets.push(buildKagamiSheet(d.kagami.result.kagami, !!opts.officialCompat));
+          kagamiCount++;
+          info.withKagami = true;
+        }
+        d.pages.forEach(function(p, i){
+          var s = buildHenreiPageSheet(p);
+          s.hpLabel = "返戻票の" + (i + 1) + "枚目";
+          sheets.push(s);
+          henreiCount++;
+        });
+        var docEl = document.createElement("div");
+        docEl.className = "hp-doc";
+        sheets.forEach(function(s){ docEl.appendChild(s); allSheets.push(s); });
+        area.appendChild(docEl);
+        info.sheets = sheets.length;
+        info.sheetEls = sheets;
+      }
+      if(info.readWarning) warnings.push({ kind: "encoding", docIndex: idx + 1, fileName: d.fileName, personIndex: null, field: "", raw: info.readWarning, compatText: "", shownText: "" });
+      d.strongNotes.forEach(function(t){
+        warnings.push({ kind: "henreiStrong", docIndex: idx + 1, fileName: d.fileName, personIndex: null, field: "", raw: "", compatText: "", shownText: "", text: t });
+      });
+      d.printNotes.forEach(function(t){
+        warnings.push({ kind: "henreiNote", docIndex: idx + 1, fileName: d.fileName, personIndex: null, field: "", raw: "", compatText: "", shownText: "", text: t });
+      });
+      docsInfo.push(info);
+    });
+    if(allSheets.length > 0) allSheets[allSheets.length - 1].classList.add("hp-last");
+    measureSheets(area, docsInfo);
+    sheetWarnings(docsInfo, warnings);
+    // ページ番号（buildPrintArea と同じ数え方。下限を下回って2ページ以上に分かれるシートは目安）
+    var pageNo = 0, approx = false;
+    docsInfo.forEach(function(i){
+      if(!i.sheetResults || i.sheets === 0) return;
+      i.firstPage = pageNo + 1;
+      i.sheetResults.forEach(function(r){ pageNo += r.estimatedPages; if(r.status === "belowFloor") i.overflow = true; });
+      if(i.overflow) approx = true;
+      i.pagesApprox = approx;
+      i.lastPage = pageNo;
+    });
+    var printedFileCount = docsInfo.filter(function(i){ return i.sheets > 0; }).length;
+    return { area: area, docsInfo: docsInfo, warnings: sortWarnings(warnings), sheetCount: allSheets.length,
+             pageCount: pageNo, pagesApprox: approx, personCount: henreiCount, printedFileCount: printedFileCount,
+             skippedFileCount: docsInfo.length - printedFileCount, limitError: limitError,
+             kagamiCount: kagamiCount, henreiCount: henreiCount };
+  }
+
+  // 検証用（#verify のときだけ __hyojunPrint.renderDocs から呼ばれる）。データはグローバルに残さない
+  function renderHenreiForVerify(xmlTexts, options){
+    var entries = xmlTexts.map(function(t, i){
+      var item = typeof t === "string" ? { name: "doc" + (i + 1), folder: "", text: t } : t;
+      var res = parseXmlText(item.text, item.name);
+      return { fileName: (item.folder ? item.folder + "/" : "") + item.name, baseName: item.name, folder: item.folder || "", batch: item.batch || 0, result: res };
+    });
+    var model = buildHenreiModel(entries);
+    var built = buildHenreiPrintArea(model, options);
+    built.area.hpWarnings = built.warnings;
+    built.area.hpDocsInfo = built.docsInfo.map(function(i){
+      return { docIndex: i.docIndex, formCode: i.formCode, persons: i.persons, sheets: i.sheets, reason: i.reason, withKagami: i.withKagami,
+               firstPage: i.firstPage, lastPage: i.lastPage, pagesApprox: i.pagesApprox, overflow: i.overflow,
+               sheetResults: (i.sheetResults || []).map(function(r){ return { label: r.label, status: r.status, zoom: r.zoom, oshiraseOver: r.oshiraseOver, estimatedPages: r.estimatedPages }; }) };
+    });
+    built.area.hpHenreiRows = model.rows.map(function(r){
+      var o = {}; HENREI_COLUMNS.forEach(function(c){ o[c.key] = r[c.key]; }); return o;
+    });
+    built.area.hpHenreiMessages = henreiMessages(model).map(function(m){ return m.text; });
+    built.area.hpCounts = { kagami: built.kagamiCount, henrei: built.henreiCount, pages: built.pageCount };
+    return built.area;
+  }
+
+  // ---------- 返戻一覧（画面・TSV・CSV） ----------
+  var henreiSection = document.getElementById("henreiSection");
+  var henreiHeaderRow = document.getElementById("henreiHeaderRow");
+  var henreiBody = document.getElementById("henreiBody");
+  var copyHenreiTsvBtn = document.getElementById("copyHenreiTsvBtn");
+  var saveHenreiCsvBtn = document.getElementById("saveHenreiCsvBtn");
+  var henreiCopyStatus = document.getElementById("henreiCopyStatus");
+  var henreiSummary = document.getElementById("henreiSummary");
+  var showHenreiBtn = document.getElementById("showHenreiBtn");
+  var henreiWithKagami = document.getElementById("henreiWithKagami");
+  var henreiRowsCache = [];   // 今の返戻一覧の行（コピー・保存用。クリアで空になる）
+
+  HENREI_COLUMNS.forEach(function(c){
+    var th = document.createElement("th");
+    th.textContent = c.emphasis ? c.label + "（必ず確認）" : c.label;
+    if(c.emphasis) th.className = "deadline";
+    henreiHeaderRow.appendChild(th);
+  });
+
+  // 和暦の日付（令和8年11月19日 など）を比べられる数（YYYYMMDD）にする。読めなければ null
+  var HENREI_ERA_BASE = { "令和": 2018, "平成": 1988 };
+  function eraDateKey(text){
+    var m = /^(令和|平成)\s*([0-9]+|元)年\s*([0-9]+)月\s*([0-9]+)日$/.exec(toHalfDigits(fullTrim(text)));
+    if(!m) return null;
+    var y = HENREI_ERA_BASE[m[1]] + (m[2] === "元" ? 1 : parseInt(m[2], 10));
+    return y * 10000 + parseInt(m[3], 10) * 100 + parseInt(m[4], 10);
+  }
+  // 一覧の上の1行（返戻の件数・再提出期限の最も近い日・空欄の件数）
+  function henreiSummaryText(rows){
+    var nearest = null, nearestText = "", blank = 0, unread = 0;
+    rows.forEach(function(r){
+      if(!r.deadline){ blank++; return; }
+      var k = eraDateKey(r.deadline);
+      if(k === null){ unread++; return; }
+      if(nearest === null || k < nearest){ nearest = k; nearestText = r.deadline; }
+    });
+    var t = "返戻 " + rows.length + "件";
+    t += nearest !== null ? "・再提出期限の最も近い日: " + nearestText : "・再提出期限の最も近い日: なし";
+    if(blank) t += "（期限が空欄 " + blank + "件）";
+    if(unread) t += "（日付として読めない期限 " + unread + "件）";
+    return t;
+  }
+
+  function renderHenreiList(model){
+    henreiRowsCache = model.rows;
+    henreiBody.innerHTML = "";
+    henreiSection.style.display = model.rows.length > 0 ? "block" : "none";
+    henreiSummary.textContent = model.rows.length > 0 ? henreiSummaryText(model.rows) : "";
+    model.rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      if(r._notes.length > 0) tr.className = "has-note";
+      HENREI_COLUMNS.forEach(function(c){
+        var td = document.createElement("td");
+        var v = r[c.key];
+        if(c.key === "check"){
+          // 理由は title に入れず、下の「エラー・注意」欄で読めるようにする（キーボード・読み上げでも分かるように文字で示す。ui M1）
+          td.classList.add("flag");
+          if(r._notes.length > 0) td.textContent = "⚠要確認（下の注意欄）";
+        } else if(c.emphasis && !v){
+          // 再提出期限が空欄: 画面だけ「空欄（原本で確認）」と目立たせる。TSV/CSV は空欄のまま（ui M2）
+          td.classList.add("deadline", "blank-deadline");
+          td.textContent = "空欄（原本で確認）";
+        } else {
+          td.textContent = (v === null || v === undefined) ? "" : String(v);
+          if(c.emphasis) td.classList.add("deadline");
+          if(c.multiline) td.classList.add("multiline");
+          if(c.numeric) td.classList.add("num");
+        }
+        tr.appendChild(td);
+      });
+      henreiBody.appendChild(tr);
+    });
+  }
+
+  // TSV（Excel用コピー）: 通信欄の改行は「／」に置き換えてから数式対策を通す（D7・設計のセキュリティ節）
+  function buildHenreiTSV(rows){
+    var br = FORM_DEFS.common.henrei.tsvLineBreak;
+    var header = HENREI_COLUMNS.map(function(c){ return c.label; }).join("\t");
+    var lines = rows.map(function(r){
+      return HENREI_COLUMNS.map(function(c){
+        var v = r[c.key];
+        var s = (v === null || v === undefined) ? "" : String(v);
+        if(c.multiline) s = s.replace(/\r\n|\r|\n/g, br);
+        if(!c.numeric) s = neutralizeFormula(s);
+        return s.replace(/[\r\n\t]/g, " ");
+      }).join("\t");
+    });
+    return [header].concat(lines).join("\r\n");
+  }
+  // CSV（保存）: 既存の csvCell・csvEscape を使い回す（番号の列は ="…"、文字の列は数式対策のあとでエスケープ）。
+  //   通信欄はセルの中の改行（\n）のまま（改行は行の中でまとめてから数式対策を通している＝ an2text の後）
+  function buildHenreiCSV(rows){
+    var header = HENREI_COLUMNS.map(function(c){ return csvEscape(c.label); }).join(",");
+    var lines = rows.map(function(r){
+      return HENREI_COLUMNS.map(function(c){ return csvCell(c, r); }).join(",");
+    });
+    return [header].concat(lines).join("\r\n");
+  }
+  function showHenreiCopyStatus(text, isErr){
+    henreiCopyStatus.textContent = text;
+    henreiCopyStatus.className = isErr ? "err" : "ok";
+  }
+  var HENREI_COPY_SUCCESS_MSG = "コピーしました。到達番号などの番号の列は、貼り付け先を「セルの書式設定→文字列」にしてから貼ってください。";
+  copyHenreiTsvBtn.addEventListener("click", function(){
+    var tsv = buildHenreiTSV(henreiRowsCache);
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = tsv;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var ok = false;
+      try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+      document.body.removeChild(ta);
+      if(ok) showHenreiCopyStatus(HENREI_COPY_SUCCESS_MSG);
+      else showHenreiCopyStatus("コピーに失敗しました。お手数ですが表を選択して手動でコピーしてください。", true);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(tsv).then(function(){ showHenreiCopyStatus(HENREI_COPY_SUCCESS_MSG); }).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
+  saveHenreiCsvBtn.addEventListener("click", function(){
+    var csv = buildHenreiCSV(henreiRowsCache);
+    var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var d = new Date();
+    a.href = url;
+    a.download = FORM_DEFS.common.henrei.csvFilePrefix + "_" + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+  });
+
+  // 返戻のお知らせの表示ボタン・送付書のチェック（表示中に切り替えたら描き直す）
+  showHenreiBtn.addEventListener("click", function(){ showPrint("henrei"); });
+  henreiWithKagami.addEventListener("change", function(){ if(printState.style === "henrei") showPrint("henrei"); });
 
   resetPrintArea();
 
